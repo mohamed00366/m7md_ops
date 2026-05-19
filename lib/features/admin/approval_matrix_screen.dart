@@ -123,6 +123,7 @@ class _ApprovalMatrixScreenState extends State<ApprovalMatrixScreen>
           ),
         ),
       ],
+      ),
     );
   }
 }
