@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../core/l10n/app_strings.dart';
+import '../core/providers/auth_provider.dart';
+import '../core/theme/app_palette.dart';
+
+/// 🛡️ بوابة الصلاحيات الموحَّدة
+///
+/// تستخدم لإخفاء/تعطيل عناصر الواجهة بناءً على صلاحيات المستخدم.
+class PermissionGate extends StatelessWidget {
+  final String? permission;
+  final List<String>? anyOf;
+  final Widget child;
+  final Widget? fallback;
+  final bool disableInsteadOfHide;
+  final String? tooltipText;
+
+  const PermissionGate({
+    super.key,
+    this.permission,
+    this.anyOf,
+    required this.child,
+    this.fallback,
+    this.disableInsteadOfHide = false,
+    this.tooltipText,
+  }) : assert(permission != null || anyOf != null,
+            'يجب تمرير permission أو anyOf');
+
+  const PermissionGate.tooltip({
+    super.key,
+    required String this.permission,
+    required this.child,
+    this.tooltipText,
+  })  : anyOf = null,
+        fallback = null,
+        disableInsteadOfHide = true;
+
+  const PermissionGate.any({
+    super.key,
+    required List<String> this.anyOf,
+    required this.child,
+    this.fallback,
+    this.disableInsteadOfHide = false,
+    this.tooltipText,
+  }) : permission = null;
+
+  bool _allowed(AuthProvider auth) {
+    if (permission != null) return auth.hasPermission(permission!);
+    if (anyOf != null) return auth.hasAnyPermission(anyOf!);
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final ok = _allowed(auth);
+    if (ok) return child;
+    if (disableInsteadOfHide) {
+      final s = AppStrings.of(context);
+      final tip = tooltipText ??
+          (s.isAr
+              ? 'ليس لديك صلاحية لهذا الإجراء'
+              : 'You do not have permission for this action');
+      return Tooltip(
+        message: tip,
+        child: Opacity(
+          opacity: 0.4,
+          child: IgnorePointer(child: child),
+        ),
+      );
+    }
+    return fallback ?? const SizedBox.shrink();
+  }
+}
+
+/// Extension للـ AuthProvider — اختصارات سريعة
+extension AuthPermissionsX on AuthProvider {
+  /// يتحقّق من الصلاحية ويعرض حواراً لطيفاً إن لم تتوفر
+  Future<bool> ensurePermission(
+    BuildContext context,
+    String permission, {
+    String? action,
+  }) async {
+    if (hasPermission(permission)) return true;
+    final s = AppStrings.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        icon: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: AppPalette.danger.withOpacity(0.12),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.lock_outline,
+              color: AppPalette.danger, size: 28),
+        ),
+        title: Text(
+          s.isAr ? 'صلاحية غير كافية' : 'Permission Denied',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        content: Text(
+          action == null
+              ? (s.isAr
+                  ? 'ليس لديك الصلاحية لتنفيذ هذا الإجراء.'
+                  : 'You do not have permission for this action.')
+              : (s.isAr
+                  ? 'ليس لديك الصلاحية لـ "$action".'
+                  : 'You do not have permission to "$action".'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 13),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppPalette.brand,
+                foregroundColor: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(s.isAr ? 'فهمت' : 'Got it'),
+          ),
+        ],
+      ),
+    );
+    return false;
+  }
+}

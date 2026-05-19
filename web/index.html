@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="منظومة الإدارة المتكاملة - M7 W Management">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1A1A1A">
+
+  <!-- iOS meta tags & icons (مهم للـ PWA على iPhone) -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="M7 W">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- Apple Touch Icons (تظهر كأيقونة في الـ Home Screen) -->
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
+
+  <!-- iOS Splash Screen Color -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Favicon (SVG للمتصفحات الحديثة، ICO للقديمة) -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="alternate icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="alternate icon" type="image/png" href="favicon.png"/>
+
+  <title>M7 W Management</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Splash screen أثناء تحميل Flutter */
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #1A1A1A 0%, #000000 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+    #splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #splash .logo {
+      width: 120px;
+      height: 120px;
+      background: white url('icons/Icon-512.png') center/80% no-repeat;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+    #splash .title {
+      color: white;
+      font-size: 22px;
+      font-weight: 800;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      margin-bottom: 8px;
+    }
+    #splash .subtitle {
+      color: rgba(255,255,255,0.85);
+      font-size: 13px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #splash .spinner {
+      margin-top: 24px;
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    body { margin: 0; padding: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <!-- Splash يظهر فوراً قبل تحميل Flutter -->
+  <div id="splash">
+    <div class="logo"></div>
+    <div class="title">M7 W Management</div>
+    <div class="subtitle">منظومة الإدارة المتكاملة</div>
+    <div class="spinner"></div>
+  </div>
+
+  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // اخفاء الـ splash بعد تحميل Flutter
+    window.addEventListener('flutter-first-frame', function () {
+      var splash = document.getElementById('splash');
+      if (splash) {
+        splash.classList.add('fade-out');
+        setTimeout(function() { splash.remove(); }, 500);
+      }
+    });
+
+    // 🆕 PWA Install — التِقاط حَدَث beforeinstallprompt وَتَخزينه
+    // لِيَستَطيع Flutter استِدعاؤه لاحِقاً عَبر window.m7PromptInstall()
+    window._m7DeferredInstallPrompt = null;
+    window._m7CanInstall = false;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window._m7DeferredInstallPrompt = e;
+      window._m7CanInstall = true;
+    });
+    window.addEventListener('appinstalled', function () {
+      window._m7DeferredInstallPrompt = null;
+      window._m7CanInstall = false;
+      window._m7Installed = true;
+    });
+    // مُساعِد يَستَدعيه Flutter لِفَتح نافِذة التَنزيل
+    window.m7PromptInstall = async function () {
+      const p = window._m7DeferredInstallPrompt;
+      if (!p) return 'no-prompt';
+      try {
+        await p.prompt();
+        const choice = await p.userChoice;
+        window._m7DeferredInstallPrompt = null;
+        window._m7CanInstall = false;
+        return (choice && choice.outcome) ? choice.outcome : 'dismissed';
+      } catch (e) {
+        return 'error';
+      }
+    };
+  </script>
+</body>
+</html>

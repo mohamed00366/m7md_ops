@@ -1,0 +1,129 @@
+name: m7md_ops
+description: M7 W Management - Operations System
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+
+  # State management
+  provider: ^6.1.1
+
+  # Local storage
+  shared_preferences: ^2.2.2
+
+  # Backend (Supabase)
+  supabase_flutter: ^2.5.6
+
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.2.1
+  google_fonts: ^6.1.0
+
+  # Charts
+  fl_chart: ^0.66.0
+
+  # SVG support for logo
+  flutter_svg: ^2.0.10+1
+
+  # Maps (OpenStreetMap - no API key required)
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # 🆕 Excel import/export
+  excel: ^4.0.6
+  file_picker: ^8.0.0+1
+  universal_html: ^2.2.4
+
+  # 🆕 رفع الصور من الكاميرا/المعرض
+  image_picker: ^1.0.7
+  cross_file: ^0.3.4+2
+
+  # 🆕 PDF generation (Phase C)
+  pdf: ^3.10.8
+  printing: ^5.12.0
+
+  # 🆕 Geo-fencing (location restriction at login)
+  geolocator: ^11.0.0       # GPS + mock-location detection
+  network_info_plus: ^4.1.0 # Wi-Fi SSID detection
+  http: ^1.1.0              # IP geolocation API calls
+
+  # 🆕 Background tracking (Fleet GPS)
+  flutter_foreground_task: ^8.10.4  # خِدمة في الواجِهة لِتَتَبُّع GPS
+
+  # 🆕 Face enrollment & detection
+  camera: ^0.10.5+9                    # كاميرا حيّة للمعاينة
+  google_mlkit_face_detection: ^0.10.1 # كشف الوجوه + معالم + ابتسامة
+  path_provider: ^2.1.2                # حفظ الصور المؤقّت
+
+  # 🆕 معالجة الصور (للقصّ والتطبيع)
+  image: ^4.1.7
+
+  # 🆕 Native Push Notifications (FCM + APNs)
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.3
+  flutter_local_notifications: ^17.2.3
+  # حِزمة device_info لِتَمييز الأَجهزة
+  device_info_plus: ^10.1.2
+  # حِفظ token محلّيّاً قَبل الـlogin
+  flutter_secure_storage: ^9.2.2
+  # 🆕 QR codes لِلكِيانات (مُوظَّفون، باصات، فُروع، نُقاط)
+  qr_flutter: ^4.1.0
+  # ملاحظة: tflite_flutter غير متوافق حالياً مع Flutter 3.29+
+  # للحصول على دقّة FaceNet (~99%)، استخدم بدلاً منه:
+  #   - cloud-based recognition (AWS Rekognition / Azure Face)
+  #   - أو انتظر إصدار tflite_flutter متوافق
+  # المطابقة الحاليّة تعمل بدقّة ~85% عبر ML Kit landmarks (offline)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  # 🆕 لِتَوليد أَيقونة التَطبيق لِكُلّ الأَحجام تِلقائيّاً
+  flutter_launcher_icons: ^0.14.1
+
+# ============================================================
+# 🎨 إعدادات أَيقونة التَطبيق (Android + iOS + Web + Windows)
+# ============================================================
+flutter_launcher_icons:
+  android: "ic_launcher"   # يُغيِّر أَيقونة Android
+  ios: true                # يُغيِّر أَيقونة iOS
+  remove_alpha_ios: true   # iOS لا يَدعَم شَفافيّة
+  web:
+    generate: true
+    image_path: "assets/logo_m7.png"
+    background_color: "#FFFFFF"
+    theme_color: "#0C9B8B"
+  windows:
+    generate: true
+    image_path: "assets/logo_m7.png"
+    icon_size: 256
+  image_path: "assets/logo_m7.png"
+  # 🆕 خَلفيّة + foreground لِـAdaptive Icons (Android 8+)
+  adaptive_icon_background: "#FFFFFF"   # خَلفيّة بَيضاء
+  adaptive_icon_foreground: "assets/logo_m7.png"
+  # حَوامِل لِأَجهِزة قَديمة (min API 21+)
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.svg
+    - assets/logo_m7.png
+    - assets/logo_m7.svg
+    - assets/logo_new.svg
+    - assets/m7_nexus_favicon.ico
+    - assets/m7_nexus_logo.svg
+    # 🆕 لُوغوهات Light/Dark — أَضِفها هُنا بَعد حَفظ الصُوَر:
+    #   - assets/m7_logo_light.png
+    #   - assets/m7_logo_dark.png
+    - assets/models/

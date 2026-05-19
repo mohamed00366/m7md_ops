@@ -1,0 +1,135 @@
+# =============================================================================
+# 🍎 Codemagic — Cloud iOS build for M7 W Management
+# =============================================================================
+# Use this when you have an Apple Developer account ($99/year) and want a real
+# .ipa you can install on iPhone via TestFlight (or sideload via AltStore).
+#
+# FIRST-TIME SETUP (do once in Codemagic dashboard):
+#   1. https://codemagic.io → sign in with GitHub.
+#   2. Add this repository.
+#   3. Settings → Integrations → Apple Developer Portal → connect your account.
+#      Codemagic will manage your signing certificates + provisioning profiles
+#      automatically.
+#   4. Settings → Integrations → App Store Connect → create an API key:
+#      https://appstoreconnect.apple.com/access/integrations/api
+#      Add: Issuer ID, Key ID, and the .p8 private key.
+#   5. App settings → Environment variables → add:
+#        APP_STORE_CONNECT_KEY_IDENTIFIER  (Key ID)
+#        APP_STORE_CONNECT_ISSUER_ID
+#        APP_STORE_CONNECT_PRIVATE_KEY     (the .p8 content)
+#      Mark all three as Secure.
+#   6. Optional — add your @apple.com email as a test recipient.
+#
+# Trigger: push to `main` OR manual run.
+# =============================================================================
+
+workflows:
+  ios-release:
+    name: iOS Release (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.m7nexus.m7
+      vars:
+        # Set these in Codemagic UI → Environment variables (Secure)
+        APP_STORE_CONNECT_KEY_IDENTIFIER: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        APP_STORE_CONNECT_ISSUER_ID: $APP_STORE_CONNECT_ISSUER_ID
+        APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+
+    scripts:
+      - name: Generate iOS folder if missing
+        script: |
+          if [ ! -d "ios" ]; then
+            echo "⚠ ios/ folder missing — running flutter create"
+            flutter create --platforms=ios --org com.m7nexus --project-name m7md_ops .
+          fi
+
+      - name: Flutter dependencies
+        script: |
+          flutter pub get
+
+      - name: Install pods
+        script: |
+          cd ios && pod install --repo-update
+
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          # Bump build number to current timestamp so TestFlight accepts it
+          BUILD_NUMBER=$(date +%s)
+          flutter build ipa --release \
+            --build-number=$BUILD_NUMBER \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        # Send invite to these testers automatically
+        # beta_groups:
+        #   - "Internal Testers"
+
+      email:
+        recipients:
+          - mo7amed.0036@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # ===========================================================================
+  # Optional — Android workflow on Codemagic (mirrors the local BUILD scripts)
+  # ===========================================================================
+  android-release:
+    name: Android Release APK
+    instance_type: linux_x2
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      vars:
+        PACKAGE_NAME: com.m7nexus.m7md_ops
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+
+    scripts:
+      - flutter pub get
+      - flutter build apk --release --build-number=$(date +%s)
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+
+    publishing:
+      email:
+        recipients:
+          - mo7amed.0036@gmail.com
+        notify:
+          success: true
+          failure: true
