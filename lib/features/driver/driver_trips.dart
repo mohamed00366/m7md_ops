@@ -537,7 +537,7 @@ class _TodayTripsState extends State<_TodayTrips> {
     final created = await showModalBottomSheet<BusPlanDetail>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -1351,7 +1351,7 @@ class _DriverAttendanceState extends State<DriverAttendance> {
     final replacement = await showModalBottomSheet<Employee>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -1752,7 +1752,7 @@ class _OffPlanTripSheetState extends State<_OffPlanTripSheet> {
     final picked = await showModalBottomSheet<List<Employee>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -2376,4 +2376,149 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
                         ),
                         trailing:
                             const Icon(Icons.chevron_right, color: Colors.grey),
-         
+                        onTap: () => Navigator.pop(context, e),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+      ),
+    );
+  }
+}
+
+class _ActionBtn extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ActionBtn(
+      {required this.label,
+      required this.color,
+      required this.selected,
+      required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? color : color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.white : color,
+                fontWeight: FontWeight.w800,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// ===== Helpers =====
+// ============================================================
+String _dayName(int i, bool isAr) =>
+    (isAr
+        ? const ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
+        : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])[i];
+
+/// فلتر الرحلات: يَأخذ كلّ الـ details ويُرجع فقط من له موظّفون لهذا الباص
+/// في هذا اليوم. يُنشئ نسخة جديدة بمعرّفات الموظّفين المُفلترة.
+List<BusPlanDetail> _filterTripsForBusDay(
+  List<BusPlanDetail> details,
+  String busId,
+  int dayIndex,
+  DateTime weekStart,
+  MockRepository repo, {
+  String? driverEmpId, // 🆕 لِتَصفِية حَسَب وَردِيّة السائِق
+}) {
+  // 🆕 احسُب تاريخ الرَحَلات (weekStart + dayIndex)
+  final tripDate = DateTime(
+    weekStart.year, weekStart.month, weekStart.day,
+  ).add(Duration(days: dayIndex));
+
+  // 🆕 اِجلِب الوَردِيّة الفِعليّة في تاريخ الرَحلة
+  // (أَحدَث وَردِيّة لَدَيها effective_from <= tripDate)
+  String? shiftStart;
+  String? shiftEnd;
+  if (driverEmpId != null) {
+    final matchingShifts = repo.busDriverShifts.where(
+      (s) =>
+          s.driverId == driverEmpId &&
+          s.busId == busId &&
+          !s.effectiveFrom.isAfter(tripDate),
+    ).toList();
+    if (matchingShifts.isNotEmpty) {
+      matchingShifts.sort(
+        (a, b) => b.effectiveFrom.compareTo(a.effectiveFrom),
+      );
+      shiftStart = matchingShifts.first.startTime;
+      shiftEnd = matchingShifts.first.endTime;
+    }
+  }
+
+  final result = <BusPlanDetail>[];
+  for (final d in details) {
+    if (d.dayIndex != dayIndex) continue;
+
+    // 🆕 إذا الوَردِيّة مُحَدَّدة، فَلتِر بِالوَقت
+    if (shiftStart != null && shiftStart.isNotEmpty &&
+        shiftEnd != null && shiftEnd.isNotEmpty) {
+      if (!_isTimeInRange(d.time, shiftStart, shiftEnd)) continue;
+    }
+
+    final matched = <String>[];
+    for (final eid in d.employeeIds.toSet()) {
+      final actualBus = repo.resolveEmployeeBusId(
+        employeeId: eid,
+        weekStart: weekStart,
+        dayIndex: d.dayIndex,
+      );
+      if (actualBus == busId) matched.add(eid);
+    }
+    if (matched.isEmpty) continue;
+    result.add(BusPlanDetail(
+      id: d.id,
+      busId: busId,
+      siteId: d.siteId,
+      dayIndex: d.dayIndex,
+      time: d.time,
+      employeeIds: matched,
+      direction: d.direction, // 🆕 احتَفِظ بِالاتِجاه (IN/OUT)
+    ));
+  }
+  return result;
+}
+
+/// مُساعِد: هَل وَقت الرَحلة ضِمن وَردِيّة السائِق؟ (HH:mm)
+bool _isTimeInRange(String tripTime, String start, String end) {
+  int parse(String t) {
+    final parts = t.split(':');
+    if (parts.length < 2) return -1;
+    final h = int.tryParse(parts[0]) ?? 0;
+    final m = int.tryParse(parts[1]) ?? 0;
+    return h * 60 + m;
+  }
+
+  final t = parse(tripTime);
+  final s = parse(start);
+  final e = parse(end);
+  if (t < 0 || s < 0 || e < 0) return true; // إن فَشَل التَحليل، اِعرِض
+
+  if (s <= e) {
+    return t >= s && t <= e;
+  }
+  // وَردِيّة لَيليّة (مَثَلاً 22:00 → 06:00)
+  return t >= s || t <= e;
+}

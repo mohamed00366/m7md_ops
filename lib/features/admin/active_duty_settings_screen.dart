@@ -524,4 +524,3 @@ class _JobTitlePickerState extends State<_JobTitlePicker> {
     );
   }
 }
-                                                                     
