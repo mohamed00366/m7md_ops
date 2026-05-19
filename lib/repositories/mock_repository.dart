@@ -1733,13 +1733,17 @@ class MockRepository extends ChangeNotifier {
     for (final r in approved) {
       // تَجميع المُوَظَّفين بِالمَفتاح (pointId, dayIndex, time, direction)
       // 🆕 كُلّ assignment يُنتِج إدخالَين: واحِد IN عَنَدَ startTime، وَواحِد OUT عَنَدَ endTime
+      //
+      // 🔧 إصلاح: لَو المُوَظَّف نَفسه لَيس لَه pointId/siteId مُسَنَّد، نَستَخدِم
+      //   نُقطة الروستر (`r.siteId`) كَـfallback. هذا يَحُلّ مَشكِلة "بَعض
+      //   المُوَظَّفين مَفقودون مِن خِطّة الباصات".
       final byKey = <String, Set<String>>{};
       for (final a in r.assignments) {
         if (a.shiftType == ShiftType.off) continue;
         final emp = employeeById(a.employeeId);
         if (emp == null) continue;
-        final empPointId = emp.pointId ?? emp.siteId;
-        if (empPointId == null || empPointId.isEmpty) continue;
+        final empPointId = emp.pointId ?? emp.siteId ?? r.siteId;
+        if (empPointId.isEmpty) continue;
 
         // IN عَنَدَ بِداية الشِفت
         final start = a.startTime;
