@@ -60,7 +60,7 @@ class _DeviceSessionSettingsScreenState
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -80,7 +80,7 @@ class _DeviceSessionSettingsScreenState
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -891,7 +891,7 @@ class _AccountPickerSheetState extends State<_AccountPickerSheet> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18)),
           ),
@@ -1253,7 +1253,7 @@ class _JobTitlePickerSheetState extends State<_JobTitlePickerSheet> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18)),
           ),

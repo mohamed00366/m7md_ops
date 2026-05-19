@@ -77,7 +77,7 @@ class _LoginMethodSettingsScreenState
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -97,7 +97,7 @@ class _LoginMethodSettingsScreenState
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -117,7 +117,7 @@ class _LoginMethodSettingsScreenState
     if (!mounted) return;
     await showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -1237,7 +1237,7 @@ class _PickerScaffold extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18)),
           ),
@@ -1359,7 +1359,7 @@ class _LockedAccountsSheetState extends State<_LockedAccountsSheet> {
     return SafeArea(
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius:
               const BorderRadius.vertical(top: Radius.circular(18)),
         ),

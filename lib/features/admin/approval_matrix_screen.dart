@@ -53,7 +53,10 @@ class _ApprovalMatrixScreenState extends State<ApprovalMatrixScreen>
     final isAr = s.isAr;
     final analysis = _MatrixAnalysis.compute();
 
-    return Column(
+    // 🆕 Scaffold لِيُوَفِّر Material ancestor الذي يَحتاجه TabBar.
+    //   كان مَفقوداً بَعد إزالة الـ Scaffold الخارِجيّ مِن settings_hub.
+    return Scaffold(
+      body: Column(
       children: [
         // ===== KPI strip =====
         Container(

@@ -40,7 +40,7 @@ class _ActiveDutySettingsScreenState
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (_) => _JobTitlePicker(initial: settings.jobTitleIds),
     );
     if (selected != null) await settings.setJobTitleIds(selected);
@@ -462,7 +462,7 @@ class _JobTitlePickerState extends State<_JobTitlePicker> {
       initialChildSize: 0.7,
       builder: (_, scrollController) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: Column(
@@ -524,3 +524,4 @@ class _JobTitlePickerState extends State<_JobTitlePicker> {
     );
   }
 }
+                                                                     

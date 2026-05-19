@@ -765,7 +765,7 @@ class _PointBlock extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -891,7 +891,7 @@ class _BusAssignSheetState extends State<_BusAssignSheet> {
     final selected = await showModalBottomSheet<String?>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -1217,139 +1217,4 @@ class _BusAssignSheetState extends State<_BusAssignSheet> {
                             Expanded(
                               flex: 3,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: accent.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: accent.withOpacity(0.3)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      bus != null
-                                          ? Icons.directions_bus
-                                          : Icons
-                                              .directions_bus_outlined,
-                                      size: 14,
-                                      color: accent,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      child: Text(
-                                        bus != null
-                                            ? bus.name
-                                            : (isAr ? 'بلا باص' : 'No bus'),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            color: accent),
-                                      ),
-                                    ),
-                                    if (bus != null && isOverride) ...[
-                                      const SizedBox(width: 4),
-                                      const Icon(Icons.flash_on,
-                                          size: 11,
-                                          color: AppColors.warning),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon:
-                                      const Icon(Icons.edit, size: 18),
-                                  visualDensity: VisualDensity.compact,
-                                  tooltip: isAr
-                                      ? 'تغيير الباص'
-                                      : 'Change bus',
-                                  onPressed: () => _pickBusFor(e),
-                                ),
-                                if (bus != null && isOverride)
-                                  IconButton(
-                                    icon: const Icon(Icons.refresh,
-                                        size: 18),
-                                    visualDensity:
-                                        VisualDensity.compact,
-                                    tooltip: isAr
-                                        ? 'العودة للافتراضي'
-                                        : 'Reset to default',
-                                    color: theme
-                                        .textTheme.bodySmall?.color,
-                                    onPressed: () =>
-                                        _clearOverrideFor(e),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================
-// حالة فارغة
-// ============================================================
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: const BoxDecoration(
-                color: CampPalette.input,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon,
-                  size: 36, color: CampPalette.textTertiary),
-            ),
-            const SizedBox(height: 16),
-            Text(title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: CampPalette.textSecondary)),
-            if (subtitle != null) ...[
-              const SizedBox(height: 6),
-              Text(subtitle!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: CampPalette.textTertiary, fontSize: 12)),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
+             

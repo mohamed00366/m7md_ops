@@ -1,4 +1,4 @@
-# Miscellaneous
+﻿# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -44,7 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# ?? Sensitive � never commit
+# ?? Sensitive — never commit
 supabase/functions/send-push/.env
 _scripts_archive/
 supabase/_archive/

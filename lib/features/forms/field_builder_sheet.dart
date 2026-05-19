@@ -176,7 +176,7 @@ class _FieldBuilderSheetState extends State<FieldBuilderSheet> {
     // - FloatingActionButton لِإضافة حَقل (دائِماً ظاهِر)
     // - bottomNavigationBar لِزِرّ الحِفظ
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: AppColors.brand,
         foregroundColor: Colors.white,
@@ -732,7 +732,7 @@ class _FieldEditDialogState extends State<_FieldEditDialog> {
 
     // 🆕 Scaffold بَسيط — AppBar + body ListView + bottom toolbar
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: AppColors.brand,
         foregroundColor: Colors.white,

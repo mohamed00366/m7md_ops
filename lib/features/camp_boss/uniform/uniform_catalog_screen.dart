@@ -367,7 +367,7 @@ class _BulkUniformItemsScreenState extends State<_BulkUniformItemsScreen> {
     final s = AppStrings.of(context);
     final isAr = s.isAr;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: UniformPalette.primary,
         foregroundColor: Colors.white,

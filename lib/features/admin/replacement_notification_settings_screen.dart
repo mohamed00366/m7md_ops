@@ -72,7 +72,7 @@ class _ReplacementNotificationSettingsScreenState
     final picked = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -282,7 +282,7 @@ class _UserPickerSheetState extends State<_UserPickerSheet> {
       maxChildSize: 0.95,
       expand: false,
       builder: (_, scroll) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
         child: Column(

@@ -90,7 +90,7 @@ class _EvaluationCriteriaScreenState extends State<EvaluationCriteriaScreen>
     final result = await showModalBottomSheet<EvaluationCriterion>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),

@@ -234,7 +234,7 @@ class _CampBossBusPlanningState extends State<CampBossBusPlanning> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -264,7 +264,7 @@ class _CampBossBusPlanningState extends State<CampBossBusPlanning> {
     final selected = await showModalBottomSheet<String?>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),

@@ -35,7 +35,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
     final result = await showModalBottomSheet<Policy>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),

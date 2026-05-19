@@ -1312,12 +1312,16 @@ class _SettingCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        // 🔧 Push the child screen DIRECTLY — every settings entry is
-        // a full screen that brings its own Scaffold + AppBar. Wrapping
-        // here would produce a duplicate header + invisible buttons
-        // (see notification_templates_screen / device_sessions_screen).
+        // 🔧 Push the child screen wrapped in Material — provides a
+        // Material ancestor (required by TabBar / InkWell / ListTile etc.)
+        // for child screens that don't bring their own Scaffold.
+        // We do NOT use Scaffold here because some children have their own
+        // AppBar and would produce a duplicate header.
         onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: setting.builder,
+          builder: (ctx) => Material(
+            color: Theme.of(ctx).scaffoldBackgroundColor,
+            child: setting.builder(ctx),
+          ),
         )),
         child: Padding(
           padding: const EdgeInsets.all(12),

@@ -110,7 +110,7 @@ class _GeoFenceSettingsScreenState extends State<GeoFenceSettingsScreen> {
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -130,7 +130,7 @@ class _GeoFenceSettingsScreenState extends State<GeoFenceSettingsScreen> {
     final selected = await showModalBottomSheet<Set<String>>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -1281,7 +1281,7 @@ class _PickerScaffold extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18)),
           ),

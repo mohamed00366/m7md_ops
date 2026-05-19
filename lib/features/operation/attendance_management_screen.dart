@@ -197,7 +197,7 @@ class _AttendanceManagementScreenState
     final buses = repo.buses;
     final picked = await showModalBottomSheet<String?>(
       context: context,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
