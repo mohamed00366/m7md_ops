@@ -82,9 +82,42 @@ class _MandatoryFaceEnrollmentScreenState
       }
 
       if (!mounted) return;
-      auth.notifyPasswordChanged(); // يُعيد بِناء _RootRouter
+
+      // 🆕 رِسالة نَجاح + تَأخير ثانيَتَين + تَسجيل خُروج تِلقائيّ
+      //   حَتّى يُعيد المُوَظَّف الدُخول بِبَصمة الوَجه.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: AppColors.success,
+        duration: const Duration(seconds: 3),
+        content: Text(
+          AppStrings.of(context).isAr
+              ? '✅ تَمّ حِفظ بَصمة وَجهِك بِنَجاح — سَيَتِمّ تَسجيل خُروجِك لِلدُخول بِالوَجه'
+              : '✅ Face enrolled successfully — logging out so you can re-login via face',
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ));
+      await Future.delayed(const Duration(milliseconds: 1800));
+      if (!mounted) return;
+      auth.logout(); // يُعيد بِناء _RootRouter → شاشة LoginScreen
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// 🆕 يَتَحَقَّق مِن قاعِدة البَيانات إن كان لِلمُوَظَّف ≥ minPoses صُوَر مَحفوظة.
+  Future<bool> _hasEnoughEnrollments(String employeeId) async {
+    final supa = SupabaseService();
+    if (!supa.isReady) return false;
+    try {
+      final rows = await supa.client
+          .from('employee_face_enrollments')
+          .select('id')
+          .eq('employee_id', employeeId);
+      final count = (rows as List).length;
+      final required = FaceEnrollmentPolicySettings.instance.minPoses;
+      return count >= required;
+    } catch (e) {
+      M7Log.error('FaceEnrollGate', '_hasEnoughEnrollments', error: e);
+      return false;
     }
   }
 
@@ -141,7 +174,16 @@ class _MandatoryFaceEnrollmentScreenState
         builder: (_) => FaceEnrollmentScreen(employee: emp),
       ),
     );
+
+    // 🆕 لَو ضَغَط المُوَظَّف زِرّ الحِفظ النِهائيّ → result == true.
+    //   لَو خَرَجَ يَدَوِيّاً (back button) بَعد التِقاط كُلّ الصُوَر → result == null
+    //   لكِنّ الصُوَر مَحفوظة في قاعِدة البَيانات. لِذلِكَ نَفحَص العَدَد
+    //   مُباشَرَةً وَنُكمِل العَمَلِيّة لَو الـ minPoses تَوَفَّر.
     if (result == true) {
+      await _markEnrolled();
+      return;
+    }
+    if (await _hasEnoughEnrollments(emp.id)) {
       await _markEnrolled();
     }
   }
