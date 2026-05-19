@@ -1030,6 +1030,51 @@ class _TripCard extends StatelessWidget {
                         fontSize: 14)),
               ),
               const SizedBox(width: 8),
+              // 🆕 شارة الاتِجاه IN/OUT
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (trip.direction == TripDirection.tripIn
+                          ? AppColors.success
+                          : AppColors.warning)
+                      .withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: trip.direction == TripDirection.tripIn
+                        ? AppColors.success
+                        : AppColors.warning,
+                    width: 0.6,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trip.direction == TripDirection.tripIn
+                          ? Icons.south_east
+                          : Icons.north_west,
+                      size: 11,
+                      color: trip.direction == TripDirection.tripIn
+                          ? AppColors.success
+                          : AppColors.warning,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      trip.direction == TripDirection.tripIn
+                          ? 'IN'
+                          : 'OUT',
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: trip.direction == TripDirection.tripIn
+                              ? AppColors.success
+                              : AppColors.warning),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1072,6 +1117,49 @@ class _TripCard extends StatelessWidget {
               ),
             ],
           ),
+          // 🆕 أَسماء المُوَظَّفين في هذه الرَحلة (مُلَخَّص)
+          if (trip.employeeIds.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Builder(builder: (_) {
+              final names = trip.employeeIds
+                  .take(3)
+                  .map((id) {
+                    try {
+                      return repo.employees
+                          .firstWhere((e) => e.id == id)
+                          .fullName;
+                    } catch (_) {
+                      return '?';
+                    }
+                  })
+                  .toList();
+              final more = trip.employeeIds.length - names.length;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline,
+                        size: 12, color: Colors.grey.shade600),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        names.join(' · ') +
+                            (more > 0
+                                ? ' + $more ${isAr ? "آخَرون" : "more"}'
+                                : ''),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
           if (attendanceStarted) ...[
             const SizedBox(height: 6),
             Row(
@@ -1736,10 +1824,15 @@ class _OffPlanTripSheetState extends State<_OffPlanTripSheet> {
       initialChildSize: 0.85,
       maxChildSize: 0.95,
       expand: false,
+      // 🆕 خَلفيّة صَلبة لِتَجاوُز الـ BrandedBackground (لُوغو الأَسَد) الذي
+      //   يَظهَر مِن خَلف أَيّ widget بِخَلفيّة شَفّافة.
       builder: (_, scrollController) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1F2937)
+            : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
+        elevation: 16,
         child: Column(
         children: [
           // Header
@@ -2014,10 +2107,15 @@ class _MultiEmployeePickerSheetState extends State<_MultiEmployeePickerSheet> {
       initialChildSize: 0.85,
       maxChildSize: 0.95,
       expand: false,
+      // 🆕 خَلفيّة صَلبة لِتَجاوُز الـ BrandedBackground (لُوغو الأَسَد) الذي
+      //   يَظهَر مِن خَلف أَيّ widget بِخَلفيّة شَفّافة.
       builder: (_, scrollController) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1F2937)
+            : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
+        elevation: 16,
         child: Column(
         children: [
           Container(
@@ -2171,10 +2269,15 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
       initialChildSize: 0.85,
       maxChildSize: 0.95,
       expand: false,
+      // 🆕 خَلفيّة صَلبة لِتَجاوُز الـ BrandedBackground (لُوغو الأَسَد) الذي
+      //   يَظهَر مِن خَلف أَيّ widget بِخَلفيّة شَفّافة.
       builder: (_, scrollController) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1F2937)
+            : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
+        elevation: 16,
         child: Column(
         children: [
           // Header
