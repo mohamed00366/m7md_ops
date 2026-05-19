@@ -487,6 +487,29 @@ class _PointBlock extends StatelessWidget {
     }).length;
     final unassignedCount = employees.length - assignedCount;
 
+    // 🆕 اِجمَع الباصات المُسنَدة (قَد تَكون باصاً واحِداً أَو أَكثَر)
+    final busCounts = <String, int>{};
+    for (final e in employees) {
+      final id = repo.resolveEmployeeBusId(
+        employeeId: e.id,
+        weekStart: weekStart,
+        dayIndex: dayIndex,
+      );
+      if (id == null || id.isEmpty) continue;
+      busCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
+    }
+    final busHeader = busCounts.entries.map((e) {
+      Bus? b;
+      try {
+        b = repo.buses.firstWhere((x) => x.id == e.key);
+      } catch (_) {}
+      final name = b?.name ?? '?';
+      // إذا كُلّ المُوَظَّفين عَلى نَفس الباص لا نَكتُب العَدَد (يُشَوِّش).
+      return busCounts.length == 1
+          ? name
+          : '$name × ${e.value}';
+    }).join(' · ');
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: Material(
@@ -512,6 +535,70 @@ class _PointBlock extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // ===== 🆕 شَريط الباص (في المُقَدِّمة، بِخَطّ كَبير) =====
+                // يُعرَض اسم الباص (أَو الباصات) المُسنَدة لِهذه الرَحلة.
+                if (busHeader.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                    decoration: BoxDecoration(
+                      color: BusesPalette.primary.withOpacity(0.12),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: BusesPalette.primary.withOpacity(0.20),
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: BusesPalette.primary,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(Icons.directions_bus,
+                              color: Colors.white, size: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            busHeader,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: BusesPalette.primary,
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (busCounts.length > 1)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: BusesPalette.primary.withOpacity(0.20),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${busCounts.length} ${s.isAr ? "باصات" : "buses"}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: BusesPalette.primary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 // ===== النقطة + شارة IN/OUT =====
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
