@@ -184,6 +184,101 @@ class LeaveService extends ChangeNotifier {
     }
   }
 
+  // ==========================================================
+  // 🆕 Late-return workflow: mark_return / apply_penalty / excuse
+  // ==========================================================
+
+  /// 🟢 تَأكيد عَودة المُوَظَّف بِتاريخ مُعَيَّن
+  Future<bool> markReturn({
+    required String leaveId,
+    required DateTime actualReturn,
+    required String markedBy,
+  }) async {
+    final supa = SupabaseService();
+    if (!supa.isReady) return false;
+    try {
+      await supa.client.rpc('mark_leave_return', params: {
+        'p_leave_id': leaveId,
+        'p_actual_return':
+            actualReturn.toIso8601String().substring(0, 10),
+        'p_marked_by': markedBy,
+      });
+      await refresh();
+      return true;
+    } catch (e) {
+      M7Log.error('LeaveService', 'markReturn', error: e);
+      return false;
+    }
+  }
+
+  /// 💰 تَوقيع خَصم لِتَأَخُّر العَودة
+  Future<String?> applyLatePenalty({
+    required String leaveId,
+    required double amount,
+    required String reason,
+    required String appliedBy,
+  }) async {
+    final supa = SupabaseService();
+    if (!supa.isReady) return null;
+    try {
+      final r = await supa.client.rpc('apply_late_penalty', params: {
+        'p_leave_id': leaveId,
+        'p_amount': amount,
+        'p_reason': reason,
+        'p_applied_by': appliedBy,
+      });
+      await refresh();
+      return r as String?;
+    } catch (e) {
+      M7Log.error('LeaveService', 'applyLatePenalty', error: e);
+      return null;
+    }
+  }
+
+  /// 📄 قَبول عُذر تَأَخُّر مَع مُستَنَد
+  Future<bool> excuseLateReturn({
+    required String leaveId,
+    required String documentUrl,
+    required String reason,
+    required String markedBy,
+  }) async {
+    final supa = SupabaseService();
+    if (!supa.isReady) return false;
+    try {
+      await supa.client.rpc('excuse_late_return', params: {
+        'p_leave_id': leaveId,
+        'p_document_url': documentUrl,
+        'p_reason': reason,
+        'p_marked_by': markedBy,
+      });
+      await refresh();
+      return true;
+    } catch (e) {
+      M7Log.error('LeaveService', 'excuseLateReturn', error: e);
+      return false;
+    }
+  }
+
+  /// 🔢 المَبلَغ المُقتَرَح لِخَصم تَأَخُّر
+  Future<double> suggestPenalty({
+    required String leaveId,
+    required DateTime actualReturn,
+  }) async {
+    final supa = SupabaseService();
+    if (!supa.isReady) return 0;
+    try {
+      final r = await supa.client.rpc('suggest_late_penalty', params: {
+        'p_leave_id': leaveId,
+        'p_actual_return':
+            actualReturn.toIso8601String().substring(0, 10),
+      });
+      return (r as num?)?.toDouble() ?? 0;
+    } catch (e) {
+      M7Log.error('LeaveService', 'suggestPenalty', error: e);
+      return 0;
+    }
+  }
+
   /// تَعديل رَصيد موظّف
   Future<bool> upsertBalance(LeaveBalance b) async {
     final supa = SupabaseService();

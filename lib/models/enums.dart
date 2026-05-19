@@ -51,7 +51,7 @@ extension UserRoleX on UserRole {
           orElse: () => UserRole.employee);
 }
 
-enum EntityStatus { active, inactive, maintenance }
+enum EntityStatus { active, inactive, maintenance, vacation }
 
 extension EntityStatusX on EntityStatus {
   String get key => toString().split('.').last;

@@ -200,6 +200,18 @@ class DataResetScreen extends StatelessWidget {
           ),
           _wipeCard(
             context,
+            icon: Icons.group_remove,
+            color: Colors.red.shade800,
+            title: '🔥 Delete ALL employees',
+            subtitle:
+                'Wipes every employee + cascades through rosters, leaves, attendance, bus logs, face data, documents, terminal logs. Accounts are PRESERVED (employee_id is nulled) so you keep your logins. Use only when starting fresh for a new country/season.',
+            confirmLabel: 'DELETE all employees',
+            confirmWord: 'PURGE',
+            highlight: true,
+            action: (ds) => ds.clearAllEmployees(),
+          ),
+          _wipeCard(
+            context,
             icon: Icons.restart_alt,
             color: Colors.orange.shade800,
             title: 'Reset numbering counters',

@@ -2938,8 +2938,16 @@ class SupabaseDataService {
           }
         }
       } catch (e) {
-        lastError = '$t: $e';
-        M7Log.error('DataService', '_wipeTables.$t', error: e);
+        // 🆕 PGRST205 = جَدوَل غَير مَوجود — تَجاوَزه بِهُدوء (deployments قَد
+        //   لا تَحوي كُلّ الجَداوِل).
+        final msg = e.toString();
+        if (msg.contains('PGRST205') ||
+            msg.contains('not find the table')) {
+          M7Log.info('DataService', '_wipeTables: skipped missing table "$t"');
+        } else {
+          lastError = '$t: $e';
+          M7Log.error('DataService', '_wipeTables.$t', error: e);
+        }
       }
     }
     await AuditLogger.instance.log(
@@ -3003,10 +3011,121 @@ class SupabaseDataService {
       );
 
   Future<int> clearAllBusLogs() => _wipeTables(
-        tables: ['bus_trip_logs', 'bus_shift_logs', 'bus_locations'],
+        // ⚠ bus_trip_logs قَد لا يَكون مَوجوداً في كُلّ deployments (PGRST205).
+        //   _wipeTables يَتَجاوَز الجَداوِل المَفقودة بِهُدوء.
+        tables: ['bus_shift_logs', 'bus_locations'],
         auditEntityType: 'bus_log',
-        auditLabel: 'All bus shift + trip logs',
+        auditLabel: 'All bus shift logs + locations',
       );
+
+  /// 👥 Delete every employee + cascade-clean all dependent transactional data.
+  ///
+  /// 🔥 EXTREMELY DESTRUCTIVE — wipes:
+  ///   1. All face enrollments (rows + photos)
+  ///   2. All roster assignments + rosters
+  ///   3. All bus driver shifts + bus assignments
+  ///   4. All leave requests + balances
+  ///   5. All attendance records
+  ///   6. All employee documents
+  ///   7. NULLs out accounts.employee_id (preserves user logins!)
+  ///   8. Finally deletes all employees
+  ///
+  /// Accounts are PRESERVED so admins remain able to log in.
+  Future<int> clearAllEmployees() async {
+    lastError = null;
+    if (!_supabase.isReady) {
+      lastError = 'Supabase not ready';
+      return 0;
+    }
+
+    final summary = <String, int>{};
+    // 1) Wipe everything that references employees, in dependency order
+    summary['face_enrollments'] = await clearAllFaceEnrollments();
+    summary['rosters'] = await clearAllRosters();
+    summary['leaves'] = await clearAllLeaves();
+    summary['attendance'] = await clearAllAttendance();
+    summary['bus_logs'] = await clearAllBusLogs();
+
+    // 2) Tables that reference employees but aren't in the cascade helpers
+    final extraTables = [
+      'bus_driver_shifts',
+      'employee_bus_assignments',
+      'employee_documents',
+      'point_terminal_clock_logs',
+      'point_terminal_sessions',
+    ];
+    int extraDeleted = 0;
+    for (final t in extraTables) {
+      try {
+        final rows = await _c.from(t).select('id').limit(10000);
+        final ids = (rows as List)
+            .map((r) => (r as Map)['id'] as String?)
+            .whereType<String>()
+            .toList();
+        for (var i = 0; i < ids.length; i += 50) {
+          final slice = ids.sublist(
+            i,
+            (i + 50 > ids.length) ? ids.length : i + 50,
+          );
+          try {
+            await _c.from(t).delete().inFilter('id', slice);
+            extraDeleted += slice.length;
+          } catch (_) {/* table may not exist */}
+        }
+      } catch (_) {/* table may not exist */}
+    }
+    summary['extra_tables'] = extraDeleted;
+
+    // 3) Decouple accounts from employees (keeps logins intact)
+    try {
+      await _c.from('accounts').update({
+        'employee_id': null,
+      }).neq('id', _zeroUuid);
+    } catch (e) {
+      M7Log.error('DataService', 'clearAllEmployees.unlink_accounts', error: e);
+    }
+
+    // 4) Finally, delete the employees themselves (batched)
+    int empDeleted = 0;
+    try {
+      final rows = await _c.from('employees').select('id').limit(10000);
+      final ids = (rows as List)
+          .map((r) => (r as Map)['id'] as String?)
+          .whereType<String>()
+          .toList();
+      for (var i = 0; i < ids.length; i += 50) {
+        final slice = ids.sublist(
+          i,
+          (i + 50 > ids.length) ? ids.length : i + 50,
+        );
+        try {
+          await _c.from('employees').delete().inFilter('id', slice);
+          empDeleted += slice.length;
+        } catch (e) {
+          lastError = 'employees batch ${i ~/ 50}: $e';
+          M7Log.error('DataService', 'clearAllEmployees.delete.batch',
+              error: e);
+        }
+      }
+    } catch (e) {
+      lastError = 'employees: $e';
+      M7Log.error('DataService', 'clearAllEmployees.select', error: e);
+    }
+    summary['employees'] = empDeleted;
+
+    // 5) Clear local memory
+    _repo.employees.clear();
+    _repo.notifyListeners();
+
+    await AuditLogger.instance.log(
+      entityType: 'employee',
+      entityId: 'BULK',
+      entityLabel: 'All employees + dependent data',
+      action: AuditAction.delete,
+      before: {'summary': summary},
+    );
+    return empDeleted;
+  }
 
   Future<int> clearAllDeviceTokens() => _wipeTables(
         tables: ['device_tokens'],

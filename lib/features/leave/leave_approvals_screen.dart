@@ -25,7 +25,7 @@ class _LeaveApprovalsScreenState extends State<LeaveApprovalsScreen>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 3, vsync: this);
+    _tab = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       LeaveService.instance.refresh();
     });

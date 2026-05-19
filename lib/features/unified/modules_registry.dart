@@ -44,6 +44,7 @@ import '../admin/employee_documents_expiry_report_screen.dart';
 import '../admin/forms_submissions_report_screen.dart';
 import '../admin/help_center_screen.dart';
 import '../admin/leave_balance_manager_screen.dart';
+import '../leave/leave_approvals_screen.dart';
 import '../admin/my_preferences_screen.dart';
 import '../admin/smart_alerts_screen.dart';
 import '../notifications/my_inbox_screen.dart';
@@ -184,6 +185,17 @@ class ModulesRegistry {
           category: ModuleCategory.hr,
           requiredPermission: P.leaveBalanceManage,
           builder: (_) => const LeaveBalanceManagerScreen(),
+        ),
+        // 🆕 اعتِماد طَلَبات الإجازات (Manager/HR) — يَعرِض pending وَيُوافِق/يَرفُض
+        AppModule(
+          key: 'leave_approvals',
+          titleAr: '🛂 اعتِماد طَلَبات الإجازات',
+          titleEn: '🛂 Leave Approvals',
+          icon: Icons.fact_check_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: P.leaveTeamApprove,
+          builder: (_) => const LeaveApprovalsScreen(),
         ),
 
         // ═══════════════════════════════════════════════════

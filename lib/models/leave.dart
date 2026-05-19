@@ -211,6 +211,14 @@ class LeaveRequest {
   final DateTime createdAt;
   DateTime updatedAt;
 
+  // 🆕 Late return + excuse tracking
+  DateTime? actualReturnDate;
+  String lateStatus; // not_started | in_progress | returned_on_time | late_pending | returned_late | excused | penalized
+  String? excuseDocumentUrl;
+  String? excuseReason;
+  String? returnMarkedBy;
+  DateTime? returnMarkedAt;
+
   LeaveRequest({
     required this.id,
     required this.employeeId,
@@ -228,8 +236,31 @@ class LeaveRequest {
     this.reviewNotes,
     DateTime? createdAt,
     DateTime? updatedAt,
+    this.actualReturnDate,
+    this.lateStatus = 'not_started',
+    this.excuseDocumentUrl,
+    this.excuseReason,
+    this.returnMarkedBy,
+    this.returnMarkedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
+
+  /// 🆕 هَل الإجازة مُتَأَخِّرة (انتَهَت وَلَم يُسَجَّل عَودة)؟
+  bool get isOverdue {
+    if (status != LeaveStatus.approved) return false;
+    if (actualReturnDate != null) return false;
+    return DateTime.now().isAfter(endDate);
+  }
+
+  /// 🆕 عَدَد أَيّام التَأَخُّر (مِن endDate إلى اليَوم/تاريخ العَودة الفِعليّ)
+  int get daysOverdue {
+    final reference = actualReturnDate ?? DateTime.now();
+    if (reference.isBefore(endDate) ||
+        reference.isAtSameMomentAs(endDate)) {
+      return 0;
+    }
+    return reference.difference(endDate).inDays;
+  }
 
   bool overlapsWith(DateTime from, DateTime to) {
     return !(endDate.isBefore(from) || startDate.isAfter(to));
