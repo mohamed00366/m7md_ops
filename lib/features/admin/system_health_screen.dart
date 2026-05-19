@@ -13,6 +13,7 @@ import 'approval_matrix_screen.dart';
 import 'bulk_permissions_matrix_screen.dart';
 import 'org_builder_screen.dart';
 import 'organization_chart_screen.dart';
+import 'admin_users.dart';
 
 /// 🩺 لوحة صحّة النظام (System Health Dashboard)
 ///
@@ -269,6 +270,10 @@ class _SystemHealthScreenState extends State<SystemHealthScreen> {
                     '${h.employeesWithoutJobTitle} employees without job title',
                 detailAr: 'لن يحصلوا على dashboard أو صلاحيّات',
                 detailEn: 'No dashboard or permissions',
+                // 🆕 افتَح شاشة المُوَظَّفين لِإصلاح كُلّ مُوَظَّف
+                onFix: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const AdminUsers(),
+                )),
               ),
             if (h.accountsWithoutEmployee > 0)
               _Issue(
@@ -279,6 +284,9 @@ class _SystemHealthScreenState extends State<SystemHealthScreen> {
                     '${h.accountsWithoutEmployee} accounts without employee',
                 detailAr: 'حسابات نظام/إدارة بدون ربط',
                 detailEn: 'System/admin accounts unlinked',
+                onFix: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const AdminUsers(),
+                )),
               ),
             if (h.employeesWithoutCountry > 0)
               _Issue(
@@ -288,6 +296,9 @@ class _SystemHealthScreenState extends State<SystemHealthScreen> {
                     '${h.employeesWithoutCountry} employees without country',
                 detailAr: 'لن يظهروا بفلتر الدولة',
                 detailEn: 'Won\'t show in country filters',
+                onFix: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const AdminUsers(),
+                )),
               ),
           ],
           isAr: isAr,
