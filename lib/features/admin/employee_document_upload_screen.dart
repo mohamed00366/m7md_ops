@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -69,6 +70,42 @@ class _EmployeeDocumentUploadScreenState
       });
     } catch (e) {
       M7Log.error('DocUpload', 'pickImage', error: e);
+    }
+  }
+
+  /// اختِيار مِلَفّ (PDF أَو أَيّ مُستَنَد)
+  Future<void> _pickAnyFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const [
+          'pdf', 'doc', 'docx', 'xls', 'xlsx',
+          'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
+        ],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final f = result.files.first;
+      if (f.bytes == null) return;
+
+      final ext = (f.extension ?? '').toLowerCase();
+      String mime = 'application/octet-stream';
+      if (ext == 'pdf') mime = 'application/pdf';
+      else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
+      else if (ext == 'png') mime = 'image/png';
+      else if (ext == 'webp') mime = 'image/webp';
+      else if (ext == 'gif') mime = 'image/gif';
+      else if (ext == 'bmp') mime = 'image/bmp';
+      else if (ext == 'doc' || ext == 'docx') mime = 'application/msword';
+      else if (ext == 'xls' || ext == 'xlsx') mime = 'application/vnd.ms-excel';
+
+      setState(() {
+        _bytes = f.bytes;
+        _fileName = f.name;
+        _mimeType = mime;
+      });
+    } catch (e) {
+      M7Log.error('DocUpload', 'pickAnyFile', error: e);
     }
   }
 
@@ -202,8 +239,10 @@ class _EmployeeDocumentUploadScreenState
         return _ImagePickerStep(
           bytes: _bytes,
           fileName: _fileName,
+          mimeType: _mimeType,
           onPickCamera: () => _pickImage(source: ImageSource.camera),
           onPickGallery: () => _pickImage(source: ImageSource.gallery),
+          onPickFile: _pickAnyFile,
           docType: widget.docType,
         );
       case 1:
@@ -220,6 +259,8 @@ class _EmployeeDocumentUploadScreenState
         return _ReviewStep(
           docType: widget.docType,
           bytes: _bytes,
+          mimeType: _mimeType,
+          fileName: _fileName,
           documentNumber: _numberCtrl.text,
           authority: _authorityCtrl.text,
           issuedDate: _issuedDate,
@@ -379,16 +420,23 @@ class _BottomBar extends StatelessWidget {
 class _ImagePickerStep extends StatelessWidget {
   final Uint8List? bytes;
   final String? fileName;
+  final String? mimeType;
   final VoidCallback onPickCamera;
   final VoidCallback onPickGallery;
+  final VoidCallback onPickFile;
   final EmpDocType docType;
   const _ImagePickerStep({
     required this.bytes,
     required this.fileName,
+    required this.mimeType,
     required this.onPickCamera,
     required this.onPickGallery,
+    required this.onPickFile,
     required this.docType,
   });
+
+  bool get _isImage => (mimeType ?? '').startsWith('image/');
+  bool get _isPdf => mimeType == 'application/pdf';
 
   @override
   Widget build(BuildContext context) {
@@ -398,52 +446,63 @@ class _ImagePickerStep extends StatelessWidget {
       children: [
         Text(
           isAr
-              ? '📷 الخُطوة 1: اختَر صورة ${docType.labelAr()}'
-              : '📷 Step 1: Pick image of ${docType.labelEn()}',
+              ? '📎 الخُطوة 1: اختَر مِلَفّ ${docType.labelAr()}'
+              : '📎 Step 1: Pick file of ${docType.labelEn()}',
           style: const TextStyle(
               fontWeight: FontWeight.w900, fontSize: 16),
         ),
         const SizedBox(height: 8),
         Text(
           isAr
-              ? 'تَأَكَّد أَنّ الصورة واضِحة وَكامِلة وَفي إضاءة جَيّدة.'
-              : 'Make sure the image is clear, complete, and well-lit.',
+              ? 'يُمكِن رَفع صورة أَو PDF أَو مُستَنَد Office.'
+              : 'You can upload an image, PDF, or Office document.',
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 20),
         if (bytes != null) ...[
-          // 🆕 InteractiveViewer لِلتَكبير + رِسالة تَلميح
-          Container(
-            constraints: const BoxConstraints(maxHeight: 320),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: AppColors.success.withOpacity(0.40), width: 2),
+          // 🆕 مَعاينة: صورة → Image, PDF → أَيقونة PDF
+          if (_isImage)
+            Container(
+              constraints: const BoxConstraints(maxHeight: 320),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: AppColors.success.withOpacity(0.40), width: 2),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 5.0,
+                child: Image.memory(bytes!, fit: BoxFit.contain),
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: AppColors.success.withOpacity(0.40), width: 2),
+                color: AppColors.success.withOpacity(0.05),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    _isPdf ? Icons.picture_as_pdf : Icons.insert_drive_file,
+                    size: 64,
+                    color: _isPdf ? Colors.red : AppColors.brand,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _isPdf
+                        ? 'PDF'
+                        : (mimeType?.split('/').last.toUpperCase() ?? 'FILE'),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
+                ],
+              ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: InteractiveViewer(
-              minScale: 1.0,
-              maxScale: 5.0,
-              child: Image.memory(bytes!, fit: BoxFit.contain),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              children: [
-                const Icon(Icons.zoom_in,
-                    color: Colors.grey, size: 14),
-                const SizedBox(width: 4),
-                Text(
-                  AppStrings.of(context).isAr
-                      ? 'اقرُص لِلتَكبير وَالتَحَقُّق من الوُضوح'
-                      : 'Pinch to zoom and check clarity',
-                  style: const TextStyle(
-                      fontSize: 10, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -465,10 +524,10 @@ class _ImagePickerStep extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: onPickGallery,
+            onPressed: onPickFile,
             icon: const Icon(Icons.refresh),
             label:
-                Text(isAr ? 'اختَر صورة أُخرى' : 'Pick another'),
+                Text(isAr ? 'اختَر مِلَفّاً آخَر' : 'Pick another'),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(44),
             ),
@@ -486,6 +545,13 @@ class _ImagePickerStep extends StatelessWidget {
             label: isAr ? '🖼 من المَعرَض' : '🖼 From Gallery',
             color: AppColors.brand,
             onTap: onPickGallery,
+          ),
+          const SizedBox(height: 10),
+          _PickButton(
+            icon: Icons.picture_as_pdf,
+            label: isAr ? '📄 PDF أَو مُستَنَد' : '📄 PDF or Document',
+            color: Colors.red,
+            onTap: onPickFile,
           ),
         ],
       ],
@@ -635,6 +701,8 @@ class _DataEntryStep extends StatelessWidget {
 class _ReviewStep extends StatelessWidget {
   final EmpDocType docType;
   final Uint8List? bytes;
+  final String? mimeType;
+  final String? fileName;
   final String documentNumber;
   final String authority;
   final DateTime? issuedDate;
@@ -643,12 +711,16 @@ class _ReviewStep extends StatelessWidget {
   const _ReviewStep({
     required this.docType,
     required this.bytes,
+    this.mimeType,
+    this.fileName,
     required this.documentNumber,
     required this.authority,
     required this.issuedDate,
     required this.expiryDate,
     required this.notes,
   });
+
+  bool get _isImage => (mimeType ?? '').startsWith('image/');
 
   String _fmt(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -673,20 +745,57 @@ class _ReviewStep extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         if (bytes != null)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 240),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: AppColors.gold.withOpacity(0.40), width: 1),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: InteractiveViewer(
-              minScale: 1.0,
-              maxScale: 5.0,
-              child: Image.memory(bytes!, fit: BoxFit.contain),
-            ),
-          ),
+          _isImage
+              ? Container(
+                  constraints: const BoxConstraints(maxHeight: 240),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.gold.withOpacity(0.40), width: 1),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: InteractiveViewer(
+                    minScale: 1.0,
+                    maxScale: 5.0,
+                    child: Image.memory(bytes!, fit: BoxFit.contain),
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.gold.withOpacity(0.40), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        mimeType == 'application/pdf'
+                            ? Icons.picture_as_pdf
+                            : Icons.insert_drive_file,
+                        size: 48,
+                        color: mimeType == 'application/pdf'
+                            ? Colors.red
+                            : AppColors.brand,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(fileName ?? 'file',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13)),
+                            Text('${(bytes!.lengthInBytes / 1024).toStringAsFixed(0)} KB',
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(12),

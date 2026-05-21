@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n/app_strings.dart';
@@ -591,19 +591,41 @@ class _UploadDialogState extends State<_UploadDialog> {
   DateTime? _expiryDate;
   ReplaceReason _reason = ReplaceReason.renewal;
 
+  /// اختِيار مِلَفّ — يَدعَم صورة (jpg/png/heic) أَو PDF أَو أَيّ مِلَفّ
   Future<void> _pickFile() async {
     try {
-      final picker = ImagePicker();
-      final x = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const [
+          // صور
+          'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
+          // PDF
+          'pdf',
+          // مُستَنَدات Office (احتياط)
+          'doc', 'docx', 'xls', 'xlsx',
+        ],
+        withData: true, // لا بُدّ مِنها لِنَحصُل عَلى bytes في الويب
       );
-      if (x == null) return;
-      final b = await x.readAsBytes();
+      if (result == null || result.files.isEmpty) return;
+      final f = result.files.first;
+      if (f.bytes == null) return;
+
+      // تَحديد MIME type حَسَب الامتِداد
+      final ext = (f.extension ?? '').toLowerCase();
+      String mime = 'application/octet-stream';
+      if (ext == 'pdf') mime = 'application/pdf';
+      else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
+      else if (ext == 'png') mime = 'image/png';
+      else if (ext == 'webp') mime = 'image/webp';
+      else if (ext == 'gif') mime = 'image/gif';
+      else if (ext == 'bmp') mime = 'image/bmp';
+      else if (ext == 'doc' || ext == 'docx') mime = 'application/msword';
+      else if (ext == 'xls' || ext == 'xlsx') mime = 'application/vnd.ms-excel';
+
       setState(() {
-        _bytes = b;
-        _fileName = x.name;
-        _mimeType = 'image/jpeg';
+        _bytes = f.bytes;
+        _fileName = f.name;
+        _mimeType = mime;
       });
     } catch (e) {
       M7Log.error('UploadDialog', 'pickFile', error: e);
@@ -673,10 +695,12 @@ class _UploadDialogState extends State<_UploadDialog> {
               // المَلَفّ
               OutlinedButton.icon(
                 onPressed: _pickFile,
-                icon: const Icon(Icons.image),
+                icon: const Icon(Icons.attach_file),
                 label: Text(_bytes == null
-                    ? (isAr ? 'اختَر صورة المَلَفّ' : 'Pick file')
-                    : (isAr ? '✓ تَمَّ الاختِيار' : '✓ Selected')),
+                    ? (isAr ? 'اختَر مِلَفّ (صورة / PDF)' : 'Pick file (image / PDF)')
+                    : (isAr
+                        ? '✓ ${_fileName ?? "تَمَّ الاختِيار"}'
+                        : '✓ ${_fileName ?? "Selected"}')),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(44),
                   foregroundColor: _bytes == null

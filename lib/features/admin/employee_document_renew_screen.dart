@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -79,6 +80,42 @@ class _EmployeeDocumentRenewScreenState
       });
     } catch (e) {
       M7Log.error('DocRenew', 'pickImage', error: e);
+    }
+  }
+
+  /// اختِيار مِلَفّ (PDF أَو مُستَنَد)
+  Future<void> _pickAnyFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const [
+          'pdf', 'doc', 'docx', 'xls', 'xlsx',
+          'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
+        ],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final f = result.files.first;
+      if (f.bytes == null) return;
+
+      final ext = (f.extension ?? '').toLowerCase();
+      String mime = 'application/octet-stream';
+      if (ext == 'pdf') mime = 'application/pdf';
+      else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
+      else if (ext == 'png') mime = 'image/png';
+      else if (ext == 'webp') mime = 'image/webp';
+      else if (ext == 'gif') mime = 'image/gif';
+      else if (ext == 'bmp') mime = 'image/bmp';
+      else if (ext == 'doc' || ext == 'docx') mime = 'application/msword';
+      else if (ext == 'xls' || ext == 'xlsx') mime = 'application/vnd.ms-excel';
+
+      setState(() {
+        _bytes = f.bytes;
+        _fileName = f.name;
+        _mimeType = mime;
+      });
+    } catch (e) {
+      M7Log.error('DocRenew', 'pickAnyFile', error: e);
     }
   }
 
@@ -281,8 +318,10 @@ class _EmployeeDocumentRenewScreenState
         return _RenewImagePickerStep(
           bytes: _bytes,
           fileName: _fileName,
+          mimeType: _mimeType,
           onPickCamera: () => _pickImage(source: ImageSource.camera),
           onPickGallery: () => _pickImage(source: ImageSource.gallery),
+          onPickFile: _pickAnyFile,
           docType: widget.currentVersion.docType,
         );
       case 2:
@@ -518,16 +557,23 @@ class _ReasonStep extends StatelessWidget {
 class _RenewImagePickerStep extends StatelessWidget {
   final Uint8List? bytes;
   final String? fileName;
+  final String? mimeType;
   final VoidCallback onPickCamera;
   final VoidCallback onPickGallery;
+  final VoidCallback onPickFile;
   final EmpDocType docType;
   const _RenewImagePickerStep({
     required this.bytes,
     required this.fileName,
+    required this.mimeType,
     required this.onPickCamera,
     required this.onPickGallery,
+    required this.onPickFile,
     required this.docType,
   });
+
+  bool get _isImage => (mimeType ?? '').startsWith('image/');
+  bool get _isPdf => mimeType == 'application/pdf';
 
   @override
   Widget build(BuildContext context) {
@@ -537,27 +583,55 @@ class _RenewImagePickerStep extends StatelessWidget {
       children: [
         Text(
           isAr
-              ? '📷 الخُطوة 2: صورة الإصدار الجَديد'
-              : '📷 Step 2: New version image',
+              ? '📎 الخُطوة 2: مِلَفّ الإصدار الجَديد'
+              : '📎 Step 2: New version file',
           style: const TextStyle(
               fontWeight: FontWeight.w900, fontSize: 16),
         ),
         const SizedBox(height: 16),
         if (bytes != null) ...[
-          Container(
-            constraints: const BoxConstraints(maxHeight: 320),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: AppColors.success.withOpacity(0.40), width: 2),
+          if (_isImage)
+            Container(
+              constraints: const BoxConstraints(maxHeight: 320),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: AppColors.success.withOpacity(0.40), width: 2),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 5.0,
+                child: Image.memory(bytes!, fit: BoxFit.contain),
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: AppColors.success.withOpacity(0.40), width: 2),
+                color: AppColors.success.withOpacity(0.05),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    _isPdf ? Icons.picture_as_pdf : Icons.insert_drive_file,
+                    size: 64,
+                    color: _isPdf ? Colors.red : AppColors.brand,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _isPdf
+                        ? 'PDF'
+                        : (mimeType?.split('/').last.toUpperCase() ?? 'FILE'),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
+                ],
+              ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: InteractiveViewer(
-              minScale: 1.0,
-              maxScale: 5.0,
-              child: Image.memory(bytes!, fit: BoxFit.contain),
-            ),
-          ),
           const SizedBox(height: 8),
           Text(
             fileName ?? '',
@@ -570,9 +644,9 @@ class _RenewImagePickerStep extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: onPickGallery,
+            onPressed: onPickFile,
             icon: const Icon(Icons.refresh),
-            label: Text(isAr ? 'تَغيير الصورة' : 'Change image'),
+            label: Text(isAr ? 'تَغيير المِلَفّ' : 'Change file'),
           ),
         ] else ...[
           ElevatedButton.icon(
@@ -602,6 +676,22 @@ class _RenewImagePickerStep extends StatelessWidget {
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.brand,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(80),
+            ),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            onPressed: onPickFile,
+            icon: const Icon(Icons.picture_as_pdf, size: 28),
+            label: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(isAr ? '📄 PDF أَو مُستَنَد' : '📄 PDF or Document',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w900, fontSize: 16)),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(80),
             ),
