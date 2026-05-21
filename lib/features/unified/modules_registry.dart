@@ -9,7 +9,7 @@ import '../admin/admin_overview.dart';
 import '../admin/admin_users.dart';
 import '../hr/document_vault_screen.dart';
 import '../hr/hr_dashboard_screen.dart';
-import '../hr/pin_management_screen.dart';
+// 🚫 PIN screens أُزيلَت مِن الـ menu — يَتِمّ تَوليد PIN مِن صَفحة المُوَظَّف
 import '../operation/hr/hr_onpoint_training_screen.dart';
 // Camp Boss modules
 import '../camp_boss/bus_shift_km_screen.dart';
@@ -60,7 +60,7 @@ import '../operation/driver_route_map_screen.dart';
 import '../operation/live_fleet_map_screen.dart';
 import '../operation/operation_rosters.dart';
 import '../operation/operation_supervisor_assignments.dart';
-import '../operation/temporary_pin_screen.dart';
+// 🚫 temporary_pin_screen أُزيلَ مِن الـ registry — مُدمَج في pin_hub_screen
 import '../operation/rosters_center.dart';
 // Policies
 import '../policies/policies_screen.dart';
@@ -173,17 +173,8 @@ class ModulesRegistry {
           requiredPermission: P.documentsVaultView,
           builder: (_) => const DocumentVaultScreen(),
         ),
-        // 🆕 إدارة PINs — تَعيين/تَجديد رَقم سِرّيّ لِبَديل التَعَرُّف عَلى الوَجه
-        AppModule(
-          key: 'pin_management',
-          titleAr: '🔐 إدارة PINs',
-          titleEn: '🔐 PIN Management',
-          icon: Icons.pin_outlined,
-          color: ModuleCategory.hr.color(),
-          category: ModuleCategory.hr,
-          requiredPermission: P.employeesView,
-          builder: (_) => const PinManagementScreen(),
-        ),
+        // 🚫 PIN Hub أُزيلَ — تَوليد PIN يَتِمّ مِن داخِل صَفحة المُوَظَّف
+        // عَبر زِرّ "تَوليد PIN" المَحميّ بِصَلاحيّة pin.generate_temporary
         AppModule(
           key: 'employees',
           titleAr: 'المُوَظَّفون',
@@ -284,17 +275,8 @@ class ModulesRegistry {
           requiresCountry: true,
           builder: (_) => const OperationSupervisorAssignments(),
         ),
-        // 🆕 PIN مُؤَقَّت — مُدير العَمَلِيّات يُوَلِّد PIN صالِح لِثَوانٍ مَعدودة
-        AppModule(
-          key: 'temporary_pin',
-          titleAr: '🔐 PIN مُؤَقَّت',
-          titleEn: '🔐 Temporary PIN',
-          icon: Icons.lock_clock_outlined,
-          color: ModuleCategory.hr.color(),
-          category: ModuleCategory.hr,
-          requiredPermission: 'pin.generate_temporary',
-          builder: (_) => const TemporaryPinScreen(),
-        ),
+        // 🚫 temporary_pin أُزيلَ كَمُديول مُستَقِلّ — دُمِجَ في pin_hub (HR section)
+        // الوُصول الآن: HR → 🔐 إدارة PINs → تاب "مُؤَقَّت"
         AppModule(
           key: 'roster_creator',
           titleAr: 'إنشاء روستر',

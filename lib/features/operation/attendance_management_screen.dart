@@ -9,6 +9,7 @@ import '../../repositories/mock_repository.dart';
 import '../../shared/employee_identity.dart';
 import '../../shared/m7_app_bar.dart';
 import 'attendance_reports_screen.dart';
+import 'point_attendance_tab.dart';
 
 /// 📋 شاشة إدارة الحضور (يوم بيوم لكلّ الموظفين)
 ///
@@ -27,7 +28,9 @@ class AttendanceManagementScreen extends StatefulWidget {
 }
 
 class _AttendanceManagementScreenState
-    extends State<AttendanceManagementScreen> {
+    extends State<AttendanceManagementScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tab;
   DateTime _date = DateTime.now();
   String? _busFilter; // null = كلّ الباصات
   BusAttendanceStatus? _statusFilter;
@@ -36,11 +39,13 @@ class _AttendanceManagementScreenState
   @override
   void initState() {
     super.initState();
+    _tab = TabController(length: 2, vsync: this);
     MockRepository().addListener(_onChange);
   }
 
   @override
   void dispose() {
+    _tab.dispose();
     MockRepository().removeListener(_onChange);
     super.dispose();
   }
@@ -349,6 +354,59 @@ class _AttendanceManagementScreenState
             ),
           ),
 
+          // ===== 🆕 شَريط التابات: الباصات | النِقاط =====
+          Container(
+            color: AppColors.brand.withOpacity(0.06),
+            child: TabBar(
+              controller: _tab,
+              labelColor: AppColors.brand,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.brand,
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w900, fontSize: 13),
+              tabs: [
+                Tab(
+                  icon: const Icon(Icons.directions_bus),
+                  text: isAr ? '🚌 الباصات' : '🚌 Buses',
+                ),
+                Tab(
+                  icon: const Icon(Icons.place),
+                  text: isAr ? '📍 النِقاط' : '📍 Points',
+                ),
+              ],
+            ),
+          ),
+
+          // ===== مُحتَوى التابات =====
+          Expanded(
+            child: TabBarView(
+              controller: _tab,
+              children: [
+                // ─────────── تاب 1: الباصات (المُحتَوى الحاليّ) ───────────
+                _buildBusTab(context, isAr, present, missing, changed,
+                    unmarked, all, rows),
+                // ─────────── تاب 2: النِقاط (Point Terminal) ───────────
+                PointAttendanceTab(date: _date),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBusTab(
+    BuildContext context,
+    bool isAr,
+    int present,
+    int missing,
+    int changed,
+    int unmarked,
+    List<_EmployeeAttendanceRow> all,
+    List<_EmployeeAttendanceRow> rows,
+  ) {
+    return Column(
+      children: [
           // ===== KPI ملخّص =====
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
@@ -475,8 +533,7 @@ class _AttendanceManagementScreenState
                   ),
           ),
         ],
-      ),
-    );
+      );
   }
 
   String _busLabel(String id) {

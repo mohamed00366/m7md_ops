@@ -13,6 +13,9 @@ import 'employee_documents_screen.dart';
 import 'employee_profile_sections.dart';
 import 'employee_360_tabs.dart';
 import '../hr/employee_entitlements_screen.dart';
+import '../hr/employee_pin_dialog.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/auth_provider.dart';
 
 /// 👤 شاشة الملف الشَخصيّ لِلموظَّف — Hub
 ///
@@ -81,6 +84,17 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => DriverReportScreen(driver: employee),
               )),
+            ),
+          // 🔐 تَوليد PIN مُؤَقَّت — يَظهَر فَقَط لِمَن لَدَيه pin.generate_temporary
+          if (context.watch<AuthProvider>().isSuperAdmin ||
+              context
+                  .watch<AuthProvider>()
+                  .permissions
+                  .contains('pin.generate_temporary'))
+            M7AppBarAction(
+              icon: Icons.lock_clock,
+              tooltip: isAr ? 'تَوليد PIN مُؤَقَّت' : 'Generate Temporary PIN',
+              onPressed: () => showEmployeePinDialog(context, employee),
             ),
           M7AppBarAction(
             icon: Icons.edit_note,

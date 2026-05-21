@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/l10n/app_strings.dart';
+import '../../core/services/point_attendance_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
 import '../../models/models.dart';
@@ -26,7 +27,9 @@ class AttendanceReportsScreen extends StatefulWidget {
 enum _DateRange { week, month, custom }
 
 class _AttendanceReportsScreenState
-    extends State<AttendanceReportsScreen> {
+    extends State<AttendanceReportsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tab;
   _DateRange _range = _DateRange.week;
   DateTime _from = DateTime.now().subtract(const Duration(days: 6));
   DateTime _to = DateTime.now();
@@ -34,7 +37,14 @@ class _AttendanceReportsScreenState
   @override
   void initState() {
     super.initState();
+    _tab = TabController(length: 2, vsync: this);
     _applyRange(_range);
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
   }
 
   void _applyRange(_DateRange r) {
@@ -155,8 +165,33 @@ class _AttendanceReportsScreenState
         title: isAr ? 'تقارير الحضور' : 'Attendance Reports',
         subtitle:
             '${DateFormat('d/M').format(_from)} → ${DateFormat('d/M').format(_to)}',
+        bottom: TabBar(
+          controller: _tab,
+          labelStyle: const TextStyle(
+              fontWeight: FontWeight.w900, fontSize: 13),
+          tabs: [
+            Tab(text: isAr ? '🚌 الباصات' : '🚌 Buses'),
+            Tab(text: isAr ? '📍 النِقاط' : '📍 Points'),
+          ],
+        ),
       ),
-      body: ListView(
+      body: TabBarView(
+        controller: _tab,
+        children: [
+          _buildBusReport(context, isAr, sortedDays, perDay),
+          _PointReportTab(from: _from, to: _to),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBusReport(
+    BuildContext context,
+    bool isAr,
+    List<MapEntry<DateTime, _DayBucket>> sortedDays,
+    Map<DateTime, _DayBucket> perDay,
+  ) {
+    return ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ===== فلتر الفترة =====
@@ -277,6 +312,164 @@ class _AttendanceReportsScreenState
             }),
 
           const SizedBox(height: 24),
+        ],
+      );
+  }
+}
+
+// =============================================================================
+// 📍 _PointReportTab — تَقرير حُضور النِقاط
+// =============================================================================
+class _PointReportTab extends StatefulWidget {
+  final DateTime from;
+  final DateTime to;
+  const _PointReportTab({required this.from, required this.to});
+
+  @override
+  State<_PointReportTab> createState() => _PointReportTabState();
+}
+
+class _PointReportTabState extends State<_PointReportTab> {
+  bool _loading = true;
+  Map<String, int> _daysPresent = {};   // employee_id → count of days present
+  Map<String, int> _daysCompleted = {}; // employee_id → days with clock_out
+  int _totalDays = 0;
+  int _totalRecords = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PointReportTab old) {
+    super.didUpdateWidget(old);
+    if (old.from != widget.from || old.to != widget.to) _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    _daysPresent.clear();
+    _daysCompleted.clear();
+    _totalDays = 0;
+    _totalRecords = 0;
+
+    var d = DateTime(widget.from.year, widget.from.month, widget.from.day);
+    final end = DateTime(widget.to.year, widget.to.month, widget.to.day);
+    while (!d.isAfter(end)) {
+      _totalDays++;
+      final rows = await PointAttendanceService.instance.forDate(d);
+      for (final r in rows) {
+        _totalRecords++;
+        if (r.isPresent) {
+          _daysPresent[r.employeeId] = (_daysPresent[r.employeeId] ?? 0) + 1;
+        }
+        if (r.isCompleted) {
+          _daysCompleted[r.employeeId] =
+              (_daysCompleted[r.employeeId] ?? 0) + 1;
+        }
+      }
+      d = d.add(const Duration(days: 1));
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isAr = AppStrings.of(context).isAr;
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final repo = MockRepository();
+    final empMap = {for (final e in repo.employees) e.id: e};
+    final sorted = _daysPresent.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // KPIs
+          Row(
+            children: [
+              Expanded(
+                child: _BigStat(
+                  label: isAr ? 'أَيّام النِطاق' : 'Days in range',
+                  value: _totalDays,
+                  color: AppColors.brand,
+                  icon: Icons.calendar_today,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _BigStat(
+                  label: isAr ? 'مُوَظَّفون حَضَروا' : 'Employees attended',
+                  value: _daysPresent.length,
+                  color: AppColors.success,
+                  icon: Icons.people,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _BigStat(
+                  label: isAr ? 'إجماليّ سِجِلّات' : 'Total records',
+                  value: _totalRecords,
+                  color: AppColors.warning,
+                  icon: Icons.history,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            isAr ? 'حُضور النِقاط (مُرَتَّب)' : 'Point attendance (sorted)',
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+          ),
+          const SizedBox(height: 8),
+          if (sorted.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: Text('لا يُوجَد سِجِلّات')),
+            )
+          else
+            ...sorted.map((e) {
+              final emp = empMap[e.key];
+              if (emp == null) return const SizedBox.shrink();
+              final present = e.value;
+              final completed = _daysCompleted[e.key] ?? 0;
+              return Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.brand.withOpacity(0.1),
+                    child: Text(emp.initials,
+                        style: const TextStyle(
+                            color: AppColors.brand,
+                            fontWeight: FontWeight.w900)),
+                  ),
+                  title: Text(emp.fullName,
+                      style: const TextStyle(fontWeight: FontWeight.w900)),
+                  subtitle: Text(emp.code,
+                      style: const TextStyle(fontSize: 11)),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('$present/$_totalDays',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.success)),
+                      Text(
+                        isAr ? '$completed مُكتَمِل' : '$completed completed',
+                        style: const TextStyle(
+                            fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
         ],
       ),
     );
