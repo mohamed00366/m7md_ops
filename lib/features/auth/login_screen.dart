@@ -346,12 +346,6 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _error = msg);
   }
 
-  void _quickFill(String username, String password) {
-    _userCtrl.text = username;
-    _passCtrl.text = password;
-    setState(() => _error = null);
-  }
-
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -767,85 +761,7 @@ class _LoginScreenState extends State<LoginScreen>
                       },
                     ),
 
-                    const SizedBox(height: 24),
-
-                    // ==== الحسابات التجريبية ====
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.surfaceDark
-                            : AppColors.surfaceLight,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                            color: isDark
-                                ? AppColors.borderDark
-                                : AppColors.borderLight,
-                            width: 0.5),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.tune,
-                                  size: 14,
-                                  color: isDark
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.textSecondaryLight),
-                              const SizedBox(width: 6),
-                              Text(
-                                isAr
-                                    ? 'حسابات تجريبية'
-                                    : 'Test Accounts',
-                                style: TextStyle(
-                                    color: isDark
-                                        ? AppColors.textSecondaryDark
-                                        : AppColors.textSecondaryLight,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // 🆕 الحسابات الفعلية (الأدوار الثابتة فقط)
-                          // ملاحظة: Supervisor دور ديناميكي يُمنح تلقائياً
-                          // عند إسناد الموظف لنقطة، فلا يلزم حساب ثابت له
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 6,
-                            children: [
-                              _DemoChip(
-                                label: 'Super Admin',
-                                color: AppColors.warning,
-                                onTap: () => _quickFill('superadmin', 'admin123'),
-                              ),
-                              _DemoChip(
-                                label: 'Operation',
-                                color: AppColors.brand,
-                                onTap: () => _quickFill('OPE', 'ope123'),
-                              ),
-                              _DemoChip(
-                                label: 'Camp Boss',
-                                color: AppColors.purple,
-                                onTap: () => _quickFill('CAM', 'cam123'),
-                              ),
-                              _DemoChip(
-                                label: 'Bus Driver',
-                                color: AppColors.success,
-                                onTap: () => _quickFill('BUS', 'bus123'),
-                              ),
-                              _DemoChip(
-                                label: 'Employee',
-                                color: AppColors.textSecondaryLight,
-                                onTap: () => _quickFill('EMP', 'emp123'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
+                    // 🚫 قِسم الحِسابات التَجريبيّة أُزيلَ — Production
                     const Spacer(),
                     Center(
                       child: Text(
@@ -933,44 +849,6 @@ class _Field extends StatelessWidget {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
               horizontal: 12, vertical: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// شريحة دور تجريبي
-// ============================================================
-class _DemoChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  const _DemoChip({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.4), width: 0.5),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w700),
         ),
       ),
     );
