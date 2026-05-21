@@ -55,6 +55,9 @@ dependencies:
   pdf: ^3.10.8
   printing: ^5.12.0
 
+  # 🎬 Video splash screen
+  video_player: ^2.8.6
+
   # 🆕 Geo-fencing (location restriction at login)
   geolocator: ^11.0.0       # GPS + mock-location detection
   network_info_plus: ^4.1.0 # Wi-Fi SSID detection
@@ -130,3 +133,5 @@ flutter:
     #   - assets/m7_logo_light.png
     #   - assets/m7_logo_dark.png
     - assets/models/
+    # 🎬 فيديو الترحيب
+    - assets/video/welcome.mp4

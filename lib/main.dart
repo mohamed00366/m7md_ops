@@ -26,6 +26,7 @@ import 'core/services/face_enrollment_policy_settings.dart';
 import 'core/services/roster_employee_filter_settings.dart';
 import 'models/rbac.dart' show AccountType;
 import 'features/auth/login_screen.dart';
+import 'features/splash/splash_video_screen.dart';
 import 'features/unified/unified_home.dart';
 import 'shared/branded_background.dart';
 import 'shared/impersonate_banner.dart';
@@ -139,11 +140,56 @@ class M7mdOpsApp extends StatelessWidget {
                 child: ImpersonateBanner(child: child),
               );
             },
-            home: const _RootRouter(),
+            home: const _SplashGate(),
           );
         },
       ),
     );
+  }
+}
+
+// =============================================================================
+// 🎬 _SplashGate — يَفحَص هَل يَعرِض الفيديو أَوّلاً أَم يَنتَقِل لِلراوتَر
+// =============================================================================
+class _SplashGate extends StatefulWidget {
+  const _SplashGate();
+
+  @override
+  State<_SplashGate> createState() => _SplashGateState();
+}
+
+class _SplashGateState extends State<_SplashGate> {
+  bool? _shouldShowVideo;
+  bool _videoDismissed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final show = await SplashVideoScreen.shouldShow();
+    if (mounted) setState(() => _shouldShowVideo = show);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ما زِلنا نَفحَص → شاشة سَوداء قَصيرة جِدّاً
+    if (_shouldShowVideo == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: SizedBox.shrink(),
+      );
+    }
+    // عَرض الفيديو إن لَزِم
+    if (_shouldShowVideo == true && !_videoDismissed) {
+      return SplashVideoScreen(
+        onComplete: () => setState(() => _videoDismissed = true),
+      );
+    }
+    // عَدا ذَلِك → الراوتَر الطَبيعيّ
+    return const _RootRouter();
   }
 }
 
