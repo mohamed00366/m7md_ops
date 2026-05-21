@@ -25,6 +25,7 @@ import 'features/point_terminal/point_terminal_home.dart';
 import 'core/services/face_enrollment_policy_settings.dart';
 import 'core/services/roster_employee_filter_settings.dart';
 import 'models/rbac.dart' show AccountType;
+import 'core/services/splash_video_settings.dart';
 import 'features/auth/login_screen.dart';
 import 'features/splash/splash_video_screen.dart';
 import 'features/unified/unified_home.dart';
@@ -149,7 +150,7 @@ class M7mdOpsApp extends StatelessWidget {
 }
 
 // =============================================================================
-// 🎬 _SplashGate — يَفحَص هَل يَعرِض الفيديو أَوّلاً أَم يَنتَقِل لِلراوتَر
+// 🎬 _SplashGate — يَفحَص الإعدادات وَيَعرِض الفيديو إن لَزِم
 // =============================================================================
 class _SplashGate extends StatefulWidget {
   const _SplashGate();
@@ -159,6 +160,7 @@ class _SplashGate extends StatefulWidget {
 }
 
 class _SplashGateState extends State<_SplashGate> {
+  SplashVideoConfig? _config;
   bool? _shouldShowVideo;
   bool _videoDismissed = false;
 
@@ -169,14 +171,20 @@ class _SplashGateState extends State<_SplashGate> {
   }
 
   Future<void> _check() async {
-    final show = await SplashVideoScreen.shouldShow();
-    if (mounted) setState(() => _shouldShowVideo = show);
+    final cfg = await SplashVideoSettings.instance.load();
+    final show = await SplashVideoScreen.shouldShow(cfg);
+    if (mounted) {
+      setState(() {
+        _config = cfg;
+        _shouldShowVideo = show;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // ما زِلنا نَفحَص → شاشة سَوداء قَصيرة جِدّاً
-    if (_shouldShowVideo == null) {
+    if (_shouldShowVideo == null || _config == null) {
       return const Scaffold(
         backgroundColor: Colors.black,
         body: SizedBox.shrink(),
@@ -185,6 +193,7 @@ class _SplashGateState extends State<_SplashGate> {
     // عَرض الفيديو إن لَزِم
     if (_shouldShowVideo == true && !_videoDismissed) {
       return SplashVideoScreen(
+        config: _config!,
         onComplete: () => setState(() => _videoDismissed = true),
       );
     }

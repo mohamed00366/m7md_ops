@@ -1,50 +1,67 @@
 // =============================================================================
-// 🎬 Splash Video Screen — يُعرَض مَرَّة واحِدة في الجَلسة
+// 🎬 Splash Video Screen — يُحَمَّل مِن URL أَو asset حَسَب الإعدادات
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/l10n/app_strings.dart';
+import '../../core/services/splash_video_settings.dart';
 
-/// شاشة فيديو الترحيب — تَظهَر عِندَ أَوَّل فَتح فَقَط في اليَوم.
-///
-/// السُلوك:
-/// - يُحَمَّل الفيديو وَيُشَغَّل تِلقائيّاً (صَوت مَكتوم لِيَعمَل في المُتَصَفِّحات)
-/// - زِرّ Skip في الأَعلى يَمين
-/// - عِندَ انتِهاء الفيديو أَو الضَغط Skip → يُستَدعى [onComplete]
-/// - يُحفَظ في SharedPreferences التاريخ لِتَجَنُّب التَكرار في نَفس اليَوم
+/// شاشة فيديو الترحيب — تَتَّبِع الإعدادات المُخَزَّنة في Supabase.
 class SplashVideoScreen extends StatefulWidget {
   final VoidCallback onComplete;
-  const SplashVideoScreen({super.key, required this.onComplete});
+  final SplashVideoConfig config;
 
-  /// مِفتاح SharedPreferences لِتاريخ آخِر عَرض
-  static const String _prefKey = 'splash_video_shown_date';
+  const SplashVideoScreen({
+    super.key,
+    required this.onComplete,
+    required this.config,
+  });
 
-  /// فَحص هَل يَجِب عَرض الفيديو اليَوم
-  static Future<bool> shouldShow() async {
+  /// فَحص هَل يَجِب عَرض الفيديو الآن حَسَب الإعدادات
+  static Future<bool> shouldShow(SplashVideoConfig cfg) async {
+    if (!cfg.enabled) return false;
+    if (cfg.showFrequency == SplashShowFrequency.everyTime) return true;
+    if (cfg.showFrequency == SplashShowFrequency.never) return false;
+
     try {
       final prefs = await SharedPreferences.getInstance();
-      final lastShown = prefs.getString(_prefKey);
-      final today = _formatDate(DateTime.now());
-      return lastShown != today;
+      final lastShown = prefs.getString('splash_video_last_shown');
+      if (lastShown == null) return true;
+
+      final last = DateTime.tryParse(lastShown);
+      if (last == null) return true;
+      final now = DateTime.now();
+
+      switch (cfg.showFrequency) {
+        case SplashShowFrequency.session:
+          // 'session' = نَفس Tab — لا نُخَزِّن، نَستَخدِم session storage فِعلِيّاً
+          // كَحَلّ بَسيط: 30 دَقيقة كَنافِذة جَلسة
+          return now.difference(last).inMinutes >= 30;
+        case SplashShowFrequency.daily:
+          return now.day != last.day ||
+              now.month != last.month ||
+              now.year != last.year;
+        case SplashShowFrequency.weekly:
+          return now.difference(last).inDays >= 7;
+        case SplashShowFrequency.everyTime:
+        case SplashShowFrequency.never:
+          return true;
+      }
     } catch (_) {
-      return false; // عِندَ الفَشَل، لا تَعرِض (آمِن)
+      return true;
     }
   }
 
-  /// تَسجيل أَنّ الفيديو عُرِضَ اليَوم
+  /// تَسجيل وَقت آخِر عَرض
   static Future<void> markShown() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefKey, _formatDate(DateTime.now()));
-    } catch (_) {
-      // ignore
-    }
+      await prefs.setString(
+          'splash_video_last_shown', DateTime.now().toIso8601String());
+    } catch (_) {}
   }
-
-  static String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   @override
   State<SplashVideoScreen> createState() => _SplashVideoScreenState();
@@ -54,6 +71,8 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
   VideoPlayerController? _controller;
   bool _initialized = false;
   bool _completed = false;
+  bool _muted = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -63,19 +82,37 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
 
   Future<void> _init() async {
     try {
-      _controller = VideoPlayerController.asset('assets/video/welcome.mp4');
+      // اِختَر المَصدَر — URL (مِن Storage) أَو asset احتياطيّ
+      final url = widget.config.videoUrl;
+      if (url != null && url.isNotEmpty) {
+        _controller = VideoPlayerController.networkUrl(Uri.parse(url));
+      } else {
+        _controller = VideoPlayerController.asset(widget.config.videoPath);
+      }
+
       await _controller!.initialize();
-      await _controller!.setVolume(0); // 🔇 مَكتوم لِيَعمَل تِلقائيّاً
+
+      // مُحاوَلة تَشغيل الصَوت إن طَلَب المُستَخدِم (قَد يَفشَل في الويب)
+      if (widget.config.autoUnmute) {
+        await _controller!.setVolume(1.0);
+        _muted = false;
+      } else {
+        await _controller!.setVolume(0);
+      }
+
       await _controller!.play();
       _controller!.addListener(_onVideoStateChanged);
       if (mounted) setState(() => _initialized = true);
 
-      // اِحتِياط — تَخَطّى الفيديو بَعد 8 ثَوانٍ كَحَدّ أَقصى
-      Future.delayed(const Duration(seconds: 8), () {
-        if (mounted && !_completed) _finish();
-      });
+      // الحَدّ الأَقصى لِلمُدَّة
+      Future.delayed(
+        Duration(seconds: widget.config.maxDurationSeconds),
+        () {
+          if (mounted && !_completed) _finish();
+        },
+      );
     } catch (e) {
-      // إن فَشِل التَحميل، انتَقِل مُباشَرةً
+      _loadError = e.toString();
       _finish();
     }
   }
@@ -86,6 +123,13 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
     if (v.position >= v.duration && !_completed) {
       _finish();
     }
+  }
+
+  Future<void> _toggleMute() async {
+    if (_controller == null) return;
+    final newMuted = !_muted;
+    await _controller!.setVolume(newMuted ? 0 : 1.0);
+    if (mounted) setState(() => _muted = newMuted);
   }
 
   Future<void> _finish() async {
@@ -120,7 +164,66 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
                   : const CircularProgressIndicator(color: Colors.white),
             ),
 
-            // زِرّ Skip
+            // 🔊 زِرّ تَفعيل الصَوت
+            if (_initialized && _muted)
+              Positioned(
+                bottom: 32,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(32),
+                    elevation: 8,
+                    child: InkWell(
+                      onTap: _toggleMute,
+                      borderRadius: BorderRadius.circular(32),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.volume_off,
+                                color: Colors.black87, size: 22),
+                            const SizedBox(width: 10),
+                            Text(
+                              isAr ? 'اضغَط لِتَفعيل الصَوت' : 'Tap to unmute',
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // 🔇 زِرّ كَتم
+            if (_initialized && !_muted)
+              Positioned(
+                top: 16,
+                left: 16,
+                child: Material(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(24),
+                  child: InkWell(
+                    onTap: _toggleMute,
+                    borderRadius: BorderRadius.circular(24),
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(Icons.volume_up,
+                          color: Colors.white, size: 22),
+                    ),
+                  ),
+                ),
+              ),
+
+            // ⏭ Skip
             Positioned(
               top: 16,
               right: 16,
@@ -145,11 +248,8 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(
-                          Icons.skip_next,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+                        const Icon(Icons.skip_next,
+                            color: Colors.white, size: 18),
                       ],
                     ),
                   ),

@@ -30,6 +30,7 @@ import 'geo_fence_settings_screen.dart';
 import 'impersonate_picker.dart';
 import 'login_method_settings_screen.dart';
 import 'session_settings_screen.dart';
+import 'splash_video_settings_screen.dart';
 // admin_roles removed from Settings Hub — managed via Job Title Permissions matrix
 // import 'admin_roles.dart';
 import 'admin_users.dart';
@@ -814,6 +815,18 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         descEn: 'Editable system variables (auth email, company name, etc.)',
         builder: (_) => const AdminSystemSettings(),
         requiredPermission: P.settingsSystemView,
+      ),
+      // 🎬 فيديو الترحيب — رَفع/تَفعيل/تَكرار
+      _SettingEntry(
+        category: catSystem,
+        icon: Icons.movie_outlined,
+        color: AppColors.purple,
+        titleAr: '🎬 فيديو الترحيب',
+        titleEn: '🎬 Splash Video',
+        descAr: 'رَفع الفيديو + التَحَكُّم بِالصَوت وَالمُدَّة وَالتَكرار',
+        descEn: 'Upload video + control sound, duration, frequency',
+        builder: (_) => const SplashVideoSettingsScreen(),
+        requiredPermission: P.settingsSplashVideoManage,
       ),
       // 🆕 صِحّة النِظام (مَركَز التَشخيص)
       _SettingEntry(

@@ -882,4 +882,8 @@ class P {
   static const pinViewHistory = 'pin.view_history';
   /// تَعديل إعدادات PIN (TTL، الطول)
   static const pinManageSettings = 'pin.manage_settings';
+
+  // ===== 🆕 Splash Video (فيديو الترحيب — May 2026) =====
+  /// إدارة فيديو الترحيب (رَفع، تَعديل المُدَّة، تَفعيل/إيقاف)
+  static const settingsSplashVideoManage = 'settings.splash_video.manage';
 }
