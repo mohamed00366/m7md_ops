@@ -30,6 +30,7 @@ import 'geo_fence_settings_screen.dart';
 import 'impersonate_picker.dart';
 import 'login_method_settings_screen.dart';
 import 'session_settings_screen.dart';
+import 'labor_rules_settings_screen.dart';
 import 'splash_video_settings_screen.dart';
 // admin_roles removed from Settings Hub — managed via Job Title Permissions matrix
 // import 'admin_roles.dart';
@@ -701,6 +702,20 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
           settings: AppModuleSettings.hr,
         ),
         requiredPermission: P.settingsHrView,
+      ),
+      // 📜 قَواعِد قانون العَمَل لِكُلّ دَولة (UAE / KSA / EG / LB)
+      _SettingEntry(
+        category: catHr,
+        icon: Icons.gavel_outlined,
+        color: AppColors.brand,
+        titleAr: '📜 قَواعِد قانون العَمَل',
+        titleEn: '📜 Labor Rules',
+        descAr:
+            'تَخصيص قَواعِد الإجازة + نِهاية الخِدمة + التَذكِرة لِكُلّ دَولة',
+        descEn:
+            'Customize leave / EOS / ticket rules per country',
+        builder: (_) => const LaborRulesSettingsScreen(),
+        requiredPermission: P.settingsLaborRulesView,
       ),
 
       // ============================================================

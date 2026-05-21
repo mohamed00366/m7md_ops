@@ -375,13 +375,15 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                           ),
                           if (_config.hasVideo) ...[
                             const SizedBox(width: 8),
-                            OutlinedButton.icon(
-                              onPressed: _removeVideo,
-                              icon: const Icon(Icons.delete_outline),
-                              label: Text(isAr ? 'حَذف' : 'Remove'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.danger,
-                                minimumSize: const Size.fromHeight(48),
+                            SizedBox(
+                              height: 48,
+                              child: OutlinedButton.icon(
+                                onPressed: _removeVideo,
+                                icon: const Icon(Icons.delete_outline),
+                                label: Text(isAr ? 'حَذف' : 'Remove'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.danger,
+                                ),
                               ),
                             ),
                           ],
@@ -502,13 +504,15 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                           ),
                           if (_config.hasAudio) ...[
                             const SizedBox(width: 8),
-                            OutlinedButton.icon(
-                              onPressed: _removeAudio,
-                              icon: const Icon(Icons.delete_outline),
-                              label: Text(isAr ? 'حَذف' : 'Remove'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.danger,
-                                minimumSize: const Size.fromHeight(44),
+                            SizedBox(
+                              height: 44,
+                              child: OutlinedButton.icon(
+                                onPressed: _removeAudio,
+                                icon: const Icon(Icons.delete_outline),
+                                label: Text(isAr ? 'حَذف' : 'Remove'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.danger,
+                                ),
                               ),
                             ),
                           ],

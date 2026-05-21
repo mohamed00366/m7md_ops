@@ -185,15 +185,28 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
     final isAr = AppStrings.of(context).isAr;
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
+      // 🚫 لا SafeArea — نُريد ملء الشاشة كامِلاً (Cinematic experience)
+      // 🆕 Directionality.ltr لِتَجَنُّب انزِياح الفيديو مَع RTL
+      body: Directionality(
+        textDirection: TextDirection.ltr,
         child: Stack(
+          fit: StackFit.expand, // 🆕 الـ Stack يَملَأ الشاشة كامِلة
           children: [
-            // الفيديو
+            // 🎬 الفيديو — يَتَكَيَّف مَع كُلّ النِسَب وَالأَجهِزة (ويب + جَوّال)
+            // BoxFit.contain يَضمَن:
+            // - فيديو portrait عَلى شاشة عَريضة → أَشرِطة سَوداء عَلى الجانِبَين
+            // - فيديو landscape عَلى شاشة طَويلة → أَشرِطة سَوداء فَوق وَتَحت
+            // - الفيديو يَظهَر دائِماً بِنِسبَتِه الأَصلِيّة بِدون قَطع
             Center(
               child: _initialized && _videoController != null
-                  ? AspectRatio(
-                      aspectRatio: _videoController!.value.aspectRatio,
-                      child: VideoPlayer(_videoController!),
+                  ? FittedBox(
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: _videoController!.value.size.width,
+                        height: _videoController!.value.size.height,
+                        child: VideoPlayer(_videoController!),
+                      ),
                     )
                   : const CircularProgressIndicator(color: Colors.white),
             ),

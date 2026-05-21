@@ -48,8 +48,8 @@ import '../admin/data_quality_screen.dart';
 import '../admin/employee_documents_expiry_report_screen.dart';
 import '../admin/forms_submissions_report_screen.dart';
 import '../admin/help_center_screen.dart';
-import '../admin/leave_balance_manager_screen.dart';
-import '../leave/leave_approvals_screen.dart';
+// 🚫 leave_balance_manager_screen أُزيلَ مايو 2026
+// 🚫 leave_approvals_screen أُزيلَ — استَبدَلناه بِنِظام مُستَحَقّات المُوَظَّف
 import '../reports/reports_hub_screen.dart';
 import '../admin/my_preferences_screen.dart';
 import '../admin/smart_alerts_screen.dart';
@@ -215,28 +215,9 @@ class ModulesRegistry {
           requiredPermission: P.evaluationsView,
           builder: (_) => const EvaluationsCenter(),
         ),
-        // 🆕 إدارة أَرصِدة الإجازات (HR/Admin فَقَط)
-        AppModule(
-          key: 'leave_balances',
-          titleAr: '🏖 إدارة أَرصِدة الإجازات',
-          titleEn: '🏖 Leave Balances',
-          icon: Icons.beach_access_outlined,
-          color: ModuleCategory.hr.color(),
-          category: ModuleCategory.hr,
-          requiredPermission: P.leaveBalanceManage,
-          builder: (_) => const LeaveBalanceManagerScreen(),
-        ),
-        // 🆕 اعتِماد طَلَبات الإجازات (Manager/HR) — يَعرِض pending وَيُوافِق/يَرفُض
-        AppModule(
-          key: 'leave_approvals',
-          titleAr: '🛂 اعتِماد طَلَبات الإجازات',
-          titleEn: '🛂 Leave Approvals',
-          icon: Icons.fact_check_outlined,
-          color: ModuleCategory.hr.color(),
-          category: ModuleCategory.hr,
-          requiredPermission: P.leaveTeamApprove,
-          builder: (_) => const LeaveApprovalsScreen(),
-        ),
+        // 🚫 leave_balances + leave_approvals أُزيلَت (مايو 2026)
+        // النِظام الجَديد هُو مُستَحَقّات المُوَظَّف (راتِب إجازة + EOS + تَذكِرة)
+        // يُفتَح مِن بِطاقة المُوَظَّف، لَيس كَمُديول مُستَقِلّ.
         // 🆕 نُقِلَ مِن النَقل → HR (إدارة الحُضور وَالانصِراف)
         AppModule(
           key: 'attendance_mgmt',

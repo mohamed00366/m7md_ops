@@ -886,4 +886,24 @@ class P {
   // ===== 🆕 Splash Video (فيديو الترحيب — May 2026) =====
   /// إدارة فيديو الترحيب (رَفع، تَعديل المُدَّة، تَفعيل/إيقاف)
   static const settingsSplashVideoManage = 'settings.splash_video.manage';
+
+  // ===== 🆕 Entitlements (المُستَحَقّات — راتِب إجازة + نِهاية خِدمة — May 2026) =====
+  /// عَرض مُستَحَقّات المُوَظَّف (لِنَفسِه أَو فَريقِه)
+  static const entitlementsView = 'entitlements.view';
+  /// عَرض مُستَحَقّات كُلّ المُوَظَّفين
+  static const entitlementsViewAll = 'entitlements.view_all';
+  /// صَرف راتِب إجازة
+  static const entitlementsPayLeaveSalary = 'entitlements.pay_leave_salary';
+  /// حِساب مُكافأة نِهاية الخِدمة
+  static const entitlementsCalculateEos = 'entitlements.calculate_eos';
+  /// صَرف مُكافأة نِهاية الخِدمة
+  static const entitlementsPayEos = 'entitlements.pay_eos';
+  /// تَفعيل/تَعطيل تَذكِرة سَفَر لِمُوَظَّف
+  static const entitlementsManageTicket = 'entitlements.manage_ticket';
+
+  // ===== 🆕 Labor Rules (قَواعِد قانون العَمَل لِكُلّ دَولة) =====
+  /// عَرض قَواعِد قانون العَمَل
+  static const settingsLaborRulesView = 'settings.labor_rules.view';
+  /// تَعديل قَواعِد قانون العَمَل لِلدُوَل
+  static const settingsLaborRulesManage = 'settings.labor_rules.manage';
 }

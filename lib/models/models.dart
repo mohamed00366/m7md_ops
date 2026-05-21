@@ -214,6 +214,14 @@ class Employee {
   /// 🚌 الباص الافتراضي للموظف (يُستخدم في خطّة الباصات)
   /// يُمكن تجاوزه ليوم محدّد عبر EmployeeBusAssignment.
   String? defaultBusId;
+  /// 🆕 بَدَلات إضافيّة (سَكَن، مُواصَلات، أُخرى) — لِحِسابات أَوضَح
+  double housingAllowance;
+  double transportAllowance;
+  double otherAllowances;
+  /// 🆕 هَل المُوَظَّف مُؤَهَّل لِتَذكِرة سَفَر؟ (لَيس الجَميع)
+  bool eligibleForTicket;
+  /// 🆕 مَبلَغ التَذكِرة (إذا كانَ مُؤَهَّلاً)
+  double ticketAmount;
   // مرفقات الملفات (تستخدم لاحقاً مع Supabase Storage)
   String? photoFileId;
   String? idCardFileId;
@@ -269,6 +277,11 @@ class Employee {
     this.pantSize = '',
     this.shoeSize = '',
     this.defaultBusId, // 🆕 الباص الافتراضي
+    this.housingAllowance = 0,    // 🆕
+    this.transportAllowance = 0,  // 🆕
+    this.otherAllowances = 0,     // 🆕
+    this.eligibleForTicket = false, // 🆕
+    this.ticketAmount = 0,        // 🆕
     this.photoFileId,
     this.idCardFileId,
     this.licenseFileId,
