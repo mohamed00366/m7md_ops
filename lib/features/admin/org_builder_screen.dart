@@ -4,6 +4,7 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 
 /// 🏗️ شاشة بناء الهيكل التنظيمي بالسحب والإفلات
 ///
@@ -45,7 +46,11 @@ class _OrgBuilderScreenState extends State<OrgBuilderScreen>
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
-    return Column(
+    return Scaffold(
+      appBar: M7AppBar(
+        title: s.isAr ? '🏗 بِناء الهَيكَل' : '🏗 Org Builder',
+      ),
+      body: Column(
       children: [
         Container(
           margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -87,6 +92,7 @@ class _OrgBuilderScreenState extends State<OrgBuilderScreen>
           ),
         ),
       ],
+      ),
     );
   }
 }

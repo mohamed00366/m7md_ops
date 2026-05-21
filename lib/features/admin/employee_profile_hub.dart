@@ -11,6 +11,7 @@ import '../manager/drivers/driver_report_screen.dart';
 import '../manager/manager_employees.dart';
 import 'employee_documents_screen.dart';
 import 'employee_profile_sections.dart';
+import 'employee_360_tabs.dart';
 
 /// 👤 شاشة الملف الشَخصيّ لِلموظَّف — Hub
 ///
@@ -24,8 +25,22 @@ class EmployeeProfileHub extends StatefulWidget {
   State<EmployeeProfileHub> createState() => _EmployeeProfileHubState();
 }
 
-class _EmployeeProfileHubState extends State<EmployeeProfileHub> {
+class _EmployeeProfileHubState extends State<EmployeeProfileHub>
+    with SingleTickerProviderStateMixin {
   Employee get employee => widget.employee;
+  late final TabController _tab;
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 5, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
 
   /// يُفتَح قِسم في شاشة مُنفَصِلة ثُمَّ يُحَدِّث الـHub عند العَودة.
   Future<void> _openSection(Widget screen) async {
@@ -73,15 +88,59 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
+      body: Column(
         children: [
-          // ===== بانِر الموظَّف =====
-          _ProfileHeader(employee: employee),
-          const SizedBox(height: 12),
-          // ===== شَريط التَقَدُّم =====
-          _CompletionBar(value: completion),
-          const SizedBox(height: 16),
+          // ===== بانِر الموظَّف ثابِت في الأَعلى =====
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+            child: _ProfileHeader(employee: employee),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: _CompletionBar(value: completion),
+          ),
+          const SizedBox(height: 8),
+          // ===== شَريط Tabs =====
+          Container(
+            color: AppColors.brand.withOpacity(0.08),
+            child: TabBar(
+              controller: _tab,
+              isScrollable: true,
+              labelColor: AppColors.brand,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.brand,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+              tabs: [
+                Tab(icon: const Icon(Icons.person), text: isAr ? 'المِلَفّ' : 'Profile'),
+                Tab(icon: const Icon(Icons.bar_chart), text: isAr ? 'إحصاءات' : 'Stats'),
+                Tab(icon: const Icon(Icons.beach_access), text: isAr ? 'إجازات' : 'Leaves'),
+                Tab(icon: const Icon(Icons.gavel), text: isAr ? 'إنذارات' : 'Discipline'),
+                Tab(icon: const Icon(Icons.access_time), text: isAr ? 'حُضور' : 'Attendance'),
+              ],
+            ),
+          ),
+          // ===== مُحتَوى الـ Tab المُختار =====
+          Expanded(
+            child: TabBarView(
+              controller: _tab,
+              children: [
+                _profileTab(context, isAr),
+                EmployeeStatsTab(employee: employee),
+                EmployeeLeavesTab(employee: employee),
+                EmployeeDisciplineTab(employee: employee),
+                EmployeeAttendanceTab(employee: employee),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _profileTab(BuildContext context, bool isAr) {
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
           // ===== شَبَكة البِطاقات =====
           GridView.count(
             crossAxisCount: 2,
@@ -264,8 +323,7 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub> {
             limit: 10,
           ),
         ],
-      ),
-    );
+      );
   }
 
   void _openFullEditor(BuildContext context) {
@@ -479,6 +537,11 @@ class _StatusChip extends StatelessWidget {
         c = Colors.orange;
         ic = Icons.build_circle;
         label = isAr ? 'صِيانة' : 'Maintenance';
+        break;
+      case EntityStatus.vacation:
+        c = Colors.teal;
+        ic = Icons.beach_access;
+        label = isAr ? 'في إجازة' : 'On Vacation';
         break;
     }
     return Container(

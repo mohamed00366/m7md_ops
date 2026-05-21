@@ -889,11 +889,20 @@ class _LinkClientsSheet extends StatefulWidget {
 
 class _LinkClientsSheetState extends State<_LinkClientsSheet> {
   late Set<String> _linked;
+  // 🔎 بَحث بِالاسم/الكود/الاسم القَصير
+  String _query = '';
+  final _searchCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _linked = widget.point.linkedClients.map((l) => l.clientId).toSet();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _toggle(String siteId) async {
@@ -927,11 +936,20 @@ class _LinkClientsSheetState extends State<_LinkClientsSheet> {
     final repo = MockRepository();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // العملاء بنفس دولة النقطة
-    final eligibleClients = widget.point.countryId == null
+    final allEligible = widget.point.countryId == null
         ? repo.sites
         : repo.sites
             .where((c) => c.countryId == widget.point.countryId)
             .toList();
+    // 🔎 فِلتَر بَحث حَيّ بِالاسم/الاسم القَصير/الاسم المُحاسَبيّ
+    final q = _query.trim().toLowerCase();
+    final eligibleClients = q.isEmpty
+        ? allEligible
+        : allEligible.where((c) {
+            return c.companyName.toLowerCase().contains(q) ||
+                c.shortName.toLowerCase().contains(q) ||
+                c.accountingName.toLowerCase().contains(q);
+          }).toList();
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -994,18 +1012,84 @@ class _LinkClientsSheetState extends State<_LinkClientsSheet> {
               ),
             ),
             const Divider(height: 16),
+            // 🔎 شَريط البَحث
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
+              child: TextField(
+                controller: _searchCtrl,
+                textDirection: TextDirection.rtl,
+                decoration: InputDecoration(
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search, size: 18),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.clear, size: 16),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _query = '');
+                          },
+                        ),
+                  hintText: s.isAr
+                      ? 'بَحث بِالاسم أَو الاسم القَصير…'
+                      : 'Search by name or short name…',
+                  hintStyle: const TextStyle(fontSize: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 10),
+                ),
+                onChanged: (v) => setState(() => _query = v),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 22, vertical: 2),
+              child: Row(
+                children: [
+                  Text(
+                    s.isAr
+                        ? '${eligibleClients.length} مِن ${allEligible.length} عَميل'
+                        : '${eligibleClients.length} of ${allEligible.length} clients',
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
             Expanded(
               child: eligibleClients.isEmpty
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
-                        child: Text(
-                          s.isAr
-                              ? 'لا يوجد عملاء في هذه الدولة. أضف عملاء من تاب "Clients" أولاً.'
-                              : 'No clients in this country. Add some in "Clients" tab first.',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: AppColors.textSecondaryLight),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _query.isEmpty
+                                  ? Icons.business
+                                  : Icons.search_off,
+                              size: 40,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _query.isEmpty
+                                  ? (s.isAr
+                                      ? 'لا يوجد عملاء في هذه الدولة. أضف عملاء من تاب "Clients" أولاً.'
+                                      : 'No clients in this country. Add some in "Clients" tab first.')
+                                  : (s.isAr
+                                      ? 'لا تُوجَد نَتائج لِلبَحث'
+                                      : 'No results for search'),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: AppColors.textSecondaryLight),
+                            ),
+                          ],
                         ),
                       ),
                     )

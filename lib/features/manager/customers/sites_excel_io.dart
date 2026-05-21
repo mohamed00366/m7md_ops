@@ -5,6 +5,8 @@ import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:universal_html/html.dart' as html;
 
+import '../../../core/services/supabase_data_service.dart';
+import '../../../core/services/supabase_service.dart';
 import '../../../models/enums.dart';
 import '../../../models/models.dart';
 import '../../../repositories/mock_repository.dart';
@@ -234,9 +236,11 @@ class SitesExcelIO {
     return out;
   }
 
-  static EntityImportResult _process(
-      List<Map<String, String>> rows, String? countryId) {
+  static Future<EntityImportResult> _process(
+      List<Map<String, String>> rows, String? countryId) async {
     final repo = MockRepository();
+    final ds = SupabaseDataService();
+    final supaReady = SupabaseService().isReady;
     final errors = <String>[];
     var imported = 0;
     var skipped = 0;
@@ -277,7 +281,18 @@ class SitesExcelIO {
         status: status,
         notes: (r['notes'] ?? '').isEmpty ? null : r['notes'],
       );
-      repo.sites.add(site);
+      // 🆕 Supabase أَوَّلاً ثُمّ الذاكِرة (لِتَجَنُّب FK violations لاحِقاً)
+      if (supaReady) {
+        final created = await ds.createSite(site);
+        if (created == null) {
+          errors.add(
+              'Row ${i + 2}: failed to save "$name" — ${ds.lastError ?? "unknown"}');
+          skipped++;
+          continue;
+        }
+      } else {
+        repo.sites.add(site);
+      }
       imported++;
     }
     repo.notifyListeners();

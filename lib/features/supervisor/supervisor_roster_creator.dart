@@ -5,6 +5,7 @@ import 'package:universal_html/html.dart' as html;
 import '../../core/l10n/app_strings.dart';
 import '../../core/l10n/ar_to_ur_dictionary.dart' as ar2ur;
 import '../../core/providers/auth_provider.dart';
+import '../../core/services/roster_changes_service.dart';
 import '../../core/services/roster_deadline_settings.dart';
 import '../../core/services/roster_employee_filter_settings.dart';
 import '../../core/services/roster_settings.dart';
@@ -17,6 +18,8 @@ import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/employee_identity.dart';
 import '../../shared/widgets.dart';
+import 'roster_changes_history_screen.dart';
+import 'roster_diff_preview_sheet.dart';
 
 /// منشئ الروستر الأسبوعي - تصميم جدولي:
 /// - الصفوف: الموظفون (مع زر إضافة)
@@ -37,6 +40,8 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
   WeeklyRoster? _roster;
   String? _loadedForSiteId; // لتعقب آخر نقطة طلب لها روستر
   bool _loading = false;
+  // 🆕 لِنِظام التَعديل المُتَتَبَّع — snapshot لِلتَعديلات الأَصليّة
+  List<RosterAssignment> _originalSnapshot = [];
   /// 🆕 نقطة يختارها المدير يدوياً عندما لا يكون مرتبطاً بنقطة معيّنة.
   /// تتطلّب صلاحيّة [P.rostersSelectAnyPoint].
   String? _managerSelectedSiteId;
@@ -92,7 +97,10 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
           r.siteId == siteId &&
           r.weekStart.toIso8601String().substring(0, 10) == wsKey).toList();
       if (found.isNotEmpty) {
-        setState(() => _roster = found.first);
+        setState(() {
+          _roster = found.first;
+          _originalSnapshot = _deepCopyAssignments(found.first.assignments);
+        });
         return;
       }
       // Create fresh draft roster in Supabase
@@ -106,7 +114,10 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
       );
       final created = await SupabaseDataService().createRoster(draft);
       if (created != null && mounted) {
-        setState(() => _roster = created);
+        setState(() {
+          _roster = created;
+          _originalSnapshot = _deepCopyAssignments(created.assignments);
+        });
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
@@ -125,9 +136,209 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
     _loading = false;
   }
 
+  // 🆕 نُسخة عَميقة (deep copy) لِـ assignments لِاستِخدامها كَ snapshot
+  List<RosterAssignment> _deepCopyAssignments(List<RosterAssignment> src) {
+    return src
+        .map((a) => RosterAssignment(
+              id: a.id,
+              employeeId: a.employeeId,
+              dayIndex: a.dayIndex,
+              startTime: a.startTime,
+              endTime: a.endTime,
+              shiftType: a.shiftType,
+              notes: a.notes,
+            ))
+        .toList();
+  }
+
+  // 🆕 يَكتَشِف الفُروقات بَين الـ snapshot وَالحالة الحاليّة
+  List<DetectedChange> _detectChanges(WeeklyRoster r) {
+    final svc = RosterChangesService.instance;
+    final repo = MockRepository();
+    final changes = <DetectedChange>[];
+
+    // مَفاتيح: employeeId|dayIndex
+    String key(String empId, int day) => '$empId|$day';
+
+    final beforeMap = <String, RosterAssignment>{};
+    for (final a in _originalSnapshot) {
+      beforeMap[key(a.employeeId, a.dayIndex)] = a;
+    }
+    final afterMap = <String, RosterAssignment>{};
+    for (final a in r.assignments) {
+      afterMap[key(a.employeeId, a.dayIndex)] = a;
+    }
+
+    final allKeys = {...beforeMap.keys, ...afterMap.keys};
+    for (final k in allKeys) {
+      final before = beforeMap[k];
+      final after = afterMap[k];
+      final parts = k.split('|');
+      final empId = parts[0];
+      final dayIndex = int.tryParse(parts[1]) ?? 0;
+      final empName = repo.employeeById(empId)?.fullName;
+
+      if (before == null && after != null) {
+        // إضافة وَردِيّة
+        changes.add(DetectedChange(
+          employeeId: empId,
+          employeeName: empName,
+          dayIndex: dayIndex,
+          type: ChangeType.addShift,
+          severity: ChangeSeverity.major,
+          beforeData: const {},
+          afterData: {
+            'start_time': after.startTime,
+            'end_time': after.endTime,
+            'shift_type': _shiftTypeKey(after.shiftType),
+          },
+        ));
+      } else if (before != null && after == null) {
+        // إزالة وَردِيّة
+        changes.add(DetectedChange(
+          employeeId: empId,
+          employeeName: empName,
+          dayIndex: dayIndex,
+          type: ChangeType.removeShift,
+          severity: ChangeSeverity.major,
+          beforeData: {
+            'start_time': before.startTime,
+            'end_time': before.endTime,
+            'shift_type': _shiftTypeKey(before.shiftType),
+          },
+          afterData: const {},
+        ));
+      } else if (before != null && after != null) {
+        // ربّما تَعديل
+        final shiftTypeChanged = before.shiftType != after.shiftType;
+        final timeChanged = before.startTime != after.startTime ||
+            before.endTime != after.endTime;
+        final notesChanged = (before.notes ?? '') != (after.notes ?? '');
+
+        if (shiftTypeChanged) {
+          changes.add(DetectedChange(
+            employeeId: empId,
+            employeeName: empName,
+            dayIndex: dayIndex,
+            type: ChangeType.shiftType,
+            severity: ChangeSeverity.major,
+            beforeData: {
+              'start_time': before.startTime,
+              'end_time': before.endTime,
+              'shift_type': _shiftTypeKey(before.shiftType),
+            },
+            afterData: {
+              'start_time': after.startTime,
+              'end_time': after.endTime,
+              'shift_type': _shiftTypeKey(after.shiftType),
+            },
+          ));
+        } else if (timeChanged) {
+          final beforeMap = {
+            'start_time': before.startTime,
+            'end_time': before.endTime,
+          };
+          final afterMap = {
+            'start_time': after.startTime,
+            'end_time': after.endTime,
+          };
+          changes.add(DetectedChange(
+            employeeId: empId,
+            employeeName: empName,
+            dayIndex: dayIndex,
+            type: ChangeType.shiftTime,
+            severity: svc.classify(
+                type: ChangeType.shiftTime,
+                before: beforeMap,
+                after: afterMap),
+            beforeData: beforeMap,
+            afterData: afterMap,
+          ));
+        } else if (notesChanged) {
+          changes.add(DetectedChange(
+            employeeId: empId,
+            employeeName: empName,
+            dayIndex: dayIndex,
+            type: ChangeType.changeNotes,
+            severity: ChangeSeverity.minor,
+            beforeData: {'notes': before.notes ?? ''},
+            afterData: {'notes': after.notes ?? ''},
+          ));
+        }
+      }
+    }
+
+    return changes;
+  }
+
+  String _shiftTypeKey(ShiftType s) {
+    switch (s) {
+      case ShiftType.morning:
+        return 'morning';
+      case ShiftType.evening:
+        return 'evening';
+      case ShiftType.night:
+        return 'night';
+      case ShiftType.off:
+        return 'off';
+      case ShiftType.custom:
+        return 'custom';
+    }
+  }
+
   /// يحفظ التعديلات في الذاكرة + Supabase (إن كانت متاحة)
   Future<bool> _persistRoster(WeeklyRoster r) async {
     final supaReady = SupabaseService().isReady;
+    final auth = context.read<AuthProvider>();
+
+    // 🆕 نِظام التَعديل المُتَتَبَّع — يَعمَل فَقَط لِلروسترات المُعتَمَدة
+    final isApproved = r.status == RosterStatus.approved ||
+        r.status == RosterStatus.submitted;
+    if (isApproved && supaReady) {
+      final changes = _detectChanges(r);
+      if (changes.isNotEmpty) {
+        // اِعرِض شاشة المُراجَعة
+        final result = await RosterDiffPreviewSheet.show(
+          context,
+          changes: changes,
+          reasonRequired: changes.any((c) => c.severity.requiresReason),
+        );
+        if (result == null || !result.confirmed) {
+          // المُستَخدِم ألغى — لا نَحفَظ
+          return false;
+        }
+        // احفَظ في Supabase أَوَّلاً
+        final ds = SupabaseDataService();
+        final ok = await ds.replaceRosterAssignments(r.id, r.assignments);
+        if (!ok && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(ds.lastError ?? 'Failed to save'),
+          ));
+          return false;
+        }
+        // اِحفَظ كُلّ التَغييرات في السِجِلّ (Trigger في DB يُرسِل إشعارات)
+        final changedBy = auth.currentUser?.id ?? '';
+        final logged = await RosterChangesService.instance.logChanges(
+          rosterId: r.id,
+          changes: changes,
+          reason: result.reason ?? '',
+          changedBy: changedBy,
+        );
+        // حَدِّث الـ snapshot لِلتَعديلات اللاحِقة
+        _originalSnapshot = _deepCopyAssignments(r.assignments);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: AppColors.success,
+            content: Text(
+                '✅ تَمّ حِفظ ${changes.length} تَعديل وَإرسال إشعارات ($logged)'),
+          ));
+        }
+        return ok;
+      }
+    }
+
+    // المَسار العاديّ (لِلروسترات غَير المُعتَمَدة)
     if (supaReady) {
       final ds = SupabaseDataService();
       final ok = await ds.replaceRosterAssignments(r.id, r.assignments);
@@ -137,9 +348,13 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
           content: Text(ds.lastError ?? 'Failed to save'),
         ));
       }
+      if (ok) {
+        _originalSnapshot = _deepCopyAssignments(r.assignments);
+      }
       return ok;
     } else {
       MockRepository().updateRoster(r);
+      _originalSnapshot = _deepCopyAssignments(r.assignments);
       return true;
     }
   }
@@ -457,26 +672,41 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
       // ابحث عن روسترات أخرى لنفس الأسبوع، حالتها draft/approved/submitted
       String? otherRosterPoint;
       DateTime? otherRosterWeek;
+      // 🆕 تَفاصيل الوَردِيّات لِكُلّ يَوم في الروستر الآخَر
+      final shiftsByDay = <int, List<String>>{};
+      final latestEndByDay = <int, String>{};
       for (final other in repo.rosters) {
         if (other.id == r.id) continue;
         if (other.status == RosterStatus.rejected) continue;
         final otherWsKey =
             other.weekStart.toIso8601String().substring(0, 10);
         if (otherWsKey != wsKey) continue;
-        // هل الموظّف لديه وردية فيه؟
-        final hasShift = other.assignments.any((a) =>
-            a.employeeId == e.id && a.shiftType != ShiftType.off);
-        if (hasShift) {
+        // اِجمَع وَردِيّات هذا المُوَظَّف في الروستر الآخَر
+        for (final a in other.assignments) {
+          if (a.employeeId != e.id) continue;
+          if (a.shiftType == ShiftType.off) continue;
+          final shiftStr = '${a.startTime}-${a.endTime}';
+          shiftsByDay.putIfAbsent(a.dayIndex, () => []).add(shiftStr);
+          // تَتَبَّع أَحدَث وَقت انتِهاء لِكُلّ يَوم
+          final prev = latestEndByDay[a.dayIndex];
+          if (prev == null ||
+              RosterAddEmployeeStatus._toMinutes(a.endTime) >
+                  RosterAddEmployeeStatus._toMinutes(prev)) {
+            latestEndByDay[a.dayIndex] = a.endTime;
+          }
+        }
+        if (shiftsByDay.isNotEmpty && otherRosterPoint == null) {
           otherRosterPoint =
               repo.pointById(other.siteId)?.name ?? '?';
           otherRosterWeek = other.weekStart;
-          break;
         }
       }
       statusMap[e.id] = RosterAddEmployeeStatus(
         linkedPointName: linkedPointName,
         otherRosterPointName: otherRosterPoint,
         otherRosterWeek: otherRosterWeek,
+        otherShiftsByDay: shiftsByDay.isEmpty ? null : shiftsByDay,
+        latestEndByDay: latestEndByDay.isEmpty ? null : latestEndByDay,
       );
     }
 
@@ -504,14 +734,35 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
         statusMap: statusMap,
         onAdd: (emp) async {
           final repo = MockRepository();
-          // أضف وردية افتراضية ليوم الإثنين فقط (يمكن تعديلها لاحقاً)
+          // 🆕 إذا المُوَظَّف عَلَيه وَردِيّة يَوم الإثنين في نُقطة أُخرى،
+          //   اقتَرِح بَدء الوَردِيّة بَعدها بِساعَتَين بَدَلاً من 08:00.
+          final empStatus = statusMap[emp.id];
+          var startTime = '08:00';
+          var endTime = '20:00';
+          var shift = ShiftType.morning;
+          final earliest = empStatus?.earliestAllowedStart(0);
+          if (earliest != null) {
+            // أَضِف ساعَتَين كَفاصِل أَمان
+            final mins = RosterAddEmployeeStatus._toMinutes(earliest) + 120;
+            final h = (mins ~/ 60).clamp(0, 23);
+            final m = mins % 60;
+            startTime =
+                '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+            // عَدِّل نِهاية الوَردِيّة لِتَكون 8 ساعات بَعد البَداية أَو 23:59
+            final endMins = (mins + 8 * 60).clamp(0, 23 * 60 + 59);
+            final eh = endMins ~/ 60;
+            final em = endMins % 60;
+            endTime =
+                '${eh.toString().padLeft(2, '0')}:${em.toString().padLeft(2, '0')}';
+            shift = mins >= 18 * 60 ? ShiftType.night : ShiftType.evening;
+          }
           r.assignments.add(RosterAssignment(
             id: repo.generateId(),
             employeeId: emp.id,
             dayIndex: 0,
-            startTime: '08:00',
-            endTime: '20:00',
-            shiftType: ShiftType.morning,
+            startTime: startTime,
+            endTime: endTime,
+            shiftType: shift,
           ));
           await _persistRoster(r);
           if (!mounted) return;
@@ -3282,14 +3533,54 @@ class RosterAddEmployeeStatus {
   final String? otherRosterPointName;
   final DateTime? otherRosterWeek;
 
+  /// 🆕 تَفاصيل الوَردِيّات في الروستر الآخَر (لِكُلّ يَوم: HH:mm إلى HH:mm).
+  /// مَفتاح: dayIndex (0..6) → قائِمة وَردِيّات بِالتَوقيت "HH:mm-HH:mm"
+  final Map<int, List<String>>? otherShiftsByDay;
+
+  /// 🆕 أَوقات الانتِهاء الأَخيرة لِكُلّ يَوم (لِحِساب "مَتى يَتَفَرَّغ").
+  /// مَفتاح: dayIndex → آخِر وَقت end_time (HH:mm)
+  final Map<int, String>? latestEndByDay;
+
   const RosterAddEmployeeStatus({
     this.linkedPointName,
     this.otherRosterPointName,
     this.otherRosterWeek,
+    this.otherShiftsByDay,
+    this.latestEndByDay,
   });
 
   bool get isCrossPoint => linkedPointName != null;
   bool get isInOtherRoster => otherRosterPointName != null;
+
+  /// 🆕 هَل لَه أَيّ تَعارُض زَمَنيّ في يَوم مُحَدَّد؟
+  bool hasConflictOnDay(int dayIndex, String startTime, String endTime) {
+    final shifts = otherShiftsByDay?[dayIndex];
+    if (shifts == null || shifts.isEmpty) return false;
+    final newStart = _toMinutes(startTime);
+    final newEnd = _toMinutes(endTime);
+    for (final shift in shifts) {
+      final parts = shift.split('-');
+      if (parts.length != 2) continue;
+      final s = _toMinutes(parts[0]);
+      final e = _toMinutes(parts[1]);
+      // تَعارُض = NewStart < OtherEnd && NewEnd > OtherStart
+      if (newStart < e && newEnd > s) return true;
+    }
+    return false;
+  }
+
+  /// 🆕 احسِب أَقرَب وَقت بَدء مَسموح بَعد آخِر وَردِيّة في يَوم مُحَدَّد.
+  /// يُرجِع null إذا لا قُيود (لا وَردِيّة سابِقة في ذاك اليَوم).
+  String? earliestAllowedStart(int dayIndex) {
+    final last = latestEndByDay?[dayIndex];
+    return last;
+  }
+
+  static int _toMinutes(String hhmm) {
+    final p = hhmm.split(':');
+    if (p.length != 2) return 0;
+    return (int.tryParse(p[0]) ?? 0) * 60 + (int.tryParse(p[1]) ?? 0);
+  }
 }
 
 class RosterAddEmployeeSheet extends StatefulWidget {
@@ -3312,6 +3603,14 @@ class RosterAddEmployeeSheet extends StatefulWidget {
 
   @override
   State<RosterAddEmployeeSheet> createState() => _AddEmployeeSheetState();
+}
+
+/// 🆕 يُعيد اسم اليَوم العَرَبيّ أَو الإنجليزيّ من dayIndex (0=الإثنين … 6=الأَحَد)
+String _dayName(int dayIndex, bool isAr) {
+  const ar = ['الإثنين', 'الثُلاثاء', 'الأَربِعاء', 'الخَميس', 'الجُمعة', 'السَبت', 'الأَحَد'];
+  const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  if (dayIndex < 0 || dayIndex > 6) return '?';
+  return isAr ? ar[dayIndex] : en[dayIndex];
 }
 
 class _AddEmployeeSheetState extends State<RosterAddEmployeeSheet> {
@@ -3425,9 +3724,48 @@ class _AddEmployeeSheetState extends State<RosterAddEmployeeSheet> {
                             color: AppColors.danger,
                             icon: Icons.warning_amber,
                             text: s.isAr
-                                ? '⚠️ مُدرَج في روستر «${status!.otherRosterPointName}» نفس الأسبوع'
-                                : '⚠️ Already in roster «${status!.otherRosterPointName}» same week',
+                                ? '⚠️ مُدرَج في «${status!.otherRosterPointName}» نَفس الأُسبوع'
+                                : '⚠️ Already in «${status!.otherRosterPointName}» same week',
                           ),
+                          // 🆕 تَفاصيل وَردِيّات الأَيّام
+                          if (status?.otherShiftsByDay != null &&
+                              status!.otherShiftsByDay!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4),
+                              child: Wrap(
+                                spacing: 4,
+                                runSpacing: 3,
+                                children: status.otherShiftsByDay!.entries
+                                    .map((entry) {
+                                  final dayName =
+                                      _dayName(entry.key, s.isAr);
+                                  final times = entry.value.join(' + ');
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.danger
+                                          .withOpacity(0.10),
+                                      borderRadius:
+                                          BorderRadius.circular(4),
+                                      border: Border.all(
+                                          color: AppColors.danger
+                                              .withOpacity(0.3)),
+                                    ),
+                                    child: Text(
+                                      '$dayName · $times',
+                                      style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.danger),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
                         ],
                         // 🆕 شارة "مربوط بنقطة أخرى"
                         if (isCrossPoint && !isInOtherRoster) ...[

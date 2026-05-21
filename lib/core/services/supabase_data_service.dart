@@ -2606,9 +2606,28 @@ class SupabaseDataService {
         lastError = 'سجلّ مكرّر — هذا العنصر موجود مسبقاً.\n'
             '(Duplicate record — this entry already exists.)';
       } else if (raw.contains('code: 23503')) {
-        // foreign key violation
-        lastError = 'خطأ في الربط: عنصر مرتبط غير موجود (FK).\n'
-            '(Foreign-key violation — referenced record missing.)';
+        // foreign key violation — استَخرِج اسم العَمود/الجَدول لِلوُضوح
+        String? fkColumn;
+        String? fkTable;
+        final colMatch = RegExp(r'Key \(([^)]+)\)').firstMatch(raw);
+        if (colMatch != null) fkColumn = colMatch.group(1);
+        final tableMatch =
+            RegExp(r'is not present in table "([^"]+)"').firstMatch(raw);
+        if (tableMatch != null) fkTable = tableMatch.group(1);
+        final constraintMatch =
+            RegExp(r'constraint "([^"]+)"').firstMatch(raw);
+        final constraint = constraintMatch?.group(1);
+
+        final hint = StringBuffer('خطأ في الربط: عنصر مرتبط غير موجود (FK).');
+        if (fkColumn != null) hint.write('\nالحَقل: $fkColumn');
+        if (fkTable != null) hint.write('\nالجَدول المَرجِعيّ: $fkTable');
+        if (constraint != null) hint.write('\nالقَيد: $constraint');
+        hint.write(
+            '\n\nالأَسباب الشائِعة:'
+            '\n• النُقطة (point_id) لَيست مُتَزامِنة مَع Supabase'
+            '\n• المُشرِف (supervisor_id) لَيس لَدَيه حِساب في الجَدول'
+            '\n\n(Foreign-key violation — referenced record missing.)');
+        lastError = hint.toString();
       } else if (raw.contains('22P02')) {
         lastError = 'صيغة UUID غير صحيحة في أحد الحقول.\n'
             '(Invalid UUID format in one of the fields.)';

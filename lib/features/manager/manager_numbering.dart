@@ -6,6 +6,7 @@ import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 
 /// شاشة نظام الترقيم - النموذج الجديد:
 /// قاعدة واحدة لكل كيان (Rule) + عدّاد منفصل لكل (قاعدة، دولة)
@@ -45,33 +46,42 @@ class _ManagerNumberingState extends State<ManagerNumbering> {
     final repo = MockRepository();
 
     if (repo.numberingRules.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.numbers, size: 56, color: AppColors.textTertiaryLight),
-              const SizedBox(height: 12),
-              Text(
-                s.isAr
-                    ? 'لا توجد قواعد ترقيم بعد'
-                    : 'No numbering rules yet',
-                style: const TextStyle(color: AppColors.textSecondaryLight),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _addRule,
-                icon: const Icon(Icons.add),
-                label: Text(s.isAr ? 'إضافة قاعدة' : 'Add Rule'),
-              ),
-            ],
+      return Scaffold(
+        appBar: M7AppBar(
+          title: s.isAr ? '🔢 نِظام التَرقيم' : '🔢 Numbering System',
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.numbers, size: 56, color: AppColors.textTertiaryLight),
+                const SizedBox(height: 12),
+                Text(
+                  s.isAr
+                      ? 'لا توجد قواعد ترقيم بعد'
+                      : 'No numbering rules yet',
+                  style: const TextStyle(color: AppColors.textSecondaryLight),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: _addRule,
+                  icon: const Icon(Icons.add),
+                  label: Text(s.isAr ? 'إضافة قاعدة' : 'Add Rule'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    return Column(
+    return Scaffold(
+      appBar: M7AppBar(
+        title: s.isAr ? '🔢 نِظام التَرقيم' : '🔢 Numbering System',
+      ),
+      body: Column(
       children: [
         // ===== شريط ملاحظة توضيحية =====
         Container(
@@ -158,6 +168,7 @@ class _ManagerNumberingState extends State<ManagerNumbering> {
         if (_selectedRule != null)
           Expanded(child: _RuleDetails(rule: _selectedRule!, onEdit: () => _editRule(_selectedRule!), onDelete: () => _deleteRule(_selectedRule!))),
       ],
+      ),
     );
   }
 

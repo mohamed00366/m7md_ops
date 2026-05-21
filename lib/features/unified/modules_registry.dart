@@ -7,9 +7,13 @@ import '../../repositories/mock_repository.dart';
 // Admin modules
 import '../admin/admin_overview.dart';
 import '../admin/admin_users.dart';
+import '../hr/document_vault_screen.dart';
+import '../hr/hr_dashboard_screen.dart';
+import '../hr/pin_management_screen.dart';
 import '../operation/hr/hr_onpoint_training_screen.dart';
 // Camp Boss modules
 import '../camp_boss/bus_shift_km_screen.dart';
+// 🚫 camp_boss_bus_planning أُزيلَ — التابَة "الخُطّة الأُسبوعيّة" داخِل CampBossBuses تُغني عَنه
 import '../camp_boss/camp_boss_buses.dart';
 import '../camp_boss/camp_boss_dashboard.dart';
 import '../laundry/camp_boss/camp_boss_dashboard.dart' as amana;
@@ -34,17 +38,19 @@ import '../manager/manager_buses.dart';
 import '../manager/manager_dashboard.dart';
 import '../manager/manager_employees.dart';
 import '../manager/manager_reports.dart';
-import '../manager/manager_tracking.dart';
+// 🚫 manager_tracking أُزيلَ — "التَتَبُّع المُباشِر" مَحذوف بِالكامِل
 // Operation/Admin modules
 import '../admin/analytics_dashboard_screen.dart';
 import '../admin/audit_log_screen.dart';
 import '../admin/company_calendar_screen.dart';
+import '../admin/company_calendar_tabs_screen.dart';
 import '../admin/data_quality_screen.dart';
 import '../admin/employee_documents_expiry_report_screen.dart';
 import '../admin/forms_submissions_report_screen.dart';
 import '../admin/help_center_screen.dart';
 import '../admin/leave_balance_manager_screen.dart';
 import '../leave/leave_approvals_screen.dart';
+import '../reports/reports_hub_screen.dart';
 import '../admin/my_preferences_screen.dart';
 import '../admin/smart_alerts_screen.dart';
 import '../notifications/my_inbox_screen.dart';
@@ -54,6 +60,7 @@ import '../operation/driver_route_map_screen.dart';
 import '../operation/live_fleet_map_screen.dart';
 import '../operation/operation_rosters.dart';
 import '../operation/operation_supervisor_assignments.dart';
+import '../operation/temporary_pin_screen.dart';
 import '../operation/rosters_center.dart';
 // Policies
 import '../policies/policies_screen.dart';
@@ -144,6 +151,39 @@ class ModulesRegistry {
         // ═══════════════════════════════════════════════════
         // 2️⃣ HR — كُلّ ما يَخُصّ المُوَظَّفين
         // ═══════════════════════════════════════════════════
+        // 🆕 لَوحة HR المُوَحَّدة — KPIs + Alerts + Quick Actions
+        AppModule(
+          key: 'hr_dashboard',
+          titleAr: '🏢 لَوحة HR',
+          titleEn: '🏢 HR Dashboard',
+          icon: Icons.dashboard_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: P.employeesView,
+          builder: (_) => const HrDashboardScreen(),
+        ),
+        // 🆕 خِزانة الوَثائق المُوَحَّدة — كُلّ وَثائق كُلّ المُوَظَّفين في شاشة واحِدة
+        AppModule(
+          key: 'document_vault',
+          titleAr: '📁 خِزانة الوَثائق',
+          titleEn: '📁 Document Vault',
+          icon: Icons.folder_special_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: P.documentsVaultView,
+          builder: (_) => const DocumentVaultScreen(),
+        ),
+        // 🆕 إدارة PINs — تَعيين/تَجديد رَقم سِرّيّ لِبَديل التَعَرُّف عَلى الوَجه
+        AppModule(
+          key: 'pin_management',
+          titleAr: '🔐 إدارة PINs',
+          titleEn: '🔐 PIN Management',
+          icon: Icons.pin_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: P.employeesView,
+          builder: (_) => const PinManagementScreen(),
+        ),
         AppModule(
           key: 'employees',
           titleAr: 'المُوَظَّفون',
@@ -197,6 +237,28 @@ class ModulesRegistry {
           requiredPermission: P.leaveTeamApprove,
           builder: (_) => const LeaveApprovalsScreen(),
         ),
+        // 🆕 نُقِلَ مِن النَقل → HR (إدارة الحُضور وَالانصِراف)
+        AppModule(
+          key: 'attendance_mgmt',
+          titleAr: '⏰ إدارة الحُضور وَالانصِراف',
+          titleEn: '⏰ Attendance Management',
+          icon: Icons.access_time_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: P.attendanceView,
+          builder: (_) => const AttendanceManagementScreen(),
+        ),
+        // 🆕 مَركَز التَقارير المُوَحَّد (Hybrid: KPIs + Quick Insights + Library)
+        AppModule(
+          key: 'reports_hub',
+          titleAr: '📊 التَقارير وَالتَحليلات',
+          titleEn: '📊 Reports & Analytics',
+          icon: Icons.bar_chart,
+          color: ModuleCategory.organization.color(),
+          category: ModuleCategory.organization,
+          requiredPermission: P.dashboardManagerView,
+          builder: (_) => const ReportsHubScreen(),
+        ),
 
         // ═══════════════════════════════════════════════════
         // 3️⃣ ORGANIZATION — عُملاء + دُوَل
@@ -240,6 +302,17 @@ class ModulesRegistry {
           requiredPermission: P.employeesView,
           requiresCountry: true,
           builder: (_) => const OperationSupervisorAssignments(),
+        ),
+        // 🆕 PIN مُؤَقَّت — مُدير العَمَلِيّات يُوَلِّد PIN صالِح لِثَوانٍ مَعدودة
+        AppModule(
+          key: 'temporary_pin',
+          titleAr: '🔐 PIN مُؤَقَّت',
+          titleEn: '🔐 Temporary PIN',
+          icon: Icons.lock_clock_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: 'pin.generate_temporary',
+          builder: (_) => const TemporaryPinScreen(),
         ),
         AppModule(
           key: 'roster_creator',
@@ -285,59 +358,22 @@ class ModulesRegistry {
         // 🚫 morning_checklist أُزيلَ — أَصبَحَ نَموذَج MORNING-CHECKLIST
         //    يَملَؤه المُشرِف مِن "نَماذِجي"
 
-        // ═══════════════════════════════════════════════════
-        // 5️⃣ TRANSPORT — الباصات + التَتَبُّع + الحُضور
-        // ═══════════════════════════════════════════════════
+        // 🚫 قِسم النَقل (Transport) أُزيلَ بِالكامِل — مَحتَواه وُزِّعَ كالتالي:
+        //   • الباصات        → العَمَلِيّات (هذا الـ AppModule)
+        //   • التَتَبُّع المُباشِر → مَحذوف
+        //   • خَريطة الأُسطول   → الكَمب
+        //   • خَرائِط المَسار   → الكَمب
+        //   • الحُضور          → الموارِد البَشَريّة
         AppModule(
           key: 'buses',
-          titleAr: 'الباصات',
-          titleEn: 'Buses',
+          titleAr: '🚌 إدارة الباصات وَالسائِقين',
+          titleEn: '🚌 Buses & Drivers',
           icon: Icons.directions_bus_outlined,
-          color: ModuleCategory.transport.color(),
-          category: ModuleCategory.transport,
+          color: ModuleCategory.organization.color(),
+          category: ModuleCategory.organization,
           requiredPermission: P.busesView,
           requiresCountry: true,
           builder: (_) => const ManagerBuses(),
-        ),
-        AppModule(
-          key: 'tracking',
-          titleAr: 'التَتَبُّع المُباشِر',
-          titleEn: 'Live Tracking',
-          icon: Icons.location_on_outlined,
-          color: ModuleCategory.transport.color(),
-          category: ModuleCategory.transport,
-          requiredPermission: P.trackingLiveView,
-          builder: (_) => const ManagerTracking(),
-        ),
-        AppModule(
-          key: 'live_fleet_map',
-          titleAr: '🗺 خَريطة الأُسطول',
-          titleEn: '🗺 Fleet Map',
-          icon: Icons.map,
-          color: ModuleCategory.transport.color(),
-          category: ModuleCategory.transport,
-          requiredPermission: P.trackingLiveView,
-          builder: (_) => const LiveFleetMapScreen(),
-        ),
-        AppModule(
-          key: 'route_map',
-          titleAr: 'خَرائِط المَسار',
-          titleEn: 'Route Map',
-          icon: Icons.alt_route,
-          color: ModuleCategory.transport.color(),
-          category: ModuleCategory.transport,
-          requiredPermission: P.trackingLiveView,
-          builder: (_) => const DriverRouteMapScreen(),
-        ),
-        AppModule(
-          key: 'attendance_mgmt',
-          titleAr: 'إدارة الحُضور',
-          titleEn: 'Attendance',
-          icon: Icons.fact_check_outlined,
-          color: ModuleCategory.transport.color(),
-          category: ModuleCategory.transport,
-          requiredPermission: P.attendanceView,
-          builder: (_) => const AttendanceManagementScreen(),
         ),
 
         // ═══════════════════════════════════════════════════
@@ -393,16 +429,19 @@ class ModulesRegistry {
           requiredPermission: P.uniformCatalogView,
           builder: (_) => const CampBossUniform(),
         ),
+        // 🆕 Camp Boss Buses Hub — 4 تابات: قائِمة باصات، سائقين، خُطّة أُسبوعيّة، تَقارير
         AppModule(
-          key: 'camp_buses',
-          titleAr: 'باصات الكامِب',
-          titleEn: 'Camp Buses',
-          icon: Icons.directions_bus_outlined,
+          key: 'camp_buses_hub',
+          titleAr: '🚐 مَركَز الباصات (كَمب)',
+          titleEn: '🚐 Buses Hub (Camp)',
+          icon: Icons.directions_bus_filled_outlined,
           color: ModuleCategory.camp.color(),
           category: ModuleCategory.camp,
-          requiredPermission: P.busesAssign,
+          requiredPermission: P.busesView,
           builder: (_) => const CampBossBuses(),
         ),
+        // 🚫 تَخطيط الباصات (CampBossBusPlanning) — حُذِفَ بِطَلَب المُستَخدِم
+        //   التابَة "📅 الخُطّة الأُسبوعيّة" داخِل "🚐 مَركَز الباصات" تُغني عَنها.
         AppModule(
           key: 'bus_shift_km',
           titleAr: '🛞 كيلومترات الوَردِيّات',
@@ -412,6 +451,27 @@ class ModulesRegistry {
           category: ModuleCategory.camp,
           requiredPermission: P.busesAssign,
           builder: (_) => const BusShiftKmScreen(),
+        ),
+        // 🆕 نُقِلَ مِن النَقل → الكَمب (الكَمب بُوص يَحتاج رُؤية الباصات)
+        AppModule(
+          key: 'live_fleet_map',
+          titleAr: '🗺 خَريطة الأُسطول',
+          titleEn: '🗺 Fleet Map',
+          icon: Icons.map,
+          color: ModuleCategory.camp.color(),
+          category: ModuleCategory.camp,
+          requiredPermission: P.trackingLiveView,
+          builder: (_) => const LiveFleetMapScreen(),
+        ),
+        AppModule(
+          key: 'route_map',
+          titleAr: 'خَرائِط المَسار',
+          titleEn: 'Route Map',
+          icon: Icons.alt_route,
+          color: ModuleCategory.camp.color(),
+          category: ModuleCategory.camp,
+          requiredPermission: P.trackingLiveView,
+          builder: (_) => const DriverRouteMapScreen(),
         ),
 
         // ═══════════════════════════════════════════════════
@@ -656,7 +716,7 @@ class ModulesRegistry {
           color: ModuleCategory.reports.color(),
           category: ModuleCategory.reports,
           requiredPermission: P.reportsCompanyCalendarView,
-          builder: (_) => const CompanyCalendarScreen(),
+          builder: (_) => const CompanyCalendarTabsScreen(),
         ),
         AppModule(
           key: 'daily_memo_report',

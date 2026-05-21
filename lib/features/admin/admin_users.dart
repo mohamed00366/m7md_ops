@@ -13,6 +13,7 @@ import '../../models/enums.dart';
 import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 import '../../shared/permission_gate.dart';
 import 'account_report_screen.dart';
 import 'bulk_account_creator.dart';
@@ -106,6 +107,9 @@ class _AdminUsersState extends State<AdminUsers> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: M7AppBar(
+        title: s.isAr ? '👥 إدارة المُستَخدِمين' : '👥 Users',
+      ),
       body: Column(
         children: [
           // ===== شريط البحث + فلتر =====
@@ -877,6 +881,244 @@ class _UserFormSheetState extends State<_UserFormSheet> {
     );
   }
 
+  // ==========================================================
+  // 🆕 تَعطيل/تَفعيل الحِساب — تَحديث is_active فَقَط
+  // ==========================================================
+  Future<void> _toggleActive() async {
+    if (widget.account == null) return;
+    final s = AppStrings.of(context);
+    final a = widget.account!;
+    final newState = !a.isActive;
+    final supaReady = SupabaseService().isReady;
+    final ds = SupabaseDataService();
+    final repo = MockRepository();
+    final auth = context.read<AuthProvider>();
+    final byUser = auth.currentUser?.id ?? '';
+
+    // 🔒 امنع تَعطيل النفس
+    if (auth.currentUser?.id == a.id) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: AppColors.danger,
+        content: Text(
+            s.isAr ? 'لا يُمكنك تَعطيل حِسابك' : 'You cannot deactivate yourself'),
+      ));
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(newState
+            ? (s.isAr ? 'تَفعيل المُستَخدِم' : 'Activate user?')
+            : (s.isAr ? 'تَعطيل المُستَخدِم' : 'Deactivate user?')),
+        content: Text(newState
+            ? (s.isAr
+                ? 'سَيَستَطيع المُستَخدِم تَسجيل الدُخول مَرّة أُخرى.'
+                : 'The user will be able to sign in again.')
+            : (s.isAr
+                ? 'لَن يَتَمَكَّن المُستَخدِم من تَسجيل الدُخول لكِن البَيانات تَبقى.'
+                : 'The user will not be able to sign in, but their data is kept.')),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(s.isAr ? 'إلغاء' : 'Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  newState ? AppColors.success : AppColors.warning,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(newState
+                ? (s.isAr ? 'تَفعيل' : 'Activate')
+                : (s.isAr ? 'تَعطيل' : 'Deactivate')),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    a.isActive = newState;
+    if (supaReady) {
+      final ok = await ds.updateAccount(
+        a,
+        roleIds: _selectedRoles.toList(),
+        countryIds: _selectedCountries.toList(),
+      );
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(ds.lastError ?? 'Failed'),
+        ));
+        return;
+      }
+    } else {
+      repo.updateAccount(a, byUser);
+    }
+
+    if (!mounted) return;
+    setState(() => _isActive = newState);
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: AppColors.success,
+      content: Text(newState
+          ? (s.isAr ? '✅ تَمّ تَفعيل الحِساب' : '✅ User activated')
+          : (s.isAr ? '⏸ تَمّ تَعطيل الحِساب' : '⏸ User deactivated')),
+    ));
+  }
+
+  // ==========================================================
+  // 🆕 حَذف نِهائيّ — مع تَأكيد مُضاعَف
+  // ==========================================================
+  Future<void> _confirmAndDelete() async {
+    if (widget.account == null) return;
+    final s = AppStrings.of(context);
+    final a = widget.account!;
+    final supaReady = SupabaseService().isReady;
+    final ds = SupabaseDataService();
+    final repo = MockRepository();
+    final auth = context.read<AuthProvider>();
+
+    // 🔒 امنع حَذف النفس
+    if (auth.currentUser?.id == a.id) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: AppColors.danger,
+        content: Text(
+            s.isAr ? 'لا يُمكنك حَذف حِسابك' : 'You cannot delete yourself'),
+      ));
+      return;
+    }
+
+    // 🔒 امنع حَذف المُدير العام الوَحيد
+    if (a.isSuperAdmin) {
+      final remainingSupers =
+          repo.accounts.where((x) => x.isSuperAdmin && x.id != a.id).length;
+      if (remainingSupers == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(s.isAr
+              ? 'لا يُمكن حَذف آخِر مُدير عام في النِظام'
+              : 'Cannot delete the last super-admin'),
+        ));
+        return;
+      }
+    }
+
+    // تَأكيد أَوَّل
+    final confirm1 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+            s.isAr ? '⚠️ حَذف نِهائيّ' : '⚠️ Delete permanently?'),
+        content: Text(s.isAr
+            ? 'سَيُحذَف "${a.fullName}" نِهائيّاً مَع كافّة أَدواره ودَوَله المَربوطة. '
+                'هَل أَنتَ مُتَأَكِّد؟\n\n'
+                'نَنصَح بِالتَعطيل بَدَلاً من الحَذف للحِفاظ على السِجِلّات.'
+            : 'User "${a.fullName}" will be permanently deleted with all roles. '
+                'Are you sure?\n\n'
+                'Deactivate is usually safer — it preserves audit history.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(s.isAr ? 'إلغاء' : 'Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(s.isAr ? 'مُتابَعة' : 'Continue'),
+          ),
+        ],
+      ),
+    );
+    if (confirm1 != true) return;
+
+    // تَأكيد ثاني — اِكتُب اسم المُستَخدِم
+    final typed = TextEditingController();
+    final confirm2 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(s.isAr ? '🔒 تَأكيد نِهائيّ' : '🔒 Final confirmation'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(s.isAr
+                ? 'اِكتُب اسم المُستَخدِم لِتَأكيد الحَذف:'
+                : 'Type the username to confirm:'),
+            const SizedBox(height: 6),
+            Text(a.username,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.danger,
+                    fontSize: 16)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: typed,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: s.isAr ? 'اسم المُستَخدِم' : 'Username',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(s.isAr ? 'إلغاء' : 'Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              if (typed.text.trim() == a.username) {
+                Navigator.pop(ctx, true);
+              } else {
+                ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                  backgroundColor: AppColors.danger,
+                  content: Text(s.isAr
+                      ? 'الاسم غَير مُطابِق'
+                      : 'Username does not match'),
+                ));
+              }
+            },
+            child: Text(s.isAr ? 'حَذف نِهائيّ' : 'Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirm2 != true) return;
+
+    if (supaReady) {
+      final ok = await ds.deleteAccount(a.id);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(ds.lastError ?? 'Failed'),
+        ));
+        return;
+      }
+    } else {
+      // Mock fallback — لا يُوجد deleteAccount مُتَخَصِّص، نَحذف مُباشَرَةً
+      repo.accounts.removeWhere((x) => x.id == a.id);
+      repo.notifyListeners();
+    }
+
+    // نَظِّف التَجاوُزات المَحلِّيّة
+    await DeviceSessionSettings.instance.removeAccount(a.id);
+    await LoginMethodSettings.instance.removeAccount(a.id);
+
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: AppColors.success,
+      content: Text(
+          s.isAr ? '🗑 تَمّ حَذف الحِساب' : '🗑 Account deleted'),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -1209,6 +1451,52 @@ class _UserFormSheetState extends State<_UserFormSheet> {
                           fontSize: 14, fontWeight: FontWeight.w700),
                     ),
                   ),
+                  // 🆕 زِرّ تَعطيل/حَذف (يَظهَر فَقَط عَنَدَ التَعديل)
+                  if (isEdit) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _toggleActive,
+                            icon: Icon(
+                              widget.account?.isActive == true
+                                  ? Icons.do_disturb_alt
+                                  : Icons.check_circle,
+                              size: 16,
+                            ),
+                            label: Text(
+                              widget.account?.isActive == true
+                                  ? (s.isAr ? 'تَعطيل' : 'Deactivate')
+                                  : (s.isAr ? 'تَفعيل' : 'Activate'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.warning,
+                              side: const BorderSide(color: AppColors.warning),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _confirmAndDelete,
+                            icon: const Icon(Icons.delete_forever, size: 16),
+                            label: Text(
+                              s.isAr ? 'حَذف نِهائيّ' : 'Delete',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.danger,
+                              side: const BorderSide(color: AppColors.danger),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   ], // close ListView children
                 ), // close ListView
               ), // close Padding (keyboard fix)

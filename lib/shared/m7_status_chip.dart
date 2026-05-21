@@ -5,12 +5,8 @@ import '../core/l10n/ar_to_ur_dictionary.dart' as ar2ur;
 import '../core/theme/app_colors.dart';
 import '../models/enums.dart';
 
-/// 🟢 شارة حالة مُوَحَّدة لِكُلّ الكِيانات
-///
-/// تَعرِض: Active / Inactive / Maintenance بِالأَلوان المُتَّفَقة:
-/// - أَخضَر = نَشِط
-/// - أَحمَر = مُعَطَّل
-/// - بُرتُقاليّ = صِيانة
+/// Unified status chip for all entities.
+/// Shows: Active / Inactive / Maintenance / Vacation.
 class M7StatusChip extends StatelessWidget {
   final EntityStatus status;
   final bool dense;
@@ -46,16 +42,13 @@ class M7StatusChip extends StatelessWidget {
   static (Color, IconData, String) _resolve(EntityStatus status, bool isAr) {
     switch (status) {
       case EntityStatus.active:
-        return (AppColors.success, Icons.check_circle,
-            isAr ? ar2ur.tr('نَشِط') : 'Active');
+        return (AppColors.success, Icons.check_circle, isAr ? ar2ur.tr('Active') : 'Active');
       case EntityStatus.inactive:
-        return (Colors.red, Icons.cancel, isAr ? ar2ur.tr('مُعَطَّل') : 'Inactive');
+        return (Colors.red, Icons.cancel, isAr ? ar2ur.tr('Inactive') : 'Inactive');
       case EntityStatus.maintenance:
-        return (
-          Colors.orange,
-          Icons.build_circle,
-          isAr ? ar2ur.tr('صِيانة') : 'Maintenance'
-        );
+        return (Colors.orange, Icons.build_circle, isAr ? ar2ur.tr('Maintenance') : 'Maintenance');
+      case EntityStatus.vacation:
+        return (Colors.teal, Icons.beach_access, isAr ? ar2ur.tr('On Vacation') : 'On Vacation');
     }
   }
 }

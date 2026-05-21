@@ -5,6 +5,8 @@ import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:universal_html/html.dart' as html;
 
+import '../../../core/services/supabase_data_service.dart';
+import '../../../core/services/supabase_service.dart';
 import '../../../models/enums.dart';
 import '../../../models/models.dart';
 import '../../../repositories/mock_repository.dart';
@@ -330,6 +332,8 @@ class CustomersExcelIO {
   static Future<CustomersImportResult> _processRows(
       List<List<String>> rows, Map<String, int> colIndex) async {
     final repo = MockRepository();
+    final ds = SupabaseDataService();
+    final supaReady = SupabaseService().isReady;
     final errors = <String>[];
     var imported = 0;
     var skipped = 0;
@@ -400,7 +404,19 @@ class CustomersExcelIO {
         countryId: country.id,
         status: status,
       );
-      repo.addMaster(master);
+      // 🆕 إذا Supabase مُتاح، احفَظ هُناك أَوَّلاً (يُحَدِّث ID + يُضيف لِلذاكِرة).
+      //   إذا غَير مُتاح، احفَظ مَحَلِّيّاً فَقَط.
+      if (supaReady) {
+        final created = await ds.createMaster(master);
+        if (created == null) {
+          errors.add(
+              'Row ${i + 2}: failed to save "$name" — ${ds.lastError ?? "unknown"}');
+          skipped++;
+          continue;
+        }
+      } else {
+        repo.addMaster(master);
+      }
       imported++;
     }
 

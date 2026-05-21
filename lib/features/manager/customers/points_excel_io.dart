@@ -5,6 +5,8 @@ import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:universal_html/html.dart' as html;
 
+import '../../../core/services/supabase_data_service.dart';
+import '../../../core/services/supabase_service.dart';
 import '../../../models/enums.dart';
 import '../../../models/models.dart';
 import '../../../repositories/mock_repository.dart';
@@ -205,9 +207,11 @@ class PointsExcelIO {
     return out;
   }
 
-  static EntityImportResult _process(
-      List<Map<String, String>> rows, String? countryId) {
+  static Future<EntityImportResult> _process(
+      List<Map<String, String>> rows, String? countryId) async {
     final repo = MockRepository();
+    final ds = SupabaseDataService();
+    final supaReady = SupabaseService().isReady;
     final errors = <String>[];
     var imported = 0;
     var skipped = 0;
@@ -225,7 +229,7 @@ class PointsExcelIO {
       final point = Point(
         id: repo.generateId(),
         code: (r['code'] ?? '').isEmpty
-            ? 'PT-${DateTime.now().millisecondsSinceEpoch % 10000}'
+            ? 'PT-${DateTime.now().millisecondsSinceEpoch % 10000}-$i'
             : r['code']!,
         name: name,
         description: r['description'] ?? '',
@@ -235,7 +239,20 @@ class PointsExcelIO {
         status: status,
         countryId: countryId,
       );
-      repo.points.add(point);
+      // 🆕 إذا Supabase مُتاح، احفَظ هُناك (يَتَكَفَّل createPoint بِالإضافة
+      //   إلى MockRepository تِلقائيّاً عَن طَريق ID مِن Supabase).
+      //   إذا غَير مُتاح، احفَظ مَحَلِّيّاً فَقَط.
+      if (supaReady) {
+        final created = await ds.createPoint(point);
+        if (created == null) {
+          errors.add(
+              'Row ${i + 2}: failed to save "$name" — ${ds.lastError ?? "unknown"}');
+          skipped++;
+          continue;
+        }
+      } else {
+        repo.points.add(point);
+      }
       imported++;
     }
     repo.notifyListeners();

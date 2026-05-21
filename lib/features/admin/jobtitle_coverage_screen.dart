@@ -6,6 +6,7 @@ import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 import 'job_title_profile_screen.dart';
 
 /// 📊 شاشة "تغطية المسمّيات الوظيفيّة" (JobTitle Coverage)
@@ -109,6 +110,9 @@ class _JobTitleCoverageScreenState extends State<JobTitleCoverageScreen> {
       ..sort();
 
     return Scaffold(
+      appBar: M7AppBar(
+        title: isAr ? '📊 تَغطية المُسَمَّيات' : '📊 Job Title Coverage',
+      ),
       body: Column(
         children: [
           // ===== Stats banner =====

@@ -921,100 +921,227 @@ class _PointCardState extends State<_PointCard> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (ctx) => SafeArea(
-        child: DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          maxChildSize: 0.9,
-          minChildSize: 0.4,
-          expand: false,
-          builder: (_, controller) => Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
+      builder: (ctx) {
+        // 🔎 حَقل بَحث حَيّ بِالاسم/الكود/المُسَمّى
+        String query = '';
+        final searchCtrl = TextEditingController();
+        return SafeArea(
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            maxChildSize: 0.95,
+            minChildSize: 0.4,
+            expand: false,
+            builder: (_, controller) => StatefulBuilder(
+              builder: (ctx2, setSt) {
+                final q = query.trim().toLowerCase();
+                final filtered = q.isEmpty
+                    ? candidates
+                    : candidates.where((c) {
+                        final jt = c.jobTitleId == null
+                            ? null
+                            : repo.jobTitleById(c.jobTitleId);
+                        final jtName =
+                            jt?.displayName(isAr).toLowerCase() ?? '';
+                        return c.fullName.toLowerCase().contains(q) ||
+                            c.code.toLowerCase().contains(q) ||
+                            jtName.contains(q);
+                      }).toList();
+
+                return Column(
                   children: [
-                    const Icon(Icons.person_add_alt_outlined,
-                        color: AppColors.brand, size: 20),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        isAr
-                            ? 'اختر موظفاً لـ "${point.name}"'
-                            : 'Pick employee for "${point.name}"',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w900),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.person_add_alt_outlined,
+                              color: AppColors.brand, size: 20),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              isAr
+                                  ? 'اختر موظفاً لـ "${point.name}"'
+                                  : 'Pick employee for "${point.name}"',
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(ctx),
+                          ),
+                        ],
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(ctx),
+                    // 🔎 شَريط البَحث الجَديد
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                      child: TextField(
+                        controller: searchCtrl,
+                        autofocus: false,
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          prefixIcon: const Icon(Icons.search, size: 18),
+                          suffixIcon: query.isEmpty
+                              ? null
+                              : IconButton(
+                                  icon: const Icon(Icons.clear, size: 16),
+                                  onPressed: () {
+                                    searchCtrl.clear();
+                                    setSt(() => query = '');
+                                  },
+                                ),
+                          hintText: isAr
+                              ? 'بَحث بِالاسم أَو الكود أَو المُسَمَّى…'
+                              : 'Search by name, code, or job title…',
+                          hintStyle: const TextStyle(fontSize: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                        ),
+                        onChanged: (v) => setSt(() => query = v),
+                      ),
+                    ),
+                    // مُلَخَّص: كَم نَتيجة ظَهَرَت
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 2),
+                      child: Row(
+                        children: [
+                          Text(
+                            isAr
+                                ? '${filtered.length} مِن ${candidates.length} مُوَظَّف'
+                                : '${filtered.length} of ${candidates.length} employees',
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: filtered.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.search_off,
+                                        size: 40,
+                                        color: Colors.grey[400]),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      isAr
+                                          ? 'لا تُوجَد نَتائج'
+                                          : 'No results',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              controller: controller,
+                              itemCount: filtered.length,
+                              itemBuilder: (_, i) {
+                                final c = filtered[i];
+                                final cJt = c.jobTitleId == null
+                                    ? null
+                                    : repo.jobTitleById(c.jobTitleId);
+                                final isL4 = cJt?.level == 4;
+                                return ListTile(
+                                  leading: AppAvatar(
+                                    initials: c.initials,
+                                    color: isL4
+                                        ? AppColors.success
+                                        : AppColors.brand,
+                                  ),
+                                  title: Text(c.fullName,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w800)),
+                                  subtitle: Text(
+                                    '${c.code} • ${cJt?.displayName(isAr) ?? "?"}',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[700]),
+                                  ),
+                                  trailing: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isL4
+                                          ? AppColors.success.withOpacity(0.15)
+                                          : AppColors.brand.withOpacity(0.15),
+                                      borderRadius:
+                                          BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      isL4
+                                          ? (isAr ? '🎖️ سيُرقّى' : '🎖️ Promote')
+                                          : (isAr ? 'L3' : 'L3'),
+                                      style: TextStyle(
+                                        color: isL4
+                                            ? AppColors.success
+                                            : AppColors.brand,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                  onTap: () => Navigator.pop(ctx, c),
+                                );
+                              },
+                            ),
                     ),
                   ],
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: ListView.builder(
-                  controller: controller,
-                  itemCount: candidates.length,
-                  itemBuilder: (_, i) {
-                    final c = candidates[i];
-                    final cJt = c.jobTitleId == null
-                        ? null
-                        : repo.jobTitleById(c.jobTitleId);
-                    final isL4 = cJt?.level == 4;
-                    return ListTile(
-                      leading: AppAvatar(
-                        initials: c.initials,
-                        color: isL4 ? AppColors.success : AppColors.brand,
-                      ),
-                      title: Text(c.fullName,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800)),
-                      subtitle: Text(
-                        '${c.code} • ${cJt?.displayName(isAr) ?? "?"}',
-                        style: TextStyle(
-                            fontSize: 11, color: Colors.grey[700]),
-                      ),
-                      trailing: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isL4
-                              ? AppColors.success.withOpacity(0.15)
-                              : AppColors.brand.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          isL4
-                              ? (isAr ? '🎖️ سيُرقّى' : '🎖️ Promote')
-                              : (isAr ? 'L3' : 'L3'),
-                          style: TextStyle(
-                            color: isL4
-                                ? AppColors.success
-                                : AppColors.brand,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      onTap: () => Navigator.pop(ctx, c),
-                    );
-                  },
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     if (picked == null) return;
     if (!context.mounted) return;
 
-    // تنفيذ الربط
-    picked.pointId = point.id;
-    repo.updateEmployee(picked);
+    // 🆕 تَنفيذ الربط — Supabase أَوَّلاً ثُمّ الذاكِرة (نَفس نَمَط _assignTo)
+    // 🐛 DEBUG: طَبع رَسائل لِلتَأَكُّد من تَنفيذ الكود الجَديد
+    // ignore: avoid_print
+    print('🔗 [LINK-DEBUG] empId=${picked.id} pointId=${point.id} '
+        'code=${picked.code}');
+    final supaReady = SupabaseService().isReady;
+    // ignore: avoid_print
+    print('🔗 [LINK-DEBUG] supaReady=$supaReady');
+    if (supaReady) {
+      final ds = SupabaseDataService();
+      final ok = await ds.assignEmployeeToSite(picked.id, point.id);
+      // ignore: avoid_print
+      print('🔗 [LINK-DEBUG] assignEmployeeToSite returned: $ok '
+          'lastError=${ds.lastError}');
+      if (!ok) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(ds.lastError ??
+              (isAr ? 'فَشِل الحِفظ في Supabase' : 'Failed to save')),
+        ));
+        return;
+      }
+    } else {
+      picked.pointId = point.id;
+      repo.updateEmployee(picked);
+    }
+
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: AppColors.success,
@@ -1157,10 +1284,28 @@ class _LinkedEmployeeRow extends StatelessWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    employee.pointId = null;
-    employee.siteId = null;
-    MockRepository().updateEmployee(employee);
+    // 🆕 Supabase أَوَّلاً ثُمّ الذاكِرة
+    final supaReady = SupabaseService().isReady;
+    if (supaReady) {
+      final ds = SupabaseDataService();
+      final saved = await ds.assignEmployeeToSite(employee.id, null);
+      if (!saved) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(ds.lastError ??
+              (isAr ? 'فَشِل الحِفظ في Supabase' : 'Failed to save')),
+        ));
+        return;
+      }
+    } else {
+      employee.pointId = null;
+      employee.siteId = null;
+      MockRepository().updateEmployee(employee);
+    }
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: AppColors.success,
       content: Text(
           isAr ? '✓ تمّ فك الربط' : '✓ Unlinked'),
     ));

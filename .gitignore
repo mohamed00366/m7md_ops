@@ -1,50 +1,166 @@
-﻿# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ============================================================================
+# Flutter / Dart
+# ============================================================================
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
+**/build/
+**/.dart_tool/
+**/doc/api/
 
-# Symbolication related
+# Generated files
+*.g.dart.lock
+*.freezed.dart.lock
+*.mocks.dart
+**/.last_build_id
+**/ios/Flutter/.last_build_id
+
+# Symbolication / Obfuscation
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# ============================================================================
+# Android
+# ============================================================================
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+*.jks
+*.keystore
 
-# ?? Sensitive — never commit
+# ============================================================================
+# iOS
+# ============================================================================
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symbols/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# ============================================================================
+# Web
+# ============================================================================
+lib/generated_plugin_registrant.dart
+
+# ============================================================================
+# macOS / Windows / Linux desktop
+# ============================================================================
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugin_registrant.h
+**/windows/flutter/generated_plugins.cmake
+**/linux/flutter/ephemeral/
+**/linux/flutter/generated_plugin_registrant.cc
+**/linux/flutter/generated_plugin_registrant.h
+**/linux/flutter/generated_plugins.cmake
+
+# ============================================================================
+# IDE
+# ============================================================================
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+.history/
+
+# ============================================================================
+# OS
+# ============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================================================
+# Logs
+# ============================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================================================
+# 🔒 Sensitive — never commit
+# ============================================================================
+.env
+.env.local
+.env.*.local
+*.env
 supabase/functions/send-push/.env
+supabase/.env
+
+# Secrets / Credentials
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_app_id_file.json
+service-account*.json
+*-service-account.json
+
+# Local archives
 _scripts_archive/
 supabase/_archive/
+*.bak
+*.backup
+*.tmp
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+*.app.dSYM.zip
+*.dSYM.zip
+
+# Coverage
+coverage/
+test/coverage_helper_test.dart
+
+# Symbolication
+*.symbols
+
+# Miscellaneous
+*.class
+*.pyc
+.atom/
+.build/
+.buildlog/
+.svn/
+.swiftpm/
+migrate_working_dir/

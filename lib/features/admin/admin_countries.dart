@@ -8,6 +8,7 @@ import '../../models/lookups.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/deletion_guard.dart';
+import '../../shared/m7_app_bar.dart';
 import '../../shared/permission_gate.dart';
 
 /// شاشة إدارة الدول (CRUD كامل) - متاحة لـ Super Admin
@@ -99,6 +100,9 @@ class _AdminCountriesState extends State<AdminCountries> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: M7AppBar(
+        title: s.isAr ? '🌍 الدُوَل' : '🌍 Countries',
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 90),
         children: [

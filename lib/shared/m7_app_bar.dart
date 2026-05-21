@@ -55,13 +55,14 @@ class M7AppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final fg = foregroundColor ?? Colors.white;
-    final bg = backgroundColor ?? AppColors.brand;
+    // 🆕 أَسوَد كامِل في الوَضع الفاتِح وَالداكِن — أَقصى تَبايُن لِلنَصّ الأَبيَض
+    final bg = backgroundColor ?? Colors.black;
     // 🆕 لَون الأَيقونات: ذَهَبيّ لِلتَبايُن العالي مَع الأَسوَد (هُويّة M7 NEXUS)
     final iconColor = AppColors.gold;
     return AppBar(
       backgroundColor: bg,
       foregroundColor: fg,
-      // 🆕 شريط الحالة بنفس لون الـ AppBar — أيقوناته بيضاء
+      // 🆕 شَريط الحالة بِلَون الـ AppBar — أَيقوناته بَيضاء
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: bg,
         statusBarIconBrightness: Brightness.light,

@@ -8,6 +8,7 @@ import '../../models/lookups.dart';
 import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 
 /// 🎭 شاشة "العرض كحساب" (Impersonate Picker)
 ///
@@ -52,6 +53,8 @@ class _ImpersonatePickerState extends State<ImpersonatePicker> {
 
     if (!auth.isSuperAdmin) {
       return Scaffold(
+        appBar: M7AppBar(
+            title: isAr ? '🎭 العَرض كَحِساب' : '🎭 Impersonate'),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -89,6 +92,9 @@ class _ImpersonatePickerState extends State<ImpersonatePicker> {
     accounts.sort((a, b) => a.fullName.compareTo(b.fullName));
 
     return Scaffold(
+      appBar: M7AppBar(
+        title: isAr ? '🎭 العَرض كَحِساب' : '🎭 Impersonate',
+      ),
       body: Column(
         children: [
           // Warning banner

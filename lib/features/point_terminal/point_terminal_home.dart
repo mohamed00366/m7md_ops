@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
@@ -25,6 +26,9 @@ import '../../models/enums.dart';
 import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/app_logo.dart';
+import 'daily_tips_dialog.dart';
+import 'employee_schedule_preview.dart';
+import 'pin_entry_dialog.dart';
 import '../forms/employee_forms_screen.dart';
 
 /// 🏪 Point Terminal Home — شاشة جِهاز النُقطة (Kiosk Mode)
@@ -74,13 +78,28 @@ class _PointTerminalHomeState extends State<PointTerminalHome>
   }
 
   /// 🆕 إذا الجَلسة الحاليّة بِدون اسم جِهاز، اطلُب من المُستَخدِم تَسمِيَتُه
+  /// مَرَّة واحِدة فَقَط — يُحفَظ في SharedPreferences حَتّى لا يَتَكَرَّر
   Future<void> _maybePromptDeviceLabel() async {
     final auth = context.read<AuthProvider>();
     final accId = auth.account?.id;
     if (accId == null) return;
+
+    // 1️⃣ تَحَقُّق مَحَلِّيّ أَوَّلاً (SharedPreferences) — أَسرَع وَأَكثَر مَوثوقيّة
+    final prefs = await SharedPreferences.getInstance();
+    final localKey = 'device_label_$accId';
+    final localLabel = prefs.getString(localKey);
+    if (localLabel != null && localLabel.trim().isNotEmpty) {
+      return; // الجِهاز مُسَمّى مُسبَقاً — لا ديالوغ
+    }
+
+    // 2️⃣ تَحَقُّق ثانٍ من Supabase (اِحتِياط)
     final existing =
         await PointTerminalSessionService.instance.getCurrentDeviceLabel(accId);
-    if (existing != null && existing.trim().isNotEmpty) return;
+    if (existing != null && existing.trim().isNotEmpty) {
+      // مَوجود في Supabase — انسَخه مَحَلِّيّاً لِلمَرّات القادِمة
+      await prefs.setString(localKey, existing);
+      return;
+    }
     if (!mounted) return;
     final isAr = AppStrings.of(context).isAr;
     final ctrl = TextEditingController();
@@ -143,6 +162,8 @@ class _PointTerminalHomeState extends State<PointTerminalHome>
     if (result != null && result.isNotEmpty) {
       await PointTerminalSessionService.instance
           .setDeviceLabel(accountId: accId, label: result);
+      // 🆕 احفَظ مَحَلِّيّاً أَيضاً لِيَدوم بَعد إغلاق التَطبيق
+      await prefs.setString(localKey, result);
     }
   }
 
@@ -774,6 +795,9 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
     }
   }
 
+  // 🆕 إشارة تَدُلّ عَلى أَنّ الكاميرا فُتِحَت أَوَّل مَرَّة (لازم لِزِرّ "افتَح الكاميرا")
+  bool _cameraOpened = false;
+
   @override
   void initState() {
     super.initState();
@@ -792,7 +816,48 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
         M7Log.error('PointTerminal', 'init detector', error: e);
       }
     }
-    _initCamera();
+    // 🆕 لا نُهَيِّئ الكاميرا تِلقائيّاً — تُفتَح عِندَ الضَغط عَلى زِرّ "افتَح الكاميرا"
+    setState(() => _initializing = false);
+  }
+
+  /// 🆕 PIN fallback — عِندَما يَفشَل التَعَرُّف عَلى الوَجه
+  Future<void> _tryPinFallback() async {
+    final matched = await PinEntryDialog.show(
+      context,
+      pointId: widget.point.id,
+    );
+    if (matched == null || !mounted) return;
+    setState(() {
+      _matchedEmployee = matched;
+      _status = AppStrings.of(context).isAr
+          ? '✅ تَمّ التَعَرُّف عَبر PIN'
+          : '✅ Identified via PIN';
+      _statusOk = true;
+    });
+    await _fetchLastActionFor(matched.id);
+  }
+
+  /// 🆕 يُفتَح يَدَويّاً مِن زِرّ "افتَح الكاميرا" بَدَل عِندَ التَحميل
+  Future<void> _openCamera() async {
+    if (_cameraOpened) return;
+    setState(() {
+      _cameraOpened = true;
+      _initializing = true;
+    });
+    await _initCamera();
+  }
+
+  /// 🆕 إغلاق الكاميرا يَدَويّاً (لِتَوفير البَطّاريّة)
+  Future<void> _closeCamera() async {
+    final cam = _camera;
+    _camera = null;
+    await cam?.dispose();
+    if (mounted) {
+      setState(() {
+        _cameraOpened = false;
+        _initializing = false;
+      });
+    }
   }
 
   Future<void> _initCamera() async {
@@ -977,6 +1042,23 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
     final terminalAccountId = auth.account?.id;
     final supa = SupabaseService();
 
+    // 🆕 شاشة Daily Tips تَظهَر فَقَط عِندَ Clock-in (لَيس Clock-out)
+    if (action == 'clock_in') {
+      final tipsOk = await DailyTipsDialog.show(
+        context,
+        employee: emp,
+        currentPoint: widget.point,
+        terminalAccountId: terminalAccountId,
+      );
+      if (!tipsOk) {
+        // المُوَظَّف ألغى — لا نُسَجِّل الدُخول
+        if (mounted) {
+          setState(() => _matchedEmployee = null);
+        }
+        return;
+      }
+    }
+
     setState(() => _busy = true);
     double? deviceLat;
     double? deviceLng;
@@ -1028,24 +1110,27 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
         });
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: AppColors.success,
-        content: Text(
-          action == 'clock_in'
-              ? '✅ تَمَّ تَسجيل دُخول ${emp.fullName}'
-              : '✅ تَمَّ تَسجيل خُروج ${emp.fullName}',
-        ),
-      ));
-      // أَفرِغ التَطابُق بَعدَ ٢ ثانية لِلسَماح لِلتالي
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _matchedEmployee = null;
-            _status = null;
-            _lastActionToday = null;
-            _lastActionAtToday = null;
-          });
-        }
+      // 🆕 تَأكيد مَلموس + صَوت بَعد التَسجيل
+      HapticFeedback.heavyImpact();
+      try {
+        SystemSound.play(SystemSoundType.click);
+      } catch (_) {}
+      // 🆕 إغلاق الكاميرا بَعد التَسجيل (تَوفير بَطّاريّة + خُصوصيّة)
+      await _closeCamera();
+      if (!mounted) return;
+      // 🆕 شاشة عَرض الوَردِيّة + الباص + الزُمَلاء
+      await EmployeeSchedulePreview.show(
+        context,
+        employee: emp,
+        currentPoint: widget.point,
+        action: action,
+      );
+      if (!mounted) return;
+      setState(() {
+        _matchedEmployee = null;
+        _status = null;
+        _lastActionToday = null;
+        _lastActionAtToday = null;
       });
     } catch (e) {
       if (!mounted) return;
@@ -1098,15 +1183,77 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final isAr = AppStrings.of(context).isAr;
+
+    // 🆕 الكاميرا لَم تُفتَح بَعد → اِعرِض زِرّ كَبير "افتَح الكاميرا"
+    if (!_cameraOpened) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.no_photography_outlined,
+                  size: 64, color: Colors.grey.shade400),
+              const SizedBox(height: 12),
+              Text(
+                isAr ? 'الكاميرا مُغلَقة' : 'Camera is off',
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                isAr
+                    ? 'اِضغَط لِفَتح الكاميرا عِندَ الحاجة فَقَط'
+                    : 'Tap to open the camera only when needed',
+                style:
+                    TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _openCamera,
+                icon: const Icon(Icons.camera_alt, size: 22),
+                label: Text(
+                    isAr ? '📷 افتَح الكاميرا' : '📷 Open Camera',
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w900)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.gold,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_initializing) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_camera == null || !_camera!.value.isInitialized) {
       return Center(
-        child: Text(_status ?? 'الكاميرا غَير جاهِزة'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_status ?? (isAr ? 'الكاميرا غَير جاهِزة' : 'Camera not ready')),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: () {
+                setState(() => _cameraOpened = false);
+              },
+              icon: const Icon(Icons.refresh),
+              label: Text(isAr ? 'حاوِل من جَديد' : 'Try again'),
+            ),
+          ],
+        ),
       );
     }
-    final isAr = AppStrings.of(context).isAr;
 
     final emp = _matchedEmployee;
     return Column(
@@ -1143,6 +1290,23 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
             fit: StackFit.expand,
             children: [
               CameraPreview(_camera!),
+              // 🆕 زِرّ إغلاق الكاميرا (أَعلى اليَسار)
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Material(
+                  color: Colors.black.withOpacity(0.55),
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: _closeCamera,
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(Icons.close, color: Colors.white, size: 20),
+                    ),
+                  ),
+                ),
+              ),
               // إطار بَيضاوي إرشاديّ
               Center(
                 child: Container(
@@ -1306,13 +1470,32 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                               strokeWidth: 2, color: Colors.white),
                         )
                       : const Icon(Icons.camera_alt),
-                  label: const Text('📷 امسَح الوَجه'),
+                  label: Text(AppStrings.of(context).isAr
+                      ? '📷 امسَح الوَجه'
+                      : '📷 Scan Face'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.gold,
                     foregroundColor: Colors.black,
                     minimumSize: const Size.fromHeight(56),
                     textStyle: const TextStyle(
                         fontWeight: FontWeight.w900, fontSize: 16),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 🆕 PIN fallback — يَظهَر دائِماً كَخَيار احتِياطيّ
+                OutlinedButton.icon(
+                  onPressed: _busy ? null : _tryPinFallback,
+                  icon: const Icon(Icons.lock_outline, size: 18),
+                  label: Text(AppStrings.of(context).isAr
+                      ? '🔐 استَخدِم PIN بَدَلاً من الوَجه'
+                      : '🔐 Use PIN instead'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.brand,
+                    side: BorderSide(
+                        color: AppColors.brand.withOpacity(0.5)),
+                    minimumSize: const Size.fromHeight(44),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 12),
                   ),
                 ),
               ],

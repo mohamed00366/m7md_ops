@@ -6,6 +6,7 @@ import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 
 /// ⚙️ شاشة إعدادات إسناد النقاط
 ///
@@ -195,8 +196,10 @@ class _PointAssignmentSettingsScreenState
       });
 
     if (!_loaded) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: M7AppBar(
+            title: s.isAr ? '⚙️ إسناد المُوَظَّفين لِلنُقَط' : '⚙️ Assign Employees to Points'),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -223,6 +226,9 @@ class _PointAssignmentSettingsScreenState
       });
 
     return Scaffold(
+      appBar: M7AppBar(
+        title: s.isAr ? '⚙️ إسناد المُوَظَّفين لِلنُقَط' : '⚙️ Assign Employees to Points',
+      ),
       body: Column(
         children: [
           // ===== Info banner =====

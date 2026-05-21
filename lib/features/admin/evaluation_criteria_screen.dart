@@ -5,6 +5,7 @@ import '../../core/services/m7_log.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/evaluation_criterion.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 
 /// 📊 شاشة إدارة معايير التقييم — للموظّفين/السائقين/الغرف.
 ///
@@ -47,6 +48,9 @@ class _EvaluationCriteriaScreenState extends State<EvaluationCriteriaScreen>
     final s = AppStrings.of(context);
     final isAr = s.isAr;
     return Scaffold(
+      appBar: M7AppBar(
+        title: isAr ? '⭐ مَعايير التَقييم' : '⭐ Evaluation Criteria',
+      ),
       body: Column(
         children: [
           Container(

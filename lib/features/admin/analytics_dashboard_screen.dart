@@ -393,6 +393,8 @@ class AnalyticsDashboardScreen extends StatelessWidget {
         return Colors.red;
       case EntityStatus.maintenance:
         return Colors.orange;
+      case EntityStatus.vacation:
+        return Colors.teal;
     }
   }
 
@@ -404,6 +406,8 @@ class AnalyticsDashboardScreen extends StatelessWidget {
         return isAr ? 'مُعَطَّل' : 'Inactive';
       case EntityStatus.maintenance:
         return isAr ? 'صِيانة' : 'Maintenance';
+      case EntityStatus.vacation:
+        return isAr ? 'في إجازة' : 'On Vacation';
     }
   }
 

@@ -13,6 +13,7 @@ import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/widgets.dart';
+import '../supervisor/roster_changes_history_screen.dart';
 import '../supervisor/supervisor_roster_creator.dart';
 
 class OperationRosters extends StatefulWidget {
@@ -222,12 +223,41 @@ class _RosterCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => RosterReviewScreen(roster: roster),
-            )),
-            icon: const Icon(Icons.visibility, size: 16),
-            label: Text(s.reviewRoster),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => RosterReviewScreen(roster: roster),
+                  )),
+                  icon: const Icon(Icons.visibility, size: 16),
+                  label: Text(s.reviewRoster,
+                      style: const TextStyle(fontSize: 12)),
+                ),
+              ),
+              // 🆕 زِرّ "📜 سِجِلّ التَعديلات" — يَظهَر فَقَط إذا الروستَر مُعتَمَد
+              if (roster.status == RosterStatus.approved ||
+                  roster.status == RosterStatus.submitted) ...[
+                const SizedBox(width: 6),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => RosterChangesHistoryScreen(
+                      rosterId: roster.id,
+                      rosterLabel: site?.displayName ??
+                          _fmt(roster.weekStart),
+                    ),
+                  )),
+                  icon: const Icon(Icons.history, size: 16),
+                  label: Text(s.isAr ? 'السِجِلّ' : 'History',
+                      style: const TextStyle(fontSize: 11)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.warning,
+                    side: BorderSide(
+                        color: AppColors.warning.withOpacity(0.5)),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),

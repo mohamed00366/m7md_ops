@@ -1,54 +1,89 @@
 # =============================================================================
-# 🚀 M7 Nexus — Auto-deploy web to Firebase Hosting on push to main
+# 🚀 M7 Nexus — Auto-deploy web to GitHub Pages on push to main
 # =============================================================================
 # SETUP (one-time):
-#   1. Generate a Firebase CI token locally:
-#        firebase login:ci
-#      It prints a long string like 1//0gW...
-#   2. Go to: https://github.com/<your-user>/<your-repo>/settings/secrets/actions
-#   3. Click "New repository secret":
-#        Name: FIREBASE_TOKEN
-#        Value: (paste the token)
-#   4. Push to main → this workflow runs automatically.
+#   1. Push the repo to GitHub
+#   2. Go to: Settings → Pages
+#   3. Source: "GitHub Actions"
+#   4. Push to main → this workflow runs automatically
 #
-# Result: every push to main updates https://m7-nexus.web.app within ~3 minutes.
+# Result: the site will be live at:
+#   https://<your-username>.github.io/<repo-name>/
 # =============================================================================
-name: Deploy Web
+name: Build and Deploy Web to GitHub Pages
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: # manual trigger
+  workflow_dispatch:  # manual trigger from Actions tab
+
+# Permissions required for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent concurrent deploys
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: 🚀 Deploy to Firebase Hosting
+  # ==========================================================================
+  # 1) Build the app
+  # ==========================================================================
+  build:
+    name: 🔨 Build Flutter Web
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: 📦 Get dependencies
+      - name: ✅ Flutter version
+        run: flutter --version
+
+      - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: 🌐 Build web (release)
-        run: flutter build web --release
+      - name: 🔍 Analyze (non-blocking)
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos || true
 
-      - name: 🚀 Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: 🏗️ Build Web (release)
+        # base-href must match the repo name (required for GitHub Pages)
+        run: |
+          flutter build web \
+            --release \
+            --base-href="/${{ github.event.repository.name }}/" \
+            --pwa-strategy=offline-first
+
+      - name: 📤 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: m7-nexus
+          path: build/web
+
+  # ==========================================================================
+  # 2) Deploy to GitHub Pages
+  # ==========================================================================
+  deploy:
+    name: 🚀 Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 🌍 Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: 📨 Success summary
         if: success()
         run: |
-          echo "::notice::✅ Deployed to https://m7-nexus.web.app"
+          echo "::notice::✅ Deployed to ${{ steps.deployment.outputs.page_url }}"

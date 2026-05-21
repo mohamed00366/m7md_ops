@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:universal_html/html.dart' as html;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart' show rootBundle, Clipboard, ClipboardData;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -44,6 +44,8 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
   bool _busy = false;
   // نَتيجة الإنشاء — تَصلُح للتَصدير بَعد الانتهاء.
   final List<_CreatedCredential> _lastCreated = [];
+  // 🆕 بَحث حَيّ في القائِمة
+  String _searchQuery = '';
 
   /// كلّ الموظّفين النَشطين الذين لا يوجد حساب مَربوط بِهم.
   ///
@@ -335,22 +337,36 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
         'Please do not share these credentials.';
   }
 
-  Future<void> _sendWhatsAppOne(_CreatedCredential c, bool isAr) async {
+  /// يَفتَح مُحادَثة WhatsApp لِمُوَظَّف واحِد — يَعمَل عَلى Web + Mobile
+  Future<bool> _sendWhatsAppOne(_CreatedCredential c, bool isAr) async {
     final phone = c.employee.mobile.replaceAll(RegExp(r'[^\d]'), '');
     if (phone.isEmpty) {
-      if (!mounted) return;
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: AppColors.warning,
         content: Text(isAr
             ? 'لا يوجد رَقم جَوّال للموظّف ${c.employee.fullName}'
             : 'No mobile number for ${c.employee.fullName}'),
       ));
-      return;
+      return false;
     }
     final msg = Uri.encodeComponent(_buildCredentialMessage(c, isAr));
-    html.window.open('https://wa.me/$phone?text=$msg', '_blank');
+    final url = Uri.parse('https://wa.me/$phone?text=$msg');
+    try {
+      final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
+      return ok;
+    } catch (_) {
+      // fallback لِلويب
+      try {
+        await launchUrl(url, webOnlyWindowName: '_blank');
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
   }
 
+  /// 🆕 إرسال تَتَابُعيّ مَع شاشة تَقَدُّم — أَكثَر مَوثوقيّة من فَتح كُلّ النَوافِذ مَعاً
   Future<void> _sendWhatsAppAll(bool isAr) async {
     final withPhone = _lastCreated
         .where((c) => c.employee.mobile.replaceAll(RegExp(r'[^\d]'), '').isNotEmpty)
@@ -366,21 +382,216 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
       ));
       return;
     }
-    // فَتح كلّ رِسالة في تابة جَديدة (المُتَصَفِّح قَد يَطلُب الإذن)
-    for (final c in withPhone) {
-      await _sendWhatsAppOne(c, isAr);
-      await Future.delayed(const Duration(milliseconds: 250));
-    }
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: AppColors.success,
-      duration: const Duration(seconds: 5),
-      content: Text(isAr
-          ? '📤 فُتِحَت ${withPhone.length} مُحادَثة WhatsApp'
-              '${withoutPhone > 0 ? "  ·  ⚠ $withoutPhone بدون رَقم" : ""}'
-          : '📤 Opened ${withPhone.length} WhatsApp chats'
-              '${withoutPhone > 0 ? "  ·  ⚠ $withoutPhone without phone" : ""}'),
-    ));
+
+    // اِفتَح شاشة Queue المُتَتالية
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => _WhatsAppQueueDialog(
+        items: withPhone,
+        isAr: isAr,
+        sendOne: _sendWhatsAppOne,
+        withoutPhoneCount: withoutPhone,
+      ),
+    );
+  }
+
+  /// 🆕 عَرض قائِمة كامِلة بِالحِسابات المُنشَأة مَع زِرّ WhatsApp لِكُلّ واحِد
+  Future<void> _showCreatedList(bool isAr) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (_, controller) => Column(
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade400,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      isAr
+                          ? '📋 الحِسابات المُنشَأة (${_lastCreated.length})'
+                          : '📋 Created Accounts (${_lastCreated.length})',
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(sheetCtx),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 4),
+              child: Text(
+                isAr
+                    ? '💡 اِضغَط زِرّ WhatsApp بِجانِب كُلّ مُوَظَّف لإرسال بَيانات دُخوله مُباشَرَةً'
+                    : '💡 Tap the WhatsApp button next to each employee to send their credentials',
+                style: TextStyle(
+                    fontSize: 11, color: Colors.grey.shade700),
+              ),
+            ),
+            const Divider(height: 12),
+            Expanded(
+              child: ListView.builder(
+                controller: controller,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                itemCount: _lastCreated.length,
+                itemBuilder: (_, i) =>
+                    _createdRow(_lastCreated[i], isAr, sheetCtx),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _createdRow(
+      _CreatedCredential c, bool isAr, BuildContext sheetCtx) {
+    final phone = c.employee.mobile.replaceAll(RegExp(r'[^\d]'), '');
+    final hasPhone = phone.isNotEmpty;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.brand.withOpacity(0.15),
+              child: Text(
+                c.employee.fullName.isNotEmpty
+                    ? c.employee.fullName[0].toUpperCase()
+                    : '?',
+                style: const TextStyle(
+                    color: AppColors.brand,
+                    fontWeight: FontWeight.w900),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(c.employee.fullName,
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900)),
+                  Text('${c.employee.code} · @${c.username}',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade700)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '🔑 ${c.password}',
+                          style: const TextStyle(
+                              fontSize: 10,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      if (hasPhone)
+                        Text('📱 $phone',
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade700))
+                      else
+                        Text(
+                          isAr ? '⚠️ بِدون رَقم' : '⚠️ no phone',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.warning,
+                              fontWeight: FontWeight.w800),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // 🆕 زِرّ WhatsApp فَرديّ
+            IconButton(
+              icon: Icon(
+                Icons.send,
+                color: hasPhone
+                    ? const Color(0xFF25D366)
+                    : Colors.grey,
+                size: 22,
+              ),
+              tooltip: isAr ? 'إرسال WhatsApp' : 'Send WhatsApp',
+              onPressed: hasPhone
+                  ? () async {
+                      final ok = await _sendWhatsAppOne(c, isAr);
+                      if (ok && sheetCtx.mounted) {
+                        ScaffoldMessenger.of(sheetCtx)
+                            .showSnackBar(SnackBar(
+                          backgroundColor: const Color(0xFF25D366),
+                          content: Text(isAr
+                              ? '📤 فُتِحَت مُحادَثة ${c.employee.fullName}'
+                              : '📤 Opened chat for ${c.employee.fullName}'),
+                        ));
+                      }
+                    }
+                  : null,
+            ),
+            // 🆕 زِرّ نَسخ كَلِمة المُرور
+            IconButton(
+              icon: const Icon(Icons.copy,
+                  color: AppColors.brand, size: 20),
+              tooltip: isAr ? 'نَسخ' : 'Copy',
+              onPressed: () async {
+                final text =
+                    'Username: ${c.username}\nPassword: ${c.password}';
+                // نَسخ عَبر Clipboard
+                await Clipboard.setData(ClipboardData(text: text));
+                if (sheetCtx.mounted) {
+                  ScaffoldMessenger.of(sheetCtx).showSnackBar(SnackBar(
+                    backgroundColor: AppColors.brand,
+                    duration: const Duration(seconds: 1),
+                    content: Text(isAr
+                        ? '✅ تَمّ النَسخ'
+                        : '✅ Copied'),
+                  ));
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ============================================================
@@ -912,7 +1123,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
       );
     }
 
-    final pending = _employeesWithoutAccount(repo, auth);
+    final pendingAll = _employeesWithoutAccount(repo, auth);
     // عَدّ الموظّفين المَحجوبين بِفَلتر الهَرَميّة (لِلْإعلام)
     final totalWithoutAccount = repo.employees.where((e) {
       if (e.status != EntityStatus.active) return false;
@@ -920,7 +1131,19 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
           .any((a) => a.employeeId == e.id && a.employeeId!.isNotEmpty);
       return !linked;
     }).length;
-    final hierarchyHidden = totalWithoutAccount - pending.length;
+    final hierarchyHidden = totalWithoutAccount - pendingAll.length;
+
+    // 🆕 تَطبيق فِلتَر البَحث
+    final q = _searchQuery.trim().toLowerCase();
+    final pending = q.isEmpty
+        ? pendingAll
+        : pendingAll.where((e) {
+            return e.fullName.toLowerCase().contains(q) ||
+                e.code.toLowerCase().contains(q) ||
+                e.code.replaceAll('-', '').toLowerCase().contains(q) ||
+                e.jobTitle.toLowerCase().contains(q) ||
+                e.mobile.replaceAll(RegExp(r'[^\d]'), '').contains(q);
+          }).toList();
     final filtered = pending;
 
     return Scaffold(
@@ -1064,11 +1287,45 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
                         color: const Color(0xFF25D366),
                         onTap: () => _sendWhatsAppAll(isAr),
                       ),
+                      // 🆕 زِرّ "عَرض القائِمة" مَع إرسال WhatsApp فَرديّ
+                      _DeliveryBtn(
+                        icon: Icons.list_alt,
+                        label: isAr ? 'القائِمة' : 'List',
+                        color: AppColors.brand,
+                        onTap: () => _showCreatedList(isAr),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
+
+          // 🆕 شَريط البَحث
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+            child: TextField(
+              decoration: InputDecoration(
+                isDense: true,
+                prefixIcon: const Icon(Icons.search, size: 18),
+                suffixIcon: _searchQuery.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        onPressed: () => setState(() => _searchQuery = ''),
+                      ),
+                hintText: isAr
+                    ? 'بَحث بِالاسم/الكود/المُسَمَّى/الهاتِف…'
+                    : 'Search by name/code/title/phone…',
+                hintStyle: const TextStyle(fontSize: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 10),
+              ),
+              onChanged: (v) => setState(() => _searchQuery = v),
+            ),
+          ),
 
           // ===== العَدّاد + اختيار الكلّ =====
           Padding(
@@ -1076,9 +1333,13 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
             child: Row(
               children: [
                 Text(
-                  isAr
-                      ? 'موظّفون بدون حساب: ${pending.length}'
-                      : 'Without account: ${pending.length}',
+                  _searchQuery.isEmpty
+                      ? (isAr
+                          ? 'موظّفون بدون حساب: ${pending.length}'
+                          : 'Without account: ${pending.length}')
+                      : (isAr
+                          ? '${pending.length} من ${pendingAll.length} نَتيجة بَحث'
+                          : '${pending.length} of ${pendingAll.length} results'),
                   style: const TextStyle(
                       fontSize: 13, fontWeight: FontWeight.w800),
                 ),
@@ -1122,14 +1383,25 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle_outline,
-                              size: 48,
-                              color: AppColors.success.withOpacity(0.7)),
+                          Icon(
+                            _searchQuery.isEmpty
+                                ? Icons.check_circle_outline
+                                : Icons.search_off,
+                            size: 48,
+                            color: (_searchQuery.isEmpty
+                                    ? AppColors.success
+                                    : Colors.grey.shade400)
+                                .withOpacity(0.7),
+                          ),
                           const SizedBox(height: 12),
                           Text(
-                            isAr
-                                ? '🎉 كلّ الموظّفين النَشطين لَدَيهم حسابات'
-                                : '🎉 All active employees have accounts',
+                            _searchQuery.isEmpty
+                                ? (isAr
+                                    ? '🎉 كلّ الموظّفين النَشطين لَدَيهم حسابات'
+                                    : '🎉 All active employees have accounts')
+                                : (isAr
+                                    ? '🔍 لا تُوجَد نَتائج بَحث لِـ "$_searchQuery"'
+                                    : '🔍 No search results for "$_searchQuery"'),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -1231,6 +1503,235 @@ class _CreatedCredential {
     required this.username,
     required this.password,
   });
+}
+
+// ============================================================
+// 🆕 WhatsApp Queue Dialog — إرسال تَتَابُعيّ مَع تَأكيد بَين كُلّ رِسالَتَين
+// ============================================================
+class _WhatsAppQueueDialog extends StatefulWidget {
+  final List<_CreatedCredential> items;
+  final bool isAr;
+  final Future<bool> Function(_CreatedCredential, bool) sendOne;
+  final int withoutPhoneCount;
+
+  const _WhatsAppQueueDialog({
+    required this.items,
+    required this.isAr,
+    required this.sendOne,
+    this.withoutPhoneCount = 0,
+  });
+
+  @override
+  State<_WhatsAppQueueDialog> createState() => _WhatsAppQueueDialogState();
+}
+
+class _WhatsAppQueueDialogState extends State<_WhatsAppQueueDialog> {
+  int _index = 0;
+  int _sent = 0;
+  int _skipped = 0;
+  bool _isSending = false;
+
+  bool get _done => _index >= widget.items.length;
+
+  Future<void> _sendCurrent() async {
+    if (_done || _isSending) return;
+    setState(() => _isSending = true);
+    final ok = await widget.sendOne(widget.items[_index], widget.isAr);
+    if (!mounted) return;
+    setState(() {
+      _isSending = false;
+      if (ok) _sent++;
+      _index++;
+    });
+  }
+
+  void _skipCurrent() {
+    if (_done) return;
+    setState(() {
+      _skipped++;
+      _index++;
+    });
+  }
+
+  Future<void> _sendAllRest() async {
+    // الإرسال السَريع — يَفتَح كُلّ النَوافِذ مَعاً
+    while (_index < widget.items.length) {
+      setState(() => _isSending = true);
+      final ok = await widget.sendOne(widget.items[_index], widget.isAr);
+      if (!mounted) return;
+      setState(() {
+        if (ok) _sent++;
+        _index++;
+      });
+      // فاصِل قَصير لِتَجَنُّب blocker
+      await Future.delayed(const Duration(milliseconds: 350));
+    }
+    if (!mounted) return;
+    setState(() => _isSending = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isAr = widget.isAr;
+    final total = widget.items.length;
+    final currentEmp = _done ? null : widget.items[_index];
+    final progress = total == 0 ? 0.0 : _index / total;
+
+    return AlertDialog(
+      icon: Icon(
+        _done ? Icons.check_circle : Icons.send_to_mobile,
+        color: _done ? AppColors.success : const Color(0xFF25D366),
+        size: 36,
+      ),
+      title: Text(
+        _done
+            ? (isAr ? '✅ تَمّت العَمَلِيّة' : '✅ Done')
+            : (isAr
+                ? 'إرسال WhatsApp ($_index / $total)'
+                : 'Send WhatsApp ($_index / $total)'),
+        textAlign: TextAlign.center,
+      ),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ===== شَريط تَقَدُّم =====
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey.shade300,
+              valueColor: const AlwaysStoppedAnimation(Color(0xFF25D366)),
+              minHeight: 8,
+            ),
+            const SizedBox(height: 12),
+            // ===== إحصاء =====
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _stat(isAr ? 'مُرسَل' : 'Sent', _sent, AppColors.success),
+                _stat(isAr ? 'تَخَطّى' : 'Skipped', _skipped,
+                    AppColors.warning),
+                _stat(isAr ? 'مُتَبَقّي' : 'Left',
+                    total - _index, AppColors.brand),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // ===== المُوَظَّف الحاليّ =====
+            if (currentEmp != null)
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.brand.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: AppColors.brand.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(isAr ? 'التالي:' : 'Next:',
+                        style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey.shade700)),
+                    const SizedBox(height: 2),
+                    Text(currentEmp.employee.fullName,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900)),
+                    Text(
+                      '${currentEmp.employee.code} · 📱 ${currentEmp.employee.mobile}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  isAr
+                      ? '🎉 تَمّ إرسال $_sent مُحادَثة'
+                      : '🎉 Sent $_sent messages',
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w800),
+                ),
+              ),
+            if (widget.withoutPhoneCount > 0) ...[
+              const SizedBox(height: 6),
+              Text(
+                isAr
+                    ? '⚠️ ${widget.withoutPhoneCount} مُوَظَّف بِدون رَقم — تَمّ تَخَطّيهم'
+                    : '⚠️ ${widget.withoutPhoneCount} skipped (no phone)',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.warning,
+                    fontWeight: FontWeight.w700),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: _done
+          ? [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: Colors.white),
+                child: Text(isAr ? 'إغلاق' : 'Close'),
+              ),
+            ]
+          : [
+              TextButton(
+                onPressed: _isSending ? null : _skipCurrent,
+                child: Text(isAr ? 'تَخَطّى' : 'Skip'),
+              ),
+              TextButton(
+                onPressed: _isSending ? null : _sendAllRest,
+                child: Text(isAr ? '⚡ أَرسِل البَقيّة' : '⚡ Send all'),
+              ),
+              ElevatedButton.icon(
+                onPressed: _isSending ? null : _sendCurrent,
+                icon: _isSending
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child:
+                            CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.send, size: 14),
+                label: Text(isAr ? 'إرسال' : 'Send'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF25D366),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(isAr ? 'إلغاء' : 'Cancel'),
+              ),
+            ],
+    );
+  }
+
+  Widget _stat(String label, int n, Color c) {
+    return Column(
+      children: [
+        Text('$n',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: c)),
+        Text(label,
+            style:
+                TextStyle(fontSize: 10, color: Colors.grey.shade700)),
+      ],
+    );
+  }
 }
 
 class _DeliveryBtn extends StatelessWidget {

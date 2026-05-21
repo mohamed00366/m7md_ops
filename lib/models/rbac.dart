@@ -605,6 +605,52 @@ class P {
   static const adminSystemHealthView = 'admin.system_health.view';
   static const adminNotificationsSend = 'admin.notifications.send';
   static const adminWhatsNewView = 'admin.whats_new.view';
+
+  // ===== 🆕 Roster Tracked-Edit (post-approval changes) =====
+  static const rostersEditApprovedMinor = 'rosters.edit_approved_minor';
+  static const rostersEditApprovedMajor = 'rosters.edit_approved_major';
+  static const rostersViewChangeLog = 'rosters.view_change_log';
+  static const rostersBypassReason = 'rosters.bypass_reason';
+
+  // ===== 🆕 Notification Receive — granular control over who gets what =====
+  // Each maps to a notify_permission() call inside a trigger. Granting one of
+  // these to a user (via role or direct override) starts delivering that
+  // specific notification stream to them — country-filtered automatically.
+  // Leave
+  static const notificationsReceiveLeaveApprovalRequests =
+      'notifications.receive.leave.approval_requests';
+  static const notificationsReceiveLeaveLateReturns =
+      'notifications.receive.leave.late_returns';
+  static const notificationsReceiveLeaveEndedToday =
+      'notifications.receive.leave.ended_today';
+  // HR
+  static const notificationsReceiveHrEmployeeCreated =
+      'notifications.receive.hr.employee_created';
+  static const notificationsReceiveHrEmployeeDeactivated =
+      'notifications.receive.hr.employee_deactivated';
+  static const notificationsReceiveHrDocumentExpiring =
+      'notifications.receive.hr.document_expiring';
+  static const notificationsReceiveHrDocumentExpired =
+      'notifications.receive.hr.document_expired';
+  // Forms
+  static const notificationsReceiveFormsPendingApproval =
+      'notifications.receive.forms.pending_approval';
+  static const notificationsReceiveFormsIncidentReported =
+      'notifications.receive.forms.incident_reported';
+  static const notificationsReceiveFormsResignation =
+      'notifications.receive.forms.resignation';
+  // Attendance / Bus / Sites / Uniform / Roster
+  static const notificationsReceiveAttendanceLateCheckin =
+      'notifications.receive.attendance.late_checkin';
+  static const notificationsReceiveBusTripEvents =
+      'notifications.receive.bus.trip_events';
+  static const notificationsReceiveSitesNewSubmission =
+      'notifications.receive.sites.new_submission';
+  static const notificationsReceiveUniformRequests =
+      'notifications.receive.uniform.requests';
+  static const notificationsReceiveRosterCreated =
+      'notifications.receive.roster.created';
+
   static const adminWhatsNewEdit = 'admin.whats_new.edit';
   static const adminL4PromotionView = 'admin.l4_promotion.view';
   static const adminL4PromotionManage = 'admin.l4_promotion.manage';
@@ -798,4 +844,42 @@ class P {
   /// تقرير المذكّرات
   static const dailyMemoReportView = 'daily_memo.report.view';
   static const dailyMemoReportExport = 'daily_memo.report.export';
+
+  // ===== 🆕 Document Vault (خِزانة الوَثائِق المُوَحَّدة — May 2026) =====
+  /// عَرض خِزانة الوَثائِق (كُلّ وَثائِق كُلّ المُوَظَّفين في شاشة واحِدة)
+  static const documentsVaultView = 'documents.vault.view';
+  /// رَفع وَثيقة جَديدة إلى الخِزانة
+  static const documentsVaultUpload = 'documents.vault.upload';
+  /// حَذف/استِبدال وَثيقة في الخِزانة
+  static const documentsVaultManage = 'documents.vault.manage';
+  /// تَصدير قائِمة الوَثائِق (CSV/Excel)
+  static const documentsVaultExport = 'documents.vault.export';
+
+  // ===== 🆕 Company Events (تَقويم الشَرِكة — May 2026) =====
+  /// عَرض أَحداث الشَرِكة (في التَقويم)
+  static const companyEventsView = 'company_events.view';
+  /// إنشاء حَدَث مُخَصَّص (اجتِماع، تَدريب، احتِفال…)
+  static const companyEventsCreate = 'company_events.create';
+  /// تَعديل حَدَث مَوجود
+  static const companyEventsEdit = 'company_events.edit';
+  /// حَذف حَدَث
+  static const companyEventsDelete = 'company_events.delete';
+  /// إدارة المُشارِكين (Responsible/Participant/Watcher)
+  static const companyEventsManageParticipants = 'company_events.manage_participants';
+
+  // ===== 🆕 Tasks (مَهام To-Do — May 2026) =====
+  /// إسناد مَهَمّة لِمُوَظَّف آخَر
+  static const tasksAssign = 'tasks.assign';
+  /// عَرض كُلّ مَهام الفَريق
+  static const tasksViewTeam = 'tasks.view_team';
+  /// تَعديل أَيّ مَهَمّة (Admin/HR)
+  static const tasksManageAll = 'tasks.manage_all';
+
+  // ===== 🆕 Temporary PIN (PIN مُؤَقَّت — May 2026) =====
+  /// تَوليد PIN مُؤَقَّت لِمُوَظَّف فَشِل في تَسجيل الوَجه
+  static const pinGenerateTemporary = 'pin.generate_temporary';
+  /// عَرض سِجِلّ الـ PINs المُولَّدة
+  static const pinViewHistory = 'pin.view_history';
+  /// تَعديل إعدادات PIN (TTL، الطول)
+  static const pinManageSettings = 'pin.manage_settings';
 }

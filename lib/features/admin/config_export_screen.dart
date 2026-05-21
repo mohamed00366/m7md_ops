@@ -7,6 +7,7 @@ import '../../core/providers/auth_provider.dart';
 import '../../core/services/config_export_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/rbac.dart';
+import '../../shared/m7_app_bar.dart';
 
 /// 📦 شاشة تصدير/استيراد الإعدادات (Session 8)
 ///
@@ -192,7 +193,11 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
     final s = AppStrings.of(context);
     final isAr = s.isAr;
 
-    return Column(
+    return Scaffold(
+      appBar: M7AppBar(
+        title: isAr ? '📦 تَصدير/استيراد الإعدادات' : '📦 Config Export/Import',
+      ),
+      body: Column(
       children: [
         Container(
           margin: const EdgeInsets.all(12),
@@ -241,6 +246,7 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
           ),
         ),
       ],
+      ),
     );
   }
 

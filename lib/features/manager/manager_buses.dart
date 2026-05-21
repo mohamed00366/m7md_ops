@@ -21,17 +21,30 @@ class ManagerBuses extends StatefulWidget {
   State<ManagerBuses> createState() => _ManagerBusesState();
 }
 
-class _ManagerBusesState extends State<ManagerBuses> {
+class _ManagerBusesState extends State<ManagerBuses>
+    with SingleTickerProviderStateMixin {
   String _query = '';
+  late TabController _tab;
 
   @override
-  Widget build(BuildContext context) {
-    final s = AppStrings.of(context);
-    final repo = MockRepository();
-    final auth = context.watch<AuthProvider>();
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 2, vsync: this);
+    _tab.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
+  // ============================================================
+  // Filtering helpers
+  // ============================================================
+  List<Bus> _filteredBuses(MockRepository repo, AuthProvider auth) {
     final activeCountry = auth.activeCountryId;
-    final filtered = repo.buses.where((b) {
-      // فلتر الدولة
+    return repo.buses.where((b) {
       if (activeCountry != null) {
         if (b.countryId != activeCountry) return false;
       } else if (!auth.isSuperAdmin) {
@@ -40,41 +53,249 @@ class _ManagerBusesState extends State<ManagerBuses> {
       if (_query.isEmpty) return true;
       final q = _query.toLowerCase();
       return b.name.toLowerCase().contains(q) ||
-          b.plateNumber.toLowerCase().contains(q);
+          b.plateNumber.toLowerCase().contains(q) ||
+          b.model.toLowerCase().contains(q);
     }).toList();
+  }
+
+  List<Employee> _filteredDrivers(MockRepository repo, AuthProvider auth) {
+    final activeCountry = auth.activeCountryId;
+    return repo.employees.where((e) {
+      // فَقَط السائقون
+      final isDriver = e.jobTitle == 'سائق' ||
+          e.jobTitle.toLowerCase().contains('driver') ||
+          e.jobTitle == 'سائق فاليه' ||
+          e.jobTitle.toLowerCase().contains('valet');
+      if (!isDriver) return false;
+      if (activeCountry != null && e.countryId != activeCountry) {
+        if (!auth.isSuperAdmin) return false;
+      }
+      if (_query.isEmpty) return true;
+      final q = _query.toLowerCase();
+      return e.fullName.toLowerCase().contains(q) ||
+          e.code.toLowerCase().contains(q);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    final isAr = s.isAr;
+    final repo = MockRepository();
+    final auth = context.watch<AuthProvider>();
+    final buses = _filteredBuses(repo, auth);
+    final drivers = _filteredDrivers(repo, auth);
 
     return Scaffold(
       body: Column(
         children: [
+          // 🆕 شَريط التابات
+          Container(
+            color: Theme.of(context).cardTheme.color,
+            child: TabBar(
+              controller: _tab,
+              tabs: [
+                Tab(
+                  icon: const Icon(Icons.directions_bus),
+                  text:
+                      isAr ? '🚌 الباصات (${buses.length})' : '🚌 Buses (${buses.length})',
+                ),
+                Tab(
+                  icon: const Icon(Icons.person),
+                  text: isAr
+                      ? '👨‍✈️ السائقون (${drivers.length})'
+                      : '👨‍✈️ Drivers (${drivers.length})',
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
               decoration: InputDecoration(
                 hintText: s.search,
                 prefixIcon: const Icon(Icons.search),
+                isDense: true,
               ),
               onChanged: (v) => setState(() => _query = v),
             ),
           ),
           Expanded(
-            child: filtered.isEmpty
-                ? EmptyState(message: s.noData)
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
-                    itemCount: filtered.length,
-                    itemBuilder: (_, i) => _BusCard(bus: filtered[i]),
-                  ),
+            child: TabBarView(
+              controller: _tab,
+              children: [
+                _busesTab(buses, s),
+                _driversTab(drivers, s),
+              ],
+            ),
           ),
         ],
       ),
-      floatingActionButton: PermissionGate(
-        permission: P.busesCreate,
-        child: FloatingActionButton.extended(
-          onPressed: _openEditor,
-          icon: const Icon(Icons.add),
-          label: Text(s.add),
+      floatingActionButton: _tab.index == 0
+          ? PermissionGate(
+              permission: P.busesCreate,
+              child: FloatingActionButton.extended(
+                onPressed: _openEditor,
+                icon: const Icon(Icons.add),
+                label: Text(s.add),
+              ),
+            )
+          : null,
+    );
+  }
+
+  // ============================================================
+  // Buses tab
+  // ============================================================
+  Widget _busesTab(List<Bus> buses, AppStrings s) {
+    if (buses.isEmpty) return EmptyState(message: s.noData);
+    // 🆕 إحصاء سَريع: مُنتَهية / قَريبة الانتِهاء
+    final expired = buses.where((b) {
+      final l = b.licenseExpiry?.difference(DateTime.now()).inDays ?? 99999;
+      final i = b.insuranceExpiry?.difference(DateTime.now()).inDays ?? 99999;
+      return l < 0 || i < 0;
+    }).length;
+    final urgent = buses.where((b) {
+      final l = b.licenseExpiry?.difference(DateTime.now()).inDays ?? 99999;
+      final i = b.insuranceExpiry?.difference(DateTime.now()).inDays ?? 99999;
+      return (l >= 0 && l <= 30) || (i >= 0 && i <= 30);
+    }).length;
+    return Column(
+      children: [
+        if (expired > 0 || urgent > 0)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.danger.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.danger.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber,
+                    color: AppColors.danger, size: 18),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    s.isAr
+                        ? '⚠️ $expired باص رُخصة/تَأمين مُنتَهية، $urgent باص قَريب الانتِهاء (≤30 يَوم)'
+                        : '⚠️ $expired buses expired, $urgent expiring ≤30 days',
+                    style: const TextStyle(
+                        fontSize: 11, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 6),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 96),
+            itemCount: buses.length,
+            itemBuilder: (_, i) => GestureDetector(
+              onTap: () => _openEditor(existing: buses[i]),
+              child: _BusCard(bus: buses[i]),
+            ),
+          ),
         ),
-      ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // Drivers tab — كُلّ سائق + الباص المُرتَبِط + إحصاء رِحلات
+  // ============================================================
+  Widget _driversTab(List<Employee> drivers, AppStrings s) {
+    if (drivers.isEmpty) {
+      return EmptyState(
+          message: s.isAr ? 'لا يُوجَد سائقون' : 'No drivers');
+    }
+    final repo = MockRepository();
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 96),
+      itemCount: drivers.length,
+      itemBuilder: (_, i) {
+        final d = drivers[i];
+        // الباص الذي يَقوده (مَن لَه driverId == d.id)
+        final bus = repo.buses.where((b) => b.driverId == d.id).firstOrNull;
+        // المُوَظَّفون الذين هذا السائق يَقودهم (لَدَيهم defaultBusId == bus.id)
+        final passengerCount = bus == null
+            ? 0
+            : repo.employees.where((e) => e.defaultBusId == bus.id).length;
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.brand.withOpacity(0.15),
+              child: Text(
+                d.fullName.isNotEmpty ? d.fullName[0].toUpperCase() : '?',
+                style: const TextStyle(
+                    color: AppColors.brand,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14),
+              ),
+            ),
+            title: Text(d.fullName,
+                style: const TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w800)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${d.code} · ${d.jobTitle}',
+                    style: const TextStyle(fontSize: 11)),
+                if (bus != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      const Icon(Icons.directions_bus,
+                          size: 12, color: AppColors.warning),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          '${bus.name} · ${bus.plateNumber}',
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else
+                  Text(
+                    s.isAr ? '— لا يُوجَد باص مُسنَد' : '— no bus assigned',
+                    style: TextStyle(
+                        fontSize: 10, color: Colors.grey.shade600),
+                  ),
+              ],
+            ),
+            trailing: passengerCount == 0
+                ? null
+                : Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.brand.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      children: [
+                        Text('$passengerCount',
+                            style: const TextStyle(
+                                color: AppColors.brand,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14)),
+                        Text(s.isAr ? 'راكِب' : 'pax',
+                            style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+          ),
+        );
+      },
     );
   }
 
@@ -92,20 +313,50 @@ class _BusCard extends StatelessWidget {
   final Bus bus;
   const _BusCard({required this.bus});
 
+  /// عَدَد الأَيّام حَتّى انتِهاء التاريخ — موجب=بَعد، سالِب=مُنتَهي
+  int _days(DateTime? d) {
+    if (d == null) return 99999;
+    return d.difference(DateTime.now()).inDays;
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final isAr = s.isAr;
     final repo = MockRepository();
     final driver = repo.employeeById(bus.driverId);
     final isActive = bus.status == EntityStatus.active;
+
+    // 🆕 احسِب إلحاحيّة الرُخصة وَالتَأمين
+    final licenseDays = _days(bus.licenseExpiry);
+    final insuranceDays = _days(bus.insuranceExpiry);
+    final hasUrgent = licenseDays <= 30 || insuranceDays <= 30;
+    final hasWarning = (licenseDays > 30 && licenseDays <= 90) ||
+        (insuranceDays > 30 && insuranceDays <= 90);
+    // عَدَد المُوَظَّفين الذين هذا الباص باصهم الافتِراضيّ
+    final assignedEmployeeCount = repo.employees
+        .where((e) => e.defaultBusId == bus.id)
+        .length;
+
+    // لَون البِطاقة وَالحُدود حَسَب الإلحاحيّة
+    final borderColor = hasUrgent
+        ? AppColors.danger.withOpacity(0.45)
+        : hasWarning
+            ? AppColors.warning.withOpacity(0.45)
+            : Theme.of(context).dividerColor;
+    final cardBg = hasUrgent
+        ? AppColors.danger.withOpacity(0.04)
+        : hasWarning
+            ? AppColors.warning.withOpacity(0.04)
+            : Theme.of(context).cardTheme.color;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        border: Border.all(color: borderColor, width: hasUrgent ? 1.5 : 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +370,8 @@ class _BusCard extends StatelessWidget {
                   color: AppColors.warning.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.directions_bus, color: AppColors.warning),
+                child: const Icon(Icons.directions_bus,
+                    color: AppColors.warning),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -130,7 +382,8 @@ class _BusCard extends StatelessWidget {
                         style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w800)),
                     Text(
-                      '${bus.plateNumber} • ${bus.model}',
+                      '${bus.plateNumber}${bus.model.isEmpty ? "" : " • ${bus.model}"}'
+                      '${bus.year == null ? "" : " • ${bus.year}"}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -143,19 +396,95 @@ class _BusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Row(
+          // ===== الصَفّ الأَوَّل: السَعة + السائق + المُوَظَّفون =====
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
             children: [
               _BusInfo(
-                  icon: Icons.airline_seat_recline_normal,
-                  label: '${s.capacity}: ${bus.capacity}'),
-              const SizedBox(width: 12),
+                icon: Icons.airline_seat_recline_normal,
+                label: '${s.capacity}: ${bus.capacity}',
+              ),
               if (driver != null)
-                Expanded(
-                  child: _BusInfo(
-                      icon: Icons.person, label: driver.fullName),
+                _BusInfo(icon: Icons.person, label: driver.fullName),
+              if (assignedEmployeeCount > 0)
+                _BusInfo(
+                  icon: Icons.groups_outlined,
+                  label: isAr
+                      ? 'مُوَظَّفون: $assignedEmployeeCount'
+                      : 'Employees: $assignedEmployeeCount',
                 ),
             ],
           ),
+          // 🆕 شارات الانتِهاء (رُخصة + تَأمين)
+          if (bus.licenseExpiry != null || bus.insuranceExpiry != null) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                if (bus.licenseExpiry != null)
+                  _expiryChip(
+                    label: isAr ? 'رُخصة' : 'License',
+                    days: licenseDays,
+                    isAr: isAr,
+                  ),
+                if (bus.insuranceExpiry != null)
+                  _expiryChip(
+                    label: isAr ? 'تَأمين' : 'Insurance',
+                    days: insuranceDays,
+                    isAr: isAr,
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _expiryChip({
+    required String label,
+    required int days,
+    required bool isAr,
+  }) {
+    Color color;
+    String text;
+    IconData icon;
+    if (days < 0) {
+      color = AppColors.danger;
+      icon = Icons.error_outline;
+      text = isAr ? '🔴 $label مُنتَهية' : '🔴 $label expired';
+    } else if (days <= 30) {
+      color = AppColors.danger;
+      icon = Icons.warning_amber;
+      text = isAr ? '⚠️ $label: $days يَوم' : '⚠️ $label: $days d';
+    } else if (days <= 90) {
+      color = AppColors.warning;
+      icon = Icons.schedule;
+      text = isAr ? '⏰ $label: $days يَوم' : '⏰ $label: $days d';
+    } else {
+      color = AppColors.success;
+      icon = Icons.check_circle_outline;
+      text = isAr ? '✅ $label: $days يَوم' : '✅ $label: $days d';
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 12),
+          const SizedBox(width: 3),
+          Text(text,
+              style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800)),
         ],
       ),
     );

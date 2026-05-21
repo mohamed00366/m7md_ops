@@ -1009,6 +1009,7 @@ class _EmployeeBusRow extends StatelessWidget {
     required this.isOverride,
     required this.isAr,
     required this.onAssign,
+    this.onClear,
   });
 
   @override

@@ -64,16 +64,26 @@ class AppTheme {
       ),
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: surface,
-        foregroundColor: text,
+        // 🆕 أَسوَد كامِل في الوَضع الفاتِح وَالداكِن — لِأَقصى تَبايُن.
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: text),
-        titleTextStyle: textTheme.titleMedium?.copyWith(
+        iconTheme: const IconThemeData(color: Colors.white),
+        actionsIconTheme: const IconThemeData(color: Colors.white),
+        // 🔧 نَستَخدِم GoogleFonts.cairo مُباشَرَةً (لا نَمُرّ بِالـ textTheme
+        //   المُعَدَّل لِأَنّ .apply(bodyColor/displayColor) يُعيد كِتابة الألوان
+        //   وَيَجعَل النَصّ غامِقاً غَير مَرئيّ عَلى خَلفيّة dark brand).
+        titleTextStyle: GoogleFonts.cairo(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w900,
+        ),
+        toolbarTextStyle: GoogleFonts.cairo(
+          color: Colors.white,
+          fontSize: 14,
           fontWeight: FontWeight.w700,
-          fontSize: 17,
-          color: text,
         ),
         // 🆕 شريط الحالة شفّاف بأيقونات بيضاء — للـ AppBars الملوّنة (brand)
         // الشاشات ذات AppBar فاتح يمكنها تعديل systemOverlayStyle محلّياً

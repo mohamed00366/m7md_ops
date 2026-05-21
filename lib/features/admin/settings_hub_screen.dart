@@ -11,6 +11,7 @@ import '../manager/manager_settings.dart';
 import 'admin_countries.dart';
 import 'amana_settings_screen.dart';
 import 'camp_uniform_settings_screen.dart';
+import 'notification_routing_screen.dart';
 import 'notification_templates_screen.dart';
 import 'admin_device_sessions_screen.dart';
 import 'admin_system_settings.dart';
@@ -595,6 +596,20 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         descEn:
             'Customize titles & bodies for every notification + toggle Push/in-app',
         builder: (_) => const NotificationTemplatesScreen(),
+        requiredPermission: P.adminRolesManage,
+      ),
+      // 🎯 تَوجيه الإشعارات — مَن يَتَلَقَّى ماذا (صَلاحِيّات + مَنح/سَحب)
+      _SettingEntry(
+        category: catAdmin,
+        icon: Icons.alt_route_outlined,
+        color: Colors.teal,
+        titleAr: '🎯 تَوجيه الإشعارات',
+        titleEn: '🎯 Notification Routing',
+        descAr:
+            'صَلاحِيّات استِقبال + مَعاينة المُستَلِمين الفِعليّين + مَنح/سَحب',
+        descEn:
+            'Receive permissions + preview real recipients + grant/revoke',
+        builder: (_) => const NotificationRoutingScreen(),
         requiredPermission: P.adminRolesManage,
       ),
 

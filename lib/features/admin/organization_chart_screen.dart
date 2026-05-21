@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_palette.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_app_bar.dart';
 import 'department_profile_screen.dart';
 import 'job_title_profile_screen.dart';
 
@@ -78,6 +79,9 @@ class _OrganizationChartScreenState extends State<OrganizationChartScreen>
     final s = AppStrings.of(context);
     return Scaffold(
       backgroundColor: AppPalette.surface,
+      appBar: M7AppBar(
+        title: s.isAr ? '🏢 الهَيكَل التَنظيميّ' : '🏢 Organization Chart',
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _exportPdf,
         backgroundColor: AppColors.danger,
