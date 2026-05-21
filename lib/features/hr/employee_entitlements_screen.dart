@@ -11,7 +11,6 @@ import '../../core/services/entitlements_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/models.dart';
 import '../../models/rbac.dart';
-import '../../shared/m7_app_bar.dart';
 
 /// شاشة مُستَحَقّات المُوَظَّف
 class EmployeeEntitlementsScreen extends StatefulWidget {
@@ -150,69 +149,64 @@ class _EmployeeEntitlementsScreenState
     final canPayLeave = auth.isSuperAdmin ||
         auth.permissions.contains(P.entitlementsPayLeaveSalary);
 
-    return Scaffold(
-      appBar: M7AppBar(
-        title: isAr
-            ? '💼 مُستَحَقّات ${widget.employee.fullName}'
-            : '💼 Entitlements — ${widget.employee.fullName}',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _load,
+    // 🆕 يَعمَل كَـ Tab body — بِدون Scaffold/AppBar (المُحيط يُوَفِّر AppBar)
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline,
+                  size: 48, color: AppColors.danger),
+              const SizedBox(height: 12),
+              Text(_error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.danger)),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: _load,
+                icon: const Icon(Icons.refresh),
+                label: Text(isAr ? 'إعادة المُحاوَلة' : 'Retry'),
+              ),
+            ],
           ),
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // 1️⃣ مَعلومات الخِدمة
+          _serviceCard(isAr),
+          const SizedBox(height: 12),
+          // 2️⃣ راتِب الإجازة
+          _leaveSalaryCard(isAr, canPayLeave),
+          const SizedBox(height: 12),
+          // 3️⃣ نِهاية الخِدمة
+          _eosCard(isAr),
+          const SizedBox(height: 12),
+          // 4️⃣ التَذكِرة
+          _ticketCard(isAr),
+          const SizedBox(height: 16),
+          // 5️⃣ السِجِلّ
+          if (_history.isNotEmpty) _historyCard(isAr),
+          const SizedBox(height: 16),
+          if (_data?.referenceLaw != null) ...[
+            Text(
+              '📜 ${_data!.referenceLaw!}',
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          const SizedBox(height: 32),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.error_outline,
-                            size: 48, color: AppColors.danger),
-                        const SizedBox(height: 12),
-                        Text(_error!,
-                            textAlign: TextAlign.center,
-                            style:
-                                const TextStyle(color: AppColors.danger)),
-                      ],
-                    ),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      // 1️⃣ مَعلومات الخِدمة
-                      _serviceCard(isAr),
-                      const SizedBox(height: 12),
-                      // 2️⃣ راتِب الإجازة
-                      _leaveSalaryCard(isAr, canPayLeave),
-                      const SizedBox(height: 12),
-                      // 3️⃣ نِهاية الخِدمة
-                      _eosCard(isAr),
-                      const SizedBox(height: 12),
-                      // 4️⃣ التَذكِرة
-                      _ticketCard(isAr),
-                      const SizedBox(height: 16),
-                      // 5️⃣ السِجِلّ
-                      if (_history.isNotEmpty) _historyCard(isAr),
-                      const SizedBox(height: 16),
-                      if (_data?.referenceLaw != null) ...[
-                        Text(
-                          '📜 ${_data!.referenceLaw!}',
-                          style: const TextStyle(
-                              fontSize: 11, color: Colors.grey),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
     );
   }
 

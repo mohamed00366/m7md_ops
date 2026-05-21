@@ -12,6 +12,7 @@ import '../manager/manager_employees.dart';
 import 'employee_documents_screen.dart';
 import 'employee_profile_sections.dart';
 import 'employee_360_tabs.dart';
+import '../hr/employee_entitlements_screen.dart';
 
 /// 👤 شاشة الملف الشَخصيّ لِلموظَّف — Hub
 ///
@@ -33,7 +34,7 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 5, vsync: this);
+    _tab = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -116,6 +117,7 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
                 Tab(icon: const Icon(Icons.beach_access), text: isAr ? 'إجازات' : 'Leaves'),
                 Tab(icon: const Icon(Icons.gavel), text: isAr ? 'إنذارات' : 'Discipline'),
                 Tab(icon: const Icon(Icons.access_time), text: isAr ? 'حُضور' : 'Attendance'),
+                Tab(icon: const Icon(Icons.payments), text: isAr ? 'مُستَحَقّات' : 'Entitlements'),
               ],
             ),
           ),
@@ -129,6 +131,7 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
                 EmployeeLeavesTab(employee: employee),
                 EmployeeDisciplineTab(employee: employee),
                 EmployeeAttendanceTab(employee: employee),
+                EmployeeEntitlementsScreen(employee: employee),
               ],
             ),
           ),

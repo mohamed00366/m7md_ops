@@ -1286,6 +1286,12 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   late final TextEditingController _trainingFee;
   late final TextEditingController _others;
   late final TextEditingController _iban;
+  // 🆕 بَدَلات إضافيّة وَ تَذكِرة (May 2026)
+  late final TextEditingController _housingAllowance;
+  late final TextEditingController _transportAllowance;
+  late final TextEditingController _otherAllowances;
+  late final TextEditingController _ticketAmount;
+  bool _eligibleForTicket = false;
   DateTime? _workLetterDate;
   String? _workLetterFileId;
 
@@ -1359,6 +1365,16 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _trainingFee = TextEditingController(text: (e?.trainingFee ?? 0).toString());
     _others = TextEditingController(text: (e?.others ?? 0).toString());
     _iban = TextEditingController(text: e?.iban ?? '');
+    // 🆕 بَدَلات + تَذكِرة
+    _housingAllowance =
+        TextEditingController(text: (e?.housingAllowance ?? 0).toString());
+    _transportAllowance =
+        TextEditingController(text: (e?.transportAllowance ?? 0).toString());
+    _otherAllowances =
+        TextEditingController(text: (e?.otherAllowances ?? 0).toString());
+    _ticketAmount =
+        TextEditingController(text: (e?.ticketAmount ?? 0).toString());
+    _eligibleForTicket = e?.eligibleForTicket ?? false;
     _workLetterDate = e?.workLetterDate;
     _workLetterFileId = e?.workLetterFileId;
 
@@ -1390,6 +1406,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _trainingFee.dispose();
     _others.dispose();
     _iban.dispose();
+    _housingAllowance.dispose();
+    _transportAllowance.dispose();
+    _otherAllowances.dispose();
+    _ticketAmount.dispose();
     _emergencyName.dispose();
     _emergencyPhone.dispose();
     _education.dispose();
@@ -1564,6 +1584,12 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         shoeSize: _shoeSize.text.trim(),
         // 🚌 الباص الافتراضي
         defaultBusId: _defaultBusId,
+        // 🆕 بَدَلات وَ تَذكِرة
+        housingAllowance: double.tryParse(_housingAllowance.text) ?? 0,
+        transportAllowance: double.tryParse(_transportAllowance.text) ?? 0,
+        otherAllowances: double.tryParse(_otherAllowances.text) ?? 0,
+        eligibleForTicket: _eligibleForTicket,
+        ticketAmount: double.tryParse(_ticketAmount.text) ?? 0,
         // الملفات
         photoFileId: _photoFileId,
         idCardFileId: _idCardFileId,
@@ -1638,6 +1664,12 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.pantSize = _pantSize.text.trim();
       e.shoeSize = _shoeSize.text.trim();
       e.defaultBusId = _defaultBusId; // 🆕 الباص الافتراضي
+      // 🆕 بَدَلات وَ تَذكِرة
+      e.housingAllowance = double.tryParse(_housingAllowance.text) ?? 0;
+      e.transportAllowance = double.tryParse(_transportAllowance.text) ?? 0;
+      e.otherAllowances = double.tryParse(_otherAllowances.text) ?? 0;
+      e.eligibleForTicket = _eligibleForTicket;
+      e.ticketAmount = double.tryParse(_ticketAmount.text) ?? 0;
       e.photoFileId = _photoFileId;
       e.idCardFileId = _idCardFileId;
       e.licenseFileId = _licenseFileId;
@@ -2112,7 +2144,118 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   controller: _iban,
                   decoration: InputDecoration(labelText: s.iban),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
+                // 🆕 البَدَلات الإضافيّة (تُحسَب لاحِقاً في المُستَحَقّات)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.purple.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border:
+                        Border.all(color: AppColors.purple.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.account_balance_wallet,
+                              size: 18, color: AppColors.purple),
+                          SizedBox(width: 6),
+                          Text('💰 البَدَلات الإضافيّة',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 13)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _housingAllowance,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: '🏠 بَدَل سَكَن',
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _transportAllowance,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: '🚌 بَدَل مُواصَلات',
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ]),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _otherAllowances,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: '✨ بَدَلات أُخرى',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // 🎫 تَذكِرة السَفَر (حَسَب قانون العَمَل)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _eligibleForTicket
+                        ? AppColors.success.withOpacity(0.05)
+                        : Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color: _eligibleForTicket
+                            ? AppColors.success.withOpacity(0.3)
+                            : Colors.grey.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(Icons.flight,
+                            color: AppColors.success),
+                        title: const Text(
+                          '✈ يَستَحِقّ تَذكِرة سَفَر',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w900, fontSize: 13),
+                        ),
+                        subtitle: const Text(
+                          'لَيس كُلّ المُوَظَّفين يَستَحِقّون تَذكِرة',
+                          style:
+                              TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        value: _eligibleForTicket,
+                        onChanged: (v) =>
+                            setState(() => _eligibleForTicket = v),
+                      ),
+                      if (_eligibleForTicket)
+                        TextField(
+                          controller: _ticketAmount,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: '💵 مَبلَغ التَذكِرة',
+                            isDense: true,
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.attach_money),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
                 // Total Salary card
                 Container(
                   padding: const EdgeInsets.all(14),
