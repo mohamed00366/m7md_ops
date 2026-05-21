@@ -87,8 +87,8 @@ extension SplashShowFrequencyX on SplashShowFrequency {
 /// مَوديل الإعدادات
 class SplashVideoConfig {
   final bool enabled;
-  final String? videoUrl;       // مِن Supabase Storage (يَطغى عَلى الـ asset)
-  final String videoPath;       // مَسار الـ asset الاحتياطيّ
+  final String? videoUrl;       // مِن Supabase Storage — لا فيديو بِدونها
+  final String? audioUrl;       // 🆕 مِلَفّ صَوت مُنفَصِل (اختِياريّ)
   final int maxDurationSeconds;
   final bool autoUnmute;
   final SplashShowFrequency showFrequency;
@@ -96,16 +96,20 @@ class SplashVideoConfig {
   const SplashVideoConfig({
     this.enabled = true,
     this.videoUrl,
-    this.videoPath = 'assets/video/welcome.mp4',
+    this.audioUrl,
     this.maxDurationSeconds = 15,
     this.autoUnmute = false,
     this.showFrequency = SplashShowFrequency.everyTime,
   });
 
+  /// هَل لَدَيها فيديو فِعليّ قابِل لِلعَرض؟
+  bool get hasVideo => videoUrl != null && videoUrl!.isNotEmpty;
+  bool get hasAudio => audioUrl != null && audioUrl!.isNotEmpty;
+
   Map<String, dynamic> toJson() => {
         'enabled': enabled,
         'video_url': videoUrl,
-        'video_path': videoPath,
+        'audio_url': audioUrl,
         'max_duration_seconds': maxDurationSeconds,
         'auto_unmute': autoUnmute,
         'show_frequency': showFrequency.key,
@@ -115,8 +119,7 @@ class SplashVideoConfig {
       SplashVideoConfig(
         enabled: j['enabled'] as bool? ?? true,
         videoUrl: j['video_url'] as String?,
-        videoPath:
-            j['video_path'] as String? ?? 'assets/video/welcome.mp4',
+        audioUrl: j['audio_url'] as String?,
         maxDurationSeconds:
             (j['max_duration_seconds'] as num?)?.toInt() ?? 15,
         autoUnmute: j['auto_unmute'] as bool? ?? false,
@@ -127,16 +130,17 @@ class SplashVideoConfig {
   SplashVideoConfig copyWith({
     bool? enabled,
     String? videoUrl,
-    String? videoPath,
+    String? audioUrl,
     int? maxDurationSeconds,
     bool? autoUnmute,
     SplashShowFrequency? showFrequency,
     bool clearVideoUrl = false,
+    bool clearAudioUrl = false,
   }) {
     return SplashVideoConfig(
       enabled: enabled ?? this.enabled,
       videoUrl: clearVideoUrl ? null : (videoUrl ?? this.videoUrl),
-      videoPath: videoPath ?? this.videoPath,
+      audioUrl: clearAudioUrl ? null : (audioUrl ?? this.audioUrl),
       maxDurationSeconds: maxDurationSeconds ?? this.maxDurationSeconds,
       autoUnmute: autoUnmute ?? this.autoUnmute,
       showFrequency: showFrequency ?? this.showFrequency,
@@ -211,6 +215,34 @@ class SplashVideoSettings {
           ? filename.split('.').last.toLowerCase()
           : 'mp4';
       final path = 'welcome_${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+      await c.storage.from('splash_videos').uploadBinary(
+            path,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: contentType,
+              upsert: true,
+            ),
+          );
+      return c.storage.from('splash_videos').getPublicUrl(path);
+    } catch (e) {
+      lastError = e.toString();
+      return null;
+    }
+  }
+
+  /// رَفع مِلَفّ صَوت إلى Supabase Storage وَإرجاع الـ public URL
+  Future<String?> uploadAudio({
+    required Uint8List bytes,
+    required String filename,
+    String contentType = 'audio/mpeg',
+  }) async {
+    try {
+      final c = SupabaseService().client;
+      final ext = filename.contains('.')
+          ? filename.split('.').last.toLowerCase()
+          : 'mp3';
+      final path = 'audio_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       await c.storage.from('splash_videos').uploadBinary(
             path,

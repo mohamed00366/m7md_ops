@@ -58,6 +58,9 @@ dependencies:
   # 🎬 Video splash screen
   video_player: ^2.8.6
 
+  # 🎵 Audio splash track
+  audioplayers: ^5.2.1
+
   # 🆕 Geo-fencing (location restriction at login)
   geolocator: ^11.0.0       # GPS + mock-location detection
   network_info_plus: ^4.1.0 # Wi-Fi SSID detection
@@ -133,5 +136,3 @@ flutter:
     #   - assets/m7_logo_light.png
     #   - assets/m7_logo_dark.png
     - assets/models/
-    # 🎬 فيديو الترحيب
-    - assets/video/welcome.mp4

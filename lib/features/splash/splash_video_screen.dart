@@ -1,6 +1,7 @@
 // =============================================================================
-// 🎬 Splash Video Screen — يُحَمَّل مِن URL أَو asset حَسَب الإعدادات
+// 🎬 Splash Video Screen — فيديو + صَوت مُنفَصِل (اختِياريّ)
 // =============================================================================
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
@@ -8,7 +9,7 @@ import 'package:video_player/video_player.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/splash_video_settings.dart';
 
-/// شاشة فيديو الترحيب — تَتَّبِع الإعدادات المُخَزَّنة في Supabase.
+/// شاشة فيديو الترحيب — مَع دَعم صَوت مُنفَصِل (audioUrl).
 class SplashVideoScreen extends StatefulWidget {
   final VoidCallback onComplete;
   final SplashVideoConfig config;
@@ -22,6 +23,7 @@ class SplashVideoScreen extends StatefulWidget {
   /// فَحص هَل يَجِب عَرض الفيديو الآن حَسَب الإعدادات
   static Future<bool> shouldShow(SplashVideoConfig cfg) async {
     if (!cfg.enabled) return false;
+    if (!cfg.hasVideo) return false;
     if (cfg.showFrequency == SplashShowFrequency.everyTime) return true;
     if (cfg.showFrequency == SplashShowFrequency.never) return false;
 
@@ -36,8 +38,6 @@ class SplashVideoScreen extends StatefulWidget {
 
       switch (cfg.showFrequency) {
         case SplashShowFrequency.session:
-          // 'session' = نَفس Tab — لا نُخَزِّن، نَستَخدِم session storage فِعلِيّاً
-          // كَحَلّ بَسيط: 30 دَقيقة كَنافِذة جَلسة
           return now.difference(last).inMinutes >= 30;
         case SplashShowFrequency.daily:
           return now.day != last.day ||
@@ -54,7 +54,6 @@ class SplashVideoScreen extends StatefulWidget {
     }
   }
 
-  /// تَسجيل وَقت آخِر عَرض
   static Future<void> markShown() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -68,11 +67,11 @@ class SplashVideoScreen extends StatefulWidget {
 }
 
 class _SplashVideoScreenState extends State<SplashVideoScreen> {
-  VideoPlayerController? _controller;
+  VideoPlayerController? _videoController;
+  AudioPlayer? _audioPlayer;
   bool _initialized = false;
   bool _completed = false;
   bool _muted = true;
-  String? _loadError;
 
   @override
   void initState() {
@@ -82,29 +81,52 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
 
   Future<void> _init() async {
     try {
-      // اِختَر المَصدَر — URL (مِن Storage) أَو asset احتياطيّ
       final url = widget.config.videoUrl;
-      if (url != null && url.isNotEmpty) {
-        _controller = VideoPlayerController.networkUrl(Uri.parse(url));
-      } else {
-        _controller = VideoPlayerController.asset(widget.config.videoPath);
+      if (url == null || url.isEmpty) {
+        _finish();
+        return;
       }
 
-      await _controller!.initialize();
+      // 1) تَهيِئة الفيديو
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
+      await _videoController!.initialize();
+      _videoController!.addListener(_onVideoStateChanged);
 
-      // مُحاوَلة تَشغيل الصَوت إن طَلَب المُستَخدِم (قَد يَفشَل في الويب)
+      // 2) تَهيِئة الصَوت المُنفَصِل (إن وُجِد)
+      if (widget.config.hasAudio) {
+        _audioPlayer = AudioPlayer();
+        await _audioPlayer!.setReleaseMode(ReleaseMode.stop);
+      }
+
+      // 3) تَحديد الصَوت الأَوَّليّ
+      // - إن كانَ هُناك صَوت مُنفَصِل: الفيديو صامِت (نَستَخدِم الصَوت المُنفَصِل فَقَط)
+      // - إن لا: نَستَخدِم صَوت الفيديو
       if (widget.config.autoUnmute) {
-        await _controller!.setVolume(1.0);
+        if (widget.config.hasAudio) {
+          await _videoController!.setVolume(0);
+          await _audioPlayer!.setVolume(1.0);
+        } else {
+          await _videoController!.setVolume(1.0);
+        }
         _muted = false;
       } else {
-        await _controller!.setVolume(0);
+        await _videoController!.setVolume(0);
+        if (_audioPlayer != null) {
+          await _audioPlayer!.setVolume(0);
+        }
       }
 
-      await _controller!.play();
-      _controller!.addListener(_onVideoStateChanged);
+      // 4) ابدَأ التَشغيل
+      await _videoController!.play();
+      if (_audioPlayer != null) {
+        try {
+          await _audioPlayer!.play(UrlSource(widget.config.audioUrl!));
+        } catch (_) {/* صَوت اختِياريّ — لا تَفشَل */}
+      }
+
       if (mounted) setState(() => _initialized = true);
 
-      // الحَدّ الأَقصى لِلمُدَّة
+      // 5) الحَدّ الأَقصى
       Future.delayed(
         Duration(seconds: widget.config.maxDurationSeconds),
         () {
@@ -112,37 +134,49 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
         },
       );
     } catch (e) {
-      _loadError = e.toString();
       _finish();
     }
   }
 
   void _onVideoStateChanged() {
-    if (_controller == null) return;
-    final v = _controller!.value;
+    if (_videoController == null) return;
+    final v = _videoController!.value;
     if (v.position >= v.duration && !_completed) {
       _finish();
     }
   }
 
   Future<void> _toggleMute() async {
-    if (_controller == null) return;
+    if (_videoController == null) return;
     final newMuted = !_muted;
-    await _controller!.setVolume(newMuted ? 0 : 1.0);
+
+    if (widget.config.hasAudio) {
+      // الصَوت يَأتي مِن AudioPlayer، الفيديو يَظَلّ صامِت
+      await _videoController!.setVolume(0);
+      await _audioPlayer?.setVolume(newMuted ? 0 : 1.0);
+    } else {
+      // الصَوت يَأتي مِن الفيديو نَفسه
+      await _videoController!.setVolume(newMuted ? 0 : 1.0);
+    }
+
     if (mounted) setState(() => _muted = newMuted);
   }
 
   Future<void> _finish() async {
     if (_completed) return;
     _completed = true;
+    try {
+      await _audioPlayer?.stop();
+    } catch (_) {}
     await SplashVideoScreen.markShown();
     if (mounted) widget.onComplete();
   }
 
   @override
   void dispose() {
-    _controller?.removeListener(_onVideoStateChanged);
-    _controller?.dispose();
+    _videoController?.removeListener(_onVideoStateChanged);
+    _videoController?.dispose();
+    _audioPlayer?.dispose();
     super.dispose();
   }
 
@@ -156,10 +190,10 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
           children: [
             // الفيديو
             Center(
-              child: _initialized && _controller != null
+              child: _initialized && _videoController != null
                   ? AspectRatio(
-                      aspectRatio: _controller!.value.aspectRatio,
-                      child: VideoPlayer(_controller!),
+                      aspectRatio: _videoController!.value.aspectRatio,
+                      child: VideoPlayer(_videoController!),
                     )
                   : const CircularProgressIndicator(color: Colors.white),
             ),

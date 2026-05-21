@@ -21,6 +21,7 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
   bool _loading = true;
   bool _saving = false;
   bool _uploading = false;
+  bool _uploadingAudio = false;
   String? _error;
   SplashVideoConfig _config = const SplashVideoConfig();
 
@@ -120,10 +121,98 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
     }
   }
 
-  void _useDefaultAsset() {
+  /// رَفع مِلَفّ صَوت
+  Future<void> _uploadAudio() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['mp3', 'wav', 'ogg', 'm4a', 'aac'],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final f = result.files.first;
+      if (f.bytes == null) return;
+
+      const maxSize = 10 * 1024 * 1024; // 10 MB لِلصَوت
+      if (f.bytes!.length > maxSize) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: AppColors.danger,
+            content: Text('⚠ الحَجم أَكبَر مِن 10 MB'),
+          ));
+        }
+        return;
+      }
+
+      setState(() => _uploadingAudio = true);
+      final ext = (f.extension ?? 'mp3').toLowerCase();
+      String mime = 'audio/mpeg';
+      if (ext == 'wav') mime = 'audio/wav';
+      else if (ext == 'ogg') mime = 'audio/ogg';
+      else if (ext == 'm4a' || ext == 'aac') mime = 'audio/aac';
+
+      final url = await SplashVideoSettings.instance.uploadAudio(
+        bytes: f.bytes!,
+        filename: f.name,
+        contentType: mime,
+      );
+      if (!mounted) return;
+      setState(() => _uploadingAudio = false);
+
+      if (url != null) {
+        setState(() {
+          _config = _config.copyWith(audioUrl: url);
+        });
+        await _save();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(
+              '❌ فَشِل الرَفع: ${SplashVideoSettings.instance.lastError}'),
+        ));
+      }
+    } catch (e) {
+      setState(() {
+        _uploadingAudio = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _removeAudio() async {
+    setState(() {
+      _config = _config.copyWith(clearAudioUrl: true);
+    });
+    await _save();
+  }
+
+  Future<void> _removeVideo() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('حَذف الفيديو'),
+        content: const Text(
+            'هَل تُريد إزالة الفيديو الحاليّ؟ لَن يَظهَر فيديو ترحيب حَتّى تَرفَع جَديداً.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.danger,
+                foregroundColor: Colors.white),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('حَذف'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     setState(() {
       _config = _config.copyWith(clearVideoUrl: true);
     });
+    await _save();
   }
 
   @override
@@ -180,49 +269,75 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.brand.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: AppColors.brand.withOpacity(0.2)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.movie,
-                                color: AppColors.brand, size: 28),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _config.videoUrl != null
-                                        ? (isAr
-                                            ? 'فيديو مَرفوع'
-                                            : 'Custom video')
-                                        : (isAr
-                                            ? 'الفيديو الافتِراضيّ'
-                                            : 'Default video'),
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 14),
-                                  ),
-                                  Text(
-                                    _config.videoUrl ?? _config.videoPath,
-                                    style: const TextStyle(
-                                        fontSize: 11, color: Colors.grey),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                      if (_config.hasVideo)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color:
+                                    AppColors.success.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: AppColors.success, size: 28),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isAr ? 'فيديو مَرفوع ✓' : 'Video uploaded ✓',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 14,
+                                          color: AppColors.success),
+                                    ),
+                                    Text(
+                                      _config.videoUrl ?? '',
+                                      style: const TextStyle(
+                                          fontSize: 10, color: Colors.grey),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.warning.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color:
+                                    AppColors.warning.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.warning_amber,
+                                  color: AppColors.warning, size: 28),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  isAr
+                                      ? 'لا يُوجَد فيديو مَرفوع — لَن تَظهَر شاشة الترحيب حَتّى تَرفَع فيديو'
+                                      : 'No video uploaded — splash will not show until you upload one',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                      color: AppColors.warning),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -237,14 +352,20 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                                           strokeWidth: 2,
                                           color: Colors.white),
                                     )
-                                  : const Icon(Icons.upload),
+                                  : Icon(_config.hasVideo
+                                      ? Icons.swap_horiz
+                                      : Icons.upload),
                               label: Text(_uploading
                                   ? (isAr
                                       ? 'جارٍ الرَفع...'
                                       : 'Uploading...')
-                                  : (isAr
-                                      ? 'رَفع فيديو جَديد'
-                                      : 'Upload new video')),
+                                  : _config.hasVideo
+                                      ? (isAr
+                                          ? 'استِبدال الفيديو'
+                                          : 'Replace video')
+                                      : (isAr
+                                          ? 'رَفع فيديو'
+                                          : 'Upload video')),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.brand,
                                 foregroundColor: Colors.white,
@@ -252,14 +373,14 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                               ),
                             ),
                           ),
-                          if (_config.videoUrl != null) ...[
+                          if (_config.hasVideo) ...[
                             const SizedBox(width: 8),
                             OutlinedButton.icon(
-                              onPressed: _useDefaultAsset,
-                              icon: const Icon(Icons.restore),
-                              label: Text(
-                                  isAr ? 'استِخدام الافتِراضيّ' : 'Use default'),
+                              onPressed: _removeVideo,
+                              icon: const Icon(Icons.delete_outline),
+                              label: Text(isAr ? 'حَذف' : 'Remove'),
                               style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.danger,
                                 minimumSize: const Size.fromHeight(48),
                               ),
                             ),
@@ -280,9 +401,136 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
 
                 const SizedBox(height: 16),
 
-                // 3️⃣ الصَوت
+                // 3️⃣ الصَوت المُنفَصِل (اختِياريّ)
                 _section(
-                  title: isAr ? 'الصَوت' : 'Audio',
+                  title: isAr ? 'مِلَفّ الصَوت (اختِياريّ)' : 'Audio file (optional)',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isAr
+                            ? 'إذا فيديوك بِدون صَوت، يُمكِنك رَفع مِلَفّ صَوت مُنفَصِل يَعمَل مَعَه.'
+                            : 'If your video has no audio, upload a separate audio track that plays with it.',
+                        style: const TextStyle(
+                            fontSize: 11, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 10),
+                      if (_config.hasAudio)
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color:
+                                    AppColors.success.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.audiotrack,
+                                  color: AppColors.success, size: 24),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  isAr
+                                      ? 'مِلَفّ صَوت مَرفوع ✓'
+                                      : 'Audio uploaded ✓',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 13,
+                                      color: AppColors.success),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.audiotrack,
+                                  color: Colors.grey, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                isAr ? 'لا يُوجَد صَوت مَرفوع' : 'No audio uploaded',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _uploadingAudio ? null : _uploadAudio,
+                              icon: _uploadingAudio
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white),
+                                    )
+                                  : Icon(_config.hasAudio
+                                      ? Icons.swap_horiz
+                                      : Icons.upload),
+                              label: Text(_uploadingAudio
+                                  ? (isAr
+                                      ? 'جارٍ الرَفع...'
+                                      : 'Uploading...')
+                                  : _config.hasAudio
+                                      ? (isAr
+                                          ? 'استِبدال الصَوت'
+                                          : 'Replace audio')
+                                      : (isAr
+                                          ? 'رَفع مِلَفّ صَوت'
+                                          : 'Upload audio')),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.purple,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size.fromHeight(44),
+                              ),
+                            ),
+                          ),
+                          if (_config.hasAudio) ...[
+                            const SizedBox(width: 8),
+                            OutlinedButton.icon(
+                              onPressed: _removeAudio,
+                              icon: const Icon(Icons.delete_outline),
+                              label: Text(isAr ? 'حَذف' : 'Remove'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.danger,
+                                minimumSize: const Size.fromHeight(44),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        isAr
+                            ? '⚠ MP3 / WAV / OGG / M4A — حَدّ أَقصى 10 MB'
+                            : '⚠ MP3 / WAV / OGG / M4A — max 10 MB',
+                        style: const TextStyle(
+                            fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // 4️⃣ التَشغيل التِلقائيّ لِلصَوت
+                _section(
+                  title: isAr ? 'تَشغيل الصَوت' : 'Sound playback',
                   child: SwitchListTile(
                     title: Text(isAr
                         ? 'مُحاوَلة تَشغيل الصَوت تِلقائيّاً'
