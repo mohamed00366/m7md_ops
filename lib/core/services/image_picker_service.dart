@@ -1,10 +1,14 @@
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'supabase_data_service.dart';
 import 'supabase_service.dart';
+
+/// مَصدَر اختِيار المِلَفّ
+enum _PickerSource { camera, gallery, file }
 
 /// 🖼️ خدمة موحّدة لاختيار/رفع الصور من الكاميرا أو المعرض
 ///
@@ -26,30 +30,58 @@ class ImagePickerService {
   ImagePickerService._();
   static final _picker = ImagePicker();
 
-  /// اختر صورة (camera/gallery) وارفعها إلى Supabase Storage.
-  /// يُرجع `_UploadResult` يحوي fileId + url، أو null إن لُغي.
+  /// اختر صورة (camera/gallery/file) وارفعها إلى Supabase Storage.
+  /// عِندَ `allowFiles: true` يَظهَر خِيار إضافيّ "PDF / مُستَنَد".
+  /// يُرجع `UploadedImage` يحوي fileId + url، أو null إن لُغي.
   static Future<UploadedImage?> pickAndUpload({
     required BuildContext context,
     required String bucket,
     String? pathPrefix,
     int imageQuality = 80,
     double maxWidth = 1600,
+    bool allowFiles = true,
   }) async {
-    final source = await _showSourcePicker(context);
+    final source = await _showSourcePicker(context, allowFiles: allowFiles);
     if (source == null) return null;
     try {
-      final XFile? picked = await _picker.pickImage(
-        source: source,
-        imageQuality: imageQuality,
-        maxWidth: maxWidth,
-      );
-      if (picked == null) return null;
+      Uint8List? bytes;
+      String? originalName;
 
-      // اقرأ البايتات (يعمل على web و mobile)
-      final bytes = await picked.readAsBytes();
-      final ext = _extOf(picked.name);
+      if (source == _PickerSource.file) {
+        // 📄 PDF أَو مُستَنَد
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: const [
+            'pdf', 'doc', 'docx', 'xls', 'xlsx',
+            'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
+          ],
+          withData: true,
+        );
+        if (result == null || result.files.isEmpty) return null;
+        final f = result.files.first;
+        if (f.bytes == null) return null;
+        bytes = f.bytes;
+        originalName = f.name;
+      } else {
+        // 📷 كاميرا أَو 🖼 مَعرَض
+        final imageSource = source == _PickerSource.camera
+            ? ImageSource.camera
+            : ImageSource.gallery;
+        final XFile? picked = await _picker.pickImage(
+          source: imageSource,
+          imageQuality: imageQuality,
+          maxWidth: maxWidth,
+        );
+        if (picked == null) return null;
+        bytes = await picked.readAsBytes();
+        originalName = picked.name;
+      }
+
+      if (bytes == null || originalName == null) return null;
+
+      final ext = _extOf(originalName);
       final filename =
-          '${pathPrefix ?? 'img'}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+          '${pathPrefix ?? 'file'}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       // ارفع للـ Supabase Storage إن جاهز
       String? publicUrl;
@@ -78,7 +110,7 @@ class ImagePickerService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
-          content: Text('فشل رفع الصورة: $e'),
+          content: Text('فشل رفع المِلَفّ: $e'),
         ));
       }
       return null;
@@ -90,22 +122,49 @@ class ImagePickerService {
     required BuildContext context,
     int imageQuality = 80,
     double maxWidth = 1600,
+    bool allowFiles = true,
   }) async {
-    final source = await _showSourcePicker(context);
+    final source = await _showSourcePicker(context, allowFiles: allowFiles);
     if (source == null) return null;
     try {
-      final XFile? picked = await _picker.pickImage(
-        source: source,
-        imageQuality: imageQuality,
-        maxWidth: maxWidth,
-      );
-      if (picked == null) return null;
-      final bytes = await picked.readAsBytes();
+      Uint8List? bytes;
+      String? name;
+
+      if (source == _PickerSource.file) {
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: const [
+            'pdf', 'doc', 'docx', 'xls', 'xlsx',
+            'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
+          ],
+          withData: true,
+        );
+        if (result == null || result.files.isEmpty) return null;
+        final f = result.files.first;
+        if (f.bytes == null) return null;
+        bytes = f.bytes;
+        name = f.name;
+      } else {
+        final imageSource = source == _PickerSource.camera
+            ? ImageSource.camera
+            : ImageSource.gallery;
+        final XFile? picked = await _picker.pickImage(
+          source: imageSource,
+          imageQuality: imageQuality,
+          maxWidth: maxWidth,
+        );
+        if (picked == null) return null;
+        bytes = await picked.readAsBytes();
+        name = picked.name;
+      }
+
+      if (bytes == null || name == null) return null;
+
       return UploadedImage(
-        fileId: picked.name,
+        fileId: name,
         url: null,
         bytes: bytes,
-        filename: picked.name,
+        filename: name,
       );
     } catch (_) {
       return null;
@@ -113,8 +172,11 @@ class ImagePickerService {
   }
 
   /// عرض bottom-sheet لاختيار المصدر
-  static Future<ImageSource?> _showSourcePicker(BuildContext context) async {
-    return showModalBottomSheet<ImageSource>(
+  static Future<_PickerSource?> _showSourcePicker(
+    BuildContext context, {
+    bool allowFiles = true,
+  }) async {
+    return showModalBottomSheet<_PickerSource>(
       context: context,
       backgroundColor: Theme.of(context).cardTheme.color,
       builder: (ctx) => SafeArea(
@@ -138,14 +200,23 @@ class ImagePickerService {
                 leading: const Icon(Icons.photo_camera, size: 24),
                 title: const Text('التقط من الكاميرا'),
                 subtitle: const Text('Take a photo'),
-                onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+                onTap: () => Navigator.of(ctx).pop(_PickerSource.camera),
               ),
             ListTile(
               leading: const Icon(Icons.photo_library, size: 24),
-              title: const Text('اختر من المعرض'),
-              subtitle: const Text('Pick from gallery'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+              title: const Text('اختر من المعرض (صورة)'),
+              subtitle: const Text('Pick image from gallery'),
+              onTap: () => Navigator.of(ctx).pop(_PickerSource.gallery),
             ),
+            // 🆕 خِيار اختِيار مِلَفّ (PDF / مُستَنَد)
+            if (allowFiles)
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf,
+                    size: 24, color: Colors.red),
+                title: const Text('اختر مِلَفّ (PDF / مُستَنَد)'),
+                subtitle: const Text('Pick PDF or document'),
+                onTap: () => Navigator.of(ctx).pop(_PickerSource.file),
+              ),
             const SizedBox(height: 4),
             ListTile(
               leading: const Icon(Icons.close, size: 24),
@@ -186,7 +257,7 @@ class ImagePickerService {
   }
 
   static String _mimeOf(String ext) {
-    switch (ext) {
+    switch (ext.toLowerCase()) {
       case 'png':
         return 'image/png';
       case 'gif':
@@ -194,7 +265,20 @@ class ImagePickerService {
       case 'webp':
         return 'image/webp';
       case 'heic':
+      case 'heif':
         return 'image/heic';
+      case 'bmp':
+        return 'image/bmp';
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+      case 'docx':
+        return 'application/msword';
+      case 'xls':
+      case 'xlsx':
+        return 'application/vnd.ms-excel';
+      case 'jpg':
+      case 'jpeg':
       default:
         return 'image/jpeg';
     }
