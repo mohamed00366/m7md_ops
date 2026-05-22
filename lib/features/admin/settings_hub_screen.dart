@@ -29,6 +29,8 @@ import 'face_embeddings_recompute_screen.dart';
 import 'geo_fence_settings_screen.dart';
 import 'impersonate_picker.dart';
 import 'login_method_settings_screen.dart';
+import 'activity_feed_screen.dart';
+import 'database_backups_screen.dart';
 import 'session_settings_screen.dart';
 import 'settings_audit_trail_screen.dart';
 import 'labor_rules_settings_screen.dart';
@@ -487,6 +489,34 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         descEn:
             'Every settings change — who, when, old → new value diff',
         builder: (_) => const SettingsAuditTrailScreen(),
+        requiredPermission: P.adminAuditView,
+      ),
+      // 🆕 نُسَخ احتِياطيّة يَوميّة لِقاعِدة البَيانات
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.backup_outlined,
+        color: AppColors.brand,
+        titleAr: '💾 النُسَخ الاحتِياطيّة',
+        titleEn: '💾 Database Backups',
+        descAr:
+            'سِجِلّ النُسَخ اليَوميّة + تَشغيل يَدَويّ + تَفاصيل عَدَد الصُفوف',
+        descEn:
+            'Daily snapshot log + manual trigger + per-table row counts',
+        builder: (_) => const DatabaseBackupsScreen(),
+        requiredPermission: P.adminAuditView,
+      ),
+      // 🆕 تَدَفُّق النَشاطات — كُلّ ما حَدَث مُؤَخَّراً في مَكان واحِد
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.timeline_outlined,
+        color: AppColors.info,
+        titleAr: '🌊 تَدَفُّق النَشاطات',
+        titleEn: '🌊 Activity Feed',
+        descAr:
+            'مَعلومات حَيّة عَن كُلّ التَغييرات: إعدادات، حالة مُوَظَّفين، نَسخ احتِياطيّ',
+        descEn:
+            'Live feed of changes: settings, employee status, backups',
+        builder: (_) => const ActivityFeedScreen(),
         requiredPermission: P.adminAuditView,
       ),
 
