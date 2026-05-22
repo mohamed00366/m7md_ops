@@ -214,10 +214,10 @@ class _RootRouter extends StatelessWidget {
           return const LoginScreen();
         }
 
-        // 🆕 1.4) إذا الحِساب نَوع point_terminal → شاشة الجِهاز الخاصّة
+        // 🆕 1.4) إذا الحِساب نَوع point_terminal → Gate يَفحَص GPS أَوَّلاً
         //          (لا فَحص تَغيير كَلِمة مُرور، لا تَسجيل وَجه، لا اختيار دَولة)
         if (auth.account?.accountType == AccountType.pointTerminal) {
-          return const PointTerminalHome();
+          return const PointTerminalGate();
         }
 
         // 🆕 1.5) إذا الحساب يَطلُب تَغيير كلمة المرور → ForceChange

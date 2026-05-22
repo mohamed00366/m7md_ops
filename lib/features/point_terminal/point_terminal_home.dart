@@ -17,6 +17,7 @@ import '../../core/providers/locale_provider.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/services/face_login_service.dart';
 import '../../core/services/m7_log.dart';
+import '../../core/services/point_terminal_geo_service.dart';
 import '../../core/services/point_terminal_session_service.dart';
 import '../../core/services/point_terminal_settings.dart';
 import '../../core/services/supabase_data_service.dart';
@@ -29,6 +30,8 @@ import '../../shared/app_logo.dart';
 import 'daily_tips_dialog.dart';
 import 'employee_schedule_preview.dart';
 import 'pin_entry_dialog.dart';
+import 'point_terminal_out_of_zone_screen.dart';
+import 'point_terminal_setup_screen.dart';
 import '../forms/employee_forms_screen.dart';
 
 /// 🏪 Point Terminal Home — شاشة جِهاز النُقطة (Kiosk Mode)
@@ -44,6 +47,80 @@ class PointTerminalHome extends StatefulWidget {
 
   @override
   State<PointTerminalHome> createState() => _PointTerminalHomeState();
+}
+
+// 🆕 Wrapper يَفحَص geo-lock قَبل عَرض الـ Home
+class PointTerminalGate extends StatefulWidget {
+  const PointTerminalGate({super.key});
+
+  @override
+  State<PointTerminalGate> createState() => _PointTerminalGateState();
+}
+
+class _PointTerminalGateState extends State<PointTerminalGate> {
+  bool _checking = true;
+  TerminalGateResult? _gate;
+  bool _override = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    setState(() => _checking = true);
+    final auth = context.read<AuthProvider>();
+    final accId = auth.account?.id;
+    if (accId == null) {
+      setState(() => _checking = false);
+      return;
+    }
+    final result =
+        await PointTerminalGeoService.instance.gate(accountId: accId);
+    if (mounted) {
+      setState(() {
+        _gate = result;
+        _checking = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_checking) {
+      return const Scaffold(
+        backgroundColor: AppColors.brand,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text('🔍 جارٍ التَحَقُّق مِن المَوقِع...',
+                  style: TextStyle(color: Colors.white)),
+            ],
+          ),
+        ),
+      );
+    }
+    final gate = _gate;
+    if (gate == null) {
+      return const PointTerminalHome();
+    }
+    if (_override || gate.decision == TerminalGateDecision.allowed) {
+      return const PointTerminalHome();
+    }
+    if (gate.decision == TerminalGateDecision.needsSetup) {
+      return PointTerminalSetupScreen(onCompleted: _check);
+    }
+    // outOfZone / maxDevicesReached / gpsError
+    return PointTerminalOutOfZoneScreen(
+      gate: gate,
+      onRetry: _check,
+      onSuperAdminOverride: () => setState(() => _override = true),
+    );
+  }
 }
 
 class _PointTerminalHomeState extends State<PointTerminalHome>

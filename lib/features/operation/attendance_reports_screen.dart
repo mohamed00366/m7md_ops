@@ -101,6 +101,32 @@ class _AttendanceReportsScreenState
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
     final isAr = s.isAr;
+    return Scaffold(
+      appBar: M7AppBar(
+        title: isAr ? 'تقارير الحضور' : 'Attendance Reports',
+        subtitle:
+            '${DateFormat('d/M').format(_from)} → ${DateFormat('d/M').format(_to)}',
+        bottom: TabBar(
+          controller: _tab,
+          labelStyle: const TextStyle(
+              fontWeight: FontWeight.w900, fontSize: 13),
+          tabs: [
+            Tab(text: isAr ? '🚌 الباصات' : '🚌 Buses'),
+            Tab(text: isAr ? '📍 النِقاط' : '📍 Points'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tab,
+        children: [
+          _buildBusReport(context, isAr),
+          _PointReportTab(from: _from, to: _to),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBusReport(BuildContext context, bool isAr) {
     final repo = MockRepository();
     final atts = _attendanceInRange();
 
@@ -133,7 +159,6 @@ class _AttendanceReportsScreenState
           break;
       }
     }
-    // ترتيب: أكثر غياباً أوّلاً (للتنبيه)
     final sortedEmps = perEmployee.entries.toList()
       ..sort((a, b) => b.value.missing.compareTo(a.value.missing));
 
@@ -160,37 +185,6 @@ class _AttendanceReportsScreenState
     final sortedDays = perDay.entries.toList()
       ..sort((a, b) => b.key.compareTo(a.key));
 
-    return Scaffold(
-      appBar: M7AppBar(
-        title: isAr ? 'تقارير الحضور' : 'Attendance Reports',
-        subtitle:
-            '${DateFormat('d/M').format(_from)} → ${DateFormat('d/M').format(_to)}',
-        bottom: TabBar(
-          controller: _tab,
-          labelStyle: const TextStyle(
-              fontWeight: FontWeight.w900, fontSize: 13),
-          tabs: [
-            Tab(text: isAr ? '🚌 الباصات' : '🚌 Buses'),
-            Tab(text: isAr ? '📍 النِقاط' : '📍 Points'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tab,
-        children: [
-          _buildBusReport(context, isAr, sortedDays, perDay),
-          _PointReportTab(from: _from, to: _to),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBusReport(
-    BuildContext context,
-    bool isAr,
-    List<MapEntry<DateTime, _DayBucket>> sortedDays,
-    Map<DateTime, _DayBucket> perDay,
-  ) {
     return ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -397,7 +391,7 @@ class _PointReportTabState extends State<_PointReportTab> {
               Expanded(
                 child: _BigStat(
                   label: isAr ? 'أَيّام النِطاق' : 'Days in range',
-                  value: _totalDays,
+                  count: _totalDays,
                   color: AppColors.brand,
                   icon: Icons.calendar_today,
                 ),
@@ -406,7 +400,7 @@ class _PointReportTabState extends State<_PointReportTab> {
               Expanded(
                 child: _BigStat(
                   label: isAr ? 'مُوَظَّفون حَضَروا' : 'Employees attended',
-                  value: _daysPresent.length,
+                  count: _daysPresent.length,
                   color: AppColors.success,
                   icon: Icons.people,
                 ),
@@ -415,7 +409,7 @@ class _PointReportTabState extends State<_PointReportTab> {
               Expanded(
                 child: _BigStat(
                   label: isAr ? 'إجماليّ سِجِلّات' : 'Total records',
-                  value: _totalRecords,
+                  count: _totalRecords,
                   color: AppColors.warning,
                   icon: Icons.history,
                 ),
