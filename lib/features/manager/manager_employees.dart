@@ -21,6 +21,7 @@ import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/employee_identity.dart';
+import '../../shared/employee_status_history.dart';
 import '../../shared/m7_multi_upload.dart';
 import '../../shared/widgets.dart';
 import '../admin/employee_documents_expiry_report_screen.dart';
@@ -1505,6 +1506,24 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     super.dispose();
   }
 
+  /// 🎨 لَون الحالة (لِبادج AppBar وَالبِطاقات)
+  Color _statusColor(EntityStatus s) {
+    switch (s) {
+      case EntityStatus.active:
+        return AppColors.success;
+      case EntityStatus.vacation:
+        return AppColors.info;
+      case EntityStatus.suspended:
+        return AppColors.warning;
+      case EntityStatus.resigned:
+      case EntityStatus.terminated:
+        return AppColors.danger;
+      case EntityStatus.inactive:
+      case EntityStatus.maintenance:
+        return Colors.grey;
+    }
+  }
+
   double get _totalSalary {
     final basic = double.tryParse(_basicSalary.text) ?? 0;
     final others = double.tryParse(_others.text) ?? 0;
@@ -1832,24 +1851,37 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
             ? (s.isAr ? ar2ur.tr('تعديل موظف') : 'Edit Employee')
             : (s.isAr ? ar2ur.tr('موظف جديد') : 'New Employee')),
         actions: [
-          // Status toggle
+          // 🆕 Status badge مَع لَون ديناميكيّ — التَوغل يَعمَل فَقَط بَين
+          // active/inactive. الحالات الأُخرى تَأتي مِن workflows تِلقائيّة.
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 8),
             child: Row(
               children: [
                 StatusBadge(
-                  label: _status == EntityStatus.active ? s.active : s.inactive,
-                  color: _status == EntityStatus.active
-                      ? AppColors.success
-                      : AppColors.danger,
+                  label: _status.label(isAr: s.isAr),
+                  color: _statusColor(_status),
                   dense: true,
                 ),
-                Switch(
-                  value: _status == EntityStatus.active,
-                  onChanged: (v) => setState(() {
-                    _status = v ? EntityStatus.active : EntityStatus.inactive;
-                  }),
-                ),
+                if (_status == EntityStatus.active ||
+                    _status == EntityStatus.inactive)
+                  Switch(
+                    value: _status == EntityStatus.active,
+                    onChanged: (v) => setState(() {
+                      _status =
+                          v ? EntityStatus.active : EntityStatus.inactive;
+                    }),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Tooltip(
+                      message: s.isAr
+                          ? 'الحالة مُدارَة تِلقائيّاً مِن إجازات/استِقالة/خَصم'
+                          : 'Auto-managed by leaves/resignation/deduction',
+                      child: const Icon(Icons.lock_outline,
+                          size: 18, color: Colors.grey),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -2071,6 +2103,61 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                 // 🆕 📄 وَثائِق الموظَّف (إصدارات) — يَظهَر بَعدَ الحِفظ
                 // 🆕 بَصمة الوَجه نُقِلَت إلى شاشة المُستَخدِمين (Admin → Users)
                 if (widget.existing != null) ...[
+                  // 🆕 بِطاقة سِجِلّ الحالة (Status History)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => EmployeeStatusHistoryScreen(
+                          employeeId: widget.existing!.id,
+                          employeeName: widget.existing!.fullName,
+                        ),
+                      ));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: _statusColor(_status).withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: _statusColor(_status).withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.history,
+                              color: _statusColor(_status)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  s.isAr
+                                      ? '📜 سِجِلّ تَغَيُّرات الحالة'
+                                      : '📜 Status History',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  s.isAr
+                                      ? 'الحالة الحاليّة: ${_status.label(isAr: true)} — اضغَط لِعَرض كُلّ التَغَيُّرات'
+                                      : 'Current: ${_status.label(isAr: false)} — tap to view all changes',
+                                  style: const TextStyle(
+                                      fontSize: 11, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right,
+                              size: 18, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
                   _DocumentsLinkCard(
                     employee: widget.existing!,
                     isAr: s.isAr,

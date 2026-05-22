@@ -21,6 +21,10 @@ class Deduction {
   final String? signatureData;
   final DateTime? signedAt;
   final String? notes;
+  // 🆕 إيقاف عَن العَمَل
+  final bool suspendsWork;
+  final DateTime? suspensionFrom;
+  final DateTime? suspensionTo;
 
   Deduction({
     required this.id,
@@ -37,6 +41,9 @@ class Deduction {
     this.signatureData,
     this.signedAt,
     this.notes,
+    this.suspendsWork = false,
+    this.suspensionFrom,
+    this.suspensionTo,
   });
 
   bool get isSigned => signedAt != null;
@@ -58,6 +65,13 @@ class Deduction {
             ? null
             : DateTime.tryParse(j['signed_at'] as String),
         notes: j['notes'] as String?,
+        suspendsWork: (j['suspends_work'] as bool?) ?? false,
+        suspensionFrom: j['suspension_from'] == null
+            ? null
+            : DateTime.tryParse(j['suspension_from'] as String),
+        suspensionTo: j['suspension_to'] == null
+            ? null
+            : DateTime.tryParse(j['suspension_to'] as String),
       );
 }
 
@@ -109,6 +123,9 @@ class DeductionsService extends ChangeNotifier {
     String? relatedLeaveId,
     String? countryId,
     String? notes,
+    bool suspendsWork = false,
+    DateTime? suspensionFrom,
+    DateTime? suspensionTo,
   }) async {
     final supa = SupabaseService();
     if (!supa.isReady) return null;
@@ -122,6 +139,13 @@ class DeductionsService extends ChangeNotifier {
         if (relatedLeaveId != null) 'p_related_leave_id': relatedLeaveId,
         if (countryId != null) 'p_country_id': countryId,
         if (notes != null) 'p_notes': notes,
+        'p_suspends_work': suspendsWork,
+        if (suspensionFrom != null)
+          'p_suspension_from':
+              suspensionFrom.toIso8601String().substring(0, 10),
+        if (suspensionTo != null)
+          'p_suspension_to':
+              suspensionTo.toIso8601String().substring(0, 10),
       });
       await refresh();
       if (r is Map) return r['warning_number'] as String?;
