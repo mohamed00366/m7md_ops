@@ -116,6 +116,18 @@ class ModulesRegistry {
           category: ModuleCategory.home,
           builder: (_) => const MyInboxScreen(),
         ),
+        // 🆕 تَقويم الشَركة — تَمّ نَقله مِن قِسم التَقارير لِيَظهَر مَع
+        //    صَندوق الإشعارات (الأَكثَر استِخداماً يَوميّاً)
+        AppModule(
+          key: 'company_calendar',
+          titleAr: 'تَقويم الشَركة',
+          titleEn: 'Company Calendar',
+          icon: Icons.calendar_month,
+          color: ModuleCategory.home.color(),
+          category: ModuleCategory.home,
+          requiredPermission: P.reportsCompanyCalendarView,
+          builder: (_) => const CompanyCalendarTabsScreen(),
+        ),
         AppModule(
           key: 'my_preferences',
           titleAr: 'تَفضيلاتي',
@@ -666,16 +678,6 @@ class ModulesRegistry {
           category: ModuleCategory.reports,
           requiredPermission: P.reportsDataQualityView,
           builder: (_) => const DataQualityScreen(),
-        ),
-        AppModule(
-          key: 'company_calendar',
-          titleAr: 'تَقويم الشَركة',
-          titleEn: 'Company Calendar',
-          icon: Icons.calendar_month,
-          color: ModuleCategory.reports.color(),
-          category: ModuleCategory.reports,
-          requiredPermission: P.reportsCompanyCalendarView,
-          builder: (_) => const CompanyCalendarTabsScreen(),
         ),
         AppModule(
           key: 'daily_memo_report',
