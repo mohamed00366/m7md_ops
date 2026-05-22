@@ -222,6 +222,15 @@ class Employee {
   bool eligibleForTicket;
   /// 🆕 مَبلَغ التَذكِرة (إذا كانَ مُؤَهَّلاً)
   double ticketAmount;
+  /// 🆕 جَواز السَفَر — مَع الشَركة أَم مَع المُوَظَّف
+  /// 'with_employee' (افتِراضيّ) | 'with_company'
+  String passportCustody;
+  /// 🆕 سَبَب الاستِلام/التَسليم
+  String passportCustodyNotes;
+  /// 🆕 تاريخ استِلام الشَركة لِلجَواز
+  DateTime? passportReceivedDate;
+  /// 🆕 تاريخ إعادة الجَواز لِلمُوَظَّف
+  DateTime? passportReturnedDate;
   // مرفقات الملفات (تستخدم لاحقاً مع Supabase Storage)
   String? photoFileId;
   String? idCardFileId;
@@ -282,6 +291,10 @@ class Employee {
     this.otherAllowances = 0,     // 🆕
     this.eligibleForTicket = false, // 🆕
     this.ticketAmount = 0,        // 🆕
+    this.passportCustody = 'with_employee', // 🆕
+    this.passportCustodyNotes = '',         // 🆕
+    this.passportReceivedDate,              // 🆕
+    this.passportReturnedDate,              // 🆕
     this.photoFileId,
     this.idCardFileId,
     this.licenseFileId,

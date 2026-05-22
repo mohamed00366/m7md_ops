@@ -207,6 +207,32 @@ class _ManagerEmployeesState extends State<ManagerEmployees> {
                           _filterHousing == 'off_camp' ? null : 'off_camp'),
                       selected: _filterHousing == 'off_camp',
                     ),
+                    // 🆕 عَرض عَدَد المُوَظَّفين حَسَب نَوع الفيزا (نَشِطون فَقَط)
+                    ...(() {
+                      final activeOnly = scopeList
+                          .where((e) => e.status == EntityStatus.active)
+                          .toList();
+                      final byVisa = <String, int>{};
+                      for (final e in activeOnly) {
+                        final v = e.visaTypeId;
+                        if (v == null || v.isEmpty) continue;
+                        byVisa[v] = (byVisa[v] ?? 0) + 1;
+                      }
+                      return byVisa.entries.map((entry) {
+                        final vt = repo.visaTypeById(entry.key);
+                        final label = vt?.displayName(s.isAr) ??
+                            (s.isAr ? 'فيزا' : 'Visa');
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6, left: 6),
+                          child: _StatChip(
+                            icon: Icons.badge,
+                            label: '${s.isAr ? "فيزا" : "Visa"}: $label',
+                            value: '${entry.value}',
+                            color: AppColors.purple,
+                          ),
+                        );
+                      });
+                    })(),
                   ],
                 ),
               ),
@@ -1292,6 +1318,11 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   late final TextEditingController _otherAllowances;
   late final TextEditingController _ticketAmount;
   bool _eligibleForTicket = false;
+  // 🆕 جَواز السَفَر — الحَفظ + المُلاحَظات + التَواريخ
+  String _passportCustody = 'with_employee';
+  late final TextEditingController _passportCustodyNotes;
+  DateTime? _passportReceivedDate;
+  DateTime? _passportReturnedDate;
   DateTime? _workLetterDate;
   String? _workLetterFileId;
 
@@ -1375,6 +1406,12 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _ticketAmount =
         TextEditingController(text: (e?.ticketAmount ?? 0).toString());
     _eligibleForTicket = e?.eligibleForTicket ?? false;
+    // 🆕 جَواز السَفَر
+    _passportCustody = e?.passportCustody ?? 'with_employee';
+    _passportCustodyNotes =
+        TextEditingController(text: e?.passportCustodyNotes ?? '');
+    _passportReceivedDate = e?.passportReceivedDate;
+    _passportReturnedDate = e?.passportReturnedDate;
     _workLetterDate = e?.workLetterDate;
     _workLetterFileId = e?.workLetterFileId;
 
@@ -1410,6 +1447,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _transportAllowance.dispose();
     _otherAllowances.dispose();
     _ticketAmount.dispose();
+    _passportCustodyNotes.dispose();
     _emergencyName.dispose();
     _emergencyPhone.dispose();
     _education.dispose();
@@ -1590,6 +1628,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         otherAllowances: double.tryParse(_otherAllowances.text) ?? 0,
         eligibleForTicket: _eligibleForTicket,
         ticketAmount: double.tryParse(_ticketAmount.text) ?? 0,
+        passportCustody: _passportCustody,
+        passportCustodyNotes: _passportCustodyNotes.text.trim(),
+        passportReceivedDate: _passportReceivedDate,
+        passportReturnedDate: _passportReturnedDate,
         // الملفات
         photoFileId: _photoFileId,
         idCardFileId: _idCardFileId,
@@ -1670,6 +1712,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.otherAllowances = double.tryParse(_otherAllowances.text) ?? 0;
       e.eligibleForTicket = _eligibleForTicket;
       e.ticketAmount = double.tryParse(_ticketAmount.text) ?? 0;
+      e.passportCustody = _passportCustody;
+      e.passportCustodyNotes = _passportCustodyNotes.text.trim();
+      e.passportReceivedDate = _passportReceivedDate;
+      e.passportReturnedDate = _passportReturnedDate;
       e.photoFileId = _photoFileId;
       e.idCardFileId = _idCardFileId;
       e.licenseFileId = _licenseFileId;
@@ -2006,6 +2052,92 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                     ),
                   ),
                 ]),
+                const SizedBox(height: 10),
+                // 🆕 حِفظ الجَواز: مَع الشَركة / مَع المُوَظَّف
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.brand.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border:
+                        Border.all(color: AppColors.brand.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: const [
+                        Icon(Icons.book_outlined,
+                            size: 18, color: AppColors.brand),
+                        SizedBox(width: 6),
+                        Text('📓 مَوضِع جَواز السَفَر',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w900, fontSize: 13)),
+                      ]),
+                      const SizedBox(height: 8),
+                      Row(children: [
+                        Expanded(
+                          child: RadioListTile<String>(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: const Text('مَع المُوَظَّف',
+                                style: TextStyle(fontSize: 12)),
+                            value: 'with_employee',
+                            groupValue: _passportCustody,
+                            onChanged: (v) =>
+                                setState(() => _passportCustody = v!),
+                          ),
+                        ),
+                        Expanded(
+                          child: RadioListTile<String>(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: const Text('مَع الشَركة',
+                                style: TextStyle(fontSize: 12)),
+                            value: 'with_company',
+                            groupValue: _passportCustody,
+                            onChanged: (v) =>
+                                setState(() => _passportCustody = v!),
+                          ),
+                        ),
+                      ]),
+                      if (_passportCustody == 'with_company') ...[
+                        const SizedBox(height: 8),
+                        Row(children: [
+                          Expanded(
+                            child: _DateField(
+                              label: 'تاريخ الاستِلام',
+                              value: _passportReceivedDate,
+                              onPicked: (d) => setState(
+                                  () => _passportReceivedDate = d),
+                              pickFn: _pickDate,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _DateField(
+                              label: 'تاريخ التَسليم',
+                              value: _passportReturnedDate,
+                              onPicked: (d) => setState(
+                                  () => _passportReturnedDate = d),
+                              pickFn: _pickDate,
+                            ),
+                          ),
+                        ]),
+                      ],
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _passportCustodyNotes,
+                        decoration: const InputDecoration(
+                          labelText: 'مُلاحَظات / سَبَب',
+                          hintText: 'مَثَلاً: لِتَجديد الإقامة',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Row(children: [
                   Expanded(

@@ -79,12 +79,13 @@ class _EmployeeDocumentsExpiryReportScreenState
           .add(Duration(days: _lookaheadDays))
           .toIso8601String()
           .substring(0, 10);
+      // 🆕 نُضَمِّن active + expired لِأَنّ المُنتَهية تَظهَر بِحالة expired
       final rows = await supa.client
           .from('employee_documents')
           .select(
               'id, employee_id, doc_type, doc_type_label, version_number, '
               'document_number, expiry_date, status')
-          .eq('status', 'active')
+          .inFilter('status', ['active', 'expired'])
           .not('expiry_date', 'is', null)
           .lte('expiry_date', upperBound)
           .order('expiry_date', ascending: true);

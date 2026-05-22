@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
@@ -375,6 +376,115 @@ class _DocTypeCardState extends State<_DocTypeCard> {
                         foregroundColor: Colors.black,
                       ),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  // 🆕 قائِمة إجراءات (تَصحيح/حَذف) لِحالة الرَفع الخاطِئ
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    tooltip: isAr ? 'إجراءات أُخرى' : 'More',
+                    onSelected: (v) async {
+                      if (v == 'delete') {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(isAr
+                                ? '⚠ حَذف وَثيقة'
+                                : '⚠ Delete document'),
+                            content: Text(isAr
+                                ? 'سَيُحذَف هذا الإصدار نِهائيّاً. مُتابَعة؟'
+                                : 'This version will be permanently deleted. Continue?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child:
+                                    Text(isAr ? 'إلغاء' : 'Cancel'),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.danger,
+                                    foregroundColor: Colors.white),
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(isAr ? 'حَذف' : 'Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed != true) return;
+                        if (!context.mounted) return;
+                        final ok = await EmployeeDocumentsService.instance
+                            .hardDelete(active);
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor:
+                              ok ? AppColors.success : AppColors.danger,
+                          content: Text(ok
+                              ? (isAr ? '✅ تَمَّ الحَذف' : '✅ Deleted')
+                              : (isAr ? '❌ فَشِل' : '❌ Failed')),
+                        ));
+                      } else if (v == 'replace') {
+                        // حَذف + إعادة رَفع
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(isAr
+                                ? '🔄 تَصحيح خَطَأ'
+                                : '🔄 Fix wrong upload'),
+                            content: Text(isAr
+                                ? 'سَيُحذَف الإصدار الحاليّ وَيَفتَح حِوار رَفع جَديد. مُتابَعة؟'
+                                : 'Current version will be deleted and upload dialog will reopen. Continue?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child:
+                                    Text(isAr ? 'إلغاء' : 'Cancel'),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.warning,
+                                    foregroundColor: Colors.white),
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(
+                                    isAr ? 'حَذف وَإعادة' : 'Delete & Reopen'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed != true) return;
+                        if (!context.mounted) return;
+                        final ok = await EmployeeDocumentsService.instance
+                            .hardDelete(active);
+                        if (!context.mounted) return;
+                        if (ok && widget.onUploadNew != null) {
+                          widget.onUploadNew!();
+                        }
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'replace',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.swap_horiz,
+                                size: 18, color: AppColors.warning),
+                            const SizedBox(width: 8),
+                            Text(isAr
+                                ? 'تَصحيح خَطَأ في الرَفع'
+                                : 'Fix wrong upload'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.delete_outline,
+                                size: 18, color: AppColors.danger),
+                            const SizedBox(width: 8),
+                            Text(isAr ? 'حَذف نِهائيّ' : 'Delete permanently'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -968,39 +1078,120 @@ class _UploadDialogState extends State<_UploadDialog> {
 }
 
 // ============================================================
-// شاشة عَرض الوَثيقة (صورة كَبيرة)
+// شاشة عَرض الوَثيقة — صورة أَو PDF
 // ============================================================
 class _DocumentViewerScreen extends StatelessWidget {
   final String url;
   final String title;
   const _DocumentViewerScreen({required this.url, required this.title});
 
+  bool get _isPdf {
+    final u = url.toLowerCase().split('?').first;
+    return u.endsWith('.pdf');
+  }
+
+  Future<void> _openInBrowser(BuildContext context) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: AppColors.danger,
+        content: Text(AppStrings.of(context).isAr
+            ? 'لا يُمكِن فَتح المِلَفّ'
+            : 'Cannot open file'),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isAr = AppStrings.of(context).isAr;
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: M7AppBar(title: title),
-      body: Center(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 4,
-          child: Image.network(
-            url,
-            fit: BoxFit.contain,
-            loadingBuilder: (_, child, progress) {
-              if (progress == null) return child;
-              return const CircularProgressIndicator(
-                  color: AppColors.gold);
-            },
-            errorBuilder: (_, __, ___) => Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'فَشِل تَحميل الصورة',
-                style: TextStyle(color: Colors.grey.shade400),
-              ),
-            ),
+      appBar: M7AppBar(
+        title: title,
+        actions: [
+          M7AppBarAction(
+            icon: Icons.open_in_new,
+            tooltip: isAr ? 'فَتح في المُتَصَفِّح' : 'Open in browser',
+            onPressed: () => _openInBrowser(context),
           ),
-        ),
+        ],
+      ),
+      body: Center(
+        child: _isPdf
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.picture_as_pdf,
+                      size: 96, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    isAr ? 'مِلَفّ PDF' : 'PDF File',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    title,
+                    style: TextStyle(
+                        color: Colors.grey.shade400, fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => _openInBrowser(context),
+                    icon: const Icon(Icons.open_in_new),
+                    label: Text(isAr ? 'فَتح المِلَفّ' : 'Open PDF'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.gold,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 14),
+                    ),
+                  ),
+                ],
+              )
+            : InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4,
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (_, child, progress) {
+                    if (progress == null) return child;
+                    return const CircularProgressIndicator(
+                        color: AppColors.gold);
+                  },
+                  errorBuilder: (_, __, ___) => Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            color: Colors.grey, size: 48),
+                        const SizedBox(height: 8),
+                        Text(
+                          isAr
+                              ? 'فَشِل تَحميل الصورة — اضغَط لِفَتح في المُتَصَفِّح'
+                              : 'Failed to load — tap to open in browser',
+                          style: TextStyle(color: Colors.grey.shade400),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () => _openInBrowser(context),
+                          icon: const Icon(Icons.open_in_new),
+                          label: Text(isAr ? 'فَتح' : 'Open'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
