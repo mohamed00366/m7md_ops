@@ -1855,12 +1855,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String?>(
                       value: _jobTitleId,
+                      isExpanded: true,
                       decoration: InputDecoration(labelText: s.jobTitle2),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         ...repo.jobTitles.map((j) => DropdownMenuItem(
                               value: j.id,
-                              child: Text(j.displayName(s.isAr)),
+                              child: Text(j.displayName(s.isAr),
+                                  overflow: TextOverflow.ellipsis),
                             )),
                       ],
                       onChanged: (v) {
@@ -1873,12 +1875,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String?>(
                       value: _departmentId,
+                      isExpanded: true,
                       decoration: InputDecoration(labelText: s.department2),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         ...repo.departments.map((d) => DropdownMenuItem(
                               value: d.id,
-                              child: Text(d.displayName(s.isAr)),
+                              child: Text(d.displayName(s.isAr),
+                                  overflow: TextOverflow.ellipsis),
                             )),
                       ],
                       onChanged: (v) {
@@ -1893,12 +1897,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String?>(
                       value: _maritalStatusId,
+                      isExpanded: true,
                       decoration: InputDecoration(labelText: s.maritalStatus2),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         ...repo.maritalStatuses.map((m) => DropdownMenuItem(
                               value: m.id,
-                              child: Text(m.displayName(s.isAr)),
+                              child: Text(m.displayName(s.isAr),
+                                  overflow: TextOverflow.ellipsis),
                             )),
                       ],
                       onChanged: (v) => setState(() => _maritalStatusId = v),
@@ -1938,12 +1944,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String?>(
                       value: _nationalityId,
+                      isExpanded: true,
                       decoration: InputDecoration(labelText: s.nationality2),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         ...repo.nationalities.map((n) => DropdownMenuItem(
                               value: n.id,
-                              child: Text(n.displayName(s.isAr)),
+                              child: Text(n.displayName(s.isAr),
+                                  overflow: TextOverflow.ellipsis),
                             )),
                       ],
                       onChanged: (v) => setState(() => _nationalityId = v),
@@ -2185,12 +2193,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String?>(
                       value: _visaTypeId,
+                      isExpanded: true,
                       decoration: InputDecoration(labelText: s.visaType2),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         ...repo.visaTypes.map((v) => DropdownMenuItem(
                               value: v.id,
-                              child: Text(v.displayName(s.isAr)),
+                              child: Text(v.displayName(s.isAr),
+                                  overflow: TextOverflow.ellipsis),
                             )),
                       ],
                       onChanged: (v) => setState(() => _visaTypeId = v),
