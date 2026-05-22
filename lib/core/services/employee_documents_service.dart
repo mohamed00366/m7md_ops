@@ -229,6 +229,10 @@ class EmployeeDocument {
   final DateTime uploadedAt;
   final String? uploadedByAccountId;
   final String? notes;
+  /// 🆕 مَسارات مُرفَقات إضافيّة (حَتّى 7 → الإجماليّ ٨ مَع filePath)
+  final List<String> attachmentPaths;
+  /// 🆕 أَنواع MIME لِلمُرفَقات الإضافيّة (نَفس تَرتيب attachmentPaths)
+  final List<String> attachmentMimes;
 
   const EmployeeDocument({
     required this.id,
@@ -249,6 +253,8 @@ class EmployeeDocument {
     required this.uploadedAt,
     this.uploadedByAccountId,
     this.notes,
+    this.attachmentPaths = const <String>[],
+    this.attachmentMimes = const <String>[],
   });
 
   /// أَيّام مُتَبَقّية قَبل انتِهاء الصَلاحيّة (null إذا لا تاريخ انتِهاء)
@@ -300,6 +306,12 @@ class EmployeeDocument {
       uploadedAt: _ts(r['uploaded_at']) ?? DateTime.now(),
       uploadedByAccountId: r['uploaded_by_account_id'] as String?,
       notes: r['notes'] as String?,
+      attachmentPaths: ((r['attachment_paths'] as List?) ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+      attachmentMimes: ((r['attachment_mimes'] as List?) ?? const [])
+          .map((e) => e.toString())
+          .toList(),
     );
   }
 

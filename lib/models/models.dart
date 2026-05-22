@@ -243,6 +243,12 @@ class Employee {
   String? workLetterFileId;
   DateTime? workLetterDate;
 
+  /// 🆕 مِلَفّات إضافيّة لِكُلّ وَثيقة (صُوَر + PDF) — حَتّى 5 مِلَفّات
+  /// تَبقى الحُقول المُفرَدة أَعلاه لِلتَوافُق الخَلفيّ كَمِلَفّ رَئيسيّ.
+  List<String> idCardFiles;
+  List<String> licenseFiles;
+  List<String> workLetterFiles;
+
   Employee({
     required this.id,
     required this.code,
@@ -306,7 +312,12 @@ class Employee {
     this.licenseFileId,
     this.workLetterFileId,
     this.workLetterDate,
-  });
+    List<String>? idCardFiles,
+    List<String>? licenseFiles,
+    List<String>? workLetterFiles,
+  })  : idCardFiles = idCardFiles ?? <String>[],
+        licenseFiles = licenseFiles ?? <String>[],
+        workLetterFiles = workLetterFiles ?? <String>[];
 
   /// إجمالي الراتب = الأساسي + others فقط (حسب الصور)
   double get totalSalary => basicSalary + others;

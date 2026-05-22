@@ -1486,6 +1486,16 @@ class SupabaseDataService {
         // 🆕 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
         excludedFromFaceLogin:
             (r['excluded_from_face_login'] as bool?) ?? false,
+        // 🆕 مِلَفّات إضافيّة (Multi-file)
+        idCardFiles: ((r['id_card_files'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        licenseFiles: ((r['license_files'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
+        workLetterFiles: ((r['work_letter_files'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
       );
 
   Map<String, dynamic> _employeeToPayload(Employee e) {
@@ -1600,6 +1610,10 @@ class SupabaseDataService {
     }
     // 🆕 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
     payload['excluded_from_face_login'] = e.excludedFromFaceLogin;
+    // 🆕 مِلَفّات إضافيّة (Multi-file)
+    payload['id_card_files'] = e.idCardFiles;
+    payload['license_files'] = e.licenseFiles;
+    payload['work_letter_files'] = e.workLetterFiles;
     return payload;
   }
 

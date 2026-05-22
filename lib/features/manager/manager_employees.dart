@@ -21,6 +21,7 @@ import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/employee_identity.dart';
+import '../../shared/m7_multi_upload.dart';
 import '../../shared/widgets.dart';
 import '../admin/employee_documents_expiry_report_screen.dart';
 import '../admin/employee_documents_screen.dart';
@@ -1351,6 +1352,11 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   // 🎭 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
   bool _excludedFromFaceLogin = false;
 
+  // 📎 مِلَفّات إضافيّة (Multi-file) لِكُلّ وَثيقة
+  List<String> _idCardFiles = <String>[];
+  List<String> _licenseFiles = <String>[];
+  List<String> _workLetterFiles = <String>[];
+
   @override
   void initState() {
     super.initState();
@@ -1417,6 +1423,12 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _passportReturnedDate = e?.passportReturnedDate;
     _workLetterDate = e?.workLetterDate;
     _workLetterFileId = e?.workLetterFileId;
+
+    // 📎 مِلَفّات إضافيّة
+    _idCardFiles = List<String>.from(e?.idCardFiles ?? const <String>[]);
+    _licenseFiles = List<String>.from(e?.licenseFiles ?? const <String>[]);
+    _workLetterFiles =
+        List<String>.from(e?.workLetterFiles ?? const <String>[]);
     _excludedFromFaceLogin = e?.excludedFromFaceLogin ?? false;
 
     _emergencyName = TextEditingController(text: e?.emergencyContactName ?? '');
@@ -1644,6 +1656,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         licenseFileId: _licenseFileId,
         workLetterFileId: _workLetterFileId,
         workLetterDate: _workLetterDate,
+        // 📎 مِلَفّات إضافيّة (Multi-file)
+        idCardFiles: _idCardFiles,
+        licenseFiles: _licenseFiles,
+        workLetterFiles: _workLetterFiles,
       );
       if (supaReady) {
         final created = await dataService.createEmployee(newEmp, countryId: cid);
@@ -1728,6 +1744,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.licenseFileId = _licenseFileId;
       e.workLetterFileId = _workLetterFileId;
       e.workLetterDate = _workLetterDate;
+      // 📎 مِلَفّات إضافيّة (Multi-file)
+      e.idCardFiles = List<String>.from(_idCardFiles);
+      e.licenseFiles = List<String>.from(_licenseFiles);
+      e.workLetterFiles = List<String>.from(_workLetterFiles);
       if (supaReady) {
         final ok = await dataService.updateEmployee(e);
         if (!ok && mounted) {
@@ -2208,16 +2228,26 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   ),
                 ]),
                 const SizedBox(height: 10),
-                _UploadBox(
+                M7MultiUploadBox(
                   label: s.idCardDoc,
                   hint: s.uploadIdCard,
                   icon: Icons.badge_outlined,
-                  hasFile: _idCardFileId != null,
                   bucket: 'id_cards',
                   pathPrefix: 'emp_${widget.existing?.id ?? "new"}_idcard',
-                  existingUrl: _idCardFileId,
-                  onUploaded: (url) =>
-                      setState(() => _idCardFileId = url),
+                  urls: [
+                    if (_idCardFileId != null) _idCardFileId!,
+                    ..._idCardFiles,
+                  ],
+                  onChanged: (list) => setState(() {
+                    // أَوَّل عُنصُر يَبقى كَالمِلَفّ الرَئيسيّ (تَوافُق خَلفيّ)
+                    if (list.isEmpty) {
+                      _idCardFileId = null;
+                      _idCardFiles = <String>[];
+                    } else {
+                      _idCardFileId = list.first;
+                      _idCardFiles = list.skip(1).toList();
+                    }
+                  }),
                 ),
               ],
             ),
@@ -2257,16 +2287,25 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   ),
                 ]),
                 const SizedBox(height: 10),
-                _UploadBox(
+                M7MultiUploadBox(
                   label: s.licenseDoc,
                   hint: s.uploadLicense,
                   icon: Icons.upload_file_outlined,
-                  hasFile: _licenseFileId != null,
                   bucket: 'licenses',
                   pathPrefix: 'emp_${widget.existing?.id ?? "new"}_license',
-                  existingUrl: _licenseFileId,
-                  onUploaded: (url) =>
-                      setState(() => _licenseFileId = url),
+                  urls: [
+                    if (_licenseFileId != null) _licenseFileId!,
+                    ..._licenseFiles,
+                  ],
+                  onChanged: (list) => setState(() {
+                    if (list.isEmpty) {
+                      _licenseFileId = null;
+                      _licenseFiles = <String>[];
+                    } else {
+                      _licenseFileId = list.first;
+                      _licenseFiles = list.skip(1).toList();
+                    }
+                  }),
                 ),
               ],
             ),
@@ -2478,17 +2517,26 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   pickFn: _pickDate,
                 ),
                 const SizedBox(height: 10),
-                _UploadBox(
+                M7MultiUploadBox(
                   label: s.workLetter,
                   hint: s.uploadWorkLetter,
                   icon: Icons.description_outlined,
-                  hasFile: _workLetterFileId != null,
                   bucket: 'work_letters',
                   pathPrefix:
                       'emp_${widget.existing?.id ?? "new"}_workletter',
-                  existingUrl: _workLetterFileId,
-                  onUploaded: (url) =>
-                      setState(() => _workLetterFileId = url),
+                  urls: [
+                    if (_workLetterFileId != null) _workLetterFileId!,
+                    ..._workLetterFiles,
+                  ],
+                  onChanged: (list) => setState(() {
+                    if (list.isEmpty) {
+                      _workLetterFileId = null;
+                      _workLetterFiles = <String>[];
+                    } else {
+                      _workLetterFileId = list.first;
+                      _workLetterFiles = list.skip(1).toList();
+                    }
+                  }),
                 ),
               ],
             ),

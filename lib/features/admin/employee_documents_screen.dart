@@ -355,6 +355,14 @@ class _DocTypeCardState extends State<_DocTypeCard> {
               _kvRow(
                   isAr ? 'رُفِعَت' : 'Uploaded',
                   _fmtDate(active.uploadedAt)),
+              // 🆕 شارة عَدَد المُرفَقات الإضافيّة + زِرّ "عَرض الكُلّ"
+              if (active.attachmentPaths.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                _AttachmentsRow(
+                  doc: active,
+                  isAr: isAr,
+                ),
+              ],
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -362,7 +370,13 @@ class _DocTypeCardState extends State<_DocTypeCard> {
                     child: OutlinedButton.icon(
                       onPressed: () => widget.onView(active),
                       icon: const Icon(Icons.visibility, size: 16),
-                      label: Text(isAr ? 'عَرض' : 'View'),
+                      label: Text(isAr
+                          ? (active.attachmentPaths.isEmpty
+                              ? 'عَرض'
+                              : 'عَرض الرَئيسيّ')
+                          : (active.attachmentPaths.isEmpty
+                              ? 'View'
+                              : 'View main')),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1073,6 +1087,103 @@ class _UploadDialogState extends State<_UploadDialog> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ============================================================
+// 🆕 صَفّ المُرفَقات الإضافيّة (badge + زِرّ عَرض الكُلّ)
+// ============================================================
+class _AttachmentsRow extends StatelessWidget {
+  final EmployeeDocument doc;
+  final bool isAr;
+  const _AttachmentsRow({required this.doc, required this.isAr});
+
+  Future<void> _openAttachment(BuildContext context, String path) async {
+    final url =
+        await EmployeeDocumentsService.instance.getSignedUrl(path);
+    if (!context.mounted) return;
+    if (url == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: AppColors.danger,
+        content: Text(isAr ? 'فَشِل فَتح المَلَفّ' : 'Failed to open'),
+      ));
+      return;
+    }
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => _DocumentViewerScreen(
+        url: url,
+        title: isAr ? 'مُرفَق إضافيّ' : 'Attachment',
+      ),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = doc.attachmentPaths.length + 1; // +1 لِلمِلَفّ الرَئيسيّ
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.brand.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.attach_file, size: 16, color: AppColors.brand),
+          const SizedBox(width: 6),
+          Text(
+            isAr ? 'مُرفَقات: $total' : 'Attachments: $total',
+            style: const TextStyle(
+                fontSize: 12, fontWeight: FontWeight.w800),
+          ),
+          const Spacer(),
+          TextButton.icon(
+            onPressed: () {
+              showModalBottomSheet<void>(
+                context: context,
+                builder: (ctx) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          isAr ? 'كُلّ المُرفَقات' : 'All attachments',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w900, fontSize: 14),
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      for (int i = 0; i < doc.attachmentPaths.length; i++)
+                        ListTile(
+                          leading: const Icon(Icons.insert_drive_file,
+                              color: AppColors.brand),
+                          title: Text(isAr
+                              ? 'مُرفَق ${i + 1}'
+                              : 'Attachment ${i + 1}'),
+                          subtitle: Text(
+                            i < doc.attachmentMimes.length
+                                ? doc.attachmentMimes[i]
+                                : '',
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                          trailing: const Icon(Icons.open_in_new, size: 18),
+                          onTap: () {
+                            Navigator.of(ctx).pop();
+                            _openAttachment(context, doc.attachmentPaths[i]);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.list, size: 16),
+            label: Text(isAr ? 'عَرض الكُلّ' : 'View all'),
+          ),
+        ],
+      ),
     );
   }
 }
