@@ -48,7 +48,7 @@ class _ManagerSettingsState extends State<ManagerSettings>
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
-    // ملاحظة: لا نضع AppBar هنا - RoleScaffold يوفّر AppBar الخارجي
+    // ملاحظة: لا نضع AppBar هنا - الـparent (SettingsHubScreen) يُوَفِّر Scaffold + AppBar
     return Column(
       children: [
         Container(

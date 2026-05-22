@@ -1051,6 +1051,7 @@ class _EmployeeGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final isActive = employee.status == EntityStatus.active;
     final color = isActive ? AppColors.success : AppColors.textTertiaryLight;
     return InkWell(

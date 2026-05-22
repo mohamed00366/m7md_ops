@@ -533,6 +533,18 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
             c = Colors.orange;
             label = '—';
             break;
+          case EntityStatus.suspended:
+            c = Colors.deepOrange;
+            label = isAr ? 'مَوقوف' : 'Suspended';
+            break;
+          case EntityStatus.resigned:
+            c = Colors.redAccent;
+            label = isAr ? 'مُستَقيل' : 'Resigned';
+            break;
+          case EntityStatus.terminated:
+            c = Colors.red.shade900;
+            label = isAr ? 'مَفصول' : 'Terminated';
+            break;
         }
         return ListTile(
           dense: true,

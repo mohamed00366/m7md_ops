@@ -13,7 +13,6 @@ import '../hr/hr_dashboard_screen.dart';
 import '../operation/hr/hr_onpoint_training_screen.dart';
 // Camp Boss modules
 import '../camp_boss/bus_shift_km_screen.dart';
-// 🚫 camp_boss_bus_planning أُزيلَ — التابَة "الخُطّة الأُسبوعيّة" داخِل CampBossBuses تُغني عَنه
 import '../camp_boss/camp_boss_buses.dart';
 import '../camp_boss/camp_boss_dashboard.dart';
 import '../laundry/camp_boss/camp_boss_dashboard.dart' as amana;
@@ -403,8 +402,6 @@ class ModulesRegistry {
           requiredPermission: P.busesView,
           builder: (_) => const CampBossBuses(),
         ),
-        // 🚫 تَخطيط الباصات (CampBossBusPlanning) — حُذِفَ بِطَلَب المُستَخدِم
-        //   التابَة "📅 الخُطّة الأُسبوعيّة" داخِل "🚐 مَركَز الباصات" تُغني عَنها.
         AppModule(
           key: 'bus_shift_km',
           titleAr: '🛞 كيلومترات الوَردِيّات',

@@ -395,6 +395,12 @@ class AnalyticsDashboardScreen extends StatelessWidget {
         return Colors.orange;
       case EntityStatus.vacation:
         return Colors.teal;
+      case EntityStatus.suspended:
+        return Colors.deepOrange;
+      case EntityStatus.resigned:
+        return Colors.redAccent;
+      case EntityStatus.terminated:
+        return Colors.red.shade900;
     }
   }
 
@@ -408,6 +414,12 @@ class AnalyticsDashboardScreen extends StatelessWidget {
         return isAr ? 'صِيانة' : 'Maintenance';
       case EntityStatus.vacation:
         return isAr ? 'في إجازة' : 'On Vacation';
+      case EntityStatus.suspended:
+        return isAr ? 'مَوقوف' : 'Suspended';
+      case EntityStatus.resigned:
+        return isAr ? 'مُستَقيل' : 'Resigned';
+      case EntityStatus.terminated:
+        return isAr ? 'مَفصول' : 'Terminated';
     }
   }
 

@@ -49,6 +49,15 @@ class M7StatusChip extends StatelessWidget {
         return (Colors.orange, Icons.build_circle, isAr ? ar2ur.tr('Maintenance') : 'Maintenance');
       case EntityStatus.vacation:
         return (Colors.teal, Icons.beach_access, isAr ? ar2ur.tr('On Vacation') : 'On Vacation');
+      case EntityStatus.suspended:
+        return (Colors.deepOrange, Icons.block,
+            isAr ? 'مَوقوف عَن العَمَل' : 'Suspended');
+      case EntityStatus.resigned:
+        return (Colors.redAccent, Icons.logout,
+            isAr ? 'مُستَقيل' : 'Resigned');
+      case EntityStatus.terminated:
+        return (Colors.red.shade900, Icons.block_flipped,
+            isAr ? 'مَفصول' : 'Terminated');
     }
   }
 }

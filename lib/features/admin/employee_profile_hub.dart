@@ -560,6 +560,21 @@ class _StatusChip extends StatelessWidget {
         ic = Icons.beach_access;
         label = isAr ? 'في إجازة' : 'On Vacation';
         break;
+      case EntityStatus.suspended:
+        c = Colors.deepOrange;
+        ic = Icons.block;
+        label = isAr ? 'مَوقوف عَن العَمَل' : 'Suspended';
+        break;
+      case EntityStatus.resigned:
+        c = Colors.redAccent;
+        ic = Icons.logout;
+        label = isAr ? 'مُستَقيل' : 'Resigned';
+        break;
+      case EntityStatus.terminated:
+        c = Colors.red.shade900;
+        ic = Icons.block_flipped;
+        label = isAr ? 'مَفصول' : 'Terminated';
+        break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

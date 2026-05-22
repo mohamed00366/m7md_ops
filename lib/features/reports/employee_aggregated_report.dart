@@ -515,6 +515,18 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
         c = Colors.orange;
         label = isAr ? 'صيانة' : 'Maint.';
         break;
+      case EntityStatus.suspended:
+        c = Colors.deepOrange;
+        label = isAr ? 'مَوقوف' : 'Suspended';
+        break;
+      case EntityStatus.resigned:
+        c = Colors.redAccent;
+        label = isAr ? 'مُستَقيل' : 'Resigned';
+        break;
+      case EntityStatus.terminated:
+        c = Colors.red.shade900;
+        label = isAr ? 'مَفصول' : 'Terminated';
+        break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
