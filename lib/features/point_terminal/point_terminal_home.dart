@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
@@ -834,6 +835,8 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
   bool _statusOk = false;
   Employee? _matchedEmployee;
   double _matchScore = 0;
+  /// 🆕 صورة الوَجه المُلتَقَطة عِندَ المُطابَقة — تُرفَع لِـ Storage عِندَ التَسجيل
+  Uint8List? _matchedFaceBytes;
   // مَنع المُعالَجة المُستَمِرّة كُلّ frame
   DateTime _lastProcess = DateTime.fromMillisecondsSinceEpoch(0);
   static const _interval = Duration(milliseconds: 600);
@@ -1094,6 +1097,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
       setState(() {
         _matchedEmployee = emp;
         _matchScore = result.bestScore;
+        _matchedFaceBytes = bytes; // 🆕 احتَفِظ بِالصورة لِلرَفع لاحِقاً
         _statusOk = true;
         _status =
             '✅ ${emp.fullName} (${(result.bestScore * 100).toStringAsFixed(0)}%)';
@@ -1175,6 +1179,26 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
         // إذا لم نَستَطِع قِراءة GPS وَلَيس إلزاميّاً — نَسمَح
       }
 
+      // 🆕 رَفع صورة إثبات الوَجه (إن وُجِدَت) — تُحفَظ في photo_path
+      String? photoUrl;
+      if (supa.isReady && _matchedFaceBytes != null) {
+        try {
+          final path =
+              'clock_${DateTime.now().millisecondsSinceEpoch}_${emp.id}.jpg';
+          await supa.client.storage.from('clock_in_photos').uploadBinary(
+                path,
+                _matchedFaceBytes!,
+                fileOptions: const FileOptions(
+                    contentType: 'image/jpeg', upsert: true),
+              );
+          photoUrl =
+              supa.client.storage.from('clock_in_photos').getPublicUrl(path);
+        } catch (e) {
+          // الرَفع اختِياريّ — لا تَفشَل العَمَلِيّة كامِلةً
+          M7Log.error('PointTerminal', 'uploadClockPhoto', error: e);
+        }
+      }
+
       if (supa.isReady) {
         await supa.client.from('point_terminal_clock_logs').insert({
           'point_id': widget.point.id,
@@ -1184,6 +1208,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
           'match_confidence': _matchScore,
           if (deviceLat != null) 'device_latitude': deviceLat,
           if (deviceLng != null) 'device_longitude': deviceLng,
+          if (photoUrl != null) 'photo_path': photoUrl,
         });
       }
       if (!mounted) return;
@@ -1617,7 +1642,8 @@ class _AttendanceListTabState extends State<_AttendanceListTab> {
       final start = DateTime(today.year, today.month, today.day);
       final rows = await supa.client
           .from('point_terminal_clock_logs')
-          .select('id, employee_id, action, created_at, match_confidence')
+          .select(
+              'id, employee_id, action, created_at, match_confidence, photo_path')
           .eq('point_id', widget.point.id)
           .gte('created_at', start.toUtc().toIso8601String())
           .order('created_at', ascending: false);
