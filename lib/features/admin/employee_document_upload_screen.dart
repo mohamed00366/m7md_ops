@@ -43,6 +43,9 @@ class _EmployeeDocumentUploadScreenState
   Uint8List? _bytes;
   String? _fileName;
   String? _mimeType;
+  /// 🆕 مُرفَقات إضافيّة (حَتّى 7 إضافيّة → الإجماليّ 8)
+  final List<({Uint8List bytes, String fileName, String? mime})> _extraFiles = [];
+  static const int _maxTotalFiles = 8;
   final _numberCtrl = TextEditingController();
   final _authorityCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
@@ -73,7 +76,22 @@ class _EmployeeDocumentUploadScreenState
     }
   }
 
-  /// اختِيار مِلَفّ (PDF أَو أَيّ مُستَنَد)
+  String _mimeOfExt(String ext) {
+    ext = ext.toLowerCase();
+    if (ext == 'pdf') return 'application/pdf';
+    if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') {
+      return 'image/jpeg';
+    }
+    if (ext == 'png') return 'image/png';
+    if (ext == 'webp') return 'image/webp';
+    if (ext == 'gif') return 'image/gif';
+    if (ext == 'bmp') return 'image/bmp';
+    if (ext == 'doc' || ext == 'docx') return 'application/msword';
+    if (ext == 'xls' || ext == 'xlsx') return 'application/vnd.ms-excel';
+    return 'application/octet-stream';
+  }
+
+  /// 🆕 اختِيار مِلَفّ/مَلَفّات — يَدعَم مُتَعَدِّد (حَتّى 8 إجماليّ)
   Future<void> _pickAnyFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -83,30 +101,51 @@ class _EmployeeDocumentUploadScreenState
           'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
         ],
         withData: true,
+        allowMultiple: true, // 🆕 مُتَعَدِّد
       );
       if (result == null || result.files.isEmpty) return;
-      final f = result.files.first;
-      if (f.bytes == null) return;
 
-      final ext = (f.extension ?? '').toLowerCase();
-      String mime = 'application/octet-stream';
-      if (ext == 'pdf') mime = 'application/pdf';
-      else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
-      else if (ext == 'png') mime = 'image/png';
-      else if (ext == 'webp') mime = 'image/webp';
-      else if (ext == 'gif') mime = 'image/gif';
-      else if (ext == 'bmp') mime = 'image/bmp';
-      else if (ext == 'doc' || ext == 'docx') mime = 'application/msword';
-      else if (ext == 'xls' || ext == 'xlsx') mime = 'application/vnd.ms-excel';
+      // كَم مُتَبَقّي يُمكِن إضافَته
+      final currentCount = (_bytes != null ? 1 : 0) + _extraFiles.length;
+      final remaining = _maxTotalFiles - currentCount;
+      if (remaining <= 0) return;
 
-      setState(() {
-        _bytes = f.bytes;
-        _fileName = f.name;
-        _mimeType = mime;
-      });
+      var added = 0;
+      for (final f in result.files) {
+        if (f.bytes == null) continue;
+        if (added >= remaining) break;
+        final mime = _mimeOfExt(f.extension ?? '');
+        if (_bytes == null) {
+          // المِلَفّ الأَوَّل → الرَئيسيّ
+          setState(() {
+            _bytes = f.bytes;
+            _fileName = f.name;
+            _mimeType = mime;
+          });
+        } else {
+          // الباقي → مُرفَقات
+          setState(() {
+            _extraFiles.add((bytes: f.bytes!, fileName: f.name, mime: mime));
+          });
+        }
+        added++;
+      }
+
+      if (result.files.length > added && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text(AppStrings.of(context).isAr
+              ? '⚠ تَجاوُز الحَدّ — تَمَّت إضافة $added فَقَط (المَسموح $_maxTotalFiles)'
+              : '⚠ Limit exceeded — only $added added (max $_maxTotalFiles)'),
+        ));
+      }
     } catch (e) {
       M7Log.error('DocUpload', 'pickAnyFile', error: e);
     }
+  }
+
+  void _removeExtra(int index) {
+    setState(() => _extraFiles.removeAt(index));
   }
 
   Future<void> _pickIssued() async {
@@ -152,6 +191,16 @@ class _EmployeeDocumentUploadScreenState
           ? null
           : _notesCtrl.text.trim(),
     );
+    // 🆕 رَفع المُرفَقات الإضافيّة إن وُجِدَت
+    if (id != null && _extraFiles.isNotEmpty) {
+      await EmployeeDocumentsService.instance.addAttachments(
+        documentId: id,
+        employeeId: widget.employee.id,
+        docType: widget.docType,
+        files: _extraFiles,
+      );
+    }
+
     if (!mounted) return;
     setState(() => _saving = false);
     if (id != null) {
@@ -236,14 +285,91 @@ class _EmployeeDocumentUploadScreenState
   Widget _buildStep() {
     switch (_step) {
       case 0:
-        return _ImagePickerStep(
-          bytes: _bytes,
-          fileName: _fileName,
-          mimeType: _mimeType,
-          onPickCamera: () => _pickImage(source: ImageSource.camera),
-          onPickGallery: () => _pickImage(source: ImageSource.gallery),
-          onPickFile: _pickAnyFile,
-          docType: widget.docType,
+        return Column(
+          children: [
+            _ImagePickerStep(
+              bytes: _bytes,
+              fileName: _fileName,
+              mimeType: _mimeType,
+              onPickCamera: () => _pickImage(source: ImageSource.camera),
+              onPickGallery: () => _pickImage(source: ImageSource.gallery),
+              onPickFile: _pickAnyFile,
+              docType: widget.docType,
+            ),
+            // 🆕 المُرفَقات الإضافيّة + زِرّ إضافة المَزيد
+            if (_bytes != null) ...[
+              const SizedBox(height: 16),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  '📎 مُرفَقات إضافيّة (${_extraFiles.length} مِن $_maxTotalFiles-1)',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w900, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 6),
+              ..._extraFiles.asMap().entries.map((e) {
+                final i = e.key;
+                final f = e.value;
+                final isImg = (f.mime ?? '').startsWith('image/');
+                final isPdf = f.mime == 'application/pdf';
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 2),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isImg
+                            ? Icons.image
+                            : (isPdf ? Icons.picture_as_pdf : Icons.insert_drive_file),
+                        size: 18,
+                        color: isPdf ? Colors.red : AppColors.brand,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(f.fileName,
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                      Text(
+                        '${(f.bytes.lengthInBytes / 1024).toStringAsFixed(0)} KB',
+                        style: const TextStyle(
+                            fontSize: 10, color: Colors.grey),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close,
+                            size: 16, color: AppColors.danger),
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            const BoxConstraints(minWidth: 28, minHeight: 28),
+                        onPressed: () => _removeExtra(i),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height: 8),
+              if ((_bytes != null ? 1 : 0) + _extraFiles.length <
+                  _maxTotalFiles)
+                OutlinedButton.icon(
+                  onPressed: _pickAnyFile,
+                  icon: const Icon(Icons.add),
+                  label: Text(
+                    AppStrings.of(context).isAr
+                        ? 'إضافة مَلَفّ آخَر (PDF/صورة)'
+                        : 'Add another file (PDF/Image)',
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40),
+                  ),
+                ),
+            ],
+          ],
         );
       case 1:
         return _DataEntryStep(

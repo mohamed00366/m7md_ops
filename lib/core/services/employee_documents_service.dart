@@ -391,7 +391,71 @@ class EmployeeDocumentsService extends ChangeNotifier {
     }
   }
 
-  /// 🆕 قائِمة كُلّ الإصدارات لِنَوع وَثيقة (نَشِطة + مُستَبدَلة)
+  /// 🆕 رَفع مُرفَقات إضافيّة لِوَثيقة مَوجودة (حَتّى 8 إجماليّ)
+  /// تُضاف إلى `attachment_paths` بِدون التَأثير عَلى المِلَفّ الرَئيسيّ
+  Future<bool> addAttachments({
+    required String documentId,
+    required String employeeId,
+    required EmpDocType docType,
+    required List<({Uint8List bytes, String fileName, String? mime})> files,
+  }) async {
+    final supa = SupabaseService();
+    if (!supa.isReady) return false;
+    if (files.isEmpty) return true;
+    try {
+      // 1) ارفَع كُلّ المِلَفّات لِـ Storage
+      final paths = <String>[];
+      final mimes = <String>[];
+      for (final f in files) {
+        final ts = DateTime.now().millisecondsSinceEpoch;
+        final cleanName = f.fileName.replaceAll(RegExp(r'[^\w\.\-]'), '_');
+        final storagePath =
+            '$employeeId/${docType.key}/${ts}_attach_$cleanName';
+        await supa.client.storage.from(_bucket).uploadBinary(
+              storagePath,
+              f.bytes,
+              fileOptions: FileOptions(
+                upsert: false,
+                contentType: f.mime,
+              ),
+            );
+        paths.add(storagePath);
+        mimes.add(f.mime ?? 'application/octet-stream');
+      }
+
+      // 2) جَلب الـ attachments الحاليّة
+      final row = await supa.client
+          .from('employee_documents')
+          .select('attachment_paths, attachment_mimes')
+          .eq('id', documentId)
+          .single();
+      final existingPaths =
+          (row['attachment_paths'] as List?)?.cast<String>() ?? [];
+      final existingMimes =
+          (row['attachment_mimes'] as List?)?.cast<String>() ?? [];
+
+      // 3) إدماج + حَدّ 7 (الإجماليّ مَع المِلَفّ الرَئيسيّ = 8)
+      final combinedPaths = [...existingPaths, ...paths].take(7).toList();
+      final combinedMimes = [...existingMimes, ...mimes].take(7).toList();
+
+      // 4) تَحديث السَجِلّ
+      await supa.client
+          .from('employee_documents')
+          .update({
+            'attachment_paths': combinedPaths,
+            'attachment_mimes': combinedMimes,
+          })
+          .eq('id', documentId);
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      M7Log.error('EmpDocs', 'addAttachments', error: e);
+      return false;
+    }
+  }
+
+  /// قائِمة كُلّ الإصدارات لِنَوع وَثيقة (نَشِطة + مُستَبدَلة)
   Future<List<EmployeeDocument>> listVersions({
     required String employeeId,
     required EmpDocType docType,

@@ -546,6 +546,8 @@ class _UploadResult {
   final Uint8List bytes;
   final String fileName;
   final String? mimeType;
+  /// 🆕 مُرفَقات إضافيّة (مَلَفّات أُخرى) — حَتّى 7 (الإجماليّ مَع الرَئيسيّ = 8)
+  final List<({Uint8List bytes, String fileName, String? mime})> attachments;
   final String? documentNumber;
   final String? issuingAuthority;
   final DateTime? issuedDate;
@@ -556,6 +558,7 @@ class _UploadResult {
     required this.bytes,
     required this.fileName,
     this.mimeType,
+    this.attachments = const [],
     this.documentNumber,
     this.issuingAuthority,
     this.issuedDate,
@@ -580,10 +583,18 @@ class _UploadDialog extends StatefulWidget {
   State<_UploadDialog> createState() => _UploadDialogState();
 }
 
+class _PickedFile {
+  final Uint8List bytes;
+  final String name;
+  final String mime;
+  _PickedFile({required this.bytes, required this.name, required this.mime});
+}
+
 class _UploadDialogState extends State<_UploadDialog> {
-  Uint8List? _bytes;
-  String? _fileName;
-  String? _mimeType;
+  /// 🆕 قائِمة مِلَفّات (حَتّى 8) — أَوَّل مِلَفّ هُو الرَئيسيّ، الباقي مُرفَقات
+  final List<_PickedFile> _files = [];
+  static const int _maxFiles = 8;
+
   final _numberCtrl = TextEditingController();
   final _authorityCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
@@ -591,45 +602,69 @@ class _UploadDialogState extends State<_UploadDialog> {
   DateTime? _expiryDate;
   ReplaceReason _reason = ReplaceReason.renewal;
 
-  /// اختِيار مِلَفّ — يَدعَم صورة (jpg/png/heic) أَو PDF أَو أَيّ مِلَفّ
+  bool get _hasFile => _files.isNotEmpty;
+
+  String _mimeFromExt(String ext) {
+    ext = ext.toLowerCase();
+    if (ext == 'pdf') return 'application/pdf';
+    if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') {
+      return 'image/jpeg';
+    }
+    if (ext == 'png') return 'image/png';
+    if (ext == 'webp') return 'image/webp';
+    if (ext == 'gif') return 'image/gif';
+    if (ext == 'bmp') return 'image/bmp';
+    if (ext == 'doc' || ext == 'docx') return 'application/msword';
+    if (ext == 'xls' || ext == 'xlsx') return 'application/vnd.ms-excel';
+    return 'application/octet-stream';
+  }
+
+  /// 🆕 اختِيار مُتَعَدِّد المِلَفّات (حَتّى 8 صُوَر أَو PDF)
   Future<void> _pickFile() async {
     try {
+      final remaining = _maxFiles - _files.length;
+      if (remaining <= 0) return;
+
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: const [
-          // صور
           'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp',
-          // PDF
           'pdf',
-          // مُستَنَدات Office (احتياط)
           'doc', 'docx', 'xls', 'xlsx',
         ],
-        withData: true, // لا بُدّ مِنها لِنَحصُل عَلى bytes في الويب
+        withData: true,
+        allowMultiple: true, // 🆕 اختِيار مُتَعَدِّد
       );
       if (result == null || result.files.isEmpty) return;
-      final f = result.files.first;
-      if (f.bytes == null) return;
 
-      // تَحديد MIME type حَسَب الامتِداد
-      final ext = (f.extension ?? '').toLowerCase();
-      String mime = 'application/octet-stream';
-      if (ext == 'pdf') mime = 'application/pdf';
-      else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
-      else if (ext == 'png') mime = 'image/png';
-      else if (ext == 'webp') mime = 'image/webp';
-      else if (ext == 'gif') mime = 'image/gif';
-      else if (ext == 'bmp') mime = 'image/bmp';
-      else if (ext == 'doc' || ext == 'docx') mime = 'application/msword';
-      else if (ext == 'xls' || ext == 'xlsx') mime = 'application/vnd.ms-excel';
+      final added = <_PickedFile>[];
+      for (final f in result.files.take(remaining)) {
+        if (f.bytes == null) continue;
+        added.add(_PickedFile(
+          bytes: f.bytes!,
+          name: f.name,
+          mime: _mimeFromExt(f.extension ?? ''),
+        ));
+      }
 
-      setState(() {
-        _bytes = f.bytes;
-        _fileName = f.name;
-        _mimeType = mime;
-      });
+      if (added.isEmpty) return;
+      setState(() => _files.addAll(added));
+
+      if (result.files.length > remaining && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text(AppStrings.of(context).isAr
+              ? '⚠ تَمَّ تَجاهُل ${result.files.length - remaining} مِلَفّ (الحَدّ الأَقصى $_maxFiles)'
+              : '⚠ Ignored ${result.files.length - remaining} files (max $_maxFiles)'),
+        ));
+      }
     } catch (e) {
       M7Log.error('UploadDialog', 'pickFile', error: e);
     }
+  }
+
+  void _removeFile(int index) {
+    setState(() => _files.removeAt(index));
   }
 
   Future<void> _pickIssued() async {
@@ -692,27 +727,93 @@ class _UploadDialogState extends State<_UploadDialog> {
                 ),
                 const Divider(height: 24),
               ],
-              // المَلَفّ
+              // 🆕 المِلَفّات (حَتّى 8) — مُتَعَدِّد
               OutlinedButton.icon(
-                onPressed: _pickFile,
+                onPressed:
+                    _files.length >= _maxFiles ? null : _pickFile,
                 icon: const Icon(Icons.attach_file),
-                label: Text(_bytes == null
-                    ? (isAr ? 'اختَر مِلَفّ (صورة / PDF)' : 'Pick file (image / PDF)')
-                    : (isAr
-                        ? '✓ ${_fileName ?? "تَمَّ الاختِيار"}'
-                        : '✓ ${_fileName ?? "Selected"}')),
+                label: Text(
+                  _files.isEmpty
+                      ? (isAr
+                          ? 'اختَر مِلَفّات (حَتّى 8 — صُوَر/PDF)'
+                          : 'Pick files (up to 8 — images/PDF)')
+                      : (isAr
+                          ? '✓ ${_files.length}/$_maxFiles مِلَفّ — أَضِف المَزيد'
+                          : '✓ ${_files.length}/$_maxFiles files — Add more'),
+                ),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(44),
-                  foregroundColor: _bytes == null
+                  foregroundColor: _files.isEmpty
                       ? AppColors.brand
                       : AppColors.success,
                 ),
               ),
-              if (_bytes != null) ...[
+              // 🆕 قائِمة المِلَفّات المُختارة
+              if (_files.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(_fileName ?? '',
-                    style: const TextStyle(
-                        fontSize: 11, color: Colors.grey)),
+                ..._files.asMap().entries.map((e) {
+                  final i = e.key;
+                  final f = e.value;
+                  final isImage = f.mime.startsWith('image/');
+                  final isPdf = f.mime == 'application/pdf';
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isImage
+                              ? Icons.image
+                              : (isPdf ? Icons.picture_as_pdf : Icons.insert_drive_file),
+                          size: 18,
+                          color: isPdf ? Colors.red : AppColors.brand,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${i == 0 ? "🏷 " : ""}${f.name}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: i == 0
+                                  ? FontWeight.w900
+                                  : FontWeight.normal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '${(f.bytes.lengthInBytes / 1024).toStringAsFixed(0)} KB',
+                          style: const TextStyle(
+                              fontSize: 9, color: Colors.grey),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close,
+                              size: 16, color: AppColors.danger),
+                          padding: EdgeInsets.zero,
+                          constraints:
+                              const BoxConstraints(minWidth: 24, minHeight: 24),
+                          onPressed: () => _removeFile(i),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                if (_files.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      isAr
+                          ? '🏷 المِلَفّ الأَوَّل هُو الرَئيسيّ (يُعرَض في القائِمة)'
+                          : '🏷 First file is the primary (shown in lists)',
+                      style: const TextStyle(
+                          fontSize: 10, color: Colors.grey),
+                    ),
+                  ),
               ],
               const SizedBox(height: 12),
               TextField(
@@ -812,15 +913,26 @@ class _UploadDialogState extends State<_UploadDialog> {
           child: Text(isAr ? 'إلغاء' : 'Cancel'),
         ),
         ElevatedButton.icon(
-          onPressed: _bytes == null
+          onPressed: !_hasFile
               ? null
               : () {
+                  final main = _files.first;
+                  final attachments = _files.length > 1
+                      ? _files.sublist(1)
+                      : <_PickedFile>[];
                   Navigator.pop(
                     context,
                     _UploadResult(
-                      bytes: _bytes!,
-                      fileName: _fileName ?? 'document.jpg',
-                      mimeType: _mimeType,
+                      bytes: main.bytes,
+                      fileName: main.name,
+                      mimeType: main.mime,
+                      attachments: attachments
+                          .map((a) => (
+                                bytes: a.bytes,
+                                fileName: a.name,
+                                mime: a.mime as String?,
+                              ))
+                          .toList(),
                       documentNumber: _numberCtrl.text.trim().isEmpty
                           ? null
                           : _numberCtrl.text.trim(),
@@ -838,7 +950,13 @@ class _UploadDialogState extends State<_UploadDialog> {
                   );
                 },
           icon: const Icon(Icons.save),
-          label: Text(isAr ? 'حِفظ' : 'Save'),
+          label: Text(isAr
+              ? (_files.length > 1
+                  ? 'حِفظ + رَفع ${_files.length} مِلَفّ'
+                  : 'حِفظ')
+              : (_files.length > 1
+                  ? 'Save + Upload ${_files.length} files'
+                  : 'Save')),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.gold,
             foregroundColor: Colors.black,
