@@ -30,6 +30,7 @@ import 'geo_fence_settings_screen.dart';
 import 'impersonate_picker.dart';
 import 'login_method_settings_screen.dart';
 import 'session_settings_screen.dart';
+import 'settings_audit_trail_screen.dart';
 import 'labor_rules_settings_screen.dart';
 import 'splash_video_settings_screen.dart';
 // admin_roles removed from Settings Hub — managed via Job Title Permissions matrix
@@ -464,7 +465,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
       ),
       // 🆕 LogViewer — أداة مطوّرين
       _SettingEntry(
-        category: catSystem,
+        category: catSystemTools,
         icon: Icons.terminal_outlined,
         color: AppColors.info,
         titleAr: 'سجلّ التطبيق (Logs)',
@@ -473,6 +474,20 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         descEn: 'Live application logs — useful for diagnostics',
         builder: (_) => const LogViewerScreen(),
         requiredPermission: P.settingsLogViewerView,
+      ),
+      // 🆕 سِجِلّ تَدقيق الإعدادات — مَن غَيَّر ماذا وَمَتى
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.history_edu_outlined,
+        color: AppColors.gold,
+        titleAr: '📜 سِجِلّ تَدقيق الإعدادات',
+        titleEn: '📜 Settings Audit Trail',
+        descAr:
+            'كُلّ تَعديل عَلى الإعدادات — مَن غَيَّر، مَتى، القيمة القَديمة وَالجَديدة',
+        descEn:
+            'Every settings change — who, when, old → new value diff',
+        builder: (_) => const SettingsAuditTrailScreen(),
+        requiredPermission: P.adminAuditView,
       ),
 
       // 📜 إعدادات التدريب — أُزيلت (لم يعد فيه Training Hub منفصل)

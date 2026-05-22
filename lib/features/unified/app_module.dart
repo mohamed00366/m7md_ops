@@ -190,6 +190,12 @@ class AppModule {
   /// المُنشئ (يُستدعى عند الفتح)
   final WidgetBuilder builder;
 
+  /// 🆕 مَجموعة فَرعيّة داخِل الفِئة (اختِياريّ)
+  /// مَثَلاً في Reports: 'dashboards' (تَحليلات حَيّة) vs 'compliance' (تَقارير)
+  final String? groupKey;
+  final String? groupTitleAr;
+  final String? groupTitleEn;
+
   const AppModule({
     required this.key,
     required this.titleAr,
@@ -200,7 +206,12 @@ class AppModule {
     this.requiredPermission,
     this.requiresCountry = false,
     required this.builder,
+    this.groupKey,
+    this.groupTitleAr,
+    this.groupTitleEn,
   });
 
   String title(bool isAr) => isAr ? ar2ur.tr(titleAr) : titleEn;
+  String? groupTitle(bool isAr) =>
+      groupKey == null ? null : (isAr ? groupTitleAr : groupTitleEn);
 }
