@@ -85,7 +85,7 @@ class _EmployeeFormsScreenState extends State<EmployeeFormsScreen>
         .length;
     return Column(children: [
       Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppPalette.card,
           border: Border(bottom: BorderSide(color: AppPalette.border)),
         ),
@@ -222,7 +222,7 @@ class _TemplateCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.10),
+                    color: AppColors.brand.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
@@ -252,7 +252,7 @@ class _TemplateCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Row(children: [
-                        Icon(Icons.account_tree,
+                        const Icon(Icons.account_tree,
                             size: 11,
                             color: AppPalette.textTertiary),
                         const SizedBox(width: 3),
@@ -348,7 +348,7 @@ class _SubmissionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,9 +383,9 @@ class _SubmissionCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.10),
+                color: color.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: color.withOpacity(0.40)),
+                border: Border.all(color: color.withValues(alpha: 0.40)),
               ),
               child: Text(
                 submission.status.label(s.isAr),
@@ -399,7 +399,7 @@ class _SubmissionCard extends StatelessWidget {
           const SizedBox(height: 6),
           if (tpl != null && submission.totalSteps > 0)
             Row(children: [
-              Icon(Icons.account_tree,
+              const Icon(Icons.account_tree,
                   size: 11, color: AppPalette.textTertiary),
               const SizedBox(width: 3),
               Text(
@@ -415,7 +415,7 @@ class _SubmissionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.06),
+                color: Colors.red.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(children: [

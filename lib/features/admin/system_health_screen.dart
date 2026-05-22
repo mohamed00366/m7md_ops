@@ -7,7 +7,6 @@ import '../../core/services/supabase_service.dart';
 import '../../core/services/workflow_engine.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
-import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import 'approval_matrix_screen.dart';
 import 'bulk_permissions_matrix_screen.dart';
@@ -584,9 +583,9 @@ class _SyncSeedPermissionsCardState extends State<_SyncSeedPermissionsCard> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.06),
+        color: AppColors.brand.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.brand.withOpacity(0.30)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,7 +650,7 @@ class _SyncSeedPermissionsCardState extends State<_SyncSeedPermissionsCard> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _resultColor.withOpacity(0.15),
+                      color: _resultColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -691,14 +690,14 @@ class _HealthScoreBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.7)],
+          colors: [color, color.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -715,7 +714,7 @@ class _HealthScoreBanner extends StatelessWidget {
                 child: CircularProgressIndicator(
                   value: score / 100,
                   strokeWidth: 6,
-                  backgroundColor: Colors.white.withOpacity(0.25),
+                  backgroundColor: Colors.white.withValues(alpha: 0.25),
                   valueColor:
                       const AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -738,7 +737,7 @@ class _HealthScoreBanner extends StatelessWidget {
                 Text(
                   isAr ? 'صحّة النظام' : 'System Health',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 12,
                   ),
                 ),
@@ -766,7 +765,7 @@ class _HealthScoreBanner extends StatelessWidget {
                       ? 'النتيجة محسوبة من الفجوات والتعارضات'
                       : 'Score derived from gaps and mismatches',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 11,
                   ),
                 ),
@@ -798,9 +797,9 @@ class _HealthCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -808,7 +807,7 @@ class _HealthCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.18),
+              color: color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 18),
@@ -896,9 +895,9 @@ class _IssueCategory extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.success.withOpacity(0.08),
+          color: AppColors.success.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.success.withOpacity(0.3)),
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -925,7 +924,7 @@ class _IssueCategory extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -947,7 +946,7 @@ class _IssueCategory extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -988,9 +987,9 @@ class _IssueRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.06),
+          color: color.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.25)),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
         child: Row(
           children: [
@@ -1028,7 +1027,7 @@ class _IssueRow extends StatelessWidget {
             ),
             if (issue.onFix != null)
               Icon(Icons.arrow_forward_ios,
-                  color: color.withOpacity(0.6), size: 12),
+                  color: color.withValues(alpha: 0.6), size: 12),
           ],
         ),
       ),
@@ -1056,7 +1055,7 @@ class _RecentActivityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.25)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1075,7 +1074,7 @@ class _RecentActivityCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.15),
+                  color: AppColors.brand.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -1227,9 +1226,9 @@ class _ActivityRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.15)),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
@@ -1237,7 +1236,7 @@ class _ActivityRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(icon, color: color, size: 14),
@@ -1340,7 +1339,7 @@ class _ActivityChartsCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withOpacity(0.25)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.25)),
         ),
         child: Center(
           child: Column(
@@ -1396,7 +1395,7 @@ class _ActivityChartsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.25)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1441,7 +1440,7 @@ class _ActivityChartsCard extends StatelessWidget {
                   drawVerticalLine: false,
                   horizontalInterval: 1,
                   getDrawingHorizontalLine: (v) => FlLine(
-                    color: Colors.grey.withOpacity(0.12),
+                    color: Colors.grey.withValues(alpha: 0.12),
                     strokeWidth: 1,
                   ),
                 ),
@@ -1612,7 +1611,7 @@ class _ActivityChartsCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 10,
-            backgroundColor: AppColors.brand.withOpacity(0.15),
+            backgroundColor: AppColors.brand.withValues(alpha: 0.15),
             child: Text(
               name.isEmpty ? '?' : name[0].toUpperCase(),
               style: const TextStyle(
@@ -1639,7 +1638,7 @@ class _ActivityChartsCard extends StatelessWidget {
               height: 6,
               child: LinearProgressIndicator(
                 value: entry.value / total,
-                backgroundColor: Colors.grey.withOpacity(0.15),
+                backgroundColor: Colors.grey.withValues(alpha: 0.15),
                 valueColor:
                     const AlwaysStoppedAnimation<Color>(AppColors.brand),
               ),

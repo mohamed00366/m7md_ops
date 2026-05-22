@@ -172,7 +172,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
               gradient: LinearGradient(
                 colors: [
                   AppColors.roleEmployee,
-                  AppColors.roleEmployee.withOpacity(0.7),
+                  AppColors.roleEmployee.withValues(alpha: 0.7),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -249,7 +249,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.15),
+                          color: AppColors.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -328,7 +328,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                   margin: const EdgeInsets.only(bottom: 6),
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.08),
+                    color: AppColors.brand.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -383,13 +383,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: isToday
-                            ? AppColors.success.withOpacity(0.08)
+                            ? AppColors.success.withValues(alpha: 0.08)
                             : AppColors.bgLight,
                         borderRadius: BorderRadius.circular(8),
                         border: isToday
                             ? Border.all(
                                 color:
-                                    AppColors.success.withOpacity(0.40))
+                                    AppColors.success.withValues(alpha: 0.40))
                             : null,
                       ),
                       child: Row(
@@ -465,12 +465,12 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.brand.withOpacity(0.10)
+                          ? AppColors.brand.withValues(alpha: 0.10)
                           : AppColors.bgLight,
                       borderRadius: BorderRadius.circular(8),
                       border: isSelected
                           ? Border.all(
-                              color: AppColors.brand.withOpacity(0.50))
+                              color: AppColors.brand.withValues(alpha: 0.50))
                           : null,
                     ),
                     child: Row(
@@ -587,7 +587,7 @@ class _Kpi extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(7),
             ),
             child: Icon(icon, color: color, size: 16),
@@ -614,7 +614,7 @@ class _MiniBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(text,

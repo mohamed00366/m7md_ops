@@ -304,10 +304,10 @@ class _DriverRouteMapScreenState extends State<DriverRouteMapScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
-                        color: accent.withOpacity(isDark ? 0.15 : 0.06),
+                        color: accent.withValues(alpha: isDark ? 0.15 : 0.06),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: accent.withOpacity(0.4),
+                            color: accent.withValues(alpha: 0.4),
                             width: 0.5),
                       ),
                       child: Row(
@@ -511,7 +511,7 @@ class _DriverRouteMapScreenState extends State<DriverRouteMapScreen> {
           border: Border.all(color: Colors.white, width: 2),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 4),
           ],
         ),
@@ -533,7 +533,7 @@ class _DriverRouteMapScreenState extends State<DriverRouteMapScreen> {
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 4),
             ],
           ),
@@ -629,10 +629,10 @@ class _DayPickerChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-              color: color.withOpacity(0.4), width: 0.5),
+              color: color.withValues(alpha: 0.4), width: 0.5),
         ),
         child: Row(
           children: [
@@ -645,7 +645,7 @@ class _DayPickerChip extends StatelessWidget {
                   Text(label,
                       style: TextStyle(
                           fontSize: 9,
-                          color: color.withOpacity(0.85),
+                          color: color.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w600)),
                   Text(
                     DateFormat('yyyy-MM-dd').format(date),
@@ -680,11 +680,11 @@ class _Legend extends StatelessWidget {
       padding:
           const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 6),
         ],
       ),
@@ -812,10 +812,10 @@ class _StatChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 6, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-            color: color.withOpacity(0.25), width: 0.5),
+            color: color.withValues(alpha: 0.25), width: 0.5),
       ),
       // 🆕 mainAxisSize.min لتجنّب طلب عرض غير محدود إذا استُخدم
       // الـ Chip في سياق غير محدود الأبعاد. الـ Text داخله يأخذ
@@ -902,7 +902,7 @@ class _DiffBar extends StatelessWidget {
       padding:
           const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.1),
+        color: c.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -967,7 +967,7 @@ class _WebRoutePainter extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.55),
+              color: Colors.black.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -1091,12 +1091,12 @@ class _EmptyMap extends StatelessWidget {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: accent.withOpacity(isDark ? 0.18 : 0.10),
+                color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: accent.withOpacity(0.35), width: 1.5),
+                    color: accent.withValues(alpha: 0.35), width: 1.5),
               ),
-              child: Icon(Icons.map_outlined, size: 48, color: accent),
+              child: const Icon(Icons.map_outlined, size: 48, color: accent),
             ),
             const SizedBox(height: 16),
             Text(
@@ -1189,10 +1189,10 @@ class _DriverPickerSheetState extends State<_DriverPickerSheet> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.10),
+                        color: AppColors.success.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: AppColors.success.withOpacity(0.3)),
+                            color: AppColors.success.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1285,7 +1285,7 @@ class _DriverPickerSheetState extends State<_DriverPickerSheet> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 5, vertical: 1),
                                     decoration: BoxDecoration(
-                                      color: AppColors.info.withOpacity(0.12),
+                                      color: AppColors.info.withValues(alpha: 0.12),
                                       borderRadius:
                                           BorderRadius.circular(6),
                                     ),

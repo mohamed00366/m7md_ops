@@ -95,15 +95,15 @@ class _Node extends StatelessWidget {
     Color borderColor;
     Color iconColor;
     if (isActive && isFilled) {
-      circleBg = AppColors.success.withOpacity(0.2);
+      circleBg = AppColors.success.withValues(alpha: 0.2);
       borderColor = AppColors.success;
       iconColor = AppColors.success;
     } else if (isActive) {
-      circleBg = AppColors.brand.withOpacity(0.15);
+      circleBg = AppColors.brand.withValues(alpha: 0.15);
       borderColor = AppColors.brand;
       iconColor = AppColors.brand;
     } else if (isFilled) {
-      circleBg = AppColors.success.withOpacity(0.12);
+      circleBg = AppColors.success.withValues(alpha: 0.12);
       borderColor = AppColors.success;
       iconColor = AppColors.success;
     } else {
@@ -133,7 +133,7 @@ class _Node extends StatelessWidget {
               boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: borderColor.withOpacity(0.35),
+                        color: borderColor.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       )
@@ -175,7 +175,7 @@ class _Node extends StatelessWidget {
             sublabel,
             style: TextStyle(
               fontSize: 9,
-              color: labelColor.withOpacity(0.7),
+              color: labelColor.withValues(alpha: 0.7),
             ),
           ),
         ],

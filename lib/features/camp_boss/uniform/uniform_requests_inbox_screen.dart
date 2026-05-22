@@ -137,7 +137,9 @@ class _UniformRequestsInboxScreenState
       if (sub.status != FormSubmissionStatus.approved) return false;
       if (!auth.isSuperAdmin &&
           sub.countryId != null &&
-          sub.countryId != auth.activeCountryId) return false;
+          sub.countryId != auth.activeCountryId) {
+        return false;
+      }
       return !_isFulfilled(repo, sub);
     }).length;
     final fulfilledCount = allCount - pendingCount;
@@ -287,9 +289,9 @@ class _UniformRequestsInboxScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.10),
+          color: selected ? color : color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(selected ? 1.0 : 0.30)),
+          border: Border.all(color: color.withValues(alpha: selected ? 1.0 : 0.30)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -433,7 +435,7 @@ class _UniformRequestsInboxScreenState
                   controller: scrollCtrl,
                   padding: const EdgeInsets.all(12),
                   child: FormRenderer(
-                    template: template!,
+                    template: template,
                     initialValues: submission.data,
                     readOnly: true,
                     onSubmit: (_) {},
@@ -553,8 +555,8 @@ class _RequestTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isFulfilled
-              ? AppColors.success.withOpacity(0.35)
-              : urgColor.withOpacity(0.40),
+              ? AppColors.success.withValues(alpha: 0.35)
+              : urgColor.withValues(alpha: 0.40),
           width: 1.2,
         ),
       ),
@@ -602,9 +604,9 @@ class _RequestTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: urgColor.withOpacity(0.12),
+                      color: urgColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: urgColor.withOpacity(0.40)),
+                      border: Border.all(color: urgColor.withValues(alpha: 0.40)),
                     ),
                     child: Text(_urgencyLabel(),
                         style: TextStyle(
@@ -633,7 +635,7 @@ class _RequestTile extends StatelessWidget {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor:
-                        UniformPalette.primary.withOpacity(0.15),
+                        UniformPalette.primary.withValues(alpha: 0.15),
                     child: Text(emp?.initials ?? '?',
                         style: const TextStyle(
                             color: UniformPalette.primary,
@@ -677,7 +679,7 @@ class _RequestTile extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: UniformPalette.primary.withOpacity(0.10),
+                            color: UniformPalette.primary.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(it,
@@ -714,7 +716,7 @@ class _RequestTile extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.10),
+                    color: AppColors.success.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(

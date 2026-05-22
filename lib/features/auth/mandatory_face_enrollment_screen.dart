@@ -238,7 +238,7 @@ class _MandatoryFaceEnrollmentScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.danger.withOpacity(0.10),
+                  color: AppColors.danger.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
                   border:
                       Border.all(color: AppColors.danger),

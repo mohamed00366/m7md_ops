@@ -67,7 +67,7 @@ class DeletionGuard {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: AppPalette.danger.withOpacity(0.12),
+            color: AppPalette.danger.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.link_off,
@@ -96,10 +96,10 @@ class DeletionGuard {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppPalette.danger.withOpacity(0.06),
+                color: AppPalette.danger.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(10),
                 border:
-                    Border.all(color: AppPalette.danger.withOpacity(0.30)),
+                    Border.all(color: AppPalette.danger.withValues(alpha: 0.30)),
               ),
               child: Column(
                 children: [
@@ -143,7 +143,7 @@ class DeletionGuard {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppPalette.amber.withOpacity(0.10),
+                color: AppPalette.amber.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -196,7 +196,7 @@ class DeletionGuard {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: AppPalette.danger.withOpacity(0.12),
+            color: AppPalette.danger.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.delete_forever,
@@ -252,7 +252,7 @@ class DeletionGuard {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: AppPalette.danger.withOpacity(0.12),
+            color: AppPalette.danger.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.link_off,
@@ -277,7 +277,7 @@ class DeletionGuard {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppPalette.amber.withOpacity(0.10),
+                color: AppPalette.amber.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(

@@ -50,7 +50,7 @@ class EmployeeAvatar extends StatelessWidget {
 
     final fallback = CircleAvatar(
       radius: radius,
-      backgroundColor: color.withOpacity(0.15),
+      backgroundColor: color.withValues(alpha: 0.15),
       child: _initials(),
     );
 
@@ -64,7 +64,7 @@ class EmployeeAvatar extends StatelessWidget {
       height: radius * 2,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
       ),
       child: ClipOval(
         child: Image.network(
@@ -247,9 +247,9 @@ class EmployeeIdentityChip extends StatelessWidget {
     Widget content = Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

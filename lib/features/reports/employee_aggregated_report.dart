@@ -381,7 +381,7 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
                         return ListTile(
                           dense: true,
                           leading: CircleAvatar(
-                            backgroundColor: AppColors.brand.withOpacity(0.15),
+                            backgroundColor: AppColors.brand.withValues(alpha: 0.15),
                             child: Text(
                               e.fullName.isNotEmpty ? e.fullName[0] : '?',
                               style: const TextStyle(
@@ -436,7 +436,7 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
               children: [
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: AppColors.brand.withOpacity(0.15),
+                  backgroundColor: AppColors.brand.withValues(alpha: 0.15),
                   child: Text(
                     e.fullName.isNotEmpty ? e.fullName[0] : '?',
                     style: const TextStyle(
@@ -531,9 +531,9 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.15),
+        color: c.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c.withOpacity(0.5)),
+        border: Border.all(color: c.withValues(alpha: 0.5)),
       ),
       child: Text(label,
           style: TextStyle(
@@ -619,9 +619,9 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
         final k = kpis[i];
         return Container(
           decoration: BoxDecoration(
-            color: k.color.withOpacity(0.08),
+            color: k.color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: k.color.withOpacity(0.3)),
+            border: Border.all(color: k.color.withValues(alpha: 0.3)),
           ),
           padding: const EdgeInsets.all(6),
           child: Column(
@@ -666,7 +666,7 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.12),
+                color: AppColors.brand.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text('$count',
@@ -948,7 +948,7 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 5, vertical: 1),
                     decoration: BoxDecoration(
-                      color: roleColor.withOpacity(0.12),
+                      color: roleColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(roleLabel,
@@ -962,7 +962,7 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 5, vertical: 1),
                     decoration: BoxDecoration(
-                      color: rsvpColor.withOpacity(0.12),
+                      color: rsvpColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(rsvpLabel,
@@ -1037,9 +1037,9 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
           color: isOverdue
-              ? AppColors.danger.withOpacity(0.05)
+              ? AppColors.danger.withValues(alpha: 0.05)
               : status == 'done'
-                  ? AppColors.success.withOpacity(0.05)
+                  ? AppColors.success.withValues(alpha: 0.05)
                   : null,
           child: ListTile(
             dense: true,
@@ -1066,7 +1066,7 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
+                  color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(statusLabel,

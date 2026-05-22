@@ -150,7 +150,7 @@ class _FormDataTableScreenState extends State<FormDataTableScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_outline,
+                const Icon(Icons.lock_outline,
                     size: 56, color: AppColors.danger),
                 const SizedBox(height: 12),
                 Text(
@@ -218,9 +218,9 @@ class _FormDataTableScreenState extends State<FormDataTableScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.08),
+              color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: AppColors.info.withOpacity(0.30)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -257,14 +257,14 @@ class _FormDataTableScreenState extends State<FormDataTableScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline,
+                      const Icon(Icons.error_outline,
                           size: 48, color: AppColors.danger),
                       const SizedBox(height: 8),
                       Text(
                         isAr
                             ? 'الجَدول غَير مَوجود — هذا النَموذج قَديم'
                             : 'Table not found — this is a legacy form',
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: AppColors.danger,
                             fontWeight: FontWeight.w800),
                         textAlign: TextAlign.center,
@@ -380,8 +380,8 @@ class _DataTableView extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         child: DataTable(
-          headingRowColor: MaterialStatePropertyAll(
-            AppColors.brand.withOpacity(0.08),
+          headingRowColor: WidgetStatePropertyAll(
+            AppColors.brand.withValues(alpha: 0.08),
           ),
           headingTextStyle: const TextStyle(
             fontSize: 11,

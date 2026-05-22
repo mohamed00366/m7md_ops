@@ -125,7 +125,7 @@ class _EmployeesBulkImportScreenState extends State<EmployeesBulkImportScreen> {
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              backgroundColor: Colors.white.withOpacity(0.15),
+              backgroundColor: Colors.white.withValues(alpha: 0.15),
             ),
             onPressed: () =>
                 Navigator.canPop(context) ? Navigator.pop(context) : null,
@@ -183,7 +183,7 @@ class _EmployeesBulkImportScreenState extends State<EmployeesBulkImportScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF7C3AED).withOpacity(0.10),
+                color: const Color(0xFF7C3AED).withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.upload_file,
@@ -359,7 +359,7 @@ class _EmployeesBulkImportScreenState extends State<EmployeesBulkImportScreen> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: r.hasErrors
-                      ? const Color(0xFFDC2626).withOpacity(0.4)
+                      ? const Color(0xFFDC2626).withValues(alpha: 0.4)
                       : selected
                           ? const Color(0xFF10B981)
                           : Colors.grey.shade300,
@@ -395,7 +395,7 @@ class _EmployeesBulkImportScreenState extends State<EmployeesBulkImportScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7C3AED).withOpacity(0.10),
+                        color: const Color(0xFF7C3AED).withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(r.employee.category,
@@ -472,7 +472,7 @@ class _Stat extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.10),
+            color: color.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(children: [

@@ -183,7 +183,7 @@ class _AdminUsersState extends State<AdminUsers> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.15),
+                          color: AppColors.warning.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -355,7 +355,7 @@ class _UserCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
             color: account.isSuperAdmin
-                ? AppColors.warning.withOpacity(0.5)
+                ? AppColors.warning.withValues(alpha: 0.5)
                 : (isDark
                     ? AppColors.borderDark
                     : AppColors.borderLight),
@@ -376,8 +376,8 @@ class _UserCard extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: account.isSuperAdmin
-                        ? AppColors.warning.withOpacity(0.2)
-                        : AppColors.brand.withOpacity(0.18),
+                        ? AppColors.warning.withValues(alpha: 0.2)
+                        : AppColors.brand.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
@@ -415,7 +415,7 @@ class _UserCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.warning.withOpacity(0.15),
+                                color: AppColors.warning.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -432,7 +432,7 @@ class _UserCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.danger.withOpacity(0.15),
+                                color: AppColors.danger.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -464,7 +464,7 @@ class _UserCard extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.brand.withOpacity(0.12),
+                                  color: AppColors.brand.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -480,7 +480,7 @@ class _UserCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.brand.withOpacity(0.06),
+                                color: AppColors.brand.withValues(alpha: 0.06),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -495,7 +495,7 @@ class _UserCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.success.withOpacity(0.12),
+                              color: AppColors.success.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -1302,7 +1302,7 @@ class _UserFormSheetState extends State<_UserFormSheet> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: AppColors.warning.withOpacity(0.10),
+                              color: AppColors.warning.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -1358,7 +1358,7 @@ class _UserFormSheetState extends State<_UserFormSheet> {
                                             vertical: 1),
                                     decoration: BoxDecoration(
                                       color: AppColors.warning
-                                          .withOpacity(0.15),
+                                          .withValues(alpha: 0.15),
                                       borderRadius:
                                           BorderRadius.circular(4),
                                     ),
@@ -1518,7 +1518,7 @@ class _Section extends StatelessWidget {
       padding: const EdgeInsets.only(top: 14, bottom: 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
             color: AppColors.brand,
             fontSize: 12,
             fontWeight: FontWeight.w800),
@@ -1549,7 +1549,7 @@ class _SectionWithAction extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.brand,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -1654,9 +1654,9 @@ class _EmployeePicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.05),
+        color: AppColors.brand.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.brand.withOpacity(0.3)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1789,10 +1789,10 @@ class _DevicePolicyToggle extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: color.withOpacity(0.3), width: 0.5),
+            Border.all(color: color.withValues(alpha: 0.3), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1891,7 +1891,7 @@ class _SegBtn extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         decoration: BoxDecoration(
           color:
-              selected ? color.withOpacity(0.18) : Colors.transparent,
+              selected ? color.withValues(alpha: 0.18) : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: selected
@@ -1982,9 +1982,9 @@ class _LoginMethodToggle extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2082,7 +2082,7 @@ class _MethodSegBtn extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? color.withOpacity(0.18)
+              ? color.withValues(alpha: 0.18)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
@@ -2176,9 +2176,9 @@ class _FaceUnlockButtonState extends State<_FaceUnlockButton> {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
       ),
       child: Row(
         children: [
@@ -2216,7 +2216,7 @@ class _FaceUnlockButtonState extends State<_FaceUnlockButton> {
             child: FilledButton.tonal(
               onPressed: _unlock,
               style: FilledButton.styleFrom(
-                backgroundColor: color.withOpacity(0.15),
+                backgroundColor: color.withValues(alpha: 0.15),
                 foregroundColor: color,
               ),
               child: Text(
@@ -2379,9 +2379,9 @@ class _UserFaceEnrollmentCardState extends State<_UserFaceEnrollmentCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -2396,7 +2396,7 @@ class _UserFaceEnrollmentCardState extends State<_UserFaceEnrollmentCard> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.18),
+                    color: color.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.face_retouching_natural,

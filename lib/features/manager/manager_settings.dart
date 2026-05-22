@@ -79,7 +79,7 @@ class _ManagerSettingsState extends State<ManagerSettings>
             labelPadding: const EdgeInsets.symmetric(horizontal: 14),
             splashFactory: NoSplash.splashFactory,
             overlayColor: WidgetStateProperty.all(
-                AppColors.brand.withOpacity(0.05)),
+                AppColors.brand.withValues(alpha: 0.05)),
             tabs: [
               Tab(text: s.numberingSystem),
               Tab(text: s.cities),
@@ -1211,9 +1211,9 @@ class _SmartSuggestionsBanner extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 4),
       decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.06),
+        color: AppColors.info.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.info.withOpacity(0.3)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1438,10 +1438,10 @@ class _LevelSelector extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: selected ? c : c.withOpacity(0.10),
+                  color: selected ? c : c.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: selected ? c : c.withOpacity(0.30),
+                    color: selected ? c : c.withValues(alpha: 0.30),
                     width: selected ? 2 : 1,
                   ),
                 ),
@@ -1489,8 +1489,8 @@ class _ApprovalPowerSelector extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: value > 0
-                    ? AppColors.success.withOpacity(0.15)
-                    : Colors.grey.withOpacity(0.15),
+                    ? AppColors.success.withValues(alpha: 0.15)
+                    : Colors.grey.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -1585,7 +1585,7 @@ class _ColorPalettePicker extends StatelessWidget {
                     boxShadow: [
                       if (selected)
                         BoxShadow(
-                          color: c.withOpacity(0.5),
+                          color: c.withValues(alpha: 0.5),
                           blurRadius: 6,
                           spreadRadius: 1,
                         ),
@@ -1645,7 +1645,7 @@ class _LookupCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color),
@@ -1790,7 +1790,7 @@ void _confirmDelete(
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.danger.withOpacity(0.1),
+                color: AppColors.danger.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(

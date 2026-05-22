@@ -133,7 +133,7 @@ class _SiteCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.purple.withOpacity(0.15),
+                    color: AppColors.purple.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.business, color: AppColors.purple),
@@ -625,10 +625,10 @@ class _CustomerEditorScreenState extends State<CustomerEditorScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.06),
+                    color: AppColors.brand.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: AppColors.brand.withOpacity(0.3),
+                      color: AppColors.brand.withValues(alpha: 0.3),
                       style: BorderStyle.solid,
                     ),
                   ),

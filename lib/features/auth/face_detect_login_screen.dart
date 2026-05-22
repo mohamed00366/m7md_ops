@@ -279,7 +279,7 @@ class _FaceDetectLoginScreenState extends State<FaceDetectLoginScreen>
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
-                        color: AppColors.warning.withOpacity(0.20),
+                        color: AppColors.warning.withValues(alpha: 0.20),
                         child: Row(
                           children: [
                             const Icon(Icons.warning_amber,
@@ -313,7 +313,7 @@ class _FaceDetectLoginScreenState extends State<FaceDetectLoginScreen>
                                   color: _statusOk
                                       ? AppColors.success
                                       : AppColors.gold
-                                          .withOpacity(0.70),
+                                          .withValues(alpha: 0.70),
                                   width: 3,
                                 ),
                                 borderRadius:
@@ -331,7 +331,7 @@ class _FaceDetectLoginScreenState extends State<FaceDetectLoginScreen>
                                 decoration: BoxDecoration(
                                   color: _statusOk
                                       ? AppColors.success
-                                      : Colors.black.withOpacity(0.70),
+                                      : Colors.black.withValues(alpha: 0.70),
                                   borderRadius:
                                       BorderRadius.circular(8),
                                 ),

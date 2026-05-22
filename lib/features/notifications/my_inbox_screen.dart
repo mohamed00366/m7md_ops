@@ -187,16 +187,16 @@ class _MyInboxScreenState extends State<MyInboxScreen> {
       padding: const EdgeInsets.all(40),
       margin: const EdgeInsets.symmetric(vertical: 30),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.08),
+        color: AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.success.withOpacity(0.25)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
           Icon(
             onlyUnread ? Icons.mark_email_read : Icons.inbox_outlined,
             size: 64,
-            color: AppColors.success.withOpacity(0.85),
+            color: AppColors.success.withValues(alpha: 0.85),
           ),
           const SizedBox(height: 12),
           Text(
@@ -238,7 +238,7 @@ class _NotificationTile extends StatelessWidget {
         alignment: AlignmentDirectional.centerEnd,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.10),
+          color: Colors.red.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
@@ -252,12 +252,12 @@ class _NotificationTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: notif.isRead
               ? Theme.of(context).cardTheme.color
-              : color.withOpacity(0.06),
+              : color.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: notif.isRead
-                ? color.withOpacity(0.15)
-                : color.withOpacity(0.40),
+                ? color.withValues(alpha: 0.15)
+                : color.withValues(alpha: 0.40),
             width: notif.isRead ? 0.5 : 1.2,
           ),
         ),
@@ -278,7 +278,7 @@ class _NotificationTile extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
@@ -309,7 +309,7 @@ class _NotificationTile extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.15),
+                                  color: Colors.red.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text('⚡',
@@ -345,7 +345,7 @@ class _NotificationTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 1),
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.10),
+                                color: color.withValues(alpha: 0.10),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

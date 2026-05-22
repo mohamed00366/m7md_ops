@@ -56,7 +56,7 @@ class _UniformEmployeeCardState extends State<UniformEmployeeCard> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                backgroundColor: Colors.white.withOpacity(0.15),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
               ),
               onPressed: () {
                 if (Navigator.canPop(context)) Navigator.pop(context);
@@ -115,7 +115,7 @@ class _UniformEmployeeCardState extends State<UniformEmployeeCard> {
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              backgroundColor: Colors.white.withOpacity(0.15),
+              backgroundColor: Colors.white.withValues(alpha: 0.15),
             ),
             onPressed: () {
               if (Navigator.canPop(context)) Navigator.pop(context);
@@ -148,14 +148,14 @@ class _UniformEmployeeCardState extends State<UniformEmployeeCard> {
               color: CampPalette.card,
               borderRadius: BorderRadius.circular(14),
               border:
-                  Border.all(color: UniformPalette.primary.withOpacity(0.30)),
+                  Border.all(color: UniformPalette.primary.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 28,
                   backgroundColor:
-                      UniformPalette.primary.withOpacity(0.15),
+                      UniformPalette.primary.withValues(alpha: 0.15),
                   child: Text(emp.initials,
                       style: const TextStyle(
                           color: UniformPalette.primary,
@@ -400,7 +400,7 @@ class _Kpi extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,7 +452,7 @@ class _SectionHeader extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text('$count',

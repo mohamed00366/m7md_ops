@@ -230,7 +230,7 @@ class CampBossDashboard extends StatelessWidget {
                       title: s.isAr ? 'تعيين باص' : 'Assign bus',
                       subtitle: s.isAr ? 'ساعة بحاجة باص' : '1 hour needs bus',
                       titleColor: Colors.white,
-                      iconColor: Colors.white.withOpacity(0.85),
+                      iconColor: Colors.white.withValues(alpha: 0.85),
                       background: CampPalette.headerStart,
                       primary: true,
                       onTap: () {},
@@ -319,7 +319,7 @@ class _DashHeader extends StatelessWidget {
                 Text(greeting,
                     style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.65))),
+                        color: Colors.white.withValues(alpha: 0.65))),
                 const SizedBox(height: 2),
                 Text(user?.fullName ?? (isAr ? 'كامب بوس' : 'Camp Boss'),
                     style: const TextStyle(
@@ -330,7 +330,7 @@ class _DashHeader extends StatelessWidget {
                 Text('${_today(isAr)} — $shiftLabel',
                     style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.55))),
+                        color: Colors.white.withValues(alpha: 0.55))),
               ],
             ),
           ),
@@ -340,7 +340,7 @@ class _DashHeader extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.notifications_none,
@@ -434,7 +434,7 @@ class _AlertBanner extends StatelessWidget {
                 const SizedBox(height: 1),
                 Text(subtitle,
                     style: TextStyle(
-                        color: CampPalette.amberText.withOpacity(0.75),
+                        color: CampPalette.amberText.withValues(alpha: 0.75),
                         fontSize: 10)),
               ],
             ),
@@ -545,7 +545,7 @@ class _TodayTimeline extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: hasBus
                         ? const Color(0xFFF8F9FB)
-                        : CampPalette.amberSoftBg.withOpacity(0.4),
+                        : CampPalette.amberSoftBg.withValues(alpha: 0.4),
                     borderRadius: CampPalette.rInput,
                     border: Border(
                         right: BorderSide(color: color, width: 3)),

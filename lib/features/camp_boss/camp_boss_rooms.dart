@@ -12,7 +12,6 @@ import '../../models/rbac.dart';
 import '../../shared/country_guard.dart';
 import '../../shared/deletion_guard.dart';
 import 'camp_palette.dart';
-import 'camp_widgets.dart';
 
 /// Camp Boss Rooms - شبكة بطاقات الغرف
 class CampBossRooms extends StatefulWidget {
@@ -229,7 +228,7 @@ class _RoomOccupantsSheetState extends State<_RoomOccupantsSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.4),
+                  color: Colors.grey.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -240,7 +239,7 @@ class _RoomOccupantsSheetState extends State<_RoomOccupantsSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: CampPalette.accent.withOpacity(0.10),
+                    color: CampPalette.accent.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child:
@@ -333,14 +332,14 @@ class _RoomOccupantsSheetState extends State<_RoomOccupantsSheet> {
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: CampPalette.accent.withOpacity(0.06),
+        color: CampPalette.accent.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: CampPalette.accent.withOpacity(0.20),
+            backgroundColor: CampPalette.accent.withValues(alpha: 0.20),
             child: Text(e.initials,
                 style: const TextStyle(
                     fontSize: 11,
@@ -436,7 +435,7 @@ class _PickRoomEmployeeSheetState extends State<_PickRoomEmployeeSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.4),
+                  color: Colors.grey.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -496,7 +495,7 @@ class _PickRoomEmployeeSheetState extends State<_PickRoomEmployeeSheet> {
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor:
-                                  CampPalette.accent.withOpacity(0.15),
+                                  CampPalette.accent.withValues(alpha: 0.15),
                               child: Text(e.initials,
                                   style: const TextStyle(
                                       color: CampPalette.accent,
@@ -597,7 +596,7 @@ class _RoomCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: CampPalette.accent.withOpacity(0.15),
+                      color: CampPalette.accent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.bed,
@@ -821,7 +820,7 @@ class _RoomOccupantsList extends StatelessWidget {
         final modeBg = !hasMode
             ? CampPalette.input
             : (isUsedBus
-                ? CampPalette.accent.withOpacity(0.08)
+                ? CampPalette.accent.withValues(alpha: 0.08)
                 : CampPalette.amberBg);
         final modeIcon = !hasMode
             ? Icons.help_outline
@@ -839,7 +838,7 @@ class _RoomOccupantsList extends StatelessWidget {
             color: modeBg,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
-                color: modeColor.withOpacity(0.35), width: 0.5),
+                color: modeColor.withValues(alpha: 0.35), width: 0.5),
           ),
           child: Row(
             children: [
@@ -877,7 +876,7 @@ class _RoomOccupantsList extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 4, vertical: 1),
                 decoration: BoxDecoration(
-                  color: modeColor.withOpacity(0.15),
+                  color: modeColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -909,7 +908,7 @@ class _MiniRating extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -1096,7 +1095,7 @@ class _StarRating extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: CampPalette.input,
         borderRadius: CampPalette.rInput,
       ),
@@ -1121,7 +1120,7 @@ class _StarRating extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color:
-                          selected ? color.withOpacity(0.2) : Colors.transparent,
+                          selected ? color.withValues(alpha: 0.2) : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                           color: selected
@@ -1292,7 +1291,7 @@ class _CreateRoomSheetState extends State<_CreateRoomSheet> {
                   color: CampPalette.amberBg,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                      color: CampPalette.amber.withOpacity(0.30)),
+                      color: CampPalette.amber.withValues(alpha: 0.30)),
                 ),
                 child: Row(
                   children: [
@@ -1641,7 +1640,9 @@ class _ManageRoomEmployeesSheetState extends State<_ManageRoomEmployeesSheet> {
       if (e.status != EntityStatus.active) return false;
       if (inAnyRoom.contains(e.id)) return false;
       if (widget.room.countryId != null &&
-          e.countryId != widget.room.countryId) return false;
+          e.countryId != widget.room.countryId) {
+        return false;
+      }
       // 🆕 فقط موظفو السكن "في الكمب" يظهرون في غرف الكمب
       if (e.housingType != HousingType.onCamp) return false;
       return true;
@@ -2007,10 +2008,10 @@ class _PickEmployeeSheetState extends State<_PickEmployeeSheet> {
                         return ListTile(
                           selected: selected,
                           selectedTileColor:
-                              CampPalette.accent.withOpacity(0.10),
+                              CampPalette.accent.withValues(alpha: 0.10),
                           leading: CircleAvatar(
                             backgroundColor:
-                                CampPalette.accent.withOpacity(0.15),
+                                CampPalette.accent.withValues(alpha: 0.15),
                             child: Text(e.initials,
                                 style: const TextStyle(
                                     color: CampPalette.accent,
@@ -2046,7 +2047,7 @@ class _PickEmployeeSheetState extends State<_PickEmployeeSheet> {
                         color: CampPalette.redBg,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: CampPalette.red.withOpacity(0.4)),
+                            color: CampPalette.red.withValues(alpha: 0.4)),
                       ),
                       child: Row(
                         children: [
@@ -2185,14 +2186,14 @@ class _EmployeeRichCard extends StatelessWidget {
     final modeBg = !hasMode
         ? CampPalette.input
         : (isUsedBus
-            ? CampPalette.accent.withOpacity(0.10)
+            ? CampPalette.accent.withValues(alpha: 0.10)
             : CampPalette.amberBg);
     final modeIcon = !hasMode
         ? Icons.help_outline
         : (isUsedBus ? Icons.directions_bus : Icons.directions_car);
 
     // اسم نوع الغرفة و القسم/المسمى من الـ lookups
-    String _lookupName(List items, String? id, bool isAr) {
+    String lookupName(List items, String? id, bool isAr) {
       if (id == null) return '';
       try {
         final m = items.firstWhere((x) => x.id == id);
@@ -2204,13 +2205,13 @@ class _EmployeeRichCard extends StatelessWidget {
 
     final jobTitle = e.jobTitle.isNotEmpty
         ? e.jobTitle
-        : _lookupName(repo.jobTitles, e.jobTitleId, s.isAr);
+        : lookupName(repo.jobTitles, e.jobTitleId, s.isAr);
     final department = e.department.isNotEmpty
         ? e.department
-        : _lookupName(repo.departments, e.departmentId, s.isAr);
+        : lookupName(repo.departments, e.departmentId, s.isAr);
     final nationality = e.nationality.isNotEmpty
         ? e.nationality
-        : _lookupName(repo.nationalities, e.nationalityId, s.isAr);
+        : lookupName(repo.nationalities, e.nationalityId, s.isAr);
 
     return Material(
       color: CampPalette.card,
@@ -2230,7 +2231,7 @@ class _EmployeeRichCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: CampPalette.accent.withOpacity(0.15),
+                  backgroundColor: CampPalette.accent.withValues(alpha: 0.15),
                   child: Text(e.initials,
                       style: const TextStyle(
                           color: CampPalette.accent,
@@ -2266,7 +2267,7 @@ class _EmployeeRichCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 4, vertical: 1),
                               decoration: BoxDecoration(
-                                color: CampPalette.red.withOpacity(0.12),
+                                color: CampPalette.red.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(
@@ -2291,7 +2292,7 @@ class _EmployeeRichCard extends StatelessWidget {
                     color: modeBg,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: modeColor.withOpacity(0.4), width: 0.5),
+                        color: modeColor.withValues(alpha: 0.4), width: 0.5),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -2334,7 +2335,7 @@ class _EmployeeRichCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: CampPalette.accent,
                       side: BorderSide(
-                          color: CampPalette.accent.withOpacity(0.4)),
+                          color: CampPalette.accent.withValues(alpha: 0.4)),
                       padding:
                           const EdgeInsets.symmetric(vertical: 6),
                     ),
@@ -2352,7 +2353,7 @@ class _EmployeeRichCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: CampPalette.red,
                       side: BorderSide(
-                          color: CampPalette.red.withOpacity(0.4)),
+                          color: CampPalette.red.withValues(alpha: 0.4)),
                       padding:
                           const EdgeInsets.symmetric(vertical: 6),
                     ),

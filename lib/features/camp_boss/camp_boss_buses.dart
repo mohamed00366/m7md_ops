@@ -11,7 +11,6 @@ import 'buses/bus_reports_screen.dart';
 import 'buses/buses_list_screen.dart';
 import 'buses/buses_shared.dart';
 import 'camp_palette.dart';
-import 'camp_widgets.dart';
 import 'camp_boss_buses_weekly.dart';
 
 /// 🚌 شاشة الباصات الرئيسية - تبويبات سفلية:
@@ -132,7 +131,7 @@ class _BusesCountryGate extends StatelessWidget {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: BusesPalette.primary.withOpacity(0.12),
+                  color: BusesPalette.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.directions_bus,
@@ -185,7 +184,7 @@ class _BusesCountryGate extends StatelessWidget {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: BusesPalette.primary
-                                        .withOpacity(0.12),
+                                        .withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   alignment: Alignment.center,

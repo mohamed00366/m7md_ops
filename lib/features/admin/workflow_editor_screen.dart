@@ -6,7 +6,6 @@ import '../../core/services/supabase_service.dart';
 import '../../core/services/workflow_engine.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/workflows/workflow_templates.dart';
-import '../../models/lookups.dart';
 import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
@@ -229,7 +228,7 @@ class _WorkflowEditorScreenState extends State<WorkflowEditorScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.1),
+                        color: AppColors.brand.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text('${p.stepCount} ${l.isAr ? "خطوة" : "steps"}',
@@ -398,7 +397,7 @@ class _WorkflowEditorScreenState extends State<WorkflowEditorScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.brand.withOpacity(0.12),
+                          color: AppColors.brand.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(t.code,
@@ -451,10 +450,10 @@ class _WorkflowEditorScreenState extends State<WorkflowEditorScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.1),
+                        color: AppColors.danger.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: AppColors.danger.withOpacity(0.3)),
+                            color: AppColors.danger.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -599,7 +598,7 @@ class _StepCard extends StatelessWidget {
                   height: 32,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.12),
+                    color: AppColors.brand.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Text('${index + 1}',
@@ -663,9 +662,9 @@ class _StepCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: color.withOpacity(0.4)),
+                      border: Border.all(color: color.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -766,9 +765,9 @@ class _MiniPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -985,7 +984,7 @@ class _StepEditorSheetState extends State<_StepEditorSheet> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.1),
+                        color: AppColors.brand.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text('$_minPower / 5',

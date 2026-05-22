@@ -56,7 +56,7 @@ class _EntityTimelineWidgetState extends State<EntityTimelineWidget> {
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +66,7 @@ class _EntityTimelineWidgetState extends State<EntityTimelineWidget> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withOpacity(0.08),
+                    color: AppColors.gold.withValues(alpha: 0.08),
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(12)),
                   ),
@@ -87,7 +87,7 @@ class _EntityTimelineWidgetState extends State<EntityTimelineWidget> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.gold.withOpacity(0.20),
+                          color: AppColors.gold.withValues(alpha: 0.20),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -153,7 +153,7 @@ class _TimelineRow extends StatelessWidget {
                   height: isFirst ? 6 : 14,
                   color: isFirst
                       ? Colors.transparent
-                      : Colors.grey.withOpacity(0.3),
+                      : Colors.grey.withValues(alpha: 0.3),
                 ),
                 Container(
                   width: 12,
@@ -163,7 +163,7 @@ class _TimelineRow extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                          color: color.withOpacity(0.30),
+                          color: color.withValues(alpha: 0.30),
                           blurRadius: 4,
                           spreadRadius: 1),
                     ],
@@ -174,7 +174,7 @@ class _TimelineRow extends StatelessWidget {
                     width: 2,
                     color: isLast
                         ? Colors.transparent
-                        : Colors.grey.withOpacity(0.3),
+                        : Colors.grey.withValues(alpha: 0.3),
                   ),
                 ),
               ],
@@ -195,7 +195,7 @@ class _TimelineRow extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.15),
+                          color: color.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -243,7 +243,7 @@ class _TimelineRow extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 6, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: color.withOpacity(0.08),
+                                    color: color.withValues(alpha: 0.08),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(

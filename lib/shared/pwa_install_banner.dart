@@ -35,14 +35,14 @@ class _PwaInstallBannerState extends State<PwaInstallBanner> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.brand.withOpacity(0.18),
-                AppColors.gold.withOpacity(0.10),
+                AppColors.brand.withValues(alpha: 0.18),
+                AppColors.gold.withValues(alpha: 0.10),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.gold.withOpacity(0.40)),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.40)),
           ),
           child: Row(
             children: [
@@ -50,7 +50,7 @@ class _PwaInstallBannerState extends State<PwaInstallBanner> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.20),
+                  color: AppColors.gold.withValues(alpha: 0.20),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.install_mobile,

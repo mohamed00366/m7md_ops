@@ -114,17 +114,17 @@ class LaundrySignaturePadState extends State<LaundrySignaturePad> {
                 top: 6,
                 left: 6,
                 child: Material(
-                  color: LaundryColors.danger.withOpacity(0.12),
+                  color: LaundryColors.danger.withValues(alpha: 0.12),
                   shape: const StadiumBorder(),
                   child: InkWell(
                     customBorder: const StadiumBorder(),
                     onTap: clear,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(Icons.refresh,
                               size: 12, color: LaundryColors.danger),
                           SizedBox(width: 3),

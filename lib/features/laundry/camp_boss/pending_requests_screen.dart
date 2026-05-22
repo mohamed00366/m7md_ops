@@ -110,7 +110,7 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: LaundryColors.primary.withOpacity(0.15),
+                    backgroundColor: LaundryColors.primary.withValues(alpha: 0.15),
                     child: Text(emp?.initials ?? '?',
                         style: const TextStyle(
                             color: LaundryColors.primary,
@@ -270,7 +270,7 @@ class _ReviewRequestScreenState extends State<_ReviewRequestScreen> {
       body: Column(
         children: [
           Container(
-            color: LaundryColors.primary.withOpacity(0.10),
+            color: LaundryColors.primary.withValues(alpha: 0.10),
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
@@ -314,7 +314,7 @@ class _ReviewRequestScreenState extends State<_ReviewRequestScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: LaundryColors.warning.withOpacity(0.10),
+                      color: LaundryColors.warning.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -404,12 +404,12 @@ class _ReviewRequestScreenState extends State<_ReviewRequestScreen> {
       decoration: BoxDecoration(
         color: diff == 0
             ? Theme.of(context).cardColor
-            : LaundryColors.warning.withOpacity(0.10),
+            : LaundryColors.warning.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
             color: diff == 0
-                ? Colors.grey.withOpacity(0.30)
-                : LaundryColors.warning.withOpacity(0.40)),
+                ? Colors.grey.withValues(alpha: 0.30)
+                : LaundryColors.warning.withValues(alpha: 0.40)),
       ),
       child: Row(
         children: [

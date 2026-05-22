@@ -137,7 +137,7 @@ class _ActiveVouchersScreenState extends State<ActiveVouchersScreen> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       color: isSelected
-          ? LaundryColors.primary.withOpacity(0.12)
+          ? LaundryColors.primary.withValues(alpha: 0.12)
           : Theme.of(context).cardColor,
       child: InkWell(
         onTap: () => setState(() {
@@ -208,11 +208,10 @@ class _ActiveVouchersScreenState extends State<ActiveVouchersScreen> {
                         style: const TextStyle(
                             fontWeight: FontWeight.w800, fontSize: 13)),
                     Text(
-                      '${v.totalItems} قِطعة: ' +
-                          v.items
+                      '${v.totalItems} قِطعة: ${v.items
                               .map((i) =>
                                   '${_types[i.clothingTypeId]?.emoji ?? "🧺"} ${i.sentQty}')
-                              .join(' · '),
+                              .join(' · ')}',
                       style: const TextStyle(fontSize: 11),
                     ),
                   ],

@@ -92,10 +92,10 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: LaundryColors.primary.withOpacity(0.10),
+                    color: LaundryColors.primary.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12),
                     border:
-                        Border.all(color: LaundryColors.primary.withOpacity(0.30)),
+                        Border.all(color: LaundryColors.primary.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [
@@ -159,7 +159,7 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
                 const SizedBox(height: 6),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.withOpacity(0.30)),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.30)),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -169,7 +169,7 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.10),
+                          color: Colors.grey.withValues(alpha: 0.10),
                           borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(10)),
                         ),
@@ -208,7 +208,7 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.12),
+                      color: Colors.amber.withValues(alpha: 0.12),
                       border: Border.all(color: Colors.amber.shade300),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -288,9 +288,9 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +313,7 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: stripe ? Colors.grey.withOpacity(0.04) : null,
+        color: stripe ? Colors.grey.withValues(alpha: 0.04) : null,
       ),
       child: Row(
         children: [
@@ -363,7 +363,7 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 14, color: color),
@@ -385,7 +385,7 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
   }
 
   static String _fmt(DateTime d) {
-    final two = (int n) => n.toString().padLeft(2, '0');
+    two(int n) => n.toString().padLeft(2, '0');
     return '${d.year}-${two(d.month)}-${two(d.day)} ${two(d.hour)}:${two(d.minute)}';
   }
 }

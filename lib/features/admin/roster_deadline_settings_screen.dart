@@ -85,9 +85,9 @@ class _RosterDeadlineSettingsScreenState
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +115,7 @@ class _RosterDeadlineSettingsScreenState
                     style: const TextStyle(fontSize: 11),
                   ),
                   onSelected: (_) => onChanged(d),
-                  selectedColor: color.withOpacity(0.20),
+                  selectedColor: color.withValues(alpha: 0.20),
                 ),
             ],
           ),
@@ -144,9 +144,9 @@ class _RosterDeadlineSettingsScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.10),
+              color: AppColors.info.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.info.withOpacity(0.30)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.30)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

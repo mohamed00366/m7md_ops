@@ -301,11 +301,11 @@ class _GeoFenceSettingsScreenState extends State<GeoFenceSettingsScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppColors.warning.withOpacity(0.08),
+                            color: AppColors.warning.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                                 color: AppColors.warning
-                                    .withOpacity(0.3)),
+                                    .withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [
@@ -482,10 +482,10 @@ class _Banner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.08),
+        color: AppColors.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: AppColors.brand.withOpacity(0.25), width: 0.5),
+            color: AppColors.brand.withValues(alpha: 0.25), width: 0.5),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,7 +609,7 @@ class _ZoneCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: zone.isActive
-                ? AppColors.success.withOpacity(0.4)
+                ? AppColors.success.withValues(alpha: 0.4)
                 : Theme.of(context).dividerColor,
             width: zone.isActive ? 0.8 : 0.5),
       ),
@@ -621,7 +621,7 @@ class _ZoneCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.12),
+                  color: AppColors.brand.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.place,
@@ -708,12 +708,12 @@ class _ScopeOption extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: active
-              ? color.withOpacity(0.08)
+              ? color.withValues(alpha: 0.08)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: active
-                ? color.withOpacity(0.6)
+                ? color.withValues(alpha: 0.6)
                 : Theme.of(context).dividerColor,
             width: active ? 1.2 : 0.5,
           ),
@@ -723,7 +723,7 @@ class _ScopeOption extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -849,7 +849,7 @@ class _AccountListCard extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: color.withOpacity(0.3), width: 0.6),
+            Border.all(color: color.withValues(alpha: 0.3), width: 0.6),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -883,7 +883,7 @@ class _AccountListCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text('${ids.length}',
@@ -970,7 +970,7 @@ class _JobTitleListCard extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: color.withOpacity(0.3), width: 0.6),
+            Border.all(color: color.withValues(alpha: 0.3), width: 0.6),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -998,7 +998,7 @@ class _JobTitleListCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text('${ids.length}',
@@ -1071,9 +1071,9 @@ class _ChipDel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1091,7 +1091,7 @@ class _ChipDel extends StatelessWidget {
             const SizedBox(width: 4),
             Text(sub,
                 style: TextStyle(
-                    color: color.withOpacity(0.7), fontSize: 10)),
+                    color: color.withValues(alpha: 0.7), fontSize: 10)),
           ],
           InkWell(
             customBorder: const CircleBorder(),
@@ -1311,7 +1311,7 @@ class _PickerScaffold extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.12),
+                        color: AppColors.brand.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text('$count',
@@ -1535,10 +1535,10 @@ class _CountTile extends StatelessWidget {
       padding:
           const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: color.withOpacity(0.25), width: 0.5),
+            Border.all(color: color.withValues(alpha: 0.25), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1550,7 +1550,7 @@ class _CountTile extends StatelessWidget {
               Expanded(
                 child: Text(label,
                     style: TextStyle(
-                        color: color.withOpacity(0.85),
+                        color: color.withValues(alpha: 0.85),
                         fontSize: 10,
                         fontWeight: FontWeight.w700)),
               ),
@@ -1595,7 +1595,7 @@ class _GroupHeader extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text('$count',
@@ -1644,7 +1644,7 @@ class _PreviewTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: c.withOpacity(0.25), width: 0.4),
+        border: Border.all(color: c.withValues(alpha: 0.25), width: 0.4),
       ),
       child: Row(
         children: [
@@ -1704,7 +1704,7 @@ class _PreviewTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: c.withOpacity(0.12),
+                color: c.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

@@ -18,7 +18,6 @@ import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/employee_identity.dart';
 import '../../shared/widgets.dart';
-import 'roster_changes_history_screen.dart';
 import 'roster_diff_preview_sheet.dart';
 
 /// منشئ الروستر الأسبوعي - تصميم جدولي:
@@ -1171,8 +1170,8 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
               '$day  •  $shift  •  ${a.startTime} → ${a.endTime}');
         }
       }
-      final footerAr = '\n\nبالتوفيق 💪';
-      final footerEn = '\n\nGood luck 💪';
+      const footerAr = '\n\nبالتوفيق 💪';
+      const footerEn = '\n\nGood luck 💪';
       return (isAr ? headerAr : headerEn) +
           lines.join('\n') +
           (isAr ? footerAr : footerEn);
@@ -1252,7 +1251,7 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
                       leading: CircleAvatar(
                         radius: 18,
                         backgroundColor:
-                            AppColors.brand.withOpacity(0.15),
+                            AppColors.brand.withValues(alpha: 0.15),
                         child: Text(
                           emp.initials,
                           style: const TextStyle(
@@ -1283,7 +1282,7 @@ class _SupervisorRosterCreatorState extends State<SupervisorRosterCreator> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.brand.withOpacity(0.10),
+                              color: AppColors.brand.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -1593,10 +1592,10 @@ class _QuickActionsBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.1),
+                  color: AppColors.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border:
-                      Border.all(color: AppColors.warning.withOpacity(0.4)),
+                      Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1639,9 +1638,9 @@ class _QABtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1706,9 +1705,9 @@ class _StatusBanner extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.danger.withOpacity(0.1),
+            color: AppColors.danger.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.danger.withOpacity(0.4)),
+            border: Border.all(color: AppColors.danger.withValues(alpha: 0.4)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1743,7 +1742,7 @@ class _StatusBanner extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     border:
-                        Border.all(color: AppColors.danger.withOpacity(0.3)),
+                        Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1822,8 +1821,8 @@ class _DeadlineBanner extends StatelessWidget {
 
     switch (st) {
       case RosterDeadlineStatus.onTime:
-        bgColor = AppColors.success.withOpacity(0.10);
-        borderColor = AppColors.success.withOpacity(0.40);
+        bgColor = AppColors.success.withValues(alpha: 0.10);
+        borderColor = AppColors.success.withValues(alpha: 0.40);
         icon = Icons.check_circle_outline;
         title = isAr
             ? '✅ الوقت كافٍ — يجب إرسال الروستر قبل $deadlineLabel'
@@ -1833,8 +1832,8 @@ class _DeadlineBanner extends StatelessWidget {
             : '$daysLeft days until deadline. $reviewLabel for review, work starts $effectiveLabel.';
         break;
       case RosterDeadlineStatus.lastDay:
-        bgColor = AppColors.warning.withOpacity(0.12);
-        borderColor = AppColors.warning.withOpacity(0.50);
+        bgColor = AppColors.warning.withValues(alpha: 0.12);
+        borderColor = AppColors.warning.withValues(alpha: 0.50);
         icon = Icons.warning_amber_rounded;
         title = isAr
             ? '⚠️ اليوم آخر يوم لإرسال الروستر ($deadlineLabel)'
@@ -1844,8 +1843,8 @@ class _DeadlineBanner extends StatelessWidget {
             : 'Submit by end of day. Tomorrow ($reviewLabel) is review day, work starts $effectiveLabel.';
         break;
       case RosterDeadlineStatus.reviewWindow:
-        bgColor = AppColors.danger.withOpacity(0.12);
-        borderColor = AppColors.danger.withOpacity(0.50);
+        bgColor = AppColors.danger.withValues(alpha: 0.12);
+        borderColor = AppColors.danger.withValues(alpha: 0.50);
         icon = Icons.error_outline;
         title = isAr
             ? '🚫 فات الموعد — أنت في نافذة المراجعة'
@@ -1855,7 +1854,7 @@ class _DeadlineBanner extends StatelessWidget {
             : 'Roster was due before $deadlineLabel. Today is review-only — exceptions only.';
         break;
       case RosterDeadlineStatus.workStarted:
-        bgColor = AppColors.danger.withOpacity(0.20);
+        bgColor = AppColors.danger.withValues(alpha: 0.20);
         borderColor = AppColors.danger;
         icon = Icons.dangerous_outlined;
         title = isAr
@@ -1920,9 +1919,9 @@ class _Banner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(children: [
         Container(
@@ -1945,7 +1944,7 @@ class _Banner extends StatelessWidget {
                 Text(subtitle!,
                     style: TextStyle(
                         fontSize: 11,
-                        color: color.withOpacity(0.8))),
+                        color: color.withValues(alpha: 0.8))),
             ],
           ),
         ),
@@ -2033,7 +2032,7 @@ class _Header extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.10),
+                    color: AppColors.brand.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -2130,9 +2129,9 @@ class _LegendChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         label,
@@ -2232,7 +2231,7 @@ class _RosterGridTableState extends State<RosterGridTable> {
     const empColWidth = 130.0;
     const dayColWidth = 70.0;
     const totalColWidth = 50.0;
-    final tableWidth = empColWidth + (dayColWidth * 7) + totalColWidth;
+    const tableWidth = empColWidth + (dayColWidth * 7) + totalColWidth;
 
     // 🆕 رأس الجدول كـ widget منفصل (سيُستعمل sticky فوق الـ body)
     final headerRow = Row(
@@ -2265,7 +2264,7 @@ class _RosterGridTableState extends State<RosterGridTable> {
           // ===== رأس الجدول الثابت (Sticky) =====
           Container(
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.06),
+              color: AppColors.brand.withValues(alpha: 0.06),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12)),
             ),
@@ -2309,7 +2308,7 @@ class _RosterGridTableState extends State<RosterGridTable> {
                           readOnly ? null : () => onRemoveEmployee(emp),
                       onLongPress: onCellLongPress == null
                           ? null
-                          : () => onCellLongPress!(emp),
+                          : () => onCellLongPress(emp),
                     ),
                     ...List.generate(7, (dayIndex) {
                       final assignment = empAssignments
@@ -2420,7 +2419,7 @@ class _RosterGridTableState extends State<RosterGridTable> {
                                 vertical: 10),
                             decoration: BoxDecoration(
                               color:
-                                  AppColors.brand.withOpacity(0.05),
+                                  AppColors.brand.withValues(alpha: 0.05),
                               border: Border(
                                 top: BorderSide(
                                     color: Theme.of(context)
@@ -2479,8 +2478,8 @@ class _HeaderCell extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isAccent
-            ? AppColors.warning.withOpacity(0.15)
-            : Theme.of(context).dividerColor.withOpacity(0.15),
+            ? AppColors.warning.withValues(alpha: 0.15)
+            : Theme.of(context).dividerColor.withValues(alpha: 0.15),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
           bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -2628,7 +2627,7 @@ class _MiniBtn extends StatelessWidget {
           width: 18,
           height: 18,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, size: 11, color: color),
@@ -2660,18 +2659,18 @@ class _ShiftCell extends StatelessWidget {
     String? timeLabel;
 
     if (a == null || a.shiftType == ShiftType.off) {
-      bg = AppColors.textTertiaryLight.withOpacity(0.1);
+      bg = AppColors.textTertiaryLight.withValues(alpha: 0.1);
       textColor = AppColors.textTertiaryLight;
       letter = 'Off';
       timeLabel = null;
     } else if (a.shiftType == ShiftType.night) {
-      bg = AppColors.info.withOpacity(0.15);
+      bg = AppColors.info.withValues(alpha: 0.15);
       textColor = AppColors.info;
       letter = 'N';
       timeLabel = '${_short(a.startTime)}-${_short(a.endTime)}';
     } else {
       // morning / evening / custom
-      bg = AppColors.success.withOpacity(0.15);
+      bg = AppColors.success.withValues(alpha: 0.15);
       textColor = AppColors.success;
       letter = 'M';
       timeLabel = '${_short(a.startTime)}-${_short(a.endTime)}';
@@ -2733,7 +2732,7 @@ class _ShiftCell extends StatelessWidget {
           if (locked)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.18),
+                color: Colors.black.withValues(alpha: 0.18),
                 alignment: Alignment.topLeft,
                 padding: const EdgeInsets.all(2),
                 child: const Icon(Icons.lock,
@@ -2769,7 +2768,7 @@ class _TotalCell extends StatelessWidget {
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.08),
+        color: AppColors.warning.withValues(alpha: 0.08),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
           bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -2804,7 +2803,7 @@ class _SummaryLabelCell extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
-        color: (color ?? AppColors.brand).withOpacity(0.08),
+        color: (color ?? AppColors.brand).withValues(alpha: 0.08),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
           bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -2842,8 +2841,8 @@ class _SummaryNumCell extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isAccent
-            ? AppColors.warning.withOpacity(0.15)
-            : (color ?? AppColors.brand).withOpacity(0.05),
+            ? AppColors.warning.withValues(alpha: 0.15)
+            : (color ?? AppColors.brand).withValues(alpha: 0.05),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
           bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -2957,7 +2956,7 @@ class _DayTimelineRow extends StatelessWidget {
             child: Container(
               height: 18,
               decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor.withOpacity(0.3),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: LayoutBuilder(builder: (_, constraints) {
@@ -2980,7 +2979,7 @@ class _DayTimelineRow extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           color: (isNight ? AppColors.info : AppColors.success)
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -3209,10 +3208,10 @@ class _ShiftEditorSheetState extends State<RosterShiftEditorSheet> {
                 margin: const EdgeInsets.only(bottom: 6),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.danger.withOpacity(0.10),
+                  color: AppColors.danger.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                      color: AppColors.danger.withOpacity(0.30)),
+                      color: AppColors.danger.withValues(alpha: 0.30)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3278,9 +3277,9 @@ class _ShiftEditorSheetState extends State<RosterShiftEditorSheet> {
                 margin: const EdgeInsets.only(bottom: 6),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.danger.withOpacity(0.08),
+                  color: AppColors.danger.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: AppColors.danger.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3431,7 +3430,7 @@ class _ShiftEditorSheetState extends State<RosterShiftEditorSheet> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.1),
+                  color: AppColors.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -3502,7 +3501,7 @@ class _TypeButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? color : color.withOpacity(0.12),
+            color: selected ? color : color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
@@ -3683,14 +3682,14 @@ class _AddEmployeeSheetState extends State<RosterAddEmployeeSheet> {
 
                 // 🆕 لون البطاقة حسب الحالة
                 final Color tileColor = isInOtherRoster
-                    ? AppColors.danger.withOpacity(0.06)
+                    ? AppColors.danger.withValues(alpha: 0.06)
                     : isCrossPoint
-                        ? AppColors.warning.withOpacity(0.08)
+                        ? AppColors.warning.withValues(alpha: 0.08)
                         : Colors.transparent;
                 final Color borderColor = isInOtherRoster
-                    ? AppColors.danger.withOpacity(0.40)
+                    ? AppColors.danger.withValues(alpha: 0.40)
                     : isCrossPoint
-                        ? AppColors.warning.withOpacity(0.40)
+                        ? AppColors.warning.withValues(alpha: 0.40)
                         : Colors.transparent;
                 final Color avatarColor = isInOtherRoster
                     ? AppColors.danger
@@ -3728,8 +3727,8 @@ class _AddEmployeeSheetState extends State<RosterAddEmployeeSheet> {
                                 : '⚠️ Already in «${status!.otherRosterPointName}» same week',
                           ),
                           // 🆕 تَفاصيل وَردِيّات الأَيّام
-                          if (status?.otherShiftsByDay != null &&
-                              status!.otherShiftsByDay!.isNotEmpty) ...[
+                          if (status.otherShiftsByDay != null &&
+                              status.otherShiftsByDay!.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             Padding(
                               padding: const EdgeInsets.symmetric(
@@ -3747,16 +3746,16 @@ class _AddEmployeeSheetState extends State<RosterAddEmployeeSheet> {
                                         horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: AppColors.danger
-                                          .withOpacity(0.10),
+                                          .withValues(alpha: 0.10),
                                       borderRadius:
                                           BorderRadius.circular(4),
                                       border: Border.all(
                                           color: AppColors.danger
-                                              .withOpacity(0.3)),
+                                              .withValues(alpha: 0.3)),
                                     ),
                                     child: Text(
                                       '$dayName · $times',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.danger),
@@ -3845,9 +3844,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.40)),
+        border: Border.all(color: color.withValues(alpha: 0.40)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -3953,9 +3952,9 @@ class _RosterBulkAddSheetState extends State<RosterBulkAddSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.05),
+                    color: AppColors.brand.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+                    border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -4177,10 +4176,10 @@ class _ManagerPointPickerState extends State<_ManagerPointPicker> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.10),
+                  color: AppColors.brand.withValues(alpha: 0.10),
                   shape: BoxShape.circle,
                   border:
-                      Border.all(color: AppColors.brand.withOpacity(0.3)),
+                      Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
                 ),
                 child: const Icon(Icons.pin_drop_outlined,
                     color: AppColors.brand, size: 38),
@@ -4242,7 +4241,7 @@ class _ManagerPointPickerState extends State<_ManagerPointPicker> {
                               leading: CircleAvatar(
                                 radius: 16,
                                 backgroundColor:
-                                    AppColors.brand.withOpacity(0.12),
+                                    AppColors.brand.withValues(alpha: 0.12),
                                 child: const Icon(Icons.location_on,
                                     color: AppColors.brand, size: 18),
                               ),
@@ -4308,7 +4307,7 @@ class _NoAssignmentState extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 40),

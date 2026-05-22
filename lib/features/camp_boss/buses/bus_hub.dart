@@ -179,15 +179,15 @@ class _BusHeader extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         border:
-            Border.all(color: AppColors.gold.withOpacity(0.30), width: 1),
+            Border.all(color: AppColors.gold.withValues(alpha: 0.30), width: 1),
       ),
       child: Row(
         children: [
@@ -195,7 +195,7 @@ class _BusHeader extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.15),
+              color: AppColors.brand.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.directions_bus,
@@ -266,7 +266,7 @@ class _BusCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withOpacity(0.25), width: 1.2),
+            border: Border.all(color: color.withValues(alpha: 0.25), width: 1.2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +277,7 @@ class _BusCard extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(icon, color: color, size: 22),
@@ -288,8 +288,8 @@ class _BusCard extends StatelessWidget {
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: statusOk
-                          ? AppColors.success.withOpacity(0.18)
-                          : color.withOpacity(0.10),
+                          ? AppColors.success.withValues(alpha: 0.18)
+                          : color.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -314,11 +314,11 @@ class _BusCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(Icons.chevron_right,
-                      color: color.withOpacity(0.60), size: 14),
+                      color: color.withValues(alpha: 0.60), size: 14),
                   Text(
                     isAr ? 'فَتح' : 'Open',
                     style: TextStyle(
-                        fontSize: 10, color: color.withOpacity(0.70)),
+                        fontSize: 10, color: color.withValues(alpha: 0.70)),
                   ),
                 ],
               ),

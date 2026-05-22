@@ -238,9 +238,9 @@ class _Chip extends StatelessWidget {
           padding: EdgeInsets.symmetric(
               horizontal: small ? 10 : 12, vertical: small ? 4 : 6),
           decoration: BoxDecoration(
-            color: selected ? c : c.withOpacity(0.1),
+            color: selected ? c : c.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: c.withOpacity(selected ? 1 : 0.3)),
+            border: Border.all(color: c.withValues(alpha: selected ? 1 : 0.3)),
           ),
           child: Text(
             label,
@@ -307,7 +307,7 @@ class _AuditCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.1),
+                  color: AppColors.brand.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(entity,
@@ -345,7 +345,7 @@ class _AuditCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).dividerColor.withOpacity(0.5),
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(3),
                   ),
                   child: Text(role,
@@ -365,7 +365,7 @@ class _AuditCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.1),
+                          color: AppColors.warning.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(f,
@@ -500,9 +500,9 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       margin: const EdgeInsets.only(bottom: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(title,
           style: TextStyle(
@@ -526,7 +526,7 @@ class _JsonViewer extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Theme.of(context).dividerColor.withOpacity(0.2),
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: SelectableText(

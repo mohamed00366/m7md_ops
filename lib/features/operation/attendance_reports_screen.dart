@@ -325,8 +325,8 @@ class _PointReportTab extends StatefulWidget {
 
 class _PointReportTabState extends State<_PointReportTab> {
   bool _loading = true;
-  Map<String, int> _daysPresent = {};   // employee_id → count of days present
-  Map<String, int> _daysCompleted = {}; // employee_id → days with clock_out
+  final Map<String, int> _daysPresent = {};   // employee_id → count of days present
+  final Map<String, int> _daysCompleted = {}; // employee_id → days with clock_out
   int _totalDays = 0;
   int _totalRecords = 0;
 
@@ -436,7 +436,7 @@ class _PointReportTabState extends State<_PointReportTab> {
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: AppColors.brand.withOpacity(0.1),
+                    backgroundColor: AppColors.brand.withValues(alpha: 0.1),
                     child: Text(emp.initials,
                         style: const TextStyle(
                             color: AppColors.brand,
@@ -518,12 +518,12 @@ class _RangeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppColors.brand
-              : AppColors.brand.withOpacity(0.08),
+              : AppColors.brand.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
               color: selected
                   ? AppColors.brand
-                  : AppColors.brand.withOpacity(0.3),
+                  : AppColors.brand.withValues(alpha: 0.3),
               width: 0.5),
         ),
         child: Text(label,
@@ -552,10 +552,10 @@ class _BigStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: color.withOpacity(0.25), width: 0.5),
+            color: color.withValues(alpha: 0.25), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -567,7 +567,7 @@ class _BigStat extends StatelessWidget {
               Expanded(
                 child: Text(label,
                     style: TextStyle(
-                        color: color.withOpacity(0.85),
+                        color: color.withValues(alpha: 0.85),
                         fontSize: 11,
                         fontWeight: FontWeight.w700),
                     maxLines: 1,
@@ -633,7 +633,7 @@ class _AttendanceRateBar extends StatelessWidget {
               value: rate,
               minHeight: 10,
               backgroundColor:
-                  AppColors.danger.withOpacity(0.15),
+                  AppColors.danger.withValues(alpha: 0.15),
               valueColor: const AlwaysStoppedAnimation(
                   AppColors.success),
             ),
@@ -720,7 +720,7 @@ class _EmpRow extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 14,
-                backgroundColor: color.withOpacity(0.12),
+                backgroundColor: color.withValues(alpha: 0.12),
                 child: Text(
                   emp.fullName.isEmpty ? '?' : emp.fullName[0],
                   style: TextStyle(
@@ -782,7 +782,7 @@ class _EmpRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: stats.presenceRate,
               minHeight: 4,
-              backgroundColor: color.withOpacity(0.15),
+              backgroundColor: color.withValues(alpha: 0.15),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
@@ -802,7 +802,7 @@ class _MiniBadge extends StatelessWidget {
       padding:
           const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text('$count',

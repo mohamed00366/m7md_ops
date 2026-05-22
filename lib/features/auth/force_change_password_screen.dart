@@ -141,7 +141,7 @@ class _ForceChangePasswordScreenState
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.20),
+                      color: Colors.white.withValues(alpha: 0.20),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.lock_reset,
@@ -166,7 +166,7 @@ class _ForceChangePasswordScreenState
                         : 'Welcome ${account?.fullName ?? ""} — this is your first login. Please set a new secure password.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.92),
+                      color: Colors.white.withValues(alpha: 0.92),
                       fontSize: 13,
                     ),
                   ),
@@ -225,10 +225,10 @@ class _ForceChangePasswordScreenState
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppColors.danger.withOpacity(0.10),
+                              color: AppColors.danger.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                  color: AppColors.danger.withOpacity(
+                                  color: AppColors.danger.withValues(alpha: 
                                       0.40)),
                             ),
                             child: Row(
@@ -299,7 +299,7 @@ class _ForceChangePasswordScreenState
                         ? 'كلمة المرور: 8 أحرُف على الأَقلّ + حُروف + أرقام'
                         : 'Password: 8+ chars + letters + digits',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.80),
+                      color: Colors.white.withValues(alpha: 0.80),
                       fontSize: 11,
                     ),
                   ),

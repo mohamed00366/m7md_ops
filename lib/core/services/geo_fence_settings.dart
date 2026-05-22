@@ -255,24 +255,24 @@ class GeoFenceSettings extends ChangeNotifier {
   GeoFenceDecision decisionFor(String accountId) {
     final override = _overrides[accountId];
     if (override == true) {
-      return GeoFenceDecision(
+      return const GeoFenceDecision(
           applies: true, reason: GeoFenceReason.overrideEnforced);
     }
     if (override == false) {
-      return GeoFenceDecision(
+      return const GeoFenceDecision(
           applies: false, reason: GeoFenceReason.overrideExempt);
     }
     if (!_enabled) {
-      return GeoFenceDecision(
+      return const GeoFenceDecision(
           applies: false, reason: GeoFenceReason.globallyDisabled);
     }
     switch (_scope) {
       case GeoFenceScope.allAccounts:
-        return GeoFenceDecision(
+        return const GeoFenceDecision(
             applies: true, reason: GeoFenceReason.scopeAll);
       case GeoFenceScope.includedOnly:
         if (_accountIds.contains(accountId)) {
-          return GeoFenceDecision(
+          return const GeoFenceDecision(
               applies: true, reason: GeoFenceReason.accountListed);
         }
         final jt = _jobTitleIdOf(accountId);
@@ -282,11 +282,11 @@ class GeoFenceSettings extends ChangeNotifier {
               reason: GeoFenceReason.jobTitleListed,
               matchedJobTitleId: jt);
         }
-        return GeoFenceDecision(
+        return const GeoFenceDecision(
             applies: false, reason: GeoFenceReason.notInIncludeList);
       case GeoFenceScope.excludedOnly:
         if (_accountIds.contains(accountId)) {
-          return GeoFenceDecision(
+          return const GeoFenceDecision(
               applies: false, reason: GeoFenceReason.accountExcluded);
         }
         final jt = _jobTitleIdOf(accountId);
@@ -296,7 +296,7 @@ class GeoFenceSettings extends ChangeNotifier {
               reason: GeoFenceReason.jobTitleExcluded,
               matchedJobTitleId: jt);
         }
-        return GeoFenceDecision(
+        return const GeoFenceDecision(
             applies: true, reason: GeoFenceReason.notInExcludeList);
     }
   }

@@ -298,14 +298,14 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -313,7 +313,7 @@ class _Header extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.15),
+              color: AppColors.success.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.storefront,

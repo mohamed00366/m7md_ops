@@ -9,7 +9,6 @@ import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_palette.dart';
 import '../../models/enums.dart';
-import '../../models/lookups.dart';
 import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
 import 'widgets/image_field.dart';
@@ -110,13 +109,13 @@ class _FormRendererState extends State<FormRenderer> {
           // ===== ترويسة النموذج =====
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
                 colors: [AppColors.brand, AppColors.brandAccent],
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
               ),
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                   top: Radius.circular(12)),
             ),
             child: Row(
@@ -126,7 +125,7 @@ class _FormRendererState extends State<FormRenderer> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.20),
+                      color: Colors.white.withValues(alpha: 0.20),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -148,7 +147,7 @@ class _FormRendererState extends State<FormRenderer> {
                       Text(
                         widget.template.code,
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             fontSize: 11),
                       ),
                     ],
@@ -369,7 +368,7 @@ class _FormRendererState extends State<FormRenderer> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: AppPalette.brand.withOpacity(0.10),
+                color: AppPalette.brand.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -489,7 +488,7 @@ class _FormRendererState extends State<FormRenderer> {
                               horizontal: 5, vertical: 1),
                           margin: const EdgeInsets.only(right: 4, top: 2),
                           decoration: BoxDecoration(
-                            color: AppPalette.textSecondary.withOpacity(0.10),
+                            color: AppPalette.textSecondary.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(item.size,
@@ -574,15 +573,15 @@ class _FormRendererState extends State<FormRenderer> {
     final latKey = field['lat_key']?.toString() ?? '${key}_lat';
     final lngKey = field['lng_key']?.toString() ?? '${key}_lng';
 
-    double? _toDouble(dynamic v) {
+    double? toDouble(dynamic v) {
       if (v == null) return null;
       if (v is num) return v.toDouble();
       if (v is String) return double.tryParse(v);
       return null;
     }
 
-    final lat = _toDouble(_values[latKey]);
-    final lng = _toDouble(_values[lngKey]);
+    final lat = toDouble(_values[latKey]);
+    final lng = toDouble(_values[lngKey]);
     final hasPicked = lat != null && lng != null;
     final theme = Theme.of(context);
 
@@ -592,7 +591,7 @@ class _FormRendererState extends State<FormRenderer> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
             color: hasPicked
-                ? AppColors.success.withOpacity(0.4)
+                ? AppColors.success.withValues(alpha: 0.4)
                 : AppPalette.border),
       ),
       padding: const EdgeInsets.all(12),
@@ -708,9 +707,9 @@ class _FormRendererState extends State<FormRenderer> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.08),
+        color: AppColors.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.brand.withOpacity(0.25)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
       ),
       child: Text(
         '$label: $value',
@@ -1321,11 +1320,11 @@ class _InlineMapPickerState extends State<_InlineMapPicker> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 6,
                       offset: const Offset(0, 2)),
                 ],

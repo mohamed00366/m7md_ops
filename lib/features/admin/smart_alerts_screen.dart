@@ -222,14 +222,14 @@ class _SmartAlertsScreenState extends State<SmartAlertsScreen> {
       padding: const EdgeInsets.all(40),
       margin: const EdgeInsets.symmetric(vertical: 30),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.08),
+        color: AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.success.withOpacity(0.30)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.30)),
       ),
       child: Column(
         children: [
           Icon(Icons.check_circle,
-              size: 64, color: AppColors.success.withOpacity(0.85)),
+              size: 64, color: AppColors.success.withValues(alpha: 0.85)),
           const SizedBox(height: 12),
           Text(
             isAr ? '✨ كُلّ شَيء عَلى ما يُرام!' : '✨ All clear!',
@@ -278,9 +278,9 @@ class _SeveritySection extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
+              color: color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: color.withOpacity(0.30)),
+              border: Border.all(color: color.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -298,7 +298,7 @@ class _SeveritySection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.20),
+                    color: color.withValues(alpha: 0.20),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -337,7 +337,7 @@ class _AlertTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -355,7 +355,7 @@ class _AlertTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(alert.icon, color: color, size: 20),
@@ -381,7 +381,7 @@ class _AlertTile extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 1),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.10),
+                          color: color.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -399,7 +399,7 @@ class _AlertTile extends StatelessWidget {
                 ),
                 if (alert.openBuilder != null)
                   Icon(Icons.chevron_right,
-                      color: color.withOpacity(0.50), size: 18),
+                      color: color.withValues(alpha: 0.50), size: 18),
               ],
             ),
           ),

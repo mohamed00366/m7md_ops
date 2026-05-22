@@ -69,7 +69,7 @@ class _MyLeavesScreenState extends State<MyLeavesScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.4),
+                color: Colors.grey.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -79,7 +79,7 @@ class _MyLeavesScreenState extends State<MyLeavesScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.15),
+                  color: AppColors.brand.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.assignment_outlined,
@@ -108,7 +108,7 @@ class _MyLeavesScreenState extends State<MyLeavesScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.grey.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.bolt, color: Colors.grey),
@@ -399,9 +399,9 @@ class _BalanceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,7 +425,7 @@ class _BalanceCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '${remaining.toStringAsFixed(0)}',
+            remaining.toStringAsFixed(0),
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w900,
@@ -512,7 +512,7 @@ class _RequestTile extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -777,8 +777,8 @@ class _SubmitLeaveFormState extends State<_SubmitLeaveForm> {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: exceeds
-                  ? AppColors.danger.withOpacity(0.10)
-                  : AppColors.info.withOpacity(0.10),
+                  ? AppColors.danger.withValues(alpha: 0.10)
+                  : AppColors.info.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

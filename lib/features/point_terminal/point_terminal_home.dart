@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -341,7 +340,7 @@ class _PointTerminalHomeState extends State<PointTerminalHome>
     final scaffoldBg = isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F0);
     final containerBg =
         isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final borderColor = AppColors.gold.withOpacity(isDark ? 0.20 : 0.40);
+    final borderColor = AppColors.gold.withValues(alpha: isDark ? 0.20 : 0.40);
 
     if (_point == null) {
       return Scaffold(
@@ -432,7 +431,7 @@ class _PointTerminalHomeState extends State<PointTerminalHome>
                         gradient: LinearGradient(
                           colors: [
                             AppColors.gold,
-                            AppColors.gold.withOpacity(0.85),
+                            AppColors.gold.withValues(alpha: 0.85),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -440,7 +439,7 @@ class _PointTerminalHomeState extends State<PointTerminalHome>
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.gold.withOpacity(0.30),
+                            color: AppColors.gold.withValues(alpha: 0.30),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -482,7 +481,7 @@ class _PointTerminalHomeState extends State<PointTerminalHome>
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                             color:
-                                AppColors.gold.withOpacity(isDark ? 0.15 : 0.30),
+                                AppColors.gold.withValues(alpha: isDark ? 0.15 : 0.30),
                             width: 1),
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -547,8 +546,8 @@ class _BackgroundDecor extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.gold.withOpacity(0.18),
-                      AppColors.gold.withOpacity(0.0),
+                      AppColors.gold.withValues(alpha: 0.18),
+                      AppColors.gold.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -565,8 +564,8 @@ class _BackgroundDecor extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.gold.withOpacity(0.10),
-                      AppColors.gold.withOpacity(0.0),
+                      AppColors.gold.withValues(alpha: 0.10),
+                      AppColors.gold.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -638,11 +637,11 @@ class _PolishedHeader extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: AppColors.gold.withOpacity(isDark ? 0.30 : 0.50),
+            color: AppColors.gold.withValues(alpha: isDark ? 0.30 : 0.50),
             width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.gold.withOpacity(0.10),
+            color: AppColors.gold.withValues(alpha: 0.10),
             blurRadius: 24,
             offset: const Offset(0, 4),
           ),
@@ -655,11 +654,11 @@ class _PolishedHeader extends StatelessWidget {
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.black.withOpacity(0.30)
+                  ? Colors.black.withValues(alpha: 0.30)
                   : Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: AppColors.gold.withOpacity(0.30), width: 1),
+                  color: AppColors.gold.withValues(alpha: 0.30), width: 1),
             ),
             child: AppLogo.medium(withName: false, dark: isDark),
           ),
@@ -678,7 +677,7 @@ class _PolishedHeader extends StatelessWidget {
                     Text(
                       isAr ? 'نُقطة الدَوام' : 'Attendance Terminal',
                       style: TextStyle(
-                          color: AppColors.gold.withOpacity(0.80),
+                          color: AppColors.gold.withValues(alpha: 0.80),
                           fontSize: 10,
                           letterSpacing: 0.5,
                           fontWeight: FontWeight.w700),
@@ -715,11 +714,11 @@ class _PolishedHeader extends StatelessWidget {
                 horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.black.withOpacity(0.50)
-                  : AppColors.gold.withOpacity(0.10),
+                  ? Colors.black.withValues(alpha: 0.50)
+                  : AppColors.gold.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                  color: AppColors.gold.withOpacity(0.30), width: 1),
+                  color: AppColors.gold.withValues(alpha: 0.30), width: 1),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -802,9 +801,9 @@ class _HeaderIconBtn extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
+              color: color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withOpacity(0.30), width: 1),
+              border: Border.all(color: color.withValues(alpha: 0.30), width: 1),
             ),
             child: Icon(icon, color: color, size: 22),
           ),
@@ -1373,7 +1372,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
                 horizontal: 12, vertical: 8),
-            color: AppColors.warning.withOpacity(0.20),
+            color: AppColors.warning.withValues(alpha: 0.20),
             child: Row(
               children: [
                 const Icon(Icons.warning_amber,
@@ -1404,7 +1403,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                 top: 12,
                 left: 12,
                 child: Material(
-                  color: Colors.black.withOpacity(0.55),
+                  color: Colors.black.withValues(alpha: 0.55),
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
@@ -1425,7 +1424,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                     border: Border.all(
                       color: _statusOk
                           ? AppColors.success
-                          : AppColors.gold.withOpacity(0.7),
+                          : AppColors.gold.withValues(alpha: 0.7),
                       width: 3,
                     ),
                     borderRadius: BorderRadius.circular(160),
@@ -1443,7 +1442,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       color: _statusOk
                           ? AppColors.success
-                          : Colors.black.withOpacity(0.7),
+                          : Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -1494,13 +1493,13 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                       color: (_lastActionToday == 'clock_in'
                               ? AppColors.success
                               : AppColors.warning)
-                          .withOpacity(0.10),
+                          .withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                           color: (_lastActionToday == 'clock_in'
                                   ? AppColors.success
                                   : AppColors.warning)
-                              .withOpacity(0.30)),
+                              .withValues(alpha: 0.30)),
                     ),
                     child: Text(
                       _lastActionToday == 'clock_in'
@@ -1534,7 +1533,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: nextIsClockIn
                                 ? AppColors.success
-                                : AppColors.success.withOpacity(0.35),
+                                : AppColors.success.withValues(alpha: 0.35),
                             foregroundColor: Colors.white,
                             minimumSize: const Size.fromHeight(48),
                             textStyle: TextStyle(
@@ -1554,7 +1553,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                           label: const Text('خُروج'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: nextIsClockIn
-                                ? AppColors.warning.withOpacity(0.35)
+                                ? AppColors.warning.withValues(alpha: 0.35)
                                 : AppColors.warning,
                             foregroundColor: Colors.white,
                             minimumSize: const Size.fromHeight(48),
@@ -1601,7 +1600,7 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.brand,
                     side: BorderSide(
-                        color: AppColors.brand.withOpacity(0.5)),
+                        color: AppColors.brand.withValues(alpha: 0.5)),
                     minimumSize: const Size.fromHeight(44),
                     textStyle: const TextStyle(
                         fontWeight: FontWeight.w700, fontSize: 12),
@@ -1676,7 +1675,7 @@ class _AttendanceListTabState extends State<_AttendanceListTab> {
         _logs.where((l) => l['action'] == 'clock_out').length;
     // أَلوان مُتَكَيِّفة مَع الثيم
     final cardBg = isDark
-        ? Colors.black.withOpacity(0.30)
+        ? Colors.black.withValues(alpha: 0.30)
         : Colors.grey.shade100;
     final primaryText = isDark ? Colors.white : Colors.black87;
     final mutedText =
@@ -1784,7 +1783,7 @@ class _AttendanceListTabState extends State<_AttendanceListTab> {
                           color: cardBg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                              color: color.withOpacity(0.30), width: 1),
+                              color: color.withValues(alpha: 0.30), width: 1),
                         ),
                         child: Row(
                           children: [
@@ -1792,10 +1791,10 @@ class _AttendanceListTabState extends State<_AttendanceListTab> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.18),
+                                color: color.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: color.withOpacity(0.40)),
+                                    color: color.withValues(alpha: 0.40)),
                               ),
                               child: Icon(
                                   isIn ? Icons.login : Icons.logout,
@@ -1842,7 +1841,7 @@ class _AttendanceListTabState extends State<_AttendanceListTab> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.18),
+                                color: color.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -1882,10 +1881,10 @@ class _AttendanceListTabState extends State<_AttendanceListTab> {
               const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.black.withOpacity(0.40)
-                : color.withOpacity(0.06),
+                ? Colors.black.withValues(alpha: 0.40)
+                : color.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: color.withOpacity(0.30)),
+            border: Border.all(color: color.withValues(alpha: 0.30)),
           ),
           child: Column(
             children: [
@@ -1922,7 +1921,7 @@ class _ExpectedListTab extends StatelessWidget {
     final isAr = AppStrings.of(context).isAr;
     final isDark = context.watch<ThemeProvider>().isDark;
     final cardBg = isDark
-        ? Colors.black.withOpacity(0.30)
+        ? Colors.black.withValues(alpha: 0.30)
         : Colors.grey.shade100;
     final primaryText = isDark ? Colors.white : Colors.black87;
     final mutedText =
@@ -1968,13 +1967,13 @@ class _ExpectedListTab extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.gold.withOpacity(0.18),
-                  AppColors.gold.withOpacity(0.06),
+                  AppColors.gold.withValues(alpha: 0.18),
+                  AppColors.gold.withValues(alpha: 0.06),
                 ],
               ),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                  color: AppColors.gold.withOpacity(0.30)),
+                  color: AppColors.gold.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -2023,7 +2022,7 @@ class _ExpectedListTab extends StatelessWidget {
                   color: cardBg,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: AppColors.gold.withOpacity(
+                      color: AppColors.gold.withValues(alpha: 
                           isDark ? 0.10 : 0.25)),
                 ),
                 child: Row(
@@ -2034,8 +2033,8 @@ class _ExpectedListTab extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppColors.gold.withOpacity(0.30),
-                            AppColors.gold.withOpacity(0.10),
+                            AppColors.gold.withValues(alpha: 0.30),
+                            AppColors.gold.withValues(alpha: 0.10),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(10),
@@ -2155,12 +2154,12 @@ class _IncidentTabState extends State<_IncidentTab> {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.warning.withOpacity(0.35),
-                      AppColors.warning.withOpacity(0.05),
+                      AppColors.warning.withValues(alpha: 0.35),
+                      AppColors.warning.withValues(alpha: 0.05),
                     ],
                   ),
                   border: Border.all(
-                      color: AppColors.warning.withOpacity(0.40),
+                      color: AppColors.warning.withValues(alpha: 0.40),
                       width: 1.5),
                 ),
                 child: const Icon(Icons.report_problem,
@@ -2182,12 +2181,12 @@ class _IncidentTabState extends State<_IncidentTab> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Colors.black.withOpacity(0.40)
+                      ? Colors.black.withValues(alpha: 0.40)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                       color: AppColors.gold
-                          .withOpacity(isDark ? 0.15 : 0.30)),
+                          .withValues(alpha: isDark ? 0.15 : 0.30)),
                 ),
                 child: Row(
                   children: [
@@ -2237,7 +2236,7 @@ class _IncidentTabState extends State<_IncidentTab> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     elevation: 4,
-                    shadowColor: AppColors.gold.withOpacity(0.40),
+                    shadowColor: AppColors.gold.withValues(alpha: 0.40),
                   ),
                 ),
               ),

@@ -257,7 +257,7 @@ class _BusDriversScreenState extends State<BusDriversScreen> {
                 const SizedBox(width: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.12),
+                    color: AppColors.brand.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: IconButton(
@@ -365,7 +365,7 @@ class _BusDriversCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,7 +377,7 @@ class _BusDriversCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.10),
+                  color: AppColors.brand.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
@@ -433,9 +433,9 @@ class _BusDriversCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.10),
+                  color: color.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: color.withOpacity(0.50)),
+                  border: Border.all(color: color.withValues(alpha: 0.50)),
                 ),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(
@@ -465,10 +465,10 @@ class _BusDriversCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.04),
+                color: AppColors.warning.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: AppColors.warning.withOpacity(0.20),
+                    color: AppColors.warning.withValues(alpha: 0.20),
                     style: BorderStyle.solid,
                     width: 1),
               ),
@@ -476,7 +476,7 @@ class _BusDriversCard extends StatelessWidget {
                 children: [
                   Icon(Icons.no_accounts,
                       size: 24,
-                      color: AppPalette.textTertiary.withOpacity(0.50)),
+                      color: AppPalette.textTertiary.withValues(alpha: 0.50)),
                   const SizedBox(height: 4),
                   Text(
                     s.isAr
@@ -552,9 +552,9 @@ class _DriverChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.08),
+        color: AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.success.withOpacity(0.30)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -566,7 +566,7 @@ class _DriverChip extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 9,
-                  backgroundColor: AppColors.success.withOpacity(0.20),
+                  backgroundColor: AppColors.success.withValues(alpha: 0.20),
                   child: Text(driver.initials,
                       style: const TextStyle(
                           fontSize: 8,
@@ -583,7 +583,7 @@ class _DriverChip extends StatelessWidget {
                 Text('• ${driver.code}',
                     style: TextStyle(
                         fontSize: 9,
-                        color: AppColors.success.withOpacity(0.70))),
+                        color: AppColors.success.withValues(alpha: 0.70))),
               ],
             ),
           ),
@@ -730,7 +730,7 @@ class _DriverPickerSheetState extends State<_DriverPickerSheet> {
                               CircleAvatar(
                                 radius: 16,
                                 backgroundColor:
-                                    AppColors.brand.withOpacity(0.10),
+                                    AppColors.brand.withValues(alpha: 0.10),
                                 child: Text(d.initials,
                                     style: const TextStyle(
                                         fontSize: 11,
@@ -801,10 +801,10 @@ class _FilterPill extends StatelessWidget {
           padding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: selected ? color : color.withOpacity(0.08),
+            color: selected ? color : color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: selected ? color : color.withOpacity(0.30)),
+                color: selected ? color : color.withValues(alpha: 0.30)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -828,8 +828,8 @@ class _FilterPill extends StatelessWidget {
                     horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
                   color: selected
-                      ? Colors.white.withOpacity(0.30)
-                      : color.withOpacity(0.15),
+                      ? Colors.white.withValues(alpha: 0.30)
+                      : color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -869,7 +869,7 @@ class _EmptyState extends StatelessWidget {
                     ? Icons.directions_bus_outlined
                     : Icons.search_off,
                 size: 48,
-                color: AppPalette.textTertiary.withOpacity(0.50)),
+                color: AppPalette.textTertiary.withValues(alpha: 0.50)),
             const SizedBox(height: 8),
             Text(
               isAllEmpty

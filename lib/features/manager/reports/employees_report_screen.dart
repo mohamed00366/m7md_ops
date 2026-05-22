@@ -107,7 +107,7 @@ class _EmployeesReportScreenState extends State<EmployeesReportScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.20),
+                  color: Colors.white.withValues(alpha: 0.20),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -125,7 +125,7 @@ class _EmployeesReportScreenState extends State<EmployeesReportScreen> {
           // ===== شريط بحث + فلاتر =====
           Container(
             padding: const EdgeInsets.all(10),
-            color: AppColors.brand.withOpacity(0.05),
+            color: AppColors.brand.withValues(alpha: 0.05),
             child: Column(
               children: [
                 TextField(
@@ -344,8 +344,8 @@ class _EmployeeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isActive
-              ? AppColors.brand.withOpacity(0.20)
-              : Colors.grey.withOpacity(0.30),
+              ? AppColors.brand.withValues(alpha: 0.20)
+              : Colors.grey.withValues(alpha: 0.30),
         ),
       ),
       child: Padding(
@@ -358,7 +358,7 @@ class _EmployeeCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: AppColors.brand.withOpacity(0.15),
+                  backgroundColor: AppColors.brand.withValues(alpha: 0.15),
                   child: Text(
                     employee.initials,
                     style: const TextStyle(
@@ -394,8 +394,8 @@ class _EmployeeCard extends StatelessWidget {
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? AppColors.success.withOpacity(0.15)
-                        : Colors.grey.withOpacity(0.15),
+                        ? AppColors.success.withValues(alpha: 0.15)
+                        : Colors.grey.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -607,9 +607,9 @@ class _ActionBtn extends StatelessWidget {
           height: 32,
           margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(0.30)),
+            border: Border.all(color: color.withValues(alpha: 0.30)),
           ),
           child: Icon(icon, size: 16, color: color),
         ),

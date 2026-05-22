@@ -253,7 +253,7 @@ class _EmployeeDocumentsExpiryReportScreenState
                                 Icon(Icons.folder_open,
                                     size: 80,
                                     color: AppColors.warning
-                                        .withOpacity(0.50)),
+                                        .withValues(alpha: 0.50)),
                                 const SizedBox(height: 12),
                                 Text(
                                   isAr
@@ -371,9 +371,9 @@ class _EmployeeDocumentsExpiryReportScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.10),
+          color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.30)),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
         ),
         child: Column(
           children: [
@@ -417,7 +417,7 @@ class _EmployeeDocumentsExpiryReportScreenState
             padding:
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.20),
+              color: color.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text('$count',
@@ -446,12 +446,12 @@ class _EmployeeDocumentsExpiryReportScreenState
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: ListTile(
         onTap: () => _openEmployee(r),
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
+          backgroundColor: color.withValues(alpha: 0.15),
           child: Text(
             emp.fullName.isNotEmpty
                 ? emp.fullName.substring(0, 1).toUpperCase()
@@ -479,7 +479,7 @@ class _EmployeeDocumentsExpiryReportScreenState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.08),
+                      color: AppColors.brand.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(

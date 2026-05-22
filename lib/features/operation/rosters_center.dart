@@ -554,7 +554,7 @@ class _ListTab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.08),
+                    color: AppColors.warning.withValues(alpha: 0.08),
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(11)),
                   ),
@@ -657,7 +657,7 @@ class _ListTab extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.08),
+                            color: AppColors.success.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
@@ -682,7 +682,7 @@ class _ListTab extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppColors.danger.withOpacity(0.08),
+                            color: AppColors.danger.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
@@ -737,7 +737,7 @@ class _Pill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(
@@ -931,9 +931,9 @@ class _ScheduleGrid extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 4, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: c.withOpacity(0.12),
+                                      color: c.withValues(alpha: 0.12),
                                       border: Border.all(
-                                          color: c.withOpacity(0.5)),
+                                          color: c.withValues(alpha: 0.5)),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Column(
@@ -965,7 +965,7 @@ class _ScheduleGrid extends StatelessWidget {
                       width: totalColW,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: AppColors.warning.withOpacity(0.08),
+                        color: AppColors.warning.withValues(alpha: 0.08),
                         border: Border(
                           right: BorderSide(
                               color: Theme.of(context).dividerColor),
@@ -1008,9 +1008,9 @@ class _Cell extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isAccent
-            ? AppColors.warning.withOpacity(0.15)
+            ? AppColors.warning.withValues(alpha: 0.15)
             : (isHeader
-                ? Theme.of(context).dividerColor.withOpacity(0.15)
+                ? Theme.of(context).dividerColor.withValues(alpha: 0.15)
                 : null),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
@@ -1612,7 +1612,7 @@ class _EmployeeWeekCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isCrossPoint
-              ? AppColors.warning.withOpacity(0.40)
+              ? AppColors.warning.withValues(alpha: 0.40)
               : Theme.of(context).dividerColor,
         ),
       ),
@@ -1624,7 +1624,7 @@ class _EmployeeWeekCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.06),
+              color: AppColors.brand.withValues(alpha: 0.06),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(8)),
             ),
@@ -1654,11 +1654,11 @@ class _EmployeeWeekCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.warning.withOpacity(0.15),
+                      color: AppColors.warning.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                           color:
-                              AppColors.warning.withOpacity(0.40)),
+                              AppColors.warning.withValues(alpha: 0.40)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -1684,7 +1684,7 @@ class _EmployeeWeekCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.15),
+                    color: AppColors.brand.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -1819,7 +1819,7 @@ class _DayRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.10),
+                color: AppColors.brand.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -1895,9 +1895,9 @@ class _Heatmap extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 0.5),
                       decoration: BoxDecoration(
                         color: v == 0
-                            ? Theme.of(context).dividerColor.withOpacity(0.2)
+                            ? Theme.of(context).dividerColor.withValues(alpha: 0.2)
                             : Color.lerp(
-                                AppColors.brand.withOpacity(0.15),
+                                AppColors.brand.withValues(alpha: 0.15),
                                 AppColors.brand,
                                 t,
                               ),
@@ -1940,16 +1940,16 @@ class _Kpi extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(children: [
         Container(
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 18),
@@ -1967,7 +1967,7 @@ class _Kpi extends StatelessWidget {
                       fontWeight: FontWeight.w800)),
               Text(label,
                   style: TextStyle(
-                      color: color.withOpacity(0.85), fontSize: 10),
+                      color: color.withValues(alpha: 0.85), fontSize: 10),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),
             ],
@@ -2019,7 +2019,7 @@ class _BarRow extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(3),
                 ),
                 child: Text(extra!,
@@ -2042,7 +2042,7 @@ class _BarRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: t,
               minHeight: 7,
-              backgroundColor: color.withOpacity(0.1),
+              backgroundColor: color.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),

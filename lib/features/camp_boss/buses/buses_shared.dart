@@ -121,9 +121,9 @@ class BusesFilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.10),
+          color: selected ? color : color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(selected ? 1 : 0.3)),
+          border: Border.all(color: color.withValues(alpha: selected ? 1 : 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -143,8 +143,8 @@ class BusesFilterChip extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
                 color: selected
-                    ? Colors.white.withOpacity(0.25)
-                    : color.withOpacity(0.18),
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : color.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text('$count',

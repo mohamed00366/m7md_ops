@@ -172,12 +172,12 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
       padding: const EdgeInsets.all(30),
       margin: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.08),
+        color: Colors.grey.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
-          Icon(Icons.search_off, size: 48, color: Colors.grey.withOpacity(0.5)),
+          Icon(Icons.search_off, size: 48, color: Colors.grey.withValues(alpha: 0.5)),
           const SizedBox(height: 10),
           Text(
             isAr ? 'لا تُوجَد نَتائِج' : 'No results',
@@ -242,7 +242,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           openBuilder: (_) => const DataQualityScreen(),
         ),
         // 🏢 الـHubs (بِدون شاشات مُباشَرة — يَتِمّ الوُصول مِن الـsidebar)
-        _Feature(
+        const _Feature(
           category: _Category.hubs,
           icon: Icons.person,
           color: AppColors.brand,
@@ -253,7 +253,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               '14 separate section cards covering all employee data.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.hubs,
           icon: Icons.directions_bus,
           color: AppColors.info,
@@ -264,7 +264,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               'Section cards: basic, driver, schedule, insurance, GPS, assigned employees.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.hubs,
           icon: Icons.business,
           color: AppColors.gold,
@@ -275,7 +275,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               'Manage trade names and branches with separate Hubs and reports.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.hubs,
           icon: Icons.place,
           color: AppColors.warning,
@@ -311,7 +311,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               'Documents expiring in 30/60/90 days grouped by type.',
           openBuilder: (_) => const EmployeeDocumentsExpiryReportScreen(),
         ),
-        _Feature(
+        const _Feature(
           category: _Category.reports,
           icon: Icons.assessment,
           color: AppColors.success,
@@ -323,7 +323,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               'Each entity has a comprehensive report with stats, details, and PDF/Excel export.',
         ),
         // 🛠️ الأَدَوات
-        _Feature(
+        const _Feature(
           category: _Category.tools,
           icon: Icons.search,
           color: AppColors.brand,
@@ -334,7 +334,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               'Searches across all entities and opens the matching Hub.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.tools,
           icon: Icons.file_upload,
           color: AppColors.gold,
@@ -345,7 +345,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               'Every list screen (employees/masters/sites/buses/points) has template + import + export.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.tools,
           icon: Icons.qr_code,
           color: AppColors.purple,
@@ -368,7 +368,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               'Unified notifications inbox (approvals/decisions/expiry/general) with filters.',
           openBuilder: (_) => const MyInboxScreen(),
         ),
-        _Feature(
+        const _Feature(
           category: _Category.tools,
           icon: Icons.bolt,
           color: AppColors.warning,
@@ -379,7 +379,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               'Floating button on home for quick access to top actions.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.tools,
           icon: Icons.wifi,
           color: AppColors.info,
@@ -390,7 +390,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           descEn:
               'Banner shown when offline + assurance changes will sync.',
         ),
-        _Feature(
+        const _Feature(
           category: _Category.tools,
           icon: Icons.install_mobile,
           color: AppColors.brand,
@@ -496,14 +496,14 @@ class _WelcomeBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.18),
-            AppColors.gold.withOpacity(0.10),
+            AppColors.brand.withValues(alpha: 0.18),
+            AppColors.gold.withValues(alpha: 0.10),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.40)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.40)),
       ),
       child: Row(
         children: [
@@ -511,7 +511,7 @@ class _WelcomeBanner extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.20),
+              color: AppColors.gold.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(12),
             ),
             child:
@@ -569,9 +569,9 @@ class _CategorySection extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: category.color.withOpacity(0.10),
+              color: category.color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: category.color.withOpacity(0.30)),
+              border: Border.all(color: category.color.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -610,7 +610,7 @@ class _FeatureTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: feature.color.withOpacity(0.20)),
+        border: Border.all(color: feature.color.withValues(alpha: 0.20)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -628,7 +628,7 @@ class _FeatureTile extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: feature.color.withOpacity(0.15),
+                    color: feature.color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child:
@@ -661,7 +661,7 @@ class _FeatureTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: feature.color.withOpacity(0.15),
+                      color: feature.color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(

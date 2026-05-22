@@ -111,8 +111,7 @@ class _PointTerminalSettingsScreenState
         padding: const EdgeInsets.all(12),
         children: [
           // ===== Geo-fence =====
-          _sectionHeader('📍 ' +
-              (isAr ? 'حُدود المَوقِع (Geo-fence)' : 'Geo-fence')),
+          _sectionHeader('📍 ${isAr ? 'حُدود المَوقِع (Geo-fence)' : 'Geo-fence'}'),
           _info(isAr
               ? 'مَسافة قُصوى مَسموحة بَين جِهاز النُقطة وَالنُقطة لِقَبول تَسجيل الدَوام.'
               : 'Maximum allowed distance between the terminal and the point for clock-in to be accepted.'),
@@ -142,8 +141,7 @@ class _PointTerminalSettingsScreenState
           const Divider(height: 24),
 
           // ===== Auto-Lock =====
-          _sectionHeader('🔒 ' +
-              (isAr ? 'الإقفال التِلقائيّ' : 'Auto-Lock')),
+          _sectionHeader('🔒 ${isAr ? 'الإقفال التِلقائيّ' : 'Auto-Lock'}'),
           _info(isAr
               ? 'يُقفِل الجِهاز عِندَ خُمول الشاشة بِشَرط لا أَحَد مُسَجَّل دُخول.'
               : 'Locks the device when the screen is idle and no employees are still clocked in.'),
@@ -172,8 +170,7 @@ class _PointTerminalSettingsScreenState
           const Divider(height: 24),
 
           // ===== Late =====
-          _sectionHeader('🕐 ' +
-              (isAr ? 'حَدّ التَأَخُّر' : 'Late Threshold')),
+          _sectionHeader('🕐 ${isAr ? 'حَدّ التَأَخُّر' : 'Late Threshold'}'),
           _info(isAr
               ? 'إذا تَجاوَزَ المُوَظَّف بَعدَ بِداية وَردِيَّتِه هذِه المُدّة، يُسَجَّل كَمُتَأَخِّر في التَقرير.'
               : 'If clock-in exceeds shift start by this many minutes, the employee is marked late in the report.'),
@@ -191,8 +188,7 @@ class _PointTerminalSettingsScreenState
           const Divider(height: 24),
 
           // ===== Face Matching =====
-          _sectionHeader('🧠 ' +
-              (isAr ? 'مُطابَقة الوَجه' : 'Face Matching')),
+          _sectionHeader('🧠 ${isAr ? 'مُطابَقة الوَجه' : 'Face Matching'}'),
           _info(isAr
               ? 'نِطاق المُوَظَّفين الذين تَتِم مُطابَقَتُهم عِندَ مَسح وَجه عَلى جِهاز النُقطة.'
               : 'Scope of employees matched when scanning a face on the terminal.'),
@@ -241,10 +237,9 @@ class _PointTerminalSettingsScreenState
           const Divider(height: 24),
 
           // ===== Face Login Exclusion — by Job Title =====
-          _sectionHeader('🎭 ' +
-              (isAr
+          _sectionHeader('🎭 ${isAr
                   ? 'استِثناء مِن دُخول بَصمة الوَجه'
-                  : 'Face Login Exclusion')),
+                  : 'Face Login Exclusion'}'),
           _info(isAr
               ? 'حَدِّد المُسَمَّيات الوَظيفيّة التي يُستَثنَى أَصحابُها مِن مُطابَقة الوَجه عَلى جِهاز النُقطة. '
                   'مِثال: المُحاسِب — يَدخُل بِكَلِمة سِرّ / PIN مُؤَقَّت فَقَط. '
@@ -276,7 +271,7 @@ class _PointTerminalSettingsScreenState
         child: Column(
           children: [
             Row(children: [
-              Icon(Icons.badge_outlined,
+              const Icon(Icons.badge_outlined,
                   size: 16, color: AppColors.gold),
               const SizedBox(width: 6),
               Expanded(
@@ -352,9 +347,9 @@ class _PointTerminalSettingsScreenState
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.08),
+            color: AppColors.info.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppColors.info.withOpacity(0.20)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.20)),
           ),
           child: Row(
             children: [
@@ -395,7 +390,7 @@ class _PointTerminalSettingsScreenState
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.15),
+                  color: AppColors.gold.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -449,7 +444,7 @@ class _PointTerminalSettingsScreenState
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.15),
+                  color: AppColors.gold.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -468,7 +463,7 @@ class _PointTerminalSettingsScreenState
             min: min,
             max: max,
             divisions: divisions,
-            label: '${(value * displayMultiplier).toStringAsFixed(0)}',
+            label: (value * displayMultiplier).toStringAsFixed(0),
             onChanged: onChanged,
           ),
         ],

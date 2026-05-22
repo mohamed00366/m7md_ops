@@ -44,7 +44,7 @@ class CountryGuard {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: AppColors.warning.withOpacity(0.15),
+            color: AppColors.warning.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.public_off,
@@ -70,7 +70,7 @@ class CountryGuard {
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.08),
+                color: AppColors.brand.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

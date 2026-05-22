@@ -176,7 +176,7 @@ class _CampAwaitingSetupScreenState extends State<CampAwaitingSetupScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_outline,
+                        const Icon(Icons.check_circle_outline,
                             size: 48, color: AppColors.success),
                         const SizedBox(height: 12),
                         Text(
@@ -338,7 +338,7 @@ class _AwaitingEmployeeTile extends StatelessWidget {
     final theme = Theme.of(context);
     final isTrainee = employee.hireType == EmployeeHireType.trainee;
     final borderColor =
-        isTrainee ? AppColors.danger : AppColors.warning.withOpacity(0.35);
+        isTrainee ? AppColors.danger : AppColors.warning.withValues(alpha: 0.35);
     final hasPhone = employee.mobile.trim().isNotEmpty;
 
     return Container(
@@ -370,8 +370,8 @@ class _AwaitingEmployeeTile extends StatelessWidget {
                       CircleAvatar(
                         radius: 22,
                         backgroundColor: isTrainee
-                            ? AppColors.danger.withOpacity(0.15)
-                            : AppColors.warning.withOpacity(0.15),
+                            ? AppColors.danger.withValues(alpha: 0.15)
+                            : AppColors.warning.withValues(alpha: 0.15),
                         child: Text(
                           employee.initials,
                           style: TextStyle(
@@ -588,13 +588,13 @@ class _AwaitingEmployeeTile extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             color: enabled
-                ? color.withOpacity(0.12)
-                : AppPalette.textTertiary.withOpacity(0.10),
+                ? color.withValues(alpha: 0.12)
+                : AppPalette.textTertiary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: enabled
-                  ? color.withOpacity(0.40)
-                  : AppPalette.textTertiary.withOpacity(0.20),
+                  ? color.withValues(alpha: 0.40)
+                  : AppPalette.textTertiary.withValues(alpha: 0.20),
             ),
           ),
           child: Icon(icon,
@@ -609,7 +609,7 @@ class _AwaitingEmployeeTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

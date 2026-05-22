@@ -280,7 +280,7 @@ class _IssueGroupCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -330,7 +330,7 @@ class _IssueGroupCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 5, vertical: 1),
                         decoration: BoxDecoration(
-                          color: UniformPalette.info.withOpacity(0.15),
+                          color: UniformPalette.info.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -347,12 +347,12 @@ class _IssueGroupCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 5, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.15),
+                          color: AppColors.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(Icons.draw,
                                 size: 9, color: AppColors.success),
                             SizedBox(width: 2),
@@ -366,7 +366,7 @@ class _IssueGroupCard extends StatelessWidget {
                       ),
                     ],
                     const Spacer(),
-                    Icon(Icons.calendar_today,
+                    const Icon(Icons.calendar_today,
                         size: 11, color: CampPalette.textSecondary),
                     const SizedBox(width: 3),
                     Text(formatDateShort(first.issueDate),
@@ -382,7 +382,7 @@ class _IssueGroupCard extends StatelessWidget {
                     CircleAvatar(
                       radius: 18,
                       backgroundColor:
-                          UniformPalette.primary.withOpacity(0.15),
+                          UniformPalette.primary.withValues(alpha: 0.15),
                       child: Text(emp?.initials ?? '?',
                           style: const TextStyle(
                               color: UniformPalette.primary,
@@ -467,7 +467,7 @@ class _IssueGroupCard extends StatelessWidget {
                           foregroundColor: UniformPalette.primary,
                           side: BorderSide(
                               color:
-                                  UniformPalette.primary.withOpacity(0.4)),
+                                  UniformPalette.primary.withValues(alpha: 0.4)),
                           padding: const EdgeInsets.symmetric(vertical: 6),
                         ),
                         onPressed: () => _openVoucher(context),
@@ -484,7 +484,7 @@ class _IssueGroupCard extends StatelessWidget {
                         style: IconButton.styleFrom(
                           foregroundColor: AppColors.info,
                           backgroundColor:
-                              AppColors.info.withOpacity(0.08),
+                              AppColors.info.withValues(alpha: 0.08),
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(38, 32),
                         ),
@@ -500,7 +500,7 @@ class _IssueGroupCard extends StatelessWidget {
                         style: IconButton.styleFrom(
                           foregroundColor: AppColors.danger,
                           backgroundColor:
-                              AppColors.danger.withOpacity(0.08),
+                              AppColors.danger.withValues(alpha: 0.08),
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(38, 32),
                         ),
@@ -517,7 +517,7 @@ class _IssueGroupCard extends StatelessWidget {
                           style: IconButton.styleFrom(
                             foregroundColor: UniformPalette.stockIn,
                             backgroundColor:
-                                UniformPalette.stockIn.withOpacity(0.08),
+                                UniformPalette.stockIn.withValues(alpha: 0.08),
                             padding: EdgeInsets.zero,
                             minimumSize: const Size(38, 32),
                           ),
@@ -680,7 +680,7 @@ class _IssueGroupCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               margin: const EdgeInsets.only(right: 4),
               decoration: BoxDecoration(
-                color: CampPalette.textSecondary.withOpacity(0.10),
+                color: CampPalette.textSecondary.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(line.size.isNotEmpty ? line.size : size,
@@ -741,7 +741,7 @@ class _IssueCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -794,7 +794,7 @@ class _IssueCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 5, vertical: 1),
                         decoration: BoxDecoration(
-                          color: UniformPalette.info.withOpacity(0.15),
+                          color: UniformPalette.info.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -808,7 +808,7 @@ class _IssueCard extends StatelessWidget {
                       ),
                     ],
                     const Spacer(),
-                    Icon(Icons.calendar_today,
+                    const Icon(Icons.calendar_today,
                         size: 11, color: CampPalette.textSecondary),
                     const SizedBox(width: 3),
                     Text(formatDateShort(issue.issueDate),
@@ -834,7 +834,7 @@ class _IssueCard extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 18,
                         backgroundColor:
-                            UniformPalette.primary.withOpacity(0.15),
+                            UniformPalette.primary.withValues(alpha: 0.15),
                         child: Text(emp?.initials ?? '?',
                             style: const TextStyle(
                                 color: UniformPalette.primary,
@@ -888,7 +888,7 @@ class _IssueCard extends StatelessWidget {
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: CampPalette.textSecondary
-                                .withOpacity(0.10),
+                                .withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -940,7 +940,7 @@ class _IssueCard extends StatelessWidget {
                             foregroundColor: UniformPalette.stockIn,
                             side: BorderSide(
                                 color: UniformPalette.stockIn
-                                    .withOpacity(0.4)),
+                                    .withValues(alpha: 0.4)),
                             padding: const EdgeInsets.symmetric(
                                 vertical: 6),
                           ),
@@ -960,7 +960,7 @@ class _IssueCard extends StatelessWidget {
                             foregroundColor: UniformPalette.primary,
                             side: BorderSide(
                                 color: UniformPalette.primary
-                                    .withOpacity(0.4)),
+                                    .withValues(alpha: 0.4)),
                             padding: const EdgeInsets.symmetric(
                                 vertical: 6),
                           ),
@@ -1156,9 +1156,9 @@ class _IssueEditorSheetState extends State<_IssueEditorSheet> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.06),
+        color: Colors.grey.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.withOpacity(0.20)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.20)),
       ),
       child: Column(
         children: [
@@ -1414,7 +1414,7 @@ class _IssueEditorSheetState extends State<_IssueEditorSheet> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: UniformPalette.stockOut.withOpacity(0.15),
+                  color: UniformPalette.stockOut.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.handshake,
@@ -1436,7 +1436,7 @@ class _IssueEditorSheetState extends State<_IssueEditorSheet> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: UniformPalette.info.withOpacity(0.10),
+                      color: UniformPalette.info.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -1468,18 +1468,18 @@ class _IssueEditorSheetState extends State<_IssueEditorSheet> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: UniformPalette.primary.withOpacity(0.08),
+                        color: UniformPalette.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                             color:
-                                UniformPalette.primary.withOpacity(0.30)),
+                                UniformPalette.primary.withValues(alpha: 0.30)),
                       ),
                       child: Row(
                         children: [
                           CircleAvatar(
                             radius: 18,
                             backgroundColor: UniformPalette.primary
-                                .withOpacity(0.15),
+                                .withValues(alpha: 0.15),
                             child: Text(selectedEmp.initials,
                                 style: const TextStyle(
                                     color: UniformPalette.primary,
@@ -1551,7 +1551,7 @@ class _IssueEditorSheetState extends State<_IssueEditorSheet> {
                                     radius: 14,
                                     backgroundColor: UniformPalette
                                         .primary
-                                        .withOpacity(0.15),
+                                        .withValues(alpha: 0.15),
                                     child: Text(e.initials,
                                         style: const TextStyle(
                                             color:
@@ -1594,7 +1594,7 @@ class _IssueEditorSheetState extends State<_IssueEditorSheet> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.10),
+                        color: Colors.grey.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Center(

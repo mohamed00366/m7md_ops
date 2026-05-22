@@ -134,9 +134,9 @@ class _MyTasksTabState extends State<MyTasksTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: c.withOpacity(0.10),
+          color: c.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: c.withOpacity(0.3)),
+          border: Border.all(color: c.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -239,9 +239,9 @@ class _MyTasksTabState extends State<MyTasksTab> {
     return Card(
       margin: const EdgeInsets.only(bottom: 6),
       color: isDone
-          ? Colors.green.withOpacity(0.05)
+          ? Colors.green.withValues(alpha: 0.05)
           : t.isOverdue
-              ? AppColors.danger.withOpacity(0.05)
+              ? AppColors.danger.withValues(alpha: 0.05)
               : null,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
@@ -358,9 +358,9 @@ class _MyTasksTabState extends State<MyTasksTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.12),
+        color: c.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: c.withOpacity(0.3)),
+        border: Border.all(color: c.withValues(alpha: 0.3)),
       ),
       child: Text(label,
           style: TextStyle(

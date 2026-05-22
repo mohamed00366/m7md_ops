@@ -127,9 +127,9 @@ class _TemporaryPinScreenState extends State<TemporaryPinScreen> {
     if (emp == null || pin == null) return;
     final phone = emp.mobile.replaceAll(RegExp(r'[^\d]'), '');
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: AppColors.warning,
-        content: const Text('⚠️ لا يُوجَد رَقَم هاتِف لِلمُوَظَّف'),
+        content: Text('⚠️ لا يُوجَد رَقَم هاتِف لِلمُوَظَّف'),
       ));
       return;
     }
@@ -153,10 +153,10 @@ class _TemporaryPinScreenState extends State<TemporaryPinScreen> {
     if (pin == null) return;
     await Clipboard.setData(ClipboardData(text: pin.pinCode));
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: AppColors.brand,
-        duration: const Duration(seconds: 1),
-        content: const Text('✅ نُسِخ PIN'),
+        duration: Duration(seconds: 1),
+        content: Text('✅ نُسِخ PIN'),
       ));
     }
   }
@@ -310,7 +310,7 @@ class _TemporaryPinScreenState extends State<TemporaryPinScreen> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor:
-                              AppColors.brand.withOpacity(0.15),
+                              AppColors.brand.withValues(alpha: 0.15),
                           child: Text(
                               e.fullName.isNotEmpty ? e.fullName[0] : '?',
                               style: const TextStyle(
@@ -343,15 +343,15 @@ class _TemporaryPinScreenState extends State<TemporaryPinScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.08),
+        color: AppColors.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.brand.withOpacity(0.3)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: AppColors.brand.withOpacity(0.18),
+            backgroundColor: AppColors.brand.withValues(alpha: 0.18),
             child: Text(e.fullName.isNotEmpty ? e.fullName[0] : '?',
                 style: const TextStyle(
                     color: AppColors.brand,
@@ -439,10 +439,10 @@ class _TemporaryPinScreenState extends State<TemporaryPinScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(0.12), color.withOpacity(0.04)],
+          colors: [color.withValues(alpha: 0.12), color.withValues(alpha: 0.04)],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.4), width: 2),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 2),
       ),
       child: Column(
         children: [
@@ -472,7 +472,7 @@ class _TemporaryPinScreenState extends State<TemporaryPinScreen> {
           if (!isExpired) ...[
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: color.withOpacity(0.15),
+              backgroundColor: color.withValues(alpha: 0.15),
               valueColor: AlwaysStoppedAnimation(color),
               minHeight: 8,
             ),

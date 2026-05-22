@@ -96,14 +96,14 @@ class _OverallScoreCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            color.withOpacity(0.18),
-            color.withOpacity(0.06),
+            color.withValues(alpha: 0.18),
+            color.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.40), width: 1.5),
       ),
       child: Row(
         children: [
@@ -120,7 +120,7 @@ class _OverallScoreCard extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: score / 100,
                     strokeWidth: 10,
-                    backgroundColor: color.withOpacity(0.15),
+                    backgroundColor: color.withValues(alpha: 0.15),
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                   ),
                 ),
@@ -138,7 +138,7 @@ class _OverallScoreCard extends StatelessWidget {
                     Text(
                       grade,
                       style: TextStyle(
-                          color: color.withOpacity(0.70),
+                          color: color.withValues(alpha: 0.70),
                           fontSize: 11,
                           fontWeight: FontWeight.w800),
                     ),
@@ -212,8 +212,8 @@ class _CategoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: expanded
-                ? card.color.withOpacity(0.40)
-                : card.color.withOpacity(0.20)),
+                ? card.color.withValues(alpha: 0.40)
+                : card.color.withValues(alpha: 0.20)),
       ),
       child: Column(
         children: [
@@ -230,7 +230,7 @@ class _CategoryCard extends StatelessWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: card.color.withOpacity(0.15),
+                        color: card.color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(card.icon, color: card.color, size: 22),
@@ -251,13 +251,13 @@ class _CategoryCard extends StatelessWidget {
                               Text(
                                 '${card.passedCount}/${card.totalCount} ${isAr ? "كامِل" : "complete"}',
                                 style: TextStyle(
-                                    color: AppColors.success.withOpacity(0.85),
+                                    color: AppColors.success.withValues(alpha: 0.85),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700),
                               ),
                               if (card.failedCount > 0) ...[
                                 const SizedBox(width: 6),
-                                Text('·', style: TextStyle(color: Colors.grey)),
+                                const Text('·', style: TextStyle(color: Colors.grey)),
                                 const SizedBox(width: 6),
                                 Text(
                                   '${card.failedCount} ${isAr ? "ناقِص" : "incomplete"}',
@@ -275,7 +275,7 @@ class _CategoryCard extends StatelessWidget {
                             child: LinearProgressIndicator(
                               value: card.score / 100,
                               minHeight: 6,
-                              backgroundColor: color.withOpacity(0.12),
+                              backgroundColor: color.withValues(alpha: 0.12),
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(color),
                             ),
@@ -387,7 +387,7 @@ class _IssueRow extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 5, vertical: 1),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.10),
+                                  color: Colors.red.withValues(alpha: 0.10),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -405,7 +405,7 @@ class _IssueRow extends StatelessWidget {
               ),
               if (issue.openBuilder != null)
                 Icon(Icons.chevron_right,
-                    color: color.withOpacity(0.60), size: 16),
+                    color: color.withValues(alpha: 0.60), size: 16),
             ],
           ),
         ),

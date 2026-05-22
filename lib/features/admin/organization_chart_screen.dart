@@ -225,11 +225,11 @@ class _DeptNodeState extends State<_DeptNode> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: color.withOpacity(0.30), width: 1.2),
+                  border: Border.all(color: color.withValues(alpha: 0.30), width: 1.2),
                   boxShadow: widget.depth == 0
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.10),
+                            color: color.withValues(alpha: 0.10),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -241,7 +241,7 @@ class _DeptNodeState extends State<_DeptNode> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,
@@ -385,11 +385,11 @@ class _JobNodeState extends State<_JobNode> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: color.withOpacity(0.40), width: 1.2),
+                  border: Border.all(color: color.withValues(alpha: 0.40), width: 1.2),
                   boxShadow: widget.depth == 0
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.12),
+                            color: color.withValues(alpha: 0.12),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -402,7 +402,7 @@ class _JobNodeState extends State<_JobNode> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -553,7 +553,7 @@ class _Mini extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.10),
+          color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [

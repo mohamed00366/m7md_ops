@@ -271,7 +271,7 @@ class _PointLocationSectionState extends State<PointLocationSection>
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.08),
+              color: AppColors.warning.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
@@ -332,7 +332,7 @@ class _PointLocationSectionState extends State<PointLocationSection>
             ),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              side: BorderSide(color: AppColors.brand.withOpacity(0.5)),
+              side: BorderSide(color: AppColors.brand.withValues(alpha: 0.5)),
             ),
           ),
         ),
@@ -364,9 +364,9 @@ class _PointLocationSectionState extends State<PointLocationSection>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.08),
+            color: AppColors.info.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.info.withOpacity(0.25)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [

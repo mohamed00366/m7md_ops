@@ -119,7 +119,7 @@ class _SmartHomeState extends State<SmartHome> {
             gradient: LinearGradient(
               colors: [
                 accent,
-                accent.withOpacity(0.7),
+                accent.withValues(alpha: 0.7),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -127,7 +127,7 @@ class _SmartHomeState extends State<SmartHome> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: accent.withOpacity(0.25),
+                color: accent.withValues(alpha: 0.25),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -139,7 +139,7 @@ class _SmartHomeState extends State<SmartHome> {
               Text(
                 greeting,
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.85), fontSize: 13),
+                    color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
               ),
               const SizedBox(height: 4),
               Text(
@@ -238,7 +238,7 @@ class _SmartHomeState extends State<SmartHome> {
             ),
             // 🆕 بَحث عام عَبر كُلّ الكِيانات
             Material(
-              color: AppColors.brand.withOpacity(0.10),
+              color: AppColors.brand.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
               child: InkWell(
                 onTap: () => showSearch<void>(
@@ -252,7 +252,7 @@ class _SmartHomeState extends State<SmartHome> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppColors.brand.withOpacity(0.30)),
+                        color: AppColors.brand.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [
@@ -399,7 +399,7 @@ class _SmartHomeState extends State<SmartHome> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.08),
+        color: AppColors.warning.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -440,7 +440,7 @@ class _MiniBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -514,19 +514,19 @@ class _ModuleCard extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     module.color,
-                    module.color.withOpacity(0.78),
+                    module.color.withValues(alpha: 0.78),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: isPinned
-                      ? Colors.white.withOpacity(0.6)
-                      : module.color.withOpacity(0.30),
+                      ? Colors.white.withValues(alpha: 0.6)
+                      : module.color.withValues(alpha: 0.30),
                   width: isPinned ? 1.5 : 0.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: module.color.withOpacity(0.30),
+                    color: module.color.withValues(alpha: 0.30),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -623,10 +623,10 @@ class _ModuleChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: module.color.withOpacity(0.1),
+          color: module.color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: module.color.withOpacity(0.3), width: 0.5),
+              color: module.color.withValues(alpha: 0.3), width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

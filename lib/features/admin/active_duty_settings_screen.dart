@@ -135,10 +135,10 @@ class _ActiveDutySettingsScreenState
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.info.withOpacity(0.08),
+                        color: AppColors.info.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppColors.info.withOpacity(0.30)),
+                            color: AppColors.info.withValues(alpha: 0.30)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,9 +469,9 @@ class _JobTitlePickerState extends State<_JobTitlePicker> {
           children: [
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.brand,
-                borderRadius: const BorderRadius.vertical(
+                borderRadius: BorderRadius.vertical(
                     top: Radius.circular(16)),
               ),
               child: Row(

@@ -29,7 +29,7 @@ class OperationDashboard extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   AppColors.roleOperation,
-                  AppColors.roleOperation.withOpacity(0.7),
+                  AppColors.roleOperation.withValues(alpha: 0.7),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -109,7 +109,7 @@ class OperationDashboard extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 6),
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.08),
+                          color: AppColors.warning.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(

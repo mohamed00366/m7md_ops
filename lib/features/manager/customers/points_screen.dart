@@ -6,7 +6,6 @@ import '../../../core/providers/auth_provider.dart';
 import '../../../core/services/supabase_data_service.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../models/enums.dart';
 import '../../../models/models.dart';
 import '../../../models/rbac.dart';
 import '../../../repositories/mock_repository.dart';
@@ -385,7 +384,7 @@ class _PointCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.15),
+                    color: AppColors.warning.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.place,
@@ -415,7 +414,7 @@ class _PointCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.warning.withOpacity(0.12),
+                                color: AppColors.warning.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -438,7 +437,7 @@ class _PointCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.info.withOpacity(0.12),
+                              color: AppColors.info.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Row(
@@ -501,7 +500,7 @@ class _PointCard extends StatelessWidget {
 // ============================================================
 class _PointEditor extends StatefulWidget {
   final Point? existing;
-  const _PointEditor({this.existing});
+  const _PointEditor();
 
   @override
   State<_PointEditor> createState() => _PointEditorState();
@@ -805,7 +804,7 @@ class _PointEditorState extends State<_PointEditor> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: BorderSide(
-                            color: AppColors.brand.withOpacity(0.5)),
+                            color: AppColors.brand.withValues(alpha: 0.5)),
                       ),
                     ),
                   ),

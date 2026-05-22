@@ -124,7 +124,7 @@ class _SiteCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.purple.withOpacity(0.15),
+                  color: AppColors.purple.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.business,
@@ -164,7 +164,7 @@ class _SiteCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.10),
+                  color: AppColors.brand.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -373,7 +373,7 @@ class _RosterCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.15),
+                  color: AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.calendar_month,
@@ -399,7 +399,7 @@ class _RosterCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -556,7 +556,7 @@ class _BusCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.15),
+                  color: AppColors.info.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.directions_bus,
@@ -664,7 +664,7 @@ class _DeductionsReportScreenState extends State<DeductionsReportScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: AppColors.danger.withOpacity(0.10),
+            color: AppColors.danger.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -742,7 +742,7 @@ class _DeductionCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.danger.withOpacity(0.15),
+              color: AppColors.danger.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.money_off,
@@ -771,7 +771,7 @@ class _DeductionCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.danger.withOpacity(0.10),
+              color: AppColors.danger.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -932,7 +932,7 @@ class _LaundryCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.teal.withOpacity(0.15),
+              color: AppColors.teal.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.local_laundry_service,
@@ -960,7 +960,7 @@ class _LaundryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: AppColors.teal.withOpacity(0.15),
+              color: AppColors.teal.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(_stageLabel(ticket.stage, isAr),
@@ -1100,7 +1100,7 @@ class _UniformCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.purple.withOpacity(0.15),
+              color: AppColors.purple.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.checkroom,
@@ -1134,7 +1134,7 @@ class _UniformCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.15),
+                color: AppColors.warning.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -1150,7 +1150,7 @@ class _UniformCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.15),
+                color: AppColors.success.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(isAr ? 'مكتمل' : 'Returned',
@@ -1209,7 +1209,7 @@ class _ReportScaffold extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.20),
+                    color: Colors.white.withValues(alpha: 0.20),
                     borderRadius: BorderRadius.circular(10)),
                 child: Text('$count',
                     style: const TextStyle(
@@ -1223,7 +1223,7 @@ class _ReportScaffold extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            color: AppColors.brand.withOpacity(0.05),
+            color: AppColors.brand.withValues(alpha: 0.05),
             child: Column(
               children: [
                 TextField(
@@ -1276,8 +1276,8 @@ class _BaseCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: isActive
-                ? AppColors.brand.withOpacity(0.20)
-                : Colors.grey.withOpacity(0.30)),
+                ? AppColors.brand.withValues(alpha: 0.20)
+                : Colors.grey.withValues(alpha: 0.30)),
       ),
       child: child,
     );
@@ -1294,8 +1294,8 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: active
-            ? AppColors.success.withOpacity(0.15)
-            : Colors.grey.withOpacity(0.15),
+            ? AppColors.success.withValues(alpha: 0.15)
+            : Colors.grey.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(

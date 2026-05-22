@@ -91,7 +91,7 @@ extension AuthPermissionsX on AuthProvider {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: AppPalette.danger.withOpacity(0.12),
+            color: AppPalette.danger.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.lock_outline,

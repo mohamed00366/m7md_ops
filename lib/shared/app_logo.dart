@@ -75,7 +75,7 @@ class AppLogo extends StatelessWidget {
             Text(
               'NEXUS',
               style: TextStyle(
-                color: textColor.withOpacity(0.75),
+                color: textColor.withValues(alpha: 0.75),
                 fontSize: size * 0.20,
                 fontWeight: FontWeight.w700,
                 letterSpacing: size * 0.10,

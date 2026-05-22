@@ -392,10 +392,10 @@ class _BulkPermissionsMatrixScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brand : Colors.grey.withOpacity(0.10),
+          color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.brand : Colors.grey.withOpacity(0.4),
+            color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.4),
           ),
         ),
         child: Text(
@@ -423,10 +423,10 @@ class _BulkPermissionsMatrixScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.10),
+          color: selected ? color : color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? color : color.withOpacity(0.4),
+            color: selected ? color : color.withValues(alpha: 0.4),
           ),
         ),
         child: Row(
@@ -456,12 +456,12 @@ class _BulkPermissionsMatrixScreenState
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: _dashboardFilter == null
-              ? Colors.grey.withOpacity(0.10)
-              : AppColors.info.withOpacity(0.15),
+              ? Colors.grey.withValues(alpha: 0.10)
+              : AppColors.info.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: _dashboardFilter == null
-                ? Colors.grey.withOpacity(0.4)
+                ? Colors.grey.withValues(alpha: 0.4)
                 : AppColors.info,
           ),
         ),
@@ -756,7 +756,7 @@ class _RowHeader extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: hasGaps ? AppColors.danger.withOpacity(0.06) : Colors.white,
+        color: hasGaps ? AppColors.danger.withValues(alpha: 0.06) : Colors.white,
         border: Border(
           right: BorderSide(color: Colors.grey[400]!),
           bottom: BorderSide(color: Colors.grey[300]!),
@@ -832,7 +832,7 @@ class _Cell extends StatelessWidget {
         height: height,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: has ? AppColors.success.withOpacity(0.18) : Colors.white,
+          color: has ? AppColors.success.withValues(alpha: 0.18) : Colors.white,
           border: Border(
             right: BorderSide(color: Colors.grey[300]!),
             bottom: BorderSide(color: Colors.grey[300]!),

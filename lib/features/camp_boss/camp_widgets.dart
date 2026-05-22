@@ -198,7 +198,7 @@ class CampQuickActionButton extends StatelessWidget {
               Text(subtitle,
                   style: TextStyle(
                       color: primary
-                          ? Colors.white.withOpacity(0.65)
+                          ? Colors.white.withValues(alpha: 0.65)
                           : CampPalette.textSecondary,
                       fontSize: 10)),
             ],
@@ -231,7 +231,7 @@ class CampStatusBadge extends StatelessWidget {
         vertical: dense ? 2 : 3,
       ),
       decoration: BoxDecoration(
-        color: bgColor ?? color.withOpacity(0.15),
+        color: bgColor ?? color.withValues(alpha: 0.15),
         borderRadius: CampPalette.rPill,
       ),
       child: Text(label,
@@ -447,7 +447,7 @@ class _CircleIconButton extends StatelessWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 18),

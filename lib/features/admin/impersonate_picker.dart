@@ -5,7 +5,6 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
-import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
@@ -186,10 +185,10 @@ class _ImpersonatePickerState extends State<ImpersonatePicker> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brand : Colors.grey.withOpacity(0.10),
+          color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.brand : Colors.grey.withOpacity(0.4),
+            color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.4),
           ),
         ),
         child: Text(
@@ -230,11 +229,11 @@ class _AccountRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
+          backgroundColor: color.withValues(alpha: 0.15),
           child: Text(
             account.fullName.isEmpty
                 ? '?'
@@ -333,7 +332,7 @@ class _AccountRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

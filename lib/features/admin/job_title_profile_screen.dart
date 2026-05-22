@@ -198,10 +198,10 @@ class _JobTitleProfileScreenState extends State<JobTitleProfileScreen> {
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.08),
+                        color: AppColors.danger.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppColors.danger.withOpacity(0.3)),
+                            color: AppColors.danger.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -360,10 +360,10 @@ class _JobTitleProfileScreenState extends State<JobTitleProfileScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.12),
+                  color: AppColors.success.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                      color: AppColors.success.withOpacity(0.3)),
+                      color: AppColors.success.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -403,9 +403,9 @@ class _JobTitleProfileScreenState extends State<JobTitleProfileScreen> {
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.06),
+        color: AppColors.brand.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -434,8 +434,8 @@ class _JobTitleProfileScreenState extends State<JobTitleProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: w.kind == 'auto_chain'
-                  ? AppColors.purple.withOpacity(0.15)
-                  : AppColors.info.withOpacity(0.15),
+                  ? AppColors.purple.withValues(alpha: 0.15)
+                  : AppColors.info.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -494,14 +494,14 @@ class _HeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.7)],
+          colors: [color, color.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -517,7 +517,7 @@ class _HeroCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -534,7 +534,7 @@ class _HeroCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -552,7 +552,7 @@ class _HeroCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Row(
@@ -587,7 +587,7 @@ class _HeroCard extends StatelessWidget {
           Text(
             isAr ? jt.nameEn : jt.nameAr,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               fontSize: 12,
             ),
           ),
@@ -595,7 +595,7 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.verified_outlined,
-                  color: Colors.white.withOpacity(0.9), size: 14),
+                  color: Colors.white.withValues(alpha: 0.9), size: 14),
               const SizedBox(width: 4),
               Text(
                 isAr
@@ -619,7 +619,7 @@ class _HeroCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: i < jt.approvalPower
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
+                                  : Colors.white.withValues(alpha: 0.3),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -650,9 +650,9 @@ class _Kpi extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -701,7 +701,7 @@ class _Section extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.25)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -734,13 +734,13 @@ class _JobTitleChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isPrimary
-            ? AppColors.brand.withOpacity(0.12)
-            : Colors.grey.withOpacity(0.10),
+            ? AppColors.brand.withValues(alpha: 0.12)
+            : Colors.grey.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isPrimary
               ? AppColors.brand
-              : Colors.grey.withOpacity(0.3),
+              : Colors.grey.withValues(alpha: 0.3),
           width: isPrimary ? 1.5 : 1,
         ),
       ),
@@ -802,9 +802,9 @@ class _EmployeeChip extends StatelessWidget {
       child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.10),
+        color: AppColors.info.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.info.withOpacity(0.3)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

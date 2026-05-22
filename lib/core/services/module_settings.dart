@@ -172,7 +172,6 @@ class SettingItem {
     this.step,
     this.options,
     this.optionsBilingual,
-    this.icon,
     this.group,
     this.unit,
   });

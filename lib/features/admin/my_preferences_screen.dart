@@ -187,7 +187,7 @@ class _MyPreferencesScreenState extends State<MyPreferencesScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: ListTile(
         leading: Icon(icon, color: AppColors.brand),
@@ -202,7 +202,7 @@ class _MyPreferencesScreenState extends State<MyPreferencesScreen> {
 
   Widget _buildInfoCard(bool isAr) {
     return Card(
-      color: AppColors.info.withOpacity(0.08),
+      color: AppColors.info.withValues(alpha: 0.08),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(

@@ -256,7 +256,7 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
                 top: 16,
                 left: 16,
                 child: Material(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(24),
                   child: InkWell(
                     onTap: _toggleMute,
@@ -275,7 +275,7 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
               top: 16,
               right: 16,
               child: Material(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(24),
                 child: InkWell(
                   onTap: _finish,

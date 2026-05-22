@@ -253,9 +253,9 @@ class _KpiChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -321,10 +321,10 @@ class _KanbanView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
+                    color: color.withValues(alpha: 0.12),
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(8)),
-                    border: Border.all(color: color.withOpacity(0.30)),
+                    border: Border.all(color: color.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [
@@ -358,7 +358,7 @@ class _KanbanView extends StatelessWidget {
                 Container(
                   height: 600,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.04),
+                    color: color.withValues(alpha: 0.04),
                     borderRadius: const BorderRadius.vertical(
                         bottom: Radius.circular(8)),
                   ),
@@ -424,7 +424,7 @@ class _SiteCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: stuck
-              ? AppColors.danger.withOpacity(0.4)
+              ? AppColors.danger.withValues(alpha: 0.4)
               : Theme.of(context).dividerColor,
           width: stuck ? 1.5 : 0.6,
         ),
@@ -580,7 +580,7 @@ class _MiniBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(

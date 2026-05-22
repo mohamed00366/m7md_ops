@@ -172,7 +172,7 @@ class _BusReportsScreenState extends State<BusReportsScreen> {
                 color: CampPalette.card,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: BusesPalette.danger.withOpacity(0.30)),
+                    color: BusesPalette.danger.withValues(alpha: 0.30)),
               ),
               child: Column(
                 children: [
@@ -300,14 +300,14 @@ class _DetailedReportsCta extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 BusesPalette.primary,
-                BusesPalette.primary.withOpacity(0.78),
+                BusesPalette.primary.withValues(alpha: 0.78),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: BusesPalette.primary.withOpacity(0.25),
+                color: BusesPalette.primary.withValues(alpha: 0.25),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -320,7 +320,7 @@ class _DetailedReportsCta extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.insights_rounded,
@@ -348,7 +348,7 @@ class _DetailedReportsCta extends StatelessWidget {
                           : 'Daily · Hourly · Capacity · Per-Point',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.92),
+                        color: Colors.white.withValues(alpha: 0.92),
                       ),
                     ),
                   ],
@@ -400,7 +400,7 @@ class _Kpi extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -461,7 +461,7 @@ class _SectionHeader extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text('$count',
@@ -517,7 +517,7 @@ class _PointRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: BusesPalette.primary.withOpacity(0.10),
+              color: BusesPalette.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
@@ -538,7 +538,7 @@ class _PointRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: BusesPalette.success.withOpacity(0.10),
+              color: BusesPalette.success.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
@@ -614,7 +614,7 @@ class _UtilizationRow extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: pct,
                       minHeight: 4,
-                      backgroundColor: color.withOpacity(0.10),
+                      backgroundColor: color.withValues(alpha: 0.10),
                       valueColor: AlwaysStoppedAnimation<Color>(color),
                     ),
                   ),
@@ -625,7 +625,7 @@ class _UtilizationRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text('$n/${bus.capacity}',
@@ -659,7 +659,7 @@ class _UnassignedEmpRow extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: BusesPalette.danger.withOpacity(0.15),
+            backgroundColor: BusesPalette.danger.withValues(alpha: 0.15),
             child: Text(employee.initials,
                 style: const TextStyle(
                     color: BusesPalette.danger,

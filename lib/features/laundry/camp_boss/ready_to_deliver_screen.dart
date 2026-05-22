@@ -263,7 +263,7 @@ class _DeliveryConfirmDialogState extends State<_DeliveryConfirmDialog> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: LaundryColors.success.withOpacity(0.10),
+                color: LaundryColors.success.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(

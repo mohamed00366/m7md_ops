@@ -65,9 +65,9 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.08),
+        color: AppColors.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.brand.withOpacity(0.25)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,10 +203,9 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
               label: isAr ? '💰 خَصومات' : '💰 Deductions',
               icon: Icons.payments,
               color: AppColors.danger,
-              fetch: () async => (await ReportsService.instance
+              fetch: () async => '${(await ReportsService.instance
                           .deductionsTotal())
-                      .toStringAsFixed(0) +
-                  ' AED',
+                      .toStringAsFixed(0)} AED',
               hint: isAr ? 'هذه الفَترة' : 'this period',
             ),
           ],
@@ -247,20 +246,20 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.brand.withOpacity(0.15),
-                        AppColors.brand.withOpacity(0.05),
+                        AppColors.brand.withValues(alpha: 0.15),
+                        AppColors.brand.withValues(alpha: 0.05),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     border:
-                        Border.all(color: AppColors.brand.withOpacity(0.3)),
+                        Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.brand.withOpacity(0.15),
+                          color: AppColors.brand.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(Icons.person_search,
@@ -308,19 +307,19 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.teal.withOpacity(0.15),
-                        Colors.teal.withOpacity(0.05),
+                        Colors.teal.withValues(alpha: 0.15),
+                        Colors.teal.withValues(alpha: 0.05),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.teal.withOpacity(0.3)),
+                    border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.teal.withOpacity(0.15),
+                          color: Colors.teal.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(Icons.location_on,
@@ -409,8 +408,8 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
       onPressed: onTap,
       avatar: Icon(icon, size: 14, color: color),
       label: Text(label, style: const TextStyle(fontSize: 11)),
-      backgroundColor: color.withOpacity(0.10),
-      side: BorderSide(color: color.withOpacity(0.30)),
+      backgroundColor: color.withValues(alpha: 0.10),
+      side: BorderSide(color: color.withValues(alpha: 0.30)),
     );
   }
 
@@ -463,7 +462,7 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
           ]),
         ),
         const SizedBox(height: 8),
-        ...filtered.map((r) => _reportCard(r, isAr)).toList(),
+        ...filtered.map((r) => _reportCard(r, isAr)),
       ],
     );
   }
@@ -474,7 +473,7 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
       child: ListTile(
         onTap: () => _openReport(r.key, isAr),
         leading: CircleAvatar(
-          backgroundColor: r.color.withOpacity(0.15),
+          backgroundColor: r.color.withValues(alpha: 0.15),
           child: Icon(r.icon, color: r.color),
         ),
         title: Text(r.title,
@@ -692,9 +691,9 @@ class _KpiCardState extends State<_KpiCard> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: widget.color.withOpacity(0.08),
+        color: widget.color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: widget.color.withOpacity(0.30)),
+        border: Border.all(color: widget.color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

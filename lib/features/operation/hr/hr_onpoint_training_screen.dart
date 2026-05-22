@@ -7,9 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/enums.dart';
 import '../../../models/models.dart';
 import '../../../repositories/mock_repository.dart';
-import '../../../shared/m7_app_bar.dart';
 import '../../../shared/widgets.dart';
-import 'hr_onpoint_detail_screen.dart';
 import 'trainee_onboarding_form_screen.dart';
 
 /// 🎓 تدريب الموظفين الجدد على نقطة (OnPoint Training) — تابة في HR Hub
@@ -267,7 +265,7 @@ class _TraineeCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -370,10 +368,10 @@ class _MiniKpi extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(selected ? 0.2 : 0.08),
+          color: color.withValues(alpha: selected ? 0.2 : 0.08),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: color.withOpacity(selected ? 0.6 : 0.2),
+            color: color.withValues(alpha: selected ? 0.6 : 0.2),
             width: selected ? 2 : 1,
           ),
         ),
@@ -394,7 +392,7 @@ class _MiniKpi extends StatelessWidget {
               label,
               style: TextStyle(
                   fontSize: 10,
-                  color: color.withOpacity(0.85),
+                  color: color.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w700),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -417,7 +415,7 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(

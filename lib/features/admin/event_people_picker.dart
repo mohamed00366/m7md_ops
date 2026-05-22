@@ -126,9 +126,9 @@ class _EventPeoplePickerState extends State<EventPeoplePicker> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,9 +181,9 @@ class _EventPeoplePickerState extends State<EventPeoplePicker> {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -197,7 +197,7 @@ class _EventPeoplePickerState extends State<EventPeoplePicker> {
             const SizedBox(width: 4),
             Text('(${p.code})',
                 style: TextStyle(
-                    color: color.withOpacity(0.7), fontSize: 9)),
+                    color: color.withValues(alpha: 0.7), fontSize: 9)),
           ],
           const SizedBox(width: 2),
           InkWell(
@@ -210,7 +210,7 @@ class _EventPeoplePickerState extends State<EventPeoplePicker> {
               _notify();
             },
             child: Icon(Icons.close,
-                color: color.withOpacity(0.7), size: 14),
+                color: color.withValues(alpha: 0.7), size: 14),
           ),
         ],
       ),
@@ -360,7 +360,7 @@ class _EventPeoplePickerState extends State<EventPeoplePicker> {
       dense: true,
       leading: CircleAvatar(
         radius: 16,
-        backgroundColor: AppColors.brand.withOpacity(0.15),
+        backgroundColor: AppColors.brand.withValues(alpha: 0.15),
         child: Text(e.fullName.isNotEmpty ? e.fullName[0] : '?',
             style: const TextStyle(
                 color: AppColors.brand,

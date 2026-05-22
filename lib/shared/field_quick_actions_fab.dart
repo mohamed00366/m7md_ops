@@ -141,7 +141,7 @@ class _QuickActionsSheet extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(Icons.bolt, color: AppColors.gold, size: 22),
+                const Icon(Icons.bolt, color: AppColors.gold, size: 22),
                 const SizedBox(width: 8),
                 Text(
                   isUr ? 'فوری اقدامات' : (isAr ? 'إجراءات سَريعة' : 'Quick Actions'),
@@ -166,7 +166,7 @@ class _QuickActionsSheet extends StatelessWidget {
               itemBuilder: (_, i) {
                 final a = actions[i];
                 return Material(
-                  color: a.color.withOpacity(0.08),
+                  color: a.color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: a.onTap,
@@ -176,7 +176,7 @@ class _QuickActionsSheet extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border:
-                            Border.all(color: a.color.withOpacity(0.25)),
+                            Border.all(color: a.color.withValues(alpha: 0.25)),
                       ),
                       child: Row(
                         children: [
@@ -184,7 +184,7 @@ class _QuickActionsSheet extends StatelessWidget {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: a.color.withOpacity(0.18),
+                              color: a.color.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child:
@@ -217,7 +217,7 @@ class _QuickActionsSheet extends StatelessWidget {
                             ),
                           ),
                           Icon(Icons.chevron_right,
-                              color: a.color.withOpacity(0.50), size: 20),
+                              color: a.color.withValues(alpha: 0.50), size: 20),
                         ],
                       ),
                     ),

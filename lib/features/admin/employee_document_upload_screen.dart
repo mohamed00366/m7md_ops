@@ -317,7 +317,7 @@ class _EmployeeDocumentUploadScreenState
                   margin: const EdgeInsets.symmetric(vertical: 2),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.08),
+                    color: Colors.grey.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -411,7 +411,7 @@ class _StepIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: AppColors.brand.withOpacity(0.06),
+      color: AppColors.brand.withValues(alpha: 0.06),
       child: Row(
         children: List.generate(total, (i) {
           final isActive = i <= current;
@@ -593,7 +593,7 @@ class _ImagePickerStep extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: AppColors.success.withOpacity(0.40), width: 2),
+                    color: AppColors.success.withValues(alpha: 0.40), width: 2),
               ),
               clipBehavior: Clip.antiAlias,
               child: InteractiveViewer(
@@ -608,8 +608,8 @@ class _ImagePickerStep extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: AppColors.success.withOpacity(0.40), width: 2),
-                color: AppColors.success.withOpacity(0.05),
+                    color: AppColors.success.withValues(alpha: 0.40), width: 2),
+                color: AppColors.success.withValues(alpha: 0.05),
               ),
               child: Column(
                 children: [
@@ -877,7 +877,7 @@ class _ReviewStep extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppColors.gold.withOpacity(0.40), width: 1),
+                        color: AppColors.gold.withValues(alpha: 0.40), width: 1),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: InteractiveViewer(
@@ -891,7 +891,7 @@ class _ReviewStep extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppColors.gold.withOpacity(0.40), width: 1),
+                        color: AppColors.gold.withValues(alpha: 0.40), width: 1),
                   ),
                   child: Row(
                     children: [
@@ -926,10 +926,10 @@ class _ReviewStep extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.05),
+            color: AppColors.brand.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: AppColors.brand.withOpacity(0.20)),
+                color: AppColors.brand.withValues(alpha: 0.20)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

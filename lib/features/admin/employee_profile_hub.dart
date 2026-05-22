@@ -117,7 +117,7 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
           const SizedBox(height: 8),
           // ===== شَريط Tabs =====
           Container(
-            color: AppColors.brand.withOpacity(0.08),
+            color: AppColors.brand.withValues(alpha: 0.08),
             child: TabBar(
               controller: _tab,
               isScrollable: true,
@@ -230,7 +230,7 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
                 color: AppColors.success,
                 statusOk: employee.basicSalary > 0,
                 statusText: employee.basicSalary > 0
-                    ? '${employee.basicSalary.toStringAsFixed(0)}'
+                    ? employee.basicSalary.toStringAsFixed(0)
                     : '—',
                 onTap: () => _openSection(
                     EmployeeFinancialSection(employee: employee)),
@@ -400,15 +400,15 @@ class _ProfileHeader extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.08),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.08),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: AppColors.gold.withOpacity(0.25), width: 1),
+            color: AppColors.gold.withValues(alpha: 0.25), width: 1),
       ),
       child: Row(
         children: [
@@ -418,8 +418,8 @@ class _ProfileHeader extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.gold.withOpacity(0.40),
-                  AppColors.gold.withOpacity(0.15),
+                  AppColors.gold.withValues(alpha: 0.40),
+                  AppColors.gold.withValues(alpha: 0.15),
                 ],
               ),
               shape: BoxShape.circle,
@@ -516,7 +516,7 @@ class _CompletionBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: value,
-            backgroundColor: color.withOpacity(0.15),
+            backgroundColor: color.withValues(alpha: 0.15),
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),
@@ -579,9 +579,9 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.15),
+        color: c.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: c.withOpacity(0.40)),
+        border: Border.all(color: c.withValues(alpha: 0.40)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -632,7 +632,7 @@ class _SectionCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-                color: color.withOpacity(0.25), width: 1.2),
+                color: color.withValues(alpha: 0.25), width: 1.2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,7 +643,7 @@ class _SectionCard extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(icon, color: color, size: 22),
@@ -655,8 +655,8 @@ class _SectionCard extends StatelessWidget {
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: statusOk
-                          ? AppColors.success.withOpacity(0.18)
-                          : color.withOpacity(0.10),
+                          ? AppColors.success.withValues(alpha: 0.18)
+                          : color.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -683,12 +683,12 @@ class _SectionCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(Icons.chevron_right,
-                      color: color.withOpacity(0.60), size: 14),
+                      color: color.withValues(alpha: 0.60), size: 14),
                   Text(
                     isAr ? 'فَتح' : 'Open',
                     style: TextStyle(
                         fontSize: 10,
-                        color: color.withOpacity(0.70)),
+                        color: color.withValues(alpha: 0.70)),
                   ),
                 ],
               ),

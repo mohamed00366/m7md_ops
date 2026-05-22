@@ -80,7 +80,7 @@ class _DirectReceiveSearchScreenState extends State<DirectReceiveSearchScreen> {
       body: Column(
         children: [
           Container(
-            color: LaundryColors.primary.withOpacity(0.10),
+            color: LaundryColors.primary.withValues(alpha: 0.10),
             padding: const EdgeInsets.all(12),
             child: TextField(
               controller: _searchCtrl,
@@ -134,7 +134,7 @@ class _DirectReceiveSearchScreenState extends State<DirectReceiveSearchScreen> {
             Text(
               _query.isEmpty
                   ? 'اكتُب اسم أَو كود لِلبَدء'
-                  : 'لا تُوجَد نَتائِج لِـ"${_query}"',
+                  : 'لا تُوجَد نَتائِج لِـ"$_query"',
               style:
                   TextStyle(color: Colors.grey.shade700, fontSize: 14),
               textAlign: TextAlign.center,
@@ -175,7 +175,7 @@ class _DirectReceiveSearchScreenState extends State<DirectReceiveSearchScreen> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: LaundryColors.primary.withOpacity(0.15),
+          backgroundColor: LaundryColors.primary.withValues(alpha: 0.15),
           child: Text(emp.initials,
               style: const TextStyle(
                   color: LaundryColors.primary,
@@ -396,7 +396,7 @@ class _DirectReceiveItemsScreenState extends State<DirectReceiveItemsScreen> {
 
   Widget _employeeBanner() {
     return Container(
-      color: LaundryColors.primary.withOpacity(0.10),
+      color: LaundryColors.primary.withValues(alpha: 0.10),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
@@ -430,7 +430,7 @@ class _DirectReceiveItemsScreenState extends State<DirectReceiveItemsScreen> {
 
   Widget _addBtn() {
     return Material(
-      color: LaundryColors.primary.withOpacity(0.10),
+      color: LaundryColors.primary.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: _addItem,
@@ -464,7 +464,7 @@ class _DirectReceiveItemsScreenState extends State<DirectReceiveItemsScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.30)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -501,7 +501,7 @@ class _DirectReceiveItemsScreenState extends State<DirectReceiveItemsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: LaundryColors.success.withOpacity(0.10),
+        color: LaundryColors.success.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

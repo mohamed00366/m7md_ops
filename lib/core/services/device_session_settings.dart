@@ -254,32 +254,32 @@ class DeviceSessionSettings extends ChangeNotifier {
   PolicyDecision decisionFor(String accountId) {
     final override = _overrides[accountId];
     if (override == true) {
-      return PolicyDecision(
+      return const PolicyDecision(
         applies: true,
         reason: PolicyReason.overrideEnforced,
       );
     }
     if (override == false) {
-      return PolicyDecision(
+      return const PolicyDecision(
         applies: false,
         reason: PolicyReason.overrideExempt,
       );
     }
     if (!_enforce) {
-      return PolicyDecision(
+      return const PolicyDecision(
         applies: false,
         reason: PolicyReason.globallyDisabled,
       );
     }
     switch (_scope) {
       case DevicePolicyScope.allAccounts:
-        return PolicyDecision(
+        return const PolicyDecision(
           applies: true,
           reason: PolicyReason.scopeAll,
         );
       case DevicePolicyScope.includedOnly:
         if (_accountIds.contains(accountId)) {
-          return PolicyDecision(
+          return const PolicyDecision(
             applies: true,
             reason: PolicyReason.accountListed,
           );
@@ -292,13 +292,13 @@ class DeviceSessionSettings extends ChangeNotifier {
             matchedJobTitleId: jt,
           );
         }
-        return PolicyDecision(
+        return const PolicyDecision(
           applies: false,
           reason: PolicyReason.notInIncludeList,
         );
       case DevicePolicyScope.excludedOnly:
         if (_accountIds.contains(accountId)) {
-          return PolicyDecision(
+          return const PolicyDecision(
             applies: false,
             reason: PolicyReason.accountExcluded,
           );
@@ -311,7 +311,7 @@ class DeviceSessionSettings extends ChangeNotifier {
             matchedJobTitleId: jt,
           );
         }
-        return PolicyDecision(
+        return const PolicyDecision(
           applies: true,
           reason: PolicyReason.notInExcludeList,
         );

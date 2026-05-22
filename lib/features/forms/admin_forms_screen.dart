@@ -94,7 +94,7 @@ class _AdminFormsScreenState extends State<AdminFormsScreen>
           : null,
       body: Column(children: [
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppPalette.card,
             border: Border(bottom: BorderSide(color: AppPalette.border)),
           ),
@@ -250,7 +250,7 @@ class _TemplateAdminCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.10),
+                    color: AppColors.brand.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
@@ -283,15 +283,15 @@ class _TemplateAdminCard extends StatelessWidget {
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: t.isActive
-                                ? AppColors.success.withOpacity(0.10)
+                                ? AppColors.success.withValues(alpha: 0.10)
                                 : AppPalette.textTertiary
-                                    .withOpacity(0.10),
+                                    .withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
                                 color: t.isActive
-                                    ? AppColors.success.withOpacity(0.40)
+                                    ? AppColors.success.withValues(alpha: 0.40)
                                     : AppPalette.textTertiary
-                                        .withOpacity(0.40)),
+                                        .withValues(alpha: 0.40)),
                           ),
                           child: Text(
                             t.isActive
@@ -385,7 +385,7 @@ class _TemplateAdminCard extends StatelessWidget {
                           s.isAr
                               ? 'بدون موافقات (مباشر)'
                               : 'No approvals (auto)',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 11,
                               fontStyle: FontStyle.italic,
                               color: AppPalette.textTertiary),
@@ -595,9 +595,9 @@ class _RoleBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Text(label,
           style: TextStyle(
@@ -632,9 +632,9 @@ class _StepBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.teal.withOpacity(0.10),
+        color: AppColors.teal.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.teal.withOpacity(0.40)),
+        border: Border.all(color: AppColors.teal.withValues(alpha: 0.40)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
@@ -782,7 +782,7 @@ class _SubmissionRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -829,9 +829,9 @@ class _SubmissionRow extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.10),
+                    color: color.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: color.withOpacity(0.40)),
+                    border: Border.all(color: color.withValues(alpha: 0.40)),
                   ),
                   child: Text(submission.status.label(s.isAr),
                       style: TextStyle(
@@ -843,7 +843,7 @@ class _SubmissionRow extends StatelessWidget {
               const SizedBox(height: 6),
               if (emp != null)
                 Row(children: [
-                  Icon(Icons.person_outline,
+                  const Icon(Icons.person_outline,
                       size: 11, color: AppPalette.textSecondary),
                   const SizedBox(width: 3),
                   Text('${emp.fullName} • ${emp.code}',
@@ -853,7 +853,7 @@ class _SubmissionRow extends StatelessWidget {
                 ]),
               const SizedBox(height: 4),
               Row(children: [
-                Icon(Icons.access_time,
+                const Icon(Icons.access_time,
                     size: 11, color: AppPalette.textTertiary),
                 const SizedBox(width: 3),
                 Text(
@@ -1005,9 +1005,9 @@ class _ResolvedApproverChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.10),
+          color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withOpacity(0.30)),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1105,7 +1105,7 @@ class _SubmissionDetailScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor:
-                        AppColors.brand.withOpacity(0.10),
+                        AppColors.brand.withValues(alpha: 0.10),
                     child: Text(employee!.initials,
                         style: const TextStyle(
                             color: AppColors.brand,
@@ -1226,7 +1226,7 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [

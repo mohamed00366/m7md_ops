@@ -155,7 +155,7 @@ class _LiveFleetMapScreenState extends State<LiveFleetMapScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_outline,
+                const Icon(Icons.lock_outline,
                     size: 56, color: AppColors.danger),
                 const SizedBox(height: 12),
                 Text(
@@ -280,7 +280,7 @@ class _LiveFleetMapScreenState extends State<LiveFleetMapScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.95),
+                  color: AppColors.warning.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -552,7 +552,7 @@ class _BusInfoCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: bus.statusColor.withOpacity(0.15),
+                    color: bus.statusColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

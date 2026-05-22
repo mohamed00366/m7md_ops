@@ -462,7 +462,7 @@ class _DailyMemoReportScreenState extends State<DailyMemoReportScreen> {
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color:
-                                  AppColors.success.withOpacity(0.18),
+                                  AppColors.success.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -623,7 +623,7 @@ class _Kpi extends StatelessWidget {
               width: 26,
               height: 26,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: Icon(icon, color: color, size: 14),

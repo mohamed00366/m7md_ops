@@ -310,7 +310,7 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
                         return ListTile(
                           dense: true,
                           leading: CircleAvatar(
-                            backgroundColor: AppColors.brand.withOpacity(0.15),
+                            backgroundColor: AppColors.brand.withValues(alpha: 0.15),
                             child: const Icon(Icons.place,
                                 color: AppColors.brand, size: 18),
                           ),
@@ -361,7 +361,7 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
               children: [
                 CircleAvatar(
                   radius: 26,
-                  backgroundColor: AppColors.brand.withOpacity(0.15),
+                  backgroundColor: AppColors.brand.withValues(alpha: 0.15),
                   child: const Icon(Icons.place,
                       color: AppColors.brand, size: 28),
                 ),
@@ -439,9 +439,9 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
         final k = kpis[i];
         return Container(
           decoration: BoxDecoration(
-            color: k.color.withOpacity(0.08),
+            color: k.color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: k.color.withOpacity(0.3)),
+            border: Border.all(color: k.color.withValues(alpha: 0.3)),
           ),
           padding: const EdgeInsets.all(4),
           child: Column(
@@ -485,7 +485,7 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.12),
+                color: AppColors.brand.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text('$count',
@@ -550,7 +550,7 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
           dense: true,
           leading: CircleAvatar(
             radius: 14,
-            backgroundColor: c.withOpacity(0.15),
+            backgroundColor: c.withValues(alpha: 0.15),
             child: Text(e.fullName.isNotEmpty ? e.fullName[0] : '?',
                 style: TextStyle(
                     color: c, fontWeight: FontWeight.w900, fontSize: 11)),
@@ -563,7 +563,7 @@ class _LocationAggregatedReportState extends State<LocationAggregatedReport> {
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: c.withOpacity(0.15),
+              color: c.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(label,

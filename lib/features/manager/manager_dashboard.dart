@@ -252,7 +252,7 @@ class ManagerDashboard extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.info.withOpacity(0.12),
+                      color: AppColors.info.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child:
@@ -294,7 +294,7 @@ class _MiniMetric extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(

@@ -297,7 +297,7 @@ class _SimpleFieldRow extends StatelessWidget {
         onTap: onEdit,
         leading: CircleAvatar(
           radius: 16,
-          backgroundColor: AppColors.brand.withOpacity(0.12),
+          backgroundColor: AppColors.brand.withValues(alpha: 0.12),
           child: Icon(typeInfo['icon'] as IconData,
               size: 16, color: AppColors.brand),
         ),
@@ -351,15 +351,12 @@ class _FieldCard extends StatelessWidget {
   final VoidCallback? onMoveDown;
 
   const _FieldCard({
-    super.key,
     required this.field,
     required this.index,
     required this.isAr,
     required this.typeOptions,
     required this.onEdit,
     required this.onDelete,
-    this.onMoveUp,
-    this.onMoveDown,
   });
 
   @override
@@ -403,7 +400,7 @@ class _FieldCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.12),
+                color: AppColors.brand.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
@@ -439,7 +436,7 @@ class _FieldCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: AppColors.danger.withOpacity(0.15),
+                            color: AppColors.danger.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: const Text(
@@ -486,7 +483,7 @@ class _FieldCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 5, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.brand.withOpacity(0.12),
+                          color: AppColors.brand.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(
@@ -1006,7 +1003,7 @@ class _FieldEditDialogState extends State<_FieldEditDialog> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 1),
                                 decoration: BoxDecoration(
-                                  color: AppColors.brand.withOpacity(0.10),
+                                  color: AppColors.brand.withValues(alpha: 0.10),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -1028,10 +1025,10 @@ class _FieldEditDialogState extends State<_FieldEditDialog> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.08),
+                    color: AppColors.success.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: AppColors.success.withOpacity(0.25)),
+                        color: AppColors.success.withValues(alpha: 0.25)),
                   ),
                   child: Row(
                     children: [
@@ -1362,7 +1359,7 @@ class _TypeGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final types = _FieldBuilderSheetState._typeOptions;
+    const types = _FieldBuilderSheetState._typeOptions;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1383,7 +1380,7 @@ class _TypeGrid extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: isSel
-                  ? AppColors.brand.withOpacity(0.15)
+                  ? AppColors.brand.withValues(alpha: 0.15)
                   : Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(

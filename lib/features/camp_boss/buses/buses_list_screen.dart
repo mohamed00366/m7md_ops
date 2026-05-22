@@ -162,9 +162,13 @@ class _BusesListScreenState extends State<BusesListScreen> {
 
     final filtered = allBuses.where((b) {
       if (_statusFilter == 'active' &&
-          b.status != EntityStatus.active) return false;
+          b.status != EntityStatus.active) {
+        return false;
+      }
       if (_statusFilter == 'inactive' &&
-          b.status != EntityStatus.inactive) return false;
+          b.status != EntityStatus.inactive) {
+        return false;
+      }
       if (_query.trim().isNotEmpty) {
         return busesMatchesQuery(_query, [
           b.name,
@@ -332,7 +336,7 @@ class _BusCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -350,7 +354,7 @@ class _BusCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.08),
+                  color: color.withValues(alpha: 0.08),
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(14)),
                 ),
@@ -395,9 +399,9 @@ class _BusCard extends StatelessWidget {
                                   color:
                                       bus.ownership == BusOwnership.company
                                           ? BusesPalette.primary
-                                              .withOpacity(0.15)
+                                              .withValues(alpha: 0.15)
                                           : BusesPalette.warning
-                                              .withOpacity(0.15),
+                                              .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Row(
@@ -437,7 +441,7 @@ class _BusCard extends StatelessWidget {
                                       horizontal: 5, vertical: 1),
                                   decoration: BoxDecoration(
                                     color: BusesPalette.danger
-                                        .withOpacity(0.15),
+                                        .withValues(alpha: 0.15),
                                     borderRadius:
                                         BorderRadius.circular(4),
                                   ),
@@ -582,9 +586,9 @@ class _Pill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

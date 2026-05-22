@@ -62,9 +62,9 @@ class _RosterApprovalBannerState extends State<RosterApprovalBanner> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.success.withOpacity(0.4)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -97,7 +97,7 @@ class _RosterApprovalBannerState extends State<RosterApprovalBanner> {
                       : '${myShifts.where((a) => a.shiftType != ShiftType.off).length} shifts • ${myHours.toStringAsFixed(0)}h • ${point?.name ?? "—"} ($whenLabel)',
                   style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.success.withOpacity(0.85),
+                      color: AppColors.success.withValues(alpha: 0.85),
                       fontWeight: FontWeight.w600),
                 ),
               ],

@@ -1747,13 +1747,13 @@ class MockRepository extends ChangeNotifier {
 
         // IN عَنَدَ بِداية الشِفت
         final start = a.startTime;
-        if (start != null && start.isNotEmpty) {
+        if (start.isNotEmpty) {
           final k = '$empPointId|${a.dayIndex}|$start|in';
           byKey.putIfAbsent(k, () => <String>{}).add(a.employeeId);
         }
         // OUT عَنَدَ نِهاية الشِفت
         final end = a.endTime;
-        if (end != null && end.isNotEmpty) {
+        if (end.isNotEmpty) {
           final k = '$empPointId|${a.dayIndex}|$end|out';
           byKey.putIfAbsent(k, () => <String>{}).add(a.employeeId);
         }

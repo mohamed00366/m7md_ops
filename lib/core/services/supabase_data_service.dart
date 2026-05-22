@@ -2310,24 +2310,22 @@ class SupabaseDataService {
       }
 
       // حَدِّث الـcache المَحَلّيّ
-      if (row != null) {
-        final newShift = BusDriverShift(
-          id: row['id'].toString(),
-          busId: row['bus_id'].toString(),
-          driverId: row['driver_id'].toString(),
-          startTime: row['start_time']?.toString(),
-          endTime: row['end_time']?.toString(),
-          notes: row['notes']?.toString(),
-          effectiveFrom: row['effective_from'] != null
-              ? DateTime.parse(row['effective_from'].toString())
-              : todayDate,
-        );
-        // أَزِل أَيّ صَفّ بِنَفس الـid (إن وُجِد)
-        _repo.busDriverShifts.removeWhere((x) => x.id == newShift.id);
-        _repo.busDriverShifts.add(newShift);
-        _repo.notifyListeners();
-      }
-
+      final newShift = BusDriverShift(
+        id: row['id'].toString(),
+        busId: row['bus_id'].toString(),
+        driverId: row['driver_id'].toString(),
+        startTime: row['start_time']?.toString(),
+        endTime: row['end_time']?.toString(),
+        notes: row['notes']?.toString(),
+        effectiveFrom: row['effective_from'] != null
+            ? DateTime.parse(row['effective_from'].toString())
+            : todayDate,
+      );
+      // أَزِل أَيّ صَفّ بِنَفس الـid (إن وُجِد)
+      _repo.busDriverShifts.removeWhere((x) => x.id == newShift.id);
+      _repo.busDriverShifts.add(newShift);
+      _repo.notifyListeners();
+    
       lastError = null;
       return true;
     } catch (e) {
@@ -5663,7 +5661,7 @@ class SupabaseDataService {
           .order('purchase_no', ascending: false)
           .limit(1);
       var maxSeq = 0;
-      if (rows is List && rows.isNotEmpty) {
+      if (rows.isNotEmpty) {
         final last = (rows.first as Map)['purchase_no']?.toString() ?? '';
         if (last.startsWith(prefix)) {
           maxSeq = int.tryParse(last.substring(prefix.length)) ?? 0;

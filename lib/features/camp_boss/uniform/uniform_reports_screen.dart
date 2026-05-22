@@ -462,7 +462,7 @@ class _Kpi extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -516,7 +516,7 @@ class _SectionHeader extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text('$count',
@@ -557,7 +557,7 @@ class _EmployeeRow extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundColor:
-                  UniformPalette.primary.withOpacity(0.15),
+                  UniformPalette.primary.withValues(alpha: 0.15),
               child: Text(emp?.initials ?? '?',
                   style: const TextStyle(
                       color: UniformPalette.primary,
@@ -586,7 +586,7 @@ class _EmployeeRow extends StatelessWidget {
                       value: pct,
                       minHeight: 4,
                       backgroundColor:
-                          UniformPalette.primary.withOpacity(0.10),
+                          UniformPalette.primary.withValues(alpha: 0.10),
                       valueColor: const AlwaysStoppedAnimation<Color>(
                           UniformPalette.primary),
                     ),
@@ -598,7 +598,7 @@ class _EmployeeRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: UniformPalette.primary.withOpacity(0.12),
+                color: UniformPalette.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text('$count',
@@ -650,7 +650,7 @@ class _ItemBarRow extends StatelessWidget {
                     value: pct,
                     minHeight: 4,
                     backgroundColor:
-                        UniformPalette.stockOut.withOpacity(0.10),
+                        UniformPalette.stockOut.withValues(alpha: 0.10),
                     valueColor: const AlwaysStoppedAnimation<Color>(
                         UniformPalette.stockOut),
                   ),
@@ -662,7 +662,7 @@ class _ItemBarRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: UniformPalette.stockOut.withOpacity(0.12),
+              color: UniformPalette.stockOut.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text('$count',
@@ -732,7 +732,7 @@ class _ActivityRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 14, color: color),

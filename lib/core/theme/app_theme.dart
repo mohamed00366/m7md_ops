@@ -120,7 +120,7 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
         ),
         labelStyle: TextStyle(color: textSecondary),
-        hintStyle: TextStyle(color: textSecondary.withOpacity(0.7)),
+        hintStyle: TextStyle(color: textSecondary.withValues(alpha: 0.7)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -175,14 +175,14 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        indicatorColor: AppColors.brand.withOpacity(0.15),
+        indicatorColor: AppColors.brand.withValues(alpha: 0.15),
         labelTextStyle: WidgetStatePropertyAll(textTheme.labelSmall),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStatePropertyAll(
             isDark ? Colors.white : AppColors.brand),
         trackColor: WidgetStatePropertyAll(
-            AppColors.brand.withOpacity(isDark ? 0.5 : 0.3)),
+            AppColors.brand.withValues(alpha: isDark ? 0.5 : 0.3)),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

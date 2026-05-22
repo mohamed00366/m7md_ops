@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../core/l10n/app_strings.dart';
 import '../core/theme/app_colors.dart';
 import '../features/admin/account_report_screen.dart';
 import '../features/admin/employee_profile_hub.dart';
@@ -54,7 +53,7 @@ class GlobalEntitySearch extends SearchDelegate<void> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.search,
-                  size: 48, color: Colors.grey.withOpacity(0.5)),
+                  size: 48, color: Colors.grey.withValues(alpha: 0.5)),
               const SizedBox(height: 12),
               Text(
                 isAr
@@ -188,7 +187,7 @@ class GlobalEntitySearch extends SearchDelegate<void> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.search_off,
-                  size: 48, color: Colors.grey.withOpacity(0.5)),
+                  size: 48, color: Colors.grey.withValues(alpha: 0.5)),
               const SizedBox(height: 12),
               Text(
                 isAr ? 'لا تُوجَد نَتائِج' : 'No results',
@@ -217,7 +216,7 @@ class GlobalEntitySearch extends SearchDelegate<void> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: r.color.withOpacity(0.15),
+              color: r.color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(r.icon, color: r.color, size: 20),
@@ -236,7 +235,7 @@ class GlobalEntitySearch extends SearchDelegate<void> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: r.color.withOpacity(0.10),
+                  color: r.color.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/notification_routing_service.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/lookups.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
@@ -80,7 +79,7 @@ class _NotificationRoutingScreenState extends State<NotificationRoutingScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
-      color: AppColors.brand.withOpacity(0.06),
+      color: AppColors.brand.withValues(alpha: 0.06),
       child: Text(
         isAr
             ? 'كُلّ صَلاحِيّة تَتَحَكَّم بِمَن يَتَلَقَّى نَوع إشعار مُعَيَّن. اضغَط لِمُعايَنة المُستَلِمين فِعلِيّاً وَمَنح/سَحب الصَلاحِيّة.'
@@ -183,7 +182,7 @@ class _NotificationRoutingScreenState extends State<NotificationRoutingScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: categoryColor.withOpacity(0.15),
+                      color: categoryColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(p.category,
@@ -204,7 +203,7 @@ class _NotificationRoutingScreenState extends State<NotificationRoutingScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 7, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.12),
+                      color: AppColors.brand.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(

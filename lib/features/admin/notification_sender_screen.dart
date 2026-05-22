@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/lookups.dart';
 import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
 
@@ -171,9 +170,9 @@ class _NotificationSenderScreenState extends State<NotificationSenderScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.06),
+              color: AppColors.brand.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+              border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -253,9 +252,9 @@ class _NotificationSenderScreenState extends State<NotificationSenderScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.06),
+              color: AppColors.info.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.info.withOpacity(0.2)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,7 +295,7 @@ class _NotificationSenderScreenState extends State<NotificationSenderScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +304,7 @@ class _NotificationSenderScreenState extends State<NotificationSenderScreen> {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: AppColors.brand.withOpacity(0.15),
+                          color: AppColors.brand.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.notifications_outlined,
@@ -406,12 +405,12 @@ class _NotificationSenderScreenState extends State<NotificationSenderScreen> {
             decoration: BoxDecoration(
               color: selected
                   ? AppColors.brand
-                  : Colors.grey.withOpacity(0.10),
+                  : Colors.grey.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: selected
                     ? AppColors.brand
-                    : Colors.grey.withOpacity(0.3),
+                    : Colors.grey.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -443,9 +442,9 @@ class _NotificationSenderScreenState extends State<NotificationSenderScreen> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.warning.withOpacity(0.08),
+          color: AppColors.warning.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+          border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [

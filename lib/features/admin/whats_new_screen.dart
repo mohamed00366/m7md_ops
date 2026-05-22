@@ -62,7 +62,7 @@ class WhatsNewScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     AppColors.brand,
-                    AppColors.brand.withOpacity(0.7),
+                    AppColors.brand.withValues(alpha: 0.7),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -94,7 +94,7 @@ class WhatsNewScreen extends StatelessWidget {
                               ? '${entries.length} ميزة جديدة في M7 Management'
                               : '${entries.length} new features in M7 Management',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             fontSize: 12,
                           ),
                         ),
@@ -354,7 +354,7 @@ class _EntryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: entry.color.withOpacity(0.3)),
+        border: Border.all(color: entry.color.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,7 +363,7 @@ class _EntryCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: entry.color.withOpacity(0.15),
+              color: entry.color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(entry.icon, color: entry.color, size: 22),

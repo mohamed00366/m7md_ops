@@ -243,9 +243,9 @@ class _CountBox extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -294,9 +294,9 @@ class _FilterChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: selected ? color : color.withOpacity(0.1),
+            color: selected ? color : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(selected ? 1 : 0.3)),
+            border: Border.all(color: color.withValues(alpha: selected ? 1 : 0.3)),
           ),
           child: Text(
             label,
@@ -352,7 +352,7 @@ class _RosterListCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isRejected || isDraft
-              ? color.withOpacity(0.5)
+              ? color.withValues(alpha: 0.5)
               : Theme.of(context).dividerColor,
           width: isRejected || isDraft ? 1.5 : 1,
         ),
@@ -369,7 +369,7 @@ class _RosterListCard extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.15),
+                        color: color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(_statusIcon(), color: color, size: 20),
@@ -468,9 +468,9 @@ class _RosterListCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.danger.withOpacity(0.08),
+                color: AppColors.danger.withValues(alpha: 0.08),
                 border: Border(
-                  top: BorderSide(color: AppColors.danger.withOpacity(0.3)),
+                  top: BorderSide(color: AppColors.danger.withValues(alpha: 0.3)),
                 ),
               ),
               child: Column(

@@ -45,7 +45,7 @@ class StatCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.13),
+                      color: color.withValues(alpha: 0.13),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(icon, color: color, size: 18),
@@ -97,7 +97,7 @@ class StatusBadge extends StatelessWidget {
         vertical: dense ? 2 : 4,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.13),
+        color: color.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -222,7 +222,7 @@ class AppAvatar extends StatelessWidget {
     final c = color ?? AppColors.brand;
     return CircleAvatar(
       radius: radius,
-      backgroundColor: c.withOpacity(0.15),
+      backgroundColor: c.withValues(alpha: 0.15),
       child: Text(
         initials,
         style: TextStyle(

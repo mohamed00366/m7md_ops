@@ -521,7 +521,7 @@ class _StatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,10 +605,10 @@ class _TimeBlock extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: has ? color.withOpacity(0.08) : CampPalette.input,
+        color: has ? color.withValues(alpha: 0.08) : CampPalette.input,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-            color: has ? color.withOpacity(0.30) : CampPalette.border),
+            color: has ? color.withValues(alpha: 0.30) : CampPalette.border),
       ),
       child: Row(
         children: [
@@ -680,7 +680,7 @@ class _LinkedEmpRow extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: BusesPalette.success.withOpacity(0.15),
+            backgroundColor: BusesPalette.success.withValues(alpha: 0.15),
             child: Text(employee.initials,
                 style: const TextStyle(
                     color: BusesPalette.success,
@@ -842,7 +842,7 @@ class _PickEmployeesSheetState extends State<_PickEmployeesSheet> {
                         leading: CircleAvatar(
                           radius: 16,
                           backgroundColor:
-                              BusesPalette.primary.withOpacity(0.15),
+                              BusesPalette.primary.withValues(alpha: 0.15),
                           child: Text(e.initials,
                               style: const TextStyle(
                                   color: BusesPalette.primary,

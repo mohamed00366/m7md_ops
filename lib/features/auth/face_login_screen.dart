@@ -484,7 +484,7 @@ class _CaptureView extends StatelessWidget {
                     horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: (isLive ? AppColors.warning : AppColors.brand)
-                      .withOpacity(0.85),
+                      .withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -539,12 +539,12 @@ class _CaptureView extends StatelessWidget {
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: statusOk
-                        ? AppColors.success.withOpacity(0.92)
-                        : Colors.black.withOpacity(0.78),
+                        ? AppColors.success.withValues(alpha: 0.92)
+                        : Colors.black.withValues(alpha: 0.78),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -605,7 +605,7 @@ class _OvalPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final c = statusOk ? AppColors.success : color.withOpacity(0.85);
+    final c = statusOk ? AppColors.success : color.withValues(alpha: 0.85);
     final w = size.width * 0.68;
     final h = size.height * 0.55;
     final left = (size.width - w) / 2;
@@ -616,7 +616,7 @@ class _OvalPainter extends CustomPainter {
       ..addOval(ovalRect)
       ..fillType = PathFillType.evenOdd;
     canvas.drawPath(
-        dim, Paint()..color = Colors.black.withOpacity(0.55));
+        dim, Paint()..color = Colors.black.withValues(alpha: 0.55));
     canvas.drawOval(
       ovalRect,
       Paint()
@@ -661,7 +661,7 @@ class _SuccessView extends StatelessWidget {
             Text(
               '${(score * 100).toStringAsFixed(0)}%',
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14),
             ),
           ],
@@ -712,14 +712,14 @@ class _FailView extends StatelessWidget {
               error,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.85), fontSize: 13),
+                  color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
             ),
             if (score > 0) ...[
               const SizedBox(height: 4),
               Text(
                 '${(score * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12),
               ),
             ],

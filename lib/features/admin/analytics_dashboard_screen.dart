@@ -428,7 +428,7 @@ class AnalyticsDashboardScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.bar_chart, size: 36, color: Colors.grey.withOpacity(0.4)),
+          Icon(Icons.bar_chart, size: 36, color: Colors.grey.withValues(alpha: 0.4)),
           const SizedBox(height: 6),
           Text(isAr ? 'لا تُوجَد بَيانات' : 'No data',
               style: const TextStyle(fontSize: 11, color: Colors.grey)),
@@ -517,7 +517,7 @@ class AnalyticsDashboardScreen extends StatelessWidget {
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 6,
-              backgroundColor: AppColors.success.withOpacity(0.10),
+              backgroundColor: AppColors.success.withValues(alpha: 0.10),
               valueColor:
                   const AlwaysStoppedAnimation<Color>(AppColors.success),
             ),
@@ -552,7 +552,7 @@ class _ChartCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +560,7 @@ class _ChartCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
             ),
@@ -605,9 +605,9 @@ class _ComplianceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -621,7 +621,7 @@ class _ComplianceCard extends StatelessWidget {
                 CircularProgressIndicator(
                   value: score,
                   strokeWidth: 7,
-                  backgroundColor: color.withOpacity(0.15),
+                  backgroundColor: color.withValues(alpha: 0.15),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
                 Text('$pct%',

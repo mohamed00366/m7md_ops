@@ -50,8 +50,8 @@ class DataResetScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.danger.withOpacity(0.08),
-              border: Border.all(color: AppColors.danger.withOpacity(0.4)),
+              color: AppColors.danger.withValues(alpha: 0.08),
+              border: Border.all(color: AppColors.danger.withValues(alpha: 0.4)),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Row(
@@ -268,7 +268,7 @@ class DataResetScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => destination),
         ),
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.12),
+          backgroundColor: color.withValues(alpha: 0.12),
           child: Icon(icon, color: color),
         ),
         title: Text(title,
@@ -305,7 +305,7 @@ class DataResetScreen extends StatelessWidget {
           action: action,
         ),
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.12),
+          backgroundColor: color.withValues(alpha: 0.12),
           child: Icon(icon, color: color),
         ),
         title: Text(title,

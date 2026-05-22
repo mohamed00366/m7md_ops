@@ -112,7 +112,7 @@ class _DriverGpsState extends State<DriverGps> {
               padding: const EdgeInsets.all(40),
               decoration: BoxDecoration(
                 color: (_tracking ? AppColors.success : AppColors.textTertiaryLight)
-                    .withOpacity(0.15),
+                    .withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(

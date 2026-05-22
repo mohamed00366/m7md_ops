@@ -116,10 +116,10 @@ class RealtimeIndicator extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.08),
+                  color: AppColors.info.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: AppColors.info.withOpacity(0.30)),
+                      color: AppColors.info.withValues(alpha: 0.30)),
                 ),
                 child: Row(
                   children: [
@@ -219,12 +219,12 @@ class _BlinkingDotState extends State<_BlinkingDot>
           width: widget.size,
           height: widget.size,
           decoration: BoxDecoration(
-            color: widget.color.withOpacity(opacity),
+            color: widget.color.withValues(alpha: opacity),
             shape: BoxShape.circle,
             boxShadow: widget.blink
                 ? [
                     BoxShadow(
-                      color: widget.color.withOpacity(0.5 * (1 - _ctrl.value)),
+                      color: widget.color.withValues(alpha: 0.5 * (1 - _ctrl.value)),
                       blurRadius: 4,
                       spreadRadius: 2,
                     ),

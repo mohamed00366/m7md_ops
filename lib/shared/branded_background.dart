@@ -85,7 +85,7 @@ class _WatermarkPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // ====== دوائر ضوئية (Blobs) - رمادي/ذهبي على الثيم الجديد ======
     final blob1 = Paint()
-      ..color = AppColors.brand.withOpacity(isDark ? 0.12 : 0.06)
+      ..color = AppColors.brand.withValues(alpha: isDark ? 0.12 : 0.06)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
     canvas.drawCircle(
       Offset(size.width * 0.15, size.height * 0.15),
@@ -94,7 +94,7 @@ class _WatermarkPainter extends CustomPainter {
     );
 
     final blob2 = Paint()
-      ..color = AppColors.gold.withOpacity(isDark ? 0.06 : 0.04)
+      ..color = AppColors.gold.withValues(alpha: isDark ? 0.06 : 0.04)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
     canvas.drawCircle(
       Offset(size.width * 0.85, size.height * 0.7),
@@ -103,7 +103,7 @@ class _WatermarkPainter extends CustomPainter {
     );
 
     final blob3 = Paint()
-      ..color = AppColors.brandAccent.withOpacity(isDark ? 0.06 : 0.04)
+      ..color = AppColors.brandAccent.withValues(alpha: isDark ? 0.06 : 0.04)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 90);
     canvas.drawCircle(
       Offset(size.width * 0.5, size.height * 0.95),
@@ -113,7 +113,7 @@ class _WatermarkPainter extends CustomPainter {
 
     // ====== موجات منحنية باهتة ======
     final wavePaint = Paint()
-      ..color = AppColors.brand.withOpacity(isDark ? 0.05 : 0.04)
+      ..color = AppColors.brand.withValues(alpha: isDark ? 0.05 : 0.04)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 

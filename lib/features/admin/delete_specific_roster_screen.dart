@@ -199,7 +199,7 @@ class _DeleteSpecificRosterScreenState
           // ===== شريط الفلاتر =====
           Container(
             padding: const EdgeInsets.all(10),
-            color: AppColors.danger.withOpacity(0.05),
+            color: AppColors.danger.withValues(alpha: 0.05),
             child: Column(
               children: [
                 // النقطة
@@ -355,12 +355,12 @@ class _DeleteSpecificRosterScreenState
                         margin: const EdgeInsets.only(bottom: 6),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.danger.withOpacity(0.06)
+                              ? AppColors.danger.withValues(alpha: 0.06)
                               : Theme.of(context).cardTheme.color,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                               color: isSelected
-                                  ? AppColors.danger.withOpacity(0.40)
+                                  ? AppColors.danger.withValues(alpha: 0.40)
                                   : Theme.of(context).dividerColor),
                         ),
                         child: ListTile(
@@ -395,7 +395,7 @@ class _DeleteSpecificRosterScreenState
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: _statusColor(r.status)
-                                      .withOpacity(0.15),
+                                      .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(

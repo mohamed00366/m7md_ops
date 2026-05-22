@@ -110,10 +110,10 @@ class MyDayCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.brand.withOpacity(0.20)),
+          border: Border.all(color: AppColors.brand.withValues(alpha: 0.20)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.18 : 0.04),
+              color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -125,7 +125,7 @@ class MyDayCard extends StatelessWidget {
             // ===== Header =====
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.wb_sunny_outlined,
                   size: 18,
                   color: AppColors.gold,
@@ -348,9 +348,9 @@ class _DayTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: color.withOpacity(isDark ? 0.14 : 0.08),
+            color: color.withValues(alpha: isDark ? 0.14 : 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: color.withOpacity(0.30)),
+            border: Border.all(color: color.withValues(alpha: 0.30)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

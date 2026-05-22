@@ -167,9 +167,9 @@ class _ManagerBusesState extends State<ManagerBuses>
             margin: const EdgeInsets.symmetric(horizontal: 12),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.danger.withOpacity(0.08),
+              color: AppColors.danger.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.danger.withOpacity(0.3)),
+              border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -228,7 +228,7 @@ class _ManagerBusesState extends State<ManagerBuses>
           child: ListTile(
             leading: CircleAvatar(
               radius: 22,
-              backgroundColor: AppColors.brand.withOpacity(0.15),
+              backgroundColor: AppColors.brand.withValues(alpha: 0.15),
               child: Text(
                 d.fullName.isNotEmpty ? d.fullName[0].toUpperCase() : '?',
                 style: const TextStyle(
@@ -275,7 +275,7 @@ class _ManagerBusesState extends State<ManagerBuses>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.12),
+                      color: AppColors.brand.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -340,14 +340,14 @@ class _BusCard extends StatelessWidget {
 
     // لَون البِطاقة وَالحُدود حَسَب الإلحاحيّة
     final borderColor = hasUrgent
-        ? AppColors.danger.withOpacity(0.45)
+        ? AppColors.danger.withValues(alpha: 0.45)
         : hasWarning
-            ? AppColors.warning.withOpacity(0.45)
+            ? AppColors.warning.withValues(alpha: 0.45)
             : Theme.of(context).dividerColor;
     final cardBg = hasUrgent
-        ? AppColors.danger.withOpacity(0.04)
+        ? AppColors.danger.withValues(alpha: 0.04)
         : hasWarning
-            ? AppColors.warning.withOpacity(0.04)
+            ? AppColors.warning.withValues(alpha: 0.04)
             : Theme.of(context).cardTheme.color;
 
     return Container(
@@ -367,7 +367,7 @@ class _BusCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.15),
+                  color: AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.directions_bus,
@@ -471,9 +471,9 @@ class _BusCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

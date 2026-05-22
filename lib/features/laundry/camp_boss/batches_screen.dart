@@ -200,9 +200,9 @@ class _BatchDetailScreenState extends State<_BatchDetailScreen> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: LaundryColors.success,
-        content: const Text('✅ تَمّ استِلام الدُفعة'),
+        content: Text('✅ تَمّ استِلام الدُفعة'),
       ));
       Navigator.of(context).pop(true);
     } else {
@@ -227,7 +227,7 @@ class _BatchDetailScreenState extends State<_BatchDetailScreen> {
           : Column(
               children: [
                 Container(
-                  color: LaundryColors.primary.withOpacity(0.10),
+                  color: LaundryColors.primary.withValues(alpha: 0.10),
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [

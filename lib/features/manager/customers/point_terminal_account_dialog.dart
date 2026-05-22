@@ -316,10 +316,10 @@ class _PointTerminalAccountDialogState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.10),
+                  color: AppColors.info.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                      Border.all(color: AppColors.info.withOpacity(0.30)),
+                      Border.all(color: AppColors.info.withValues(alpha: 0.30)),
                 ),
                 child: Row(
                   children: [
@@ -368,10 +368,10 @@ class _PointTerminalAccountDialogState
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.10),
+                    color: AppColors.warning.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: AppColors.warning.withOpacity(0.30)),
+                        color: AppColors.warning.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [
@@ -403,7 +403,7 @@ class _PointTerminalAccountDialogState
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.10),
+                      color: AppColors.success.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -427,10 +427,10 @@ class _PointTerminalAccountDialogState
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.06),
+                  color: AppColors.info.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                      Border.all(color: AppColors.info.withOpacity(0.20)),
+                      Border.all(color: AppColors.info.withValues(alpha: 0.20)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,7 +454,7 @@ class _PointTerminalAccountDialogState
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.15),
+                            color: AppColors.gold.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -547,8 +547,8 @@ class _PointTerminalAccountDialogState
                   horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: highlight
-                    ? AppColors.gold.withOpacity(0.15)
-                    : Colors.grey.withOpacity(0.10),
+                    ? AppColors.gold.withValues(alpha: 0.15)
+                    : Colors.grey.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: SelectableText(

@@ -490,7 +490,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.brand.withOpacity(0.15),
+              backgroundColor: AppColors.brand.withValues(alpha: 0.15),
               child: Text(
                 c.employee.fullName.isNotEmpty
                     ? c.employee.fullName[0].toUpperCase()
@@ -520,7 +520,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.15),
+                          color: AppColors.warning.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -540,7 +540,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
                       else
                         Text(
                           isAr ? '⚠️ بِدون رَقم' : '⚠️ no phone',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 10,
                               color: AppColors.warning,
                               fontWeight: FontWeight.w800),
@@ -878,7 +878,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
       decoration: pw.BoxDecoration(
         borderRadius: pw.BorderRadius.circular(10),
         border: pw.Border.all(color: PdfColors.grey300, width: 0.6),
-        boxShadow: [
+        boxShadow: const [
           pw.BoxShadow(
             color: PdfColors.grey300,
             blurRadius: 2,
@@ -1187,9 +1187,9 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.08),
+              color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.info.withOpacity(0.30)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -1214,10 +1214,10 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 12),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.10),
+                color: AppColors.warning.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(10),
                 border:
-                    Border.all(color: AppColors.warning.withOpacity(0.40)),
+                    Border.all(color: AppColors.warning.withValues(alpha: 0.40)),
               ),
               child: Row(
                 children: [
@@ -1246,10 +1246,10 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 12),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.10),
+                color: AppColors.success.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(10),
                 border:
-                    Border.all(color: AppColors.success.withOpacity(0.40)),
+                    Border.all(color: AppColors.success.withValues(alpha: 0.40)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1399,7 +1399,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
                             color: (_searchQuery.isEmpty
                                     ? AppColors.success
                                     : Colors.grey.shade400)
-                                .withOpacity(0.7),
+                                .withValues(alpha: 0.7),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -1450,7 +1450,7 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
                           ],
                         ),
                         secondary: CircleAvatar(
-                          backgroundColor: AppColors.brand.withOpacity(0.15),
+                          backgroundColor: AppColors.brand.withValues(alpha: 0.15),
                           child: Text(
                             emp.initials,
                             style: const TextStyle(
@@ -1630,10 +1630,10 @@ class _WhatsAppQueueDialogState extends State<_WhatsAppQueueDialog> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.06),
+                  color: AppColors.brand.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: AppColors.brand.withOpacity(0.3)),
+                      color: AppColors.brand.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1658,7 +1658,7 @@ class _WhatsAppQueueDialogState extends State<_WhatsAppQueueDialog> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.08),
+                  color: AppColors.success.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -1675,7 +1675,7 @@ class _WhatsAppQueueDialogState extends State<_WhatsAppQueueDialog> {
                 isAr
                     ? '⚠️ ${widget.withoutPhoneCount} مُوَظَّف بِدون رَقم — تَمّ تَخَطّيهم'
                     : '⚠️ ${widget.withoutPhoneCount} skipped (no phone)',
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 10,
                     color: AppColors.warning,
                     fontWeight: FontWeight.w700),
@@ -1766,7 +1766,7 @@ class _DeliveryBtn extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),

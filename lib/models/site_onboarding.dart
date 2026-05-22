@@ -10,6 +10,7 @@
 ///
 /// حالات التَجهيز الفَرعيّة (lc_status):
 ///   pending / in_progress / done / blocked
+library;
 
 import 'dart:convert';
 

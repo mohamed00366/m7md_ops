@@ -229,9 +229,9 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.10),
+            color: color.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: color.withOpacity(0.3)),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: Column(
             children: [
@@ -326,7 +326,7 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
           return ChoiceChip(
             label: Text(u.$2, style: const TextStyle(fontSize: 11)),
             selected: selected,
-            selectedColor: u.$3.withOpacity(0.18),
+            selectedColor: u.$3.withValues(alpha: 0.18),
             onSelected: (_) => setState(() => _urgencyFilter = u.$1),
           );
         },
@@ -407,7 +407,7 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(urgencyIcon, color: color, size: 22),
@@ -433,9 +433,9 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.12),
+                            color: color.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: color.withOpacity(0.3)),
+                            border: Border.all(color: color.withValues(alpha: 0.3)),
                           ),
                           child: Text(urgencyLabel,
                               style: TextStyle(

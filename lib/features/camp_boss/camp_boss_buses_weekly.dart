@@ -132,7 +132,7 @@ class _WeekHeader extends StatelessWidget {
         '${d.day}/${d.month}';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      color: BusesPalette.primary.withOpacity(0.06),
+      color: BusesPalette.primary.withValues(alpha: 0.06),
       child: Row(
         children: [
           IconButton(
@@ -273,7 +273,7 @@ class _HourGroup extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: BusesPalette.info.withOpacity(0.30)),
+        border: Border.all(color: BusesPalette.info.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -282,7 +282,7 @@ class _HourGroup extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
             decoration: BoxDecoration(
-              color: BusesPalette.info.withOpacity(0.10),
+              color: BusesPalette.info.withValues(alpha: 0.10),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(14)),
             ),
@@ -327,10 +327,10 @@ class _HourGroup extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: BusesPalette.success.withOpacity(0.15),
+                      color: BusesPalette.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: BusesPalette.success.withOpacity(0.40)),
+                          color: BusesPalette.success.withValues(alpha: 0.40)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -401,7 +401,7 @@ class _HourGroup extends StatelessWidget {
                       leading: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: BusesPalette.primary.withOpacity(0.15),
+                          color: BusesPalette.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Icon(Icons.directions_bus,
@@ -527,10 +527,10 @@ class _PointBlock extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: Container(
             decoration: BoxDecoration(
-              color: BusesPalette.secondary.withOpacity(0.05),
+              color: BusesPalette.secondary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                  color: BusesPalette.secondary.withOpacity(0.20)),
+                  color: BusesPalette.secondary.withValues(alpha: 0.20)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -542,14 +542,14 @@ class _PointBlock extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                     decoration: BoxDecoration(
-                      color: BusesPalette.primary.withOpacity(0.12),
+                      color: BusesPalette.primary.withValues(alpha: 0.12),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(10),
                         topRight: Radius.circular(10),
                       ),
                       border: Border(
                         bottom: BorderSide(
-                          color: BusesPalette.primary.withOpacity(0.20),
+                          color: BusesPalette.primary.withValues(alpha: 0.20),
                           width: 0.5,
                         ),
                       ),
@@ -584,7 +584,7 @@ class _PointBlock extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: BusesPalette.primary.withOpacity(0.20),
+                              color: BusesPalette.primary.withValues(alpha: 0.20),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -626,7 +626,7 @@ class _PointBlock extends StatelessWidget {
                           color: (detail.direction == TripDirection.tripIn
                                   ? AppColors.success
                                   : AppColors.warning)
-                              .withOpacity(0.15),
+                              .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
                               color: detail.direction == TripDirection.tripIn
@@ -651,7 +651,7 @@ class _PointBlock extends StatelessWidget {
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color:
-                              BusesPalette.secondary.withOpacity(0.15),
+                              BusesPalette.secondary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -674,11 +674,11 @@ class _PointBlock extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.10),
+                            color: AppColors.success.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
                                 color:
-                                    AppColors.success.withOpacity(0.3)),
+                                    AppColors.success.withValues(alpha: 0.3)),
                           ),
                           child: Text(
                             '${s.isAr ? "مُسند" : "Assigned"}: $assignedCount',
@@ -694,11 +694,11 @@ class _PointBlock extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.danger.withOpacity(0.10),
+                              color: AppColors.danger.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
                                   color:
-                                      AppColors.danger.withOpacity(0.3)),
+                                      AppColors.danger.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               '${s.isAr ? "بلا باص" : "No bus"}: $unassignedCount',
@@ -813,9 +813,9 @@ class _EmployeeChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: accent.withOpacity(0.10),
+        color: accent.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: accent.withOpacity(0.30)),
+        border: Border.all(color: accent.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1220,10 +1220,10 @@ class _BusAssignSheetState extends State<_BusAssignSheet> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: accent.withOpacity(0.08),
+                                  color: accent.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                      color: accent.withOpacity(0.3)),
+                                      color: accent.withValues(alpha: 0.3)),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,

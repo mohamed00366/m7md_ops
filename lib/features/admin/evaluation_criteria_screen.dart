@@ -185,7 +185,7 @@ class _CriteriaList extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.10),
+                    color: AppColors.brand.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text('${entry.value.length}',
@@ -226,7 +226,7 @@ class _CriterionTile extends StatelessWidget {
         border: Border.all(
             color: criterion.enabled
                 ? theme.dividerColor
-                : AppColors.danger.withOpacity(0.3)),
+                : AppColors.danger.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +354,7 @@ class _MetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(

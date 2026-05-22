@@ -77,7 +77,7 @@ class ImagePickerService {
         originalName = picked.name;
       }
 
-      if (bytes == null || originalName == null) return null;
+      if (bytes == null) return null;
 
       final ext = _extOf(originalName);
       final filename =
@@ -158,7 +158,7 @@ class ImagePickerService {
         name = picked.name;
       }
 
-      if (bytes == null || name == null) return null;
+      if (bytes == null) return null;
 
       return UploadedImage(
         fileId: name,

@@ -195,9 +195,9 @@ class _Kpi extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,7 +317,7 @@ class _EmployeeLeavesTabState extends State<EmployeeLeavesTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _statusColor(status).withOpacity(0.15),
+                          color: _statusColor(status).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
                               color: _statusColor(status), width: 0.6),
@@ -372,7 +372,7 @@ class _EmployeeLeavesTabState extends State<EmployeeLeavesTab> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.warning.withOpacity(0.1),
+                        color: AppColors.warning.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -474,9 +474,9 @@ class _EmployeeDisciplineTabState extends State<EmployeeDisciplineTab> {
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: AppColors.danger.withOpacity(0.08),
+              color: AppColors.danger.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.danger.withOpacity(0.3)),
+              border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -668,11 +668,11 @@ class _EmployeeAttendanceTabState extends State<EmployeeAttendanceTab> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: (isIn ? AppColors.success : AppColors.warning)
-                  .withOpacity(0.08),
+                  .withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                   color: (isIn ? AppColors.success : AppColors.warning)
-                      .withOpacity(0.3)),
+                      .withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [

@@ -127,9 +127,9 @@ class _OperationSupervisorAssignmentsState
             margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.08),
+              color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.info.withOpacity(0.3)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -212,7 +212,7 @@ class _SupervisorCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: point == null
-                ? AppColors.warning.withOpacity(0.4)
+                ? AppColors.warning.withValues(alpha: 0.4)
                 : Theme.of(context).dividerColor,
             width: point == null ? 1.5 : 1),
       ),
@@ -303,7 +303,7 @@ class _SupervisorCard extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: (point == null ? AppColors.warning : AppColors.success)
-                  .withOpacity(0.1),
+                  .withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -464,7 +464,7 @@ class _SupervisorCard extends StatelessWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.15),
+                          color: AppColors.warning.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(Icons.place,
@@ -673,8 +673,8 @@ class _PointCardState extends State<_PointCard> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: linked.isEmpty
-              ? AppColors.warning.withOpacity(0.4)
-              : AppColors.brand.withOpacity(0.25),
+              ? AppColors.warning.withValues(alpha: 0.4)
+              : AppColors.brand.withValues(alpha: 0.25),
           width: linked.isEmpty ? 1.5 : 1,
         ),
       ),
@@ -693,7 +693,7 @@ class _PointCardState extends State<_PointCard> {
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.12),
+                      color: AppColors.brand.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.pin_drop_outlined,
@@ -806,7 +806,7 @@ class _PointCardState extends State<_PointCard> {
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.brand,
-                    side: BorderSide(color: AppColors.brand.withOpacity(0.5)),
+                    side: BorderSide(color: AppColors.brand.withValues(alpha: 0.5)),
                   ),
                 ),
               ),
@@ -826,7 +826,7 @@ class _PointCardState extends State<_PointCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
@@ -1079,8 +1079,8 @@ class _PointCardState extends State<_PointCard> {
                                         horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: isL4
-                                          ? AppColors.success.withOpacity(0.15)
-                                          : AppColors.brand.withOpacity(0.15),
+                                          ? AppColors.success.withValues(alpha: 0.15)
+                                          : AppColors.brand.withValues(alpha: 0.15),
                                       borderRadius:
                                           BorderRadius.circular(4),
                                     ),
@@ -1177,8 +1177,8 @@ class _LinkedEmployeeRow extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: isPromoted
-            ? AppColors.success.withOpacity(0.06)
-            : Colors.grey.withOpacity(0.05),
+            ? AppColors.success.withValues(alpha: 0.06)
+            : Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

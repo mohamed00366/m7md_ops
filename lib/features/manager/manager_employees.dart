@@ -16,11 +16,9 @@ import '../../core/services/supabase_service.dart';
 import '../../shared/country_guard.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
-import '../../models/lookups.dart';
 import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
-import '../../shared/employee_identity.dart';
 import '../../shared/employee_status_history.dart';
 import '../../shared/m7_multi_upload.dart';
 import '../../shared/widgets.dart';
@@ -97,15 +95,23 @@ class _ManagerEmployeesState extends State<ManagerEmployees> {
       }
       if (_filterHire != null) {
         if (_filterHire == 'trainee' &&
-            e.hireType != EmployeeHireType.trainee) return false;
+            e.hireType != EmployeeHireType.trainee) {
+          return false;
+        }
         if (_filterHire == 'professional' &&
-            e.hireType != EmployeeHireType.professional) return false;
+            e.hireType != EmployeeHireType.professional) {
+          return false;
+        }
       }
       if (_filterHousing != null) {
         if (_filterHousing == 'on_camp' &&
-            e.housingType != HousingType.onCamp) return false;
+            e.housingType != HousingType.onCamp) {
+          return false;
+        }
         if (_filterHousing == 'off_camp' &&
-            e.housingType != HousingType.offCamp) return false;
+            e.housingType != HousingType.offCamp) {
+          return false;
+        }
       }
       if (_query.isEmpty) return true;
       final q = _query.toLowerCase();
@@ -800,10 +806,10 @@ class _StatChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(selected ? 0.18 : 0.08),
+          color: color.withValues(alpha: selected ? 0.18 : 0.08),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: color.withOpacity(selected ? 0.6 : 0.2),
+            color: color.withValues(alpha: selected ? 0.6 : 0.2),
             width: selected ? 2 : 1,
           ),
         ),
@@ -814,7 +820,7 @@ class _StatChip extends StatelessWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(6),
               ),
               alignment: Alignment.center,
@@ -833,7 +839,7 @@ class _StatChip extends StatelessWidget {
                     )),
                 Text(label,
                     style: TextStyle(
-                      color: color.withOpacity(0.85),
+                      color: color.withValues(alpha: 0.85),
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                     )),
@@ -963,7 +969,7 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Theme.of(context).dividerColor.withOpacity(0.3),
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(text, style: const TextStyle(fontSize: 10)),
@@ -979,7 +985,6 @@ class _EmployeeAvatar extends StatelessWidget {
   const _EmployeeAvatar({
     required this.employee,
     this.radius = 22,
-    this.color = AppColors.brand,
   });
 
   Widget _initials() {
@@ -1002,7 +1007,7 @@ class _EmployeeAvatar extends StatelessWidget {
 
     final fallback = CircleAvatar(
       radius: radius,
-      backgroundColor: color.withOpacity(0.15),
+      backgroundColor: color.withValues(alpha: 0.15),
       child: _initials(),
     );
 
@@ -1018,7 +1023,7 @@ class _EmployeeAvatar extends StatelessWidget {
       height: radius * 2,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
       ),
       child: ClipOval(
         child: Image.network(
@@ -1183,7 +1188,7 @@ class _EmployeeBigPhoto extends StatelessWidget {
         (url.startsWith('http://') || url.startsWith('https://'));
 
     final fallback = Container(
-      color: color.withOpacity(0.12),
+      color: color.withValues(alpha: 0.12),
       alignment: Alignment.center,
       child: Text(
         employee.initials,
@@ -1205,7 +1210,7 @@ class _EmployeeBigPhoto extends StatelessWidget {
       loadingBuilder: (_, child, progress) {
         if (progress == null) return child;
         return Container(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           alignment: Alignment.center,
           child: const SizedBox(
             width: 24,
@@ -1246,7 +1251,7 @@ class _EmployeeCompactRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.15),
+                color: AppColors.warning.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text('🎓',
@@ -2119,10 +2124,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        color: _statusColor(_status).withOpacity(0.06),
+                        color: _statusColor(_status).withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: _statusColor(_status).withOpacity(0.3)),
+                            color: _statusColor(_status).withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -2168,10 +2173,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.info.withOpacity(0.08),
+                      color: AppColors.info.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppColors.info.withOpacity(0.25)),
+                          color: AppColors.info.withValues(alpha: 0.25)),
                     ),
                     child: Row(
                       children: [
@@ -2224,10 +2229,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.05),
+                    color: AppColors.brand.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10),
                     border:
-                        Border.all(color: AppColors.brand.withOpacity(0.2)),
+                        Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2603,16 +2608,16 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.purple.withOpacity(0.05),
+                    color: AppColors.purple.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10),
                     border:
-                        Border.all(color: AppColors.purple.withOpacity(0.2)),
+                        Border.all(color: AppColors.purple.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: const [
+                      const Row(
+                        children: [
                           Icon(Icons.account_balance_wallet,
                               size: 18, color: AppColors.purple),
                           SizedBox(width: 6),
@@ -2667,13 +2672,13 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: _eligibleForTicket
-                        ? AppColors.success.withOpacity(0.05)
-                        : Colors.grey.withOpacity(0.05),
+                        ? AppColors.success.withValues(alpha: 0.05)
+                        : Colors.grey.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                         color: _eligibleForTicket
-                            ? AppColors.success.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.2)),
+                            ? AppColors.success.withValues(alpha: 0.3)
+                            : Colors.grey.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     children: [
@@ -2714,7 +2719,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.12),
+                    color: AppColors.brand.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -2866,10 +2871,10 @@ class _DocumentsLinkCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.info.withOpacity(0.08),
+          color: AppColors.info.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
           border:
-              Border.all(color: AppColors.info.withOpacity(0.30)),
+              Border.all(color: AppColors.info.withValues(alpha: 0.30)),
         ),
         child: Row(
           children: [
@@ -2877,7 +2882,7 @@ class _DocumentsLinkCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.18),
+                color: AppColors.info.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.folder_special,
@@ -2933,9 +2938,9 @@ class _HousingField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.05),
+        color: AppColors.brand.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.brand.withOpacity(0.25)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3027,7 +3032,7 @@ class _HousingOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.15) : Colors.transparent,
+          color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: selected ? color : Theme.of(context).dividerColor,
@@ -3088,9 +3093,9 @@ class _HireTypeField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.05),
+        color: AppColors.warning.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.warning.withOpacity(0.25)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3183,7 +3188,7 @@ class _HireOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.15) : Colors.transparent,
+          color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: selected ? color : Theme.of(context).dividerColor,
@@ -3246,9 +3251,9 @@ class _UniformSizesField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.05),
+        color: AppColors.info.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.info.withOpacity(0.25)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3328,25 +3333,25 @@ class _DefaultBusField extends StatelessWidget {
         .where((b) => b.status == EntityStatus.active)
         .toList()
       ..sort((a, b) => a.name.compareTo(b.name));
-    final brand = AppColors.success;
+    const brand = AppColors.success;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: brand.withOpacity(0.05),
+        color: brand.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: brand.withOpacity(0.25)),
+        border: Border.all(color: brand.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Icon(Icons.directions_bus_outlined, color: brand, size: 16),
+              const Icon(Icons.directions_bus_outlined, color: brand, size: 16),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   isAr ? ar2ur.tr('الباص الافتراضي') : 'Default Bus',
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                       color: brand),
@@ -3478,7 +3483,7 @@ class _BulkImportPreviewDialogState extends State<_BulkImportPreviewDialog> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.08),
+                color: AppColors.brand.withValues(alpha: 0.08),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(14)),
               ),
@@ -3548,11 +3553,11 @@ class _BulkImportPreviewDialogState extends State<_BulkImportPreviewDialog> {
                   String statusLabel;
                   Color statusColor;
                   if (r.isUpdate) {
-                    rowColor = AppColors.warning.withOpacity(0.05);
+                    rowColor = AppColors.warning.withValues(alpha: 0.05);
                     statusLabel = isAr ? ar2ur.tr('موجود — تجاوز') : 'Exists — skip';
                     statusColor = AppColors.warning;
                   } else if (!r.isValid) {
-                    rowColor = AppColors.danger.withOpacity(0.05);
+                    rowColor = AppColors.danger.withValues(alpha: 0.05);
                     statusLabel = isAr ? ar2ur.tr('مشاكل') : 'Issues';
                     statusColor = AppColors.danger;
                   } else {
@@ -3635,10 +3640,10 @@ class _BulkImportPreviewDialogState extends State<_BulkImportPreviewDialog> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 3),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.12),
+                            color: statusColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                                color: statusColor.withOpacity(0.4)),
+                                color: statusColor.withValues(alpha: 0.4)),
                           ),
                           child: Text(
                             statusLabel,
@@ -3715,9 +3720,9 @@ class _PreviewSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -3857,10 +3862,10 @@ class _UploadBoxState extends State<_UploadBox> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.brand.withOpacity(0.05),
+          color: AppColors.brand.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: AppColors.brand.withOpacity(0.3),
+            color: AppColors.brand.withValues(alpha: 0.3),
             style: BorderStyle.solid,
           ),
         ),
@@ -3943,7 +3948,6 @@ class _DateField extends StatelessWidget {
     required this.onPicked,
     required this.pickFn,
     this.lastDate,
-    this.firstDate,
   });
 
   @override

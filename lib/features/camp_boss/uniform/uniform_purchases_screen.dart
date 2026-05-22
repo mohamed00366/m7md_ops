@@ -207,14 +207,14 @@ class _PurchaseTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.success.withOpacity(0.30)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.30)),
       ),
       child: ExpansionTile(
         leading: Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.15),
+            color: AppColors.success.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(Icons.shopping_cart,
@@ -232,7 +232,7 @@ class _PurchaseTile extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: UniformPalette.primary.withOpacity(0.10),
+                        color: UniformPalette.primary.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -357,7 +357,7 @@ class _PurchaseTile extends StatelessWidget {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.info,
                             side: BorderSide(
-                                color: AppColors.info.withOpacity(0.4)),
+                                color: AppColors.info.withValues(alpha: 0.4)),
                             padding: const EdgeInsets.symmetric(vertical: 6),
                           ),
                         ),
@@ -375,7 +375,7 @@ class _PurchaseTile extends StatelessWidget {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.danger,
                             side: BorderSide(
-                                color: AppColors.danger.withOpacity(0.4)),
+                                color: AppColors.danger.withValues(alpha: 0.4)),
                             padding: const EdgeInsets.symmetric(vertical: 6),
                           ),
                         ),
@@ -578,7 +578,7 @@ class _NewPurchaseSheetState extends State<_NewPurchaseSheet> {
     }
     setState(() => _saving = true);
     final auth = context.read<AuthProvider>();
-    debugPrint('Active country: ${auth.activeCountryId} (edit=${_isEdit})');
+    debugPrint('Active country: ${auth.activeCountryId} (edit=$_isEdit)');
     final purchase = UniformPurchase(
       id: _isEdit ? widget.existing!.id : MockRepository().generateId(),
       purchaseNo: _receiptNo,
@@ -705,7 +705,7 @@ class _NewPurchaseSheetState extends State<_NewPurchaseSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.4),
+              color: Colors.grey.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -729,10 +729,10 @@ class _NewPurchaseSheetState extends State<_NewPurchaseSheet> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: UniformPalette.primary.withOpacity(0.12),
+                    color: UniformPalette.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: UniformPalette.primary.withOpacity(0.40)),
+                        color: UniformPalette.primary.withValues(alpha: 0.40)),
                   ),
                   child: Text(
                     _receiptNo,
@@ -809,7 +809,7 @@ class _NewPurchaseSheetState extends State<_NewPurchaseSheet> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.10),
+                        color: Colors.grey.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Center(
@@ -831,10 +831,10 @@ class _NewPurchaseSheetState extends State<_NewPurchaseSheet> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.08),
+                      color: AppColors.success.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppColors.success.withOpacity(0.30)),
+                          color: AppColors.success.withValues(alpha: 0.30)),
                     ),
                     child: Row(
                       children: [
@@ -929,9 +929,9 @@ class _NewPurchaseSheetState extends State<_NewPurchaseSheet> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.06),
+        color: Colors.grey.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.withOpacity(0.20)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [

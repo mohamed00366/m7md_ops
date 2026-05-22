@@ -126,7 +126,7 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.1),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -203,9 +203,9 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.06),
+            color: AppColors.brand.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+            border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -405,9 +405,9 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
       return Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.danger.withOpacity(0.10),
+          color: AppColors.danger.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.danger.withOpacity(0.4)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.4)),
         ),
         child: Row(
           children: [
@@ -433,9 +433,9 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.08),
+              color: AppColors.success.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.success.withOpacity(0.3)),
+              border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,7 +566,7 @@ class _ConfigExportScreenState extends State<ConfigExportScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.success.withOpacity(0.3)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

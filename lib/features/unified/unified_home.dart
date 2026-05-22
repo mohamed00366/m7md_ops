@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/l10n/ar_to_ur_dictionary.dart' as ar2ur;
 import '../../core/providers/auth_provider.dart';
-import '../../core/providers/locale_provider.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/services/dynamic_role_engine.dart';
 import '../../core/theme/app_colors.dart';
@@ -230,7 +229,7 @@ class _UnifiedDrawerState extends State<_UnifiedDrawer> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.brand, AppColors.brand.withOpacity(0.7)],
+                  colors: [AppColors.brand, AppColors.brand.withValues(alpha: 0.7)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -449,7 +448,7 @@ class _CategorySectionState extends State<_CategorySection> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 5, vertical: 1),
                     decoration: BoxDecoration(
-                      color: cat.color().withOpacity(0.12),
+                      color: cat.color().withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -509,7 +508,7 @@ class _ModuleTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
       decoration: BoxDecoration(
-        color: active ? module.color.withOpacity(0.12) : null,
+        color: active ? module.color.withValues(alpha: 0.12) : null,
         borderRadius: BorderRadius.circular(10),
       ),
       child: ListTile(
@@ -520,7 +519,7 @@ class _ModuleTile extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: module.color.withOpacity(active ? 0.25 : 0.12),
+            color: module.color.withValues(alpha: active ? 0.25 : 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(module.icon, color: module.color, size: 16),
@@ -679,9 +678,9 @@ class _CountryChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(0.4), width: 0.5),
+            border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -726,7 +725,7 @@ class _RequiresCountry extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.public_off,
-                size: 56, color: AppColors.warning.withOpacity(0.7)),
+                size: 56, color: AppColors.warning.withValues(alpha: 0.7)),
             const SizedBox(height: 12),
             Text(
               isAr

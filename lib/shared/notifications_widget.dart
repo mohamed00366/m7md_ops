@@ -73,7 +73,7 @@ class _NotificationsBellState extends State<NotificationsBell> {
                   border: Border.all(color: Colors.white, width: 1.5),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFDC2626).withOpacity(0.40),
+                      color: const Color(0xFFDC2626).withValues(alpha: 0.40),
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
@@ -274,11 +274,11 @@ class _NotificationsPanelState extends State<_NotificationsPanel> {
                         Icon(Icons.notifications_off_outlined,
                             size: 56,
                             color: AppPalette.textTertiary
-                                .withOpacity(0.50)),
+                                .withValues(alpha: 0.50)),
                         const SizedBox(height: 12),
                         Text(
                           s.isAr ? 'لا توجد إشعارات' : 'No notifications',
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: AppPalette.textSecondary,
                               fontWeight: FontWeight.w700,
                               fontSize: 14),
@@ -442,12 +442,12 @@ class _NotificationTile extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: unread
-                ? _color.withOpacity(0.06)
-                : AppPalette.input.withOpacity(0.50),
+                ? _color.withValues(alpha: 0.06)
+                : AppPalette.input.withValues(alpha: 0.50),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
                 color: unread
-                    ? _color.withOpacity(0.30)
+                    ? _color.withValues(alpha: 0.30)
                     : AppPalette.border,
                 width: unread ? 1.2 : 0.8),
           ),
@@ -458,7 +458,7 @@ class _NotificationTile extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: _color.withOpacity(0.15),
+                  color: _color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -542,10 +542,10 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brand : Colors.grey.withOpacity(0.08),
+          color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.brand : Colors.grey.withOpacity(0.3),
+            color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -584,7 +584,7 @@ class _DateHeader extends StatelessWidget {
           Expanded(
             child: Container(
               height: 1,
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
             ),
           ),
         ],

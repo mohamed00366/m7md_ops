@@ -3,7 +3,6 @@
 // =============================================================================
 import 'package:flutter/material.dart';
 
-import '../../../core/services/supabase_service.dart';
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
 import '../domain/models.dart';
@@ -95,7 +94,7 @@ class _LaundryReportsScreenState extends State<LaundryReportsScreen> {
   Widget _filterBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      color: LaundryColors.danger.withOpacity(0.08),
+      color: LaundryColors.danger.withValues(alpha: 0.08),
       width: double.infinity,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -292,9 +291,9 @@ class _MissingReportDetailScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: LaundryColors.danger.withOpacity(0.10),
+              color: LaundryColors.danger.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: LaundryColors.danger.withOpacity(0.40)),
+              border: Border.all(color: LaundryColors.danger.withValues(alpha: 0.40)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

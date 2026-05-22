@@ -47,7 +47,7 @@ class _PinHubScreenState extends State<PinHubScreen>
         children: [
           // شَريط التابات
           Container(
-            color: AppColors.brand.withOpacity(0.08),
+            color: AppColors.brand.withValues(alpha: 0.08),
             child: TabBar(
               controller: _tab,
               labelColor: AppColors.brand,

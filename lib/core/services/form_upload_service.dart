@@ -73,7 +73,7 @@ class FormUploadService {
     final ts = DateTime.now().millisecondsSinceEpoch;
     final ext = _extensionOf(xfile.name);
     final safeFolder = subFolder.replaceAll(RegExp(r'[^a-zA-Z0-9_/]'), '_');
-    final path = '$safeFolder/${userId}_${ts}.$ext';
+    final path = '$safeFolder/${userId}_$ts.$ext';
 
     try {
       final storage = supa.client.storage.from(bucketName);

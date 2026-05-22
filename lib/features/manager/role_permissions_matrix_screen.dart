@@ -276,9 +276,9 @@ class _RolePermissionsMatrixScreenState
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.04),
+            color: color.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withOpacity(0.15)),
+            border: Border.all(color: color.withValues(alpha: 0.15)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -657,7 +657,7 @@ class _RolePermissionsMatrixScreenState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -679,7 +679,7 @@ class _RolePermissionsMatrixScreenState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.15),
+                        color: Colors.grey.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -880,7 +880,7 @@ class _RolePermissionsMatrixScreenState
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              backgroundColor: Colors.white.withOpacity(0.15),
+              backgroundColor: Colors.white.withValues(alpha: 0.15),
             ),
             onPressed: () async {
               if (_dirty) {
@@ -981,7 +981,7 @@ class _RolePermissionsMatrixScreenState
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: color.withOpacity(0.25)),
+                  border: Border.all(color: color.withValues(alpha: 0.25)),
                 ),
                 child: ExpansionTile(
                   iconColor: color,
@@ -993,7 +993,7 @@ class _RolePermissionsMatrixScreenState
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
+                        color: color.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10)),
                     child: Icon(icon, color: color, size: 20),
                   ),
@@ -1089,10 +1089,10 @@ class _PermChip extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? c.withOpacity(0.15) : Colors.transparent,
+          color: selected ? c.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? c : c.withOpacity(0.35),
+            color: selected ? c : c.withValues(alpha: 0.35),
             width: selected ? 1.5 : 0.8,
           ),
         ),

@@ -167,7 +167,7 @@ class _TraineeOnboardingFormScreenState
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.20),
+                  color: Colors.white.withValues(alpha: 0.20),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Center(
@@ -237,7 +237,7 @@ class _TraineeOnboardingFormScreenState
                         ),
                         if (_saving)
                           Container(
-                            color: Colors.black.withOpacity(0.20),
+                            color: Colors.black.withValues(alpha: 0.20),
                             child: const Center(
                               child: CircularProgressIndicator(),
                             ),
@@ -279,9 +279,9 @@ class _TraineeOnboardingFormScreenState
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

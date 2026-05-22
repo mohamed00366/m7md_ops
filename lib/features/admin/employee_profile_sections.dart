@@ -601,9 +601,9 @@ class _EmployeeIDSectionState extends State<EmployeeIDSection>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.08),
+            color: AppColors.info.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.info.withOpacity(0.25)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [
@@ -889,9 +889,9 @@ class _EmployeeFinancialSectionState
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.08),
+            color: AppColors.success.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.success.withOpacity(0.30)),
+            border: Border.all(color: AppColors.success.withValues(alpha: 0.30)),
           ),
           child: Row(
             children: [
@@ -1090,9 +1090,9 @@ class _EmployeeBusSectionState extends State<EmployeeBusSection>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.teal.withOpacity(0.08),
+            color: Colors.teal.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.teal.withOpacity(0.25)),
+            border: Border.all(color: Colors.teal.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [
@@ -1770,9 +1770,9 @@ class _EmployeePhotoSectionState extends State<EmployeePhotoSection>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.08),
+            color: AppColors.info.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.info.withOpacity(0.25)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [
@@ -1833,9 +1833,9 @@ class _ExpiryHint extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.10),
+        color: c.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c.withOpacity(0.30)),
+        border: Border.all(color: c.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

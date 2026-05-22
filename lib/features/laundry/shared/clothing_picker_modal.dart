@@ -122,7 +122,7 @@ class _ClothingPickerSheetState extends State<_ClothingPickerSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.4),
+                color: Colors.grey.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -153,10 +153,10 @@ class _ClothingPickerSheetState extends State<_ClothingPickerSheet> {
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: LaundryColors.success.withOpacity(0.08),
+        color: LaundryColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
         border:
-            Border.all(color: LaundryColors.success.withOpacity(0.30)),
+            Border.all(color: LaundryColors.success.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,10 +268,10 @@ class _ClothingPickerSheetState extends State<_ClothingPickerSheet> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: LaundryColors.primary.withOpacity(0.10),
+              color: LaundryColors.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
               border:
-                  Border.all(color: LaundryColors.primary.withOpacity(0.30)),
+                  Border.all(color: LaundryColors.primary.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -382,9 +382,9 @@ class _TypeCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
           decoration: BoxDecoration(
-            color: LaundryColors.primary.withOpacity(0.08),
+            color: LaundryColors.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: LaundryColors.primary.withOpacity(0.20)),
+            border: Border.all(color: LaundryColors.primary.withValues(alpha: 0.20)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -416,7 +416,7 @@ class _StepBtn extends StatelessWidget {
     return Material(
       color: enabled
           ? LaundryColors.primary
-          : Colors.grey.withOpacity(0.30),
+          : Colors.grey.withValues(alpha: 0.30),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),

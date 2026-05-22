@@ -42,7 +42,7 @@ class AdminOverview extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.shield_moon_outlined,
@@ -65,7 +65,7 @@ class AdminOverview extends StatelessWidget {
                               ? 'إدارة المستخدمين والصلاحيات'
                               : 'Manage users and permissions',
                           style: TextStyle(
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withValues(alpha: 0.85),
                               fontSize: 12),
                         ),
                       ],
@@ -171,7 +171,7 @@ class AdminOverview extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: AppColors.brand.withOpacity(0.2),
+                    backgroundColor: AppColors.brand.withValues(alpha: 0.2),
                     child: Text(
                       user.initials,
                       style: const TextStyle(

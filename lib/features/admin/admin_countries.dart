@@ -110,10 +110,10 @@ class _AdminCountriesState extends State<AdminCountries> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.08),
+              color: AppColors.brand.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: AppColors.brand.withOpacity(0.3), width: 0.5),
+                  color: AppColors.brand.withValues(alpha: 0.3), width: 0.5),
             ),
             child: Row(
               children: [
@@ -166,7 +166,7 @@ class _AdminCountriesState extends State<AdminCountries> {
                       gradient: LinearGradient(
                         colors: [
                           AppColors.brand,
-                          AppColors.brand.withOpacity(0.7),
+                          AppColors.brand.withValues(alpha: 0.7),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -270,7 +270,7 @@ class _MiniBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -467,7 +467,7 @@ class _CountryEditorState extends State<_CountryEditor> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.08),
+                      color: AppColors.brand.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

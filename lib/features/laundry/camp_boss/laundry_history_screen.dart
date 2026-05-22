@@ -119,7 +119,7 @@ class _LaundryHistoryScreenState extends State<LaundryHistoryScreen> {
   Widget _statsBar() {
     return Container(
       padding: const EdgeInsets.all(12),
-      color: LaundryColors.primary.withOpacity(0.08),
+      color: LaundryColors.primary.withValues(alpha: 0.08),
       child: Row(
         children: [
           Expanded(child: _stat('سَنَدات', '$_totalVouchers', Icons.receipt_long,
@@ -142,9 +142,9 @@ class _LaundryHistoryScreenState extends State<LaundryHistoryScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         children: [
@@ -165,7 +165,7 @@ class _LaundryHistoryScreenState extends State<LaundryHistoryScreen> {
   Widget _filterBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      color: LaundryColors.primary.withOpacity(0.04),
+      color: LaundryColors.primary.withValues(alpha: 0.04),
       width: double.infinity,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

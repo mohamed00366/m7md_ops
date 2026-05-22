@@ -108,9 +108,9 @@ class _MyApprovalsScreenState extends State<MyApprovalsScreen> {
             margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.10),
+              color: AppColors.warning.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+              border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -162,7 +162,7 @@ class _MyApprovalCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warning.withOpacity(0.4)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,7 +254,7 @@ class _MyApprovalCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.brand,
-                    side: BorderSide(color: AppColors.brand.withOpacity(0.4)),
+                    side: BorderSide(color: AppColors.brand.withValues(alpha: 0.4)),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   onPressed: () => _viewDetail(context, tpl, emp),

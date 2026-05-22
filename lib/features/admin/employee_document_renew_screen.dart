@@ -100,8 +100,9 @@ class _EmployeeDocumentRenewScreenState
 
       final ext = (f.extension ?? '').toLowerCase();
       String mime = 'application/octet-stream';
-      if (ext == 'pdf') mime = 'application/pdf';
-      else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
+      if (ext == 'pdf') {
+        mime = 'application/pdf';
+      } else if (ext == 'jpg' || ext == 'jpeg' || ext == 'heic' || ext == 'heif') mime = 'image/jpeg';
       else if (ext == 'png') mime = 'image/png';
       else if (ext == 'webp') mime = 'image/webp';
       else if (ext == 'gif') mime = 'image/gif';
@@ -364,7 +365,7 @@ class _RenewStepIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: AppColors.warning.withOpacity(0.06),
+      color: AppColors.warning.withValues(alpha: 0.06),
       child: Row(
         children: List.generate(total, (i) {
           final isActive = i <= current;
@@ -427,9 +428,9 @@ class _OldVersionBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.08),
+        color: AppColors.info.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.info.withOpacity(0.25)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -508,7 +509,7 @@ class _ReasonStep extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.warning.withOpacity(0.15)
+                      ? AppColors.warning.withValues(alpha: 0.15)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
@@ -545,7 +546,7 @@ class _ReasonStep extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -596,7 +597,7 @@ class _RenewImagePickerStep extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: AppColors.success.withOpacity(0.40), width: 2),
+                    color: AppColors.success.withValues(alpha: 0.40), width: 2),
               ),
               clipBehavior: Clip.antiAlias,
               child: InteractiveViewer(
@@ -611,8 +612,8 @@ class _RenewImagePickerStep extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: AppColors.success.withOpacity(0.40), width: 2),
-                color: AppColors.success.withOpacity(0.05),
+                    color: AppColors.success.withValues(alpha: 0.40), width: 2),
+                color: AppColors.success.withValues(alpha: 0.05),
               ),
               child: Column(
                 children: [
@@ -903,7 +904,7 @@ class _RenewReviewStep extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: AppColors.success.withOpacity(0.40), width: 2),
+                  color: AppColors.success.withValues(alpha: 0.40), width: 2),
             ),
             clipBehavior: Clip.antiAlias,
             child: Image.memory(newBytes!, fit: BoxFit.contain),
@@ -912,10 +913,10 @@ class _RenewReviewStep extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.warning.withOpacity(0.10),
+            color: AppColors.warning.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(8),
             border:
-                Border.all(color: AppColors.warning.withOpacity(0.30)),
+                Border.all(color: AppColors.warning.withValues(alpha: 0.30)),
           ),
           child: Row(
             children: [
@@ -957,9 +958,9 @@ class _ComparisonColumn extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

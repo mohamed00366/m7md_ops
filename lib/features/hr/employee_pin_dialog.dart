@@ -194,14 +194,14 @@ class _EmployeePinDialogState extends State<_EmployeePinDialog> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.06),
+                      color: AppColors.brand.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
                         CircleAvatar(
                           backgroundColor:
-                              AppColors.brand.withOpacity(0.15),
+                              AppColors.brand.withValues(alpha: 0.15),
                           child: Text(
                             widget.employee.initials,
                             style: const TextStyle(
@@ -273,7 +273,7 @@ class _EmployeePinDialogState extends State<_EmployeePinDialog> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: _countdownColor().withOpacity(0.1),
+                        color: _countdownColor().withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: _countdownColor(), width: 2),

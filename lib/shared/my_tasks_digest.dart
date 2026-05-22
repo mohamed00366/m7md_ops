@@ -36,7 +36,9 @@ class MyTasksDigest extends StatelessWidget {
     final pendingApprovals = <FormSubmission>[];
     for (final sub in repo.formSubmissions) {
       if (sub.status != FormSubmissionStatus.submitted &&
-          sub.status != FormSubmissionStatus.inReview) continue;
+          sub.status != FormSubmissionStatus.inReview) {
+        continue;
+      }
       final match = WorkflowEngine.currentApprover(sub);
       if (match == null || !match.isResolved) continue;
       if (myJtId != null && match.jobTitle?.id == myJtId) {
@@ -65,10 +67,10 @@ class MyTasksDigest extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -82,7 +84,7 @@ class MyTasksDigest extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
             child: Row(
               children: [
-                Icon(Icons.inbox_outlined,
+                const Icon(Icons.inbox_outlined,
                     color: AppColors.brand, size: 20),
                 const SizedBox(width: 6),
                 Text(
@@ -110,7 +112,7 @@ class MyTasksDigest extends StatelessWidget {
                     isAr
                         ? '⏳ بانتظار موافقتي (${pendingApprovals.length})'
                         : '⏳ Awaiting my approval (${pendingApprovals.length})',
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w800,
                         color: AppColors.warning),
@@ -164,7 +166,7 @@ class MyTasksDigest extends StatelessWidget {
                     isAr
                         ? '📤 طلباتي الأخيرة (${recentMy.length})'
                         : '📤 My recent submissions (${recentMy.length})',
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w800,
                         color: AppColors.brand),
@@ -268,9 +270,9 @@ class _PendingRow extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(14, 2, 14, 2),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.warning.withOpacity(0.06),
+          color: AppColors.warning.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.warning.withOpacity(0.2)),
+          border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -314,7 +316,7 @@ class _PendingRow extends StatelessWidget {
               ),
             ),
             Icon(Icons.arrow_forward_ios,
-                size: 11, color: AppColors.warning.withOpacity(0.6)),
+                size: 11, color: AppColors.warning.withValues(alpha: 0.6)),
           ],
         ),
       ),
@@ -368,9 +370,9 @@ class _MySubmissionRow extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(14, 2, 14, 2),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: _color.withOpacity(0.06),
+          color: _color.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _color.withOpacity(0.2)),
+          border: Border.all(color: _color.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -390,7 +392,7 @@ class _MySubmissionRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: _color.withOpacity(0.15),
+                color: _color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(

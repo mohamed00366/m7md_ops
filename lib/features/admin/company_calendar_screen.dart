@@ -93,7 +93,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.08),
+              color: AppColors.brand.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -191,14 +191,14 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
       padding: const EdgeInsets.all(40),
       margin: const EdgeInsets.symmetric(vertical: 30),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.08),
+        color: AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.success.withOpacity(0.25)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
           Icon(Icons.check_circle,
-              size: 64, color: AppColors.success.withOpacity(0.85)),
+              size: 64, color: AppColors.success.withValues(alpha: 0.85)),
           const SizedBox(height: 12),
           Text(
             isAr
@@ -268,20 +268,20 @@ class _DayGroup extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: isToday
-                  ? AppColors.brand.withOpacity(0.15)
-                  : AppColors.brand.withOpacity(0.06),
+                  ? AppColors.brand.withValues(alpha: 0.15)
+                  : AppColors.brand.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                  color: AppColors.brand.withOpacity(isToday ? 0.50 : 0.20)),
+                  color: AppColors.brand.withValues(alpha: isToday ? 0.50 : 0.20)),
             ),
             child: Row(
               children: [
-                Icon(Icons.event,
+                const Icon(Icons.event,
                     color: AppColors.brand, size: 16),
                 const SizedBox(width: 6),
                 Text(
                   day,
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: AppColors.brand,
                       fontWeight: FontWeight.w900,
                       fontSize: 12,
@@ -292,7 +292,7 @@ class _DayGroup extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.18),
+                    color: AppColors.brand.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -336,7 +336,7 @@ class _EventTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: event.color.withOpacity(0.25)),
+        border: Border.all(color: event.color.withValues(alpha: 0.25)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -354,7 +354,7 @@ class _EventTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: event.color.withOpacity(0.15),
+                    color: event.color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(event.icon, color: event.color, size: 20),
@@ -382,7 +382,7 @@ class _EventTile extends StatelessWidget {
                 ),
                 if (event.openBuilder != null)
                   Icon(Icons.chevron_right,
-                      color: event.color.withOpacity(0.50), size: 18),
+                      color: event.color.withValues(alpha: 0.50), size: 18),
               ],
             ),
           ),

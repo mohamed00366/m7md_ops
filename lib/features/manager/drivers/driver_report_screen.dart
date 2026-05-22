@@ -300,14 +300,14 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -315,7 +315,7 @@ class _Header extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.20),
+              color: AppColors.gold.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
@@ -376,9 +376,9 @@ class _ExpiryHint extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.10),
+        color: c.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c.withOpacity(0.30)),
+        border: Border.all(color: c.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

@@ -404,7 +404,7 @@ class _CustomerWizardScreenState extends State<CustomerWizardScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.12),
+                        color: AppColors.brand.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: Text(
@@ -788,7 +788,7 @@ class _ClientTabState extends State<_ClientTab> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: st._autoCreateMaster
-                        ? AppColors.success.withOpacity(0.08)
+                        ? AppColors.success.withValues(alpha: 0.08)
                         : Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -1039,9 +1039,9 @@ class _PointTabState extends State<_PointTab> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.08),
+              color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.info.withOpacity(0.4)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.4)),
             ),
             child: Row(children: [
               const Icon(Icons.lightbulb_outline,
@@ -1088,7 +1088,7 @@ class _PointTabState extends State<_PointTab> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.06),
+                    color: AppColors.brand.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(children: [
@@ -1257,10 +1257,10 @@ class _PointTabState extends State<_PointTab> {
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.08),
+                        color: AppColors.brand.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppColors.brand.withOpacity(0.3)),
+                            color: AppColors.brand.withValues(alpha: 0.3)),
                       ),
                       child: Row(children: [
                         Expanded(

@@ -94,7 +94,7 @@ class _FleetTrackingSettingsScreenState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_outline,
+                const Icon(Icons.lock_outline,
                     size: 56, color: AppColors.danger),
                 const SizedBox(height: 12),
                 Text(
@@ -424,7 +424,7 @@ class _LinkTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: iconColor.withOpacity(0.12),
+          backgroundColor: iconColor.withValues(alpha: 0.12),
           child: Icon(icon, color: iconColor),
         ),
         title: Text(title,
@@ -459,7 +459,7 @@ class _MethodRadio extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brand.withOpacity(0.06) : null,
+          color: selected ? AppColors.brand.withValues(alpha: 0.06) : null,
           border: Border(
             bottom: BorderSide(color: Theme.of(context).dividerColor),
           ),

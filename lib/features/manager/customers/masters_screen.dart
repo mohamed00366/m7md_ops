@@ -133,10 +133,10 @@ class _MastersScreenState extends State<MastersScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.10),
+                    color: AppColors.success.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: AppColors.success.withOpacity(0.30)),
+                        color: AppColors.success.withValues(alpha: 0.30)),
                   ),
                   child: Text(
                     s.isAr ? 'فُروع:' : 'Branches:',
@@ -666,7 +666,7 @@ class _MasterTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
             color: expanded
-                ? AppColors.brand.withOpacity(0.5)
+                ? AppColors.brand.withValues(alpha: 0.5)
                 : (isDark ? AppColors.borderDark : AppColors.borderLight),
             width: expanded ? 1.2 : 0.5),
       ),
@@ -687,7 +687,7 @@ class _MasterTile extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.15),
+                        color: AppColors.brand.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(Icons.business,
@@ -747,7 +747,7 @@ class _MasterTile extends StatelessWidget {
                     AnimatedRotation(
                       turns: expanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 200),
-                      child: Icon(Icons.keyboard_arrow_down,
+                      child: const Icon(Icons.keyboard_arrow_down,
                           color: AppColors.brand, size: 24),
                     ),
                   ],
@@ -841,10 +841,10 @@ class _MasterTile extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.06),
+                    color: AppColors.warning.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                        color: AppColors.warning.withOpacity(0.3),
+                        color: AppColors.warning.withValues(alpha: 0.3),
                         width: 0.5),
                   ),
                   child: Row(
@@ -903,7 +903,7 @@ class _ClientRow extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 3),
       decoration: BoxDecoration(
         color: isDark
-            ? AppColors.surface2Dark.withOpacity(0.5)
+            ? AppColors.surface2Dark.withValues(alpha: 0.5)
             : AppColors.surface2Light,
         borderRadius: BorderRadius.circular(10),
       ),
@@ -923,7 +923,7 @@ class _ClientRow extends StatelessWidget {
                     color: (client.status == EntityStatus.active
                             ? AppColors.success
                             : Colors.red)
-                        .withOpacity(0.15),
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(Icons.storefront,
@@ -977,7 +977,7 @@ class _ClientRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.warning.withOpacity(0.12),
+                      color: AppColors.warning.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -1028,7 +1028,7 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -1352,15 +1352,15 @@ class _StatsBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: AppColors.gold.withOpacity(0.25)),
+            Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -1372,7 +1372,7 @@ class _StatsBanner extends StatelessWidget {
                 color: AppColors.brand),
           ),
           Container(
-              width: 1, height: 38, color: Colors.grey.withOpacity(0.2)),
+              width: 1, height: 38, color: Colors.grey.withValues(alpha: 0.2)),
           Expanded(
             child: _StatBox(
                 icon: Icons.check_circle,
@@ -1381,7 +1381,7 @@ class _StatsBanner extends StatelessWidget {
                 color: AppColors.success),
           ),
           Container(
-              width: 1, height: 38, color: Colors.grey.withOpacity(0.2)),
+              width: 1, height: 38, color: Colors.grey.withValues(alpha: 0.2)),
           Expanded(
             child: _StatBox(
                 icon: Icons.cancel,
@@ -1390,7 +1390,7 @@ class _StatsBanner extends StatelessWidget {
                 color: Colors.red),
           ),
           Container(
-              width: 1, height: 38, color: Colors.grey.withOpacity(0.2)),
+              width: 1, height: 38, color: Colors.grey.withValues(alpha: 0.2)),
           Expanded(
             child: _StatBox(
                 icon: Icons.storefront,
@@ -1399,7 +1399,7 @@ class _StatsBanner extends StatelessWidget {
                 color: AppColors.info),
           ),
           Container(
-              width: 1, height: 38, color: Colors.grey.withOpacity(0.2)),
+              width: 1, height: 38, color: Colors.grey.withValues(alpha: 0.2)),
           Expanded(
             child: _StatBox(
                 icon: Icons.place,
@@ -1512,7 +1512,7 @@ class _ToolBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withOpacity(0.10),
+      color: color.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,
@@ -1521,7 +1521,7 @@ class _ToolBtn extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withOpacity(0.30)),
+            border: Border.all(color: color.withValues(alpha: 0.30)),
           ),
           child: Row(
             children: [

@@ -297,9 +297,9 @@ class _M7MultiUploadBoxState extends State<M7MultiUploadBox> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.05),
+        color: AppColors.brand.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.brand.withOpacity(0.3)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -326,8 +326,8 @@ class _M7MultiUploadBoxState extends State<M7MultiUploadBox> {
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: widget.urls.isEmpty
-                      ? Colors.grey.withOpacity(0.2)
-                      : AppColors.success.withOpacity(0.2),
+                      ? Colors.grey.withValues(alpha: 0.2)
+                      : AppColors.success.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -431,13 +431,13 @@ class _FilePreviewTile extends StatelessWidget {
             height: tileSize,
             decoration: BoxDecoration(
               color: isPdf
-                  ? Colors.red.withOpacity(0.08)
-                  : Colors.grey.withOpacity(0.1),
+                  ? Colors.red.withValues(alpha: 0.08)
+                  : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isPdf
-                    ? Colors.red.withOpacity(0.4)
-                    : AppColors.brand.withOpacity(0.3),
+                    ? Colors.red.withValues(alpha: 0.4)
+                    : AppColors.brand.withValues(alpha: 0.3),
               ),
             ),
             child: ClipRRect(
@@ -476,7 +476,7 @@ class _FilePreviewTile extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.65),
+              color: Colors.black.withValues(alpha: 0.65),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(

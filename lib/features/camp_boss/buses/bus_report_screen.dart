@@ -205,7 +205,7 @@ class BusReportScreen extends StatelessWidget {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: AppColors.gold.withOpacity(0.15),
+                                  color: AppColors.gold.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 alignment: Alignment.center,
@@ -258,7 +258,7 @@ class BusReportScreen extends StatelessWidget {
         pw.Container(
           padding:
               const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-          decoration: pw.BoxDecoration(
+          decoration: const pw.BoxDecoration(
               color: pw_pdf.PdfColor.fromInt(0xFF111827)),
           child: pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -269,7 +269,7 @@ class BusReportScreen extends StatelessWidget {
                       color: pw_pdf.PdfColors.white,
                       fontWeight: pw.FontWeight.bold)),
               pw.Text(_fmtDate(DateTime.now()),
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                       fontSize: 10, color: pw_pdf.PdfColors.white)),
             ],
           ),
@@ -381,7 +381,7 @@ class BusReportScreen extends StatelessWidget {
           pw.SizedBox(
               width: 140,
               child: pw.Text(label,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                       fontSize: 11, color: pw_pdf.PdfColors.grey700))),
           pw.Expanded(
               child: pw.Text(value,
@@ -403,14 +403,14 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.30)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -418,7 +418,7 @@ class _Header extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.15),
+              color: AppColors.brand.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.directions_bus,

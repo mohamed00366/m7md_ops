@@ -201,7 +201,7 @@ class _NewLaundryRequestScreenState extends State<NewLaundryRequestScreen> {
                       color: Theme.of(context).cardColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           offset: const Offset(0, -2),
                           blurRadius: 6,
                         ),
@@ -241,7 +241,7 @@ class _NewLaundryRequestScreenState extends State<NewLaundryRequestScreen> {
 
   Widget _addItemButton() {
     return Material(
-      color: LaundryColors.primary.withOpacity(0.10),
+      color: LaundryColors.primary.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: _addItem,
@@ -278,7 +278,7 @@ class _NewLaundryRequestScreenState extends State<NewLaundryRequestScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.30)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.30)),
       ),
       child: InkWell(
         onTap: () => _editItem(idx),
@@ -323,9 +323,9 @@ class _NewLaundryRequestScreenState extends State<NewLaundryRequestScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: LaundryColors.success.withOpacity(0.08),
+        color: LaundryColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: LaundryColors.success.withOpacity(0.30)),
+        border: Border.all(color: LaundryColors.success.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

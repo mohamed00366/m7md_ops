@@ -267,7 +267,7 @@ class _PolicyEditorSheetState extends State<PolicyEditorSheet> {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: theme.dividerColor.withOpacity(0.3),
+                          color: theme.dividerColor.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: theme.dividerColor),
                         ),
@@ -450,7 +450,7 @@ class _SectionEditorState extends State<_SectionEditor> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.10),
+                  color: AppColors.brand.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

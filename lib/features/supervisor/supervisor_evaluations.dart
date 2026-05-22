@@ -122,9 +122,9 @@ class _SupervisorEvaluationsState extends State<SupervisorEvaluations> {
               margin: const EdgeInsets.symmetric(vertical: 12),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.10),
+                color: AppColors.warning.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
               ),
               child: Row(children: [
                 const Icon(Icons.info_outline,
@@ -203,9 +203,9 @@ class _InstructionsBanner extends StatelessWidget {
     final s = AppStrings.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.06),
+        color: AppColors.info.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.info.withOpacity(0.3)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -289,7 +289,7 @@ class _CategoryHelp extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -446,7 +446,7 @@ class _PastEvalCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.15),
+              color: AppColors.warning.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             alignment: Alignment.center,
@@ -609,7 +609,7 @@ class _EvaluationFormSheetState extends State<EvaluationFormSheet> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.15),
+                    color: AppColors.warning.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -717,7 +717,7 @@ class _CategorySection extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -725,7 +725,7 @@ class _CategorySection extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12)),
             ),
@@ -800,7 +800,7 @@ class _CriterionRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: selected
-                          ? color.withOpacity(0.15)
+                          ? color.withValues(alpha: 0.15)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
@@ -1052,7 +1052,7 @@ class _OperationEvaluationsViewState extends State<_OperationEvaluationsView> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
-          color: AppColors.brand.withOpacity(0.08),
+          color: AppColors.brand.withValues(alpha: 0.08),
           child: Row(children: [
             const Icon(Icons.admin_panel_settings,
                 color: AppColors.brand, size: 22),
@@ -1164,7 +1164,7 @@ class _PointEvalGroup extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.12),
+            color: AppColors.brand.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(Icons.location_on, color: AppColors.brand),
@@ -1183,8 +1183,8 @@ class _PointEvalGroup extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: employees.isEmpty
-                  ? AppColors.warning.withOpacity(0.15)
-                  : AppColors.brand.withOpacity(0.15),
+                  ? AppColors.warning.withValues(alpha: 0.15)
+                  : AppColors.brand.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

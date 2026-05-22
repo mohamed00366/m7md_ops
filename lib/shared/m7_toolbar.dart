@@ -61,7 +61,7 @@ class _ToolButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: action.color.withOpacity(0.10),
+      color: action.color.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: action.onTap,
@@ -70,7 +70,7 @@ class _ToolButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: action.color.withOpacity(0.30)),
+            border: Border.all(color: action.color.withValues(alpha: 0.30)),
           ),
           child: Row(
             children: [
@@ -113,9 +113,9 @@ class M7FilterPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.10),
+          color: selected ? color : color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.50)),
+          border: Border.all(color: color.withValues(alpha: 0.50)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -131,8 +131,8 @@ class M7FilterPill extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: selected
-                    ? Colors.white.withOpacity(0.25)
-                    : color.withOpacity(0.20),
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : color.withValues(alpha: 0.20),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text('$count',

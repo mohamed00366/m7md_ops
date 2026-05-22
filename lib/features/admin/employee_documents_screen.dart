@@ -272,7 +272,7 @@ class _DocTypeCardState extends State<_DocTypeCard> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25), width: 1.2),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 1.2),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -286,7 +286,7 @@ class _DocTypeCardState extends State<_DocTypeCard> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(_iconFor(widget.docType),
@@ -320,7 +320,7 @@ class _DocTypeCardState extends State<_DocTypeCard> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.15),
+                      color: AppColors.gold.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -604,9 +604,9 @@ class _HistoryItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.08),
+        color: Colors.grey.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.withOpacity(0.20)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
@@ -614,7 +614,7 @@ class _HistoryItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.20),
+              color: Colors.grey.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -884,7 +884,7 @@ class _UploadDialogState extends State<_UploadDialog> {
                     margin: const EdgeInsets.symmetric(vertical: 2),
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.08),
+                      color: Colors.grey.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -1005,10 +1005,10 @@ class _UploadDialogState extends State<_UploadDialog> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.10),
+                    color: AppColors.warning.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: AppColors.warning.withOpacity(0.30)),
+                        color: AppColors.warning.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [
@@ -1124,9 +1124,9 @@ class _AttachmentsRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.06),
+        color: AppColors.brand.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [

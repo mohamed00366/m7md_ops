@@ -282,7 +282,7 @@ class _BusHeader extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppColors.roleDriver.withOpacity(0.15),
+              color: AppColors.roleDriver.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.directions_bus,
@@ -359,10 +359,10 @@ class _WeekStatsCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(8, 4, 8, 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.roleDriver.withOpacity(0.06),
+        color: AppColors.roleDriver.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
         border:
-            Border.all(color: AppColors.roleDriver.withOpacity(0.20)),
+            Border.all(color: AppColors.roleDriver.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
@@ -412,7 +412,7 @@ class _StatChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withOpacity(0.30)),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
         ),
         child: Row(
           children: [
@@ -811,14 +811,14 @@ class _DayHeader extends StatelessWidget {
       margin: const EdgeInsets.only(top: 12, bottom: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.roleDriver.withOpacity(0.10),
+        color: AppColors.roleDriver.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(6),
-        border: Border(
+        border: const Border(
             right: BorderSide(color: AppColors.roleDriver, width: 3)),
       ),
       child: Row(
         children: [
-          Icon(Icons.calendar_today,
+          const Icon(Icons.calendar_today,
               size: 12, color: AppColors.roleDriver),
           const SizedBox(width: 6),
           Text(
@@ -899,7 +899,7 @@ class _UpcomingTripBanner extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: (isImminent ? AppColors.danger : AppColors.warning)
-            .withOpacity(0.10),
+            .withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
             color: isImminent ? AppColors.danger : AppColors.warning,
@@ -1009,7 +1009,7 @@ class _TripCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: status.color.withOpacity(0.30)),
+        border: Border.all(color: status.color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1038,7 +1038,7 @@ class _TripCard extends StatelessWidget {
                   color: (trip.direction == TripDirection.tripIn
                           ? AppColors.success
                           : AppColors.warning)
-                      .withOpacity(0.15),
+                      .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: trip.direction == TripDirection.tripIn
@@ -1099,7 +1099,7 @@ class _TripCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.10),
+                  color: AppColors.brand.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -1245,9 +1245,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: status.color.withOpacity(0.15),
+        color: status.color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: status.color.withOpacity(0.40)),
+        border: Border.all(color: status.color.withValues(alpha: 0.40)),
       ),
       child: Row(
         children: [
@@ -1275,7 +1275,7 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text('$count $label',
@@ -1516,8 +1516,8 @@ class _DriverAttendanceState extends State<DriverAttendance> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [AppColors.roleDriver, AppColors.brand],
@@ -1547,7 +1547,7 @@ class _DriverAttendanceState extends State<DriverAttendance> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.20),
+                        color: Colors.white.withValues(alpha: 0.20),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -1684,10 +1684,10 @@ class _DriverAttendanceState extends State<DriverAttendance> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.warning.withOpacity(0.10),
+                      color: AppColors.warning.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                          color: AppColors.warning.withOpacity(0.30)),
+                          color: AppColors.warning.withValues(alpha: 0.30)),
                     ),
                     child: Row(
                       children: [
@@ -1838,10 +1838,10 @@ class _OffPlanTripSheetState extends State<_OffPlanTripSheet> {
           // Header
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.brand,
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+                  BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
@@ -1875,10 +1875,10 @@ class _OffPlanTripSheetState extends State<_OffPlanTripSheet> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.08),
+                    color: AppColors.info.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppColors.info.withOpacity(0.30)),
+                        color: AppColors.info.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [
@@ -2007,7 +2007,7 @@ class _OffPlanTripSheetState extends State<_OffPlanTripSheet> {
                           dense: true,
                           leading: CircleAvatar(
                             backgroundColor:
-                                AppColors.brand.withOpacity(0.12),
+                                AppColors.brand.withValues(alpha: 0.12),
                             radius: 16,
                             child: Text(
                               e.fullName.isNotEmpty
@@ -2120,10 +2120,10 @@ class _MultiEmployeePickerSheetState extends State<_MultiEmployeePickerSheet> {
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.brand,
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+                  BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
@@ -2199,7 +2199,7 @@ class _MultiEmployeePickerSheetState extends State<_MultiEmployeePickerSheet> {
                         ),
                         secondary: CircleAvatar(
                           backgroundColor:
-                              AppColors.brand.withOpacity(0.12),
+                              AppColors.brand.withValues(alpha: 0.12),
                           child: Text(
                             e.fullName.isNotEmpty
                                 ? e.fullName.substring(0, 1).toUpperCase()
@@ -2231,7 +2231,6 @@ class _EmployeePickerSheet extends StatefulWidget {
   final Set<String>? includeOnlyIds;
   const _EmployeePickerSheet({
     required this.title,
-    this.excludeIds = const {},
     this.includeOnlyIds,
   });
 
@@ -2283,10 +2282,10 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
           // Header
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.roleDriver,
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+                  BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
@@ -2355,7 +2354,7 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor:
-                              AppColors.roleDriver.withOpacity(0.15),
+                              AppColors.roleDriver.withValues(alpha: 0.15),
                           child: Text(
                             e.fullName.isNotEmpty
                                 ? e.fullName.substring(0, 1).toUpperCase()
@@ -2406,7 +2405,7 @@ class _ActionBtn extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: selected ? color : color.withOpacity(0.1),
+            color: selected ? color : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(

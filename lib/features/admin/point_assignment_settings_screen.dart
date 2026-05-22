@@ -236,9 +236,9 @@ class _PointAssignmentSettingsScreenState
             margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.06),
+              color: AppColors.brand.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.brand.withOpacity(0.25)),
+              border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
             ),
             child: Row(
               children: [
@@ -337,10 +337,10 @@ class _PointAssignmentSettingsScreenState
             margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.purple.withOpacity(0.06),
+              color: AppColors.purple.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(10),
               border:
-                  Border.all(color: AppColors.purple.withOpacity(0.30)),
+                  Border.all(color: AppColors.purple.withValues(alpha: 0.30)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,7 +496,7 @@ class _PointAssignmentSettingsScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -553,12 +553,12 @@ class _TitleRow extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withOpacity(0.08)
-              : Colors.grey.withOpacity(0.04),
+              ? color.withValues(alpha: 0.08)
+              : Colors.grey.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color:
-                isSelected ? color.withOpacity(0.4) : Colors.grey.withOpacity(0.2),
+                isSelected ? color.withValues(alpha: 0.4) : Colors.grey.withValues(alpha: 0.2),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -596,7 +596,7 @@ class _TitleRow extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.15),
+                            color: color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -618,7 +618,7 @@ class _TitleRow extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
-                            color: AppColors.info.withOpacity(0.15),
+                            color: AppColors.info.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Row(

@@ -391,7 +391,7 @@ class _KpiCard extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(icon, color: color, size: 18),
@@ -619,7 +619,7 @@ class _BarRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: pct,
             minHeight: 8,
-            backgroundColor: color.withOpacity(0.10),
+            backgroundColor: color.withValues(alpha: 0.10),
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -708,7 +708,7 @@ class _RoomsDetailTable extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: DataTable(
             headingRowColor: WidgetStateProperty.all(
-                CampPalette.accent.withOpacity(0.06)),
+                CampPalette.accent.withValues(alpha: 0.06)),
             columnSpacing: 18,
             horizontalMargin: 12,
             dataRowMinHeight: 36,
@@ -778,7 +778,7 @@ class _RoomsDetailTable extends StatelessWidget {
           padding:
               const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: occColor.withOpacity(0.12),
+            color: occColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
@@ -812,7 +812,7 @@ class _RoomsDetailTable extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(

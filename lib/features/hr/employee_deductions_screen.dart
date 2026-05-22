@@ -2,7 +2,6 @@
 // 📋 Employee Deductions Screen — sees their own deductions + can sign pending
 // =============================================================================
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/providers/auth_provider.dart';
@@ -110,10 +109,10 @@ class _EmployeeDeductionsScreenState
                           padding: const EdgeInsets.all(10),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: AppColors.warning.withOpacity(0.10),
+                            color: AppColors.warning.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: AppColors.warning.withOpacity(0.4)),
+                                color: AppColors.warning.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             children: [
@@ -265,11 +264,11 @@ class _DeductionCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (d.isSigned)
-                    Row(
+                    const Row(
                       children: [
-                        const Icon(Icons.check_circle,
+                        Icon(Icons.check_circle,
                             color: AppColors.success, size: 14),
-                        const SizedBox(width: 3),
+                        SizedBox(width: 3),
                         Text('مُوَقَّع',
                             style: TextStyle(
                                 color: AppColors.success,
@@ -278,10 +277,10 @@ class _DeductionCard extends StatelessWidget {
                       ],
                     )
                   else
-                    Row(
+                    const Row(
                       children: [
                         Icon(Icons.draw, color: AppColors.warning, size: 14),
-                        const SizedBox(width: 3),
+                        SizedBox(width: 3),
                         Text('بانتِظار التَوقيع',
                             style: TextStyle(
                                 color: AppColors.warning,
@@ -377,10 +376,10 @@ class _SignDeductionDialogState extends State<_SignDeductionDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.danger.withOpacity(0.06),
+                    color: AppColors.danger.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppColors.danger.withOpacity(0.3)),
+                        color: AppColors.danger.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

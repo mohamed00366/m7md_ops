@@ -120,7 +120,7 @@ class _GpsDevicesScreenState extends State<GpsDevicesScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_outline,
+                const Icon(Icons.lock_outline,
                     size: 56, color: AppColors.danger),
                 const SizedBox(height: 12),
                 Text(
@@ -241,7 +241,7 @@ class _BusGpsCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: methodMeta.color.withOpacity(0.15),
+                  color: methodMeta.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
@@ -288,7 +288,7 @@ class _BusGpsCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: status.color.withOpacity(0.15),
+                      color: status.color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -688,9 +688,9 @@ class _GpsEditorScreenState extends State<_GpsEditorScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.08),
+                color: AppColors.info.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.info.withOpacity(0.30)),
+                border: Border.all(color: AppColors.info.withValues(alpha: 0.30)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -780,7 +780,7 @@ class _MethodTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 6),
       decoration: BoxDecoration(
         color: selected
-            ? meta.color.withOpacity(0.10)
+            ? meta.color.withValues(alpha: 0.10)
             : Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(

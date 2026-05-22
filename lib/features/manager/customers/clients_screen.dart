@@ -274,7 +274,7 @@ class _ClientCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.15),
+                    color: AppColors.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.storefront,
@@ -310,7 +310,7 @@ class _ClientCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.brand.withOpacity(0.12),
+                            color: AppColors.brand.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -584,7 +584,7 @@ class _ClientEditorState extends State<_ClientEditor> {
                   // Master (مطلوب)
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.06),
+                      color: AppColors.brand.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(8),

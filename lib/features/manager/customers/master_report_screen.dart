@@ -92,7 +92,7 @@ class MasterReportScreen extends StatelessWidget {
         build: (ctx) => [
           pw.Container(
             padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-            decoration: pw.BoxDecoration(
+            decoration: const pw.BoxDecoration(
               color: pw_pdf.PdfColor.fromInt(0xFF111827),
             ),
             child: pw.Row(
@@ -107,7 +107,7 @@ class MasterReportScreen extends StatelessWidget {
                 ),
                 pw.Text(
                   _fmtDate(DateTime.now()),
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                       fontSize: 10, color: pw_pdf.PdfColors.white),
                 ),
               ],
@@ -289,7 +289,7 @@ class MasterReportScreen extends StatelessWidget {
 
   static String _fmtDate(DateTime? d) {
     if (d == null) return '—';
-    final two = (int n) => n.toString().padLeft(2, '0');
+    two(int n) => n.toString().padLeft(2, '0');
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
 
@@ -301,7 +301,7 @@ class MasterReportScreen extends StatelessWidget {
           pw.SizedBox(
             width: 140,
             child: pw.Text(label,
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                     fontSize: 11, color: pw_pdf.PdfColors.grey700)),
           ),
           pw.Expanded(
@@ -378,15 +378,15 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         border:
-            Border.all(color: AppColors.gold.withOpacity(0.30), width: 1),
+            Border.all(color: AppColors.gold.withValues(alpha: 0.30), width: 1),
       ),
       child: Row(
         children: [
@@ -394,7 +394,7 @@ class _Header extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.15),
+              color: AppColors.brand.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.business,
@@ -500,9 +500,9 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -552,7 +552,7 @@ class _SectionShell extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +560,7 @@ class _SectionShell extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
             ),
@@ -770,7 +770,7 @@ class _EmployeesCard extends StatelessWidget {
                           width: 28,
                           height: 28,
                           decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.15),
+                            color: AppColors.gold.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
@@ -839,9 +839,9 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.40)),
+        border: Border.all(color: color.withValues(alpha: 0.40)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

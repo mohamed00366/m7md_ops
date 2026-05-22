@@ -234,19 +234,19 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
         gradient: LinearGradient(
           colors: urgent > 0
               ? [
-                  AppColors.danger.withOpacity(0.15),
-                  AppColors.warning.withOpacity(0.05),
+                  AppColors.danger.withValues(alpha: 0.15),
+                  AppColors.warning.withValues(alpha: 0.05),
                 ]
               : [
-                  AppColors.brand.withOpacity(0.15),
-                  AppColors.success.withOpacity(0.05),
+                  AppColors.brand.withValues(alpha: 0.15),
+                  AppColors.success.withValues(alpha: 0.05),
                 ],
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: urgent > 0
-              ? AppColors.danger.withOpacity(0.3)
-              : AppColors.brand.withOpacity(0.3),
+              ? AppColors.danger.withValues(alpha: 0.3)
+              : AppColors.brand.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -311,9 +311,9 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: c.withOpacity(0.10),
+          color: c.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: c.withOpacity(0.25)),
+          border: Border.all(color: c.withValues(alpha: 0.25)),
         ),
         child: Column(
           children: [
@@ -401,7 +401,7 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.success.withOpacity(0.08),
+          color: AppColors.success.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -446,7 +446,7 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: a.color.withOpacity(0.15),
+                  color: a.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(a.icon, color: a.color, size: 22),
@@ -488,10 +488,10 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.08),
+                  color: AppColors.success.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: AppColors.success.withOpacity(0.25)),
+                      color: AppColors.success.withValues(alpha: 0.25)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -528,10 +528,10 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.08),
+                  color: AppColors.warning.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: AppColors.warning.withOpacity(0.25)),
+                      color: AppColors.warning.withValues(alpha: 0.25)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,10 +637,10 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               onTap: a.onTap,
               child: Container(
                 decoration: BoxDecoration(
-                  color: a.color.withOpacity(0.08),
+                  color: a.color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                   border:
-                      Border.all(color: a.color.withOpacity(0.25)),
+                      Border.all(color: a.color.withValues(alpha: 0.25)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -738,7 +738,7 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
         dense: true,
         leading: CircleAvatar(
           radius: 14,
-          backgroundColor: color.withOpacity(0.15),
+          backgroundColor: color.withValues(alpha: 0.15),
           child: Text(name.isNotEmpty ? name[0] : '?',
               style: TextStyle(
                   color: color,

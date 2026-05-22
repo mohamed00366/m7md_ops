@@ -144,7 +144,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.10),
+                        color: AppColors.brand.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -193,7 +193,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
-                          color: color.withOpacity(0.04),
+                          color: color.withValues(alpha: 0.04),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -215,7 +215,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 5, vertical: 1),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.12),
+                                  color: color.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(e.tag,

@@ -131,10 +131,9 @@ class _LoginScreenState extends State<LoginScreen>
                   .inMinutes
                   .clamp(1, 999)
               : LoginMethodSettings.instance.cooldownMinutes;
-          msg = (s.isAr
+          msg = '${s.isAr
                   ? LoginMethodSettings.instance.msgCooldownAr
-                  : LoginMethodSettings.instance.msgCooldownEn) +
-              '\n($mins ${s.isAr ? "دقائق" : "min"})';
+                  : LoginMethodSettings.instance.msgCooldownEn}\n($mins ${s.isAr ? "دقائق" : "min"})';
           break;
         case LoginResult.faceLocked:
           await LoginMethodSettings.instance.load();
@@ -196,9 +195,8 @@ class _LoginScreenState extends State<LoginScreen>
         case FaceAttemptOutcome.failed:
         default:
           await LoginMethodSettings.instance.load();
-          msg = LoginMethodSettings.instance
-                  .faceFailedMessage(isAr: s.isAr) +
-              '\n(${status.failedCount}/${LoginMethodSettings.instance.maxAttempts * 2})';
+          msg = '${LoginMethodSettings.instance
+                  .faceFailedMessage(isAr: s.isAr)}\n(${status.failedCount}/${LoginMethodSettings.instance.maxAttempts * 2})';
       }
       setState(() => _error = msg);
     }
@@ -402,7 +400,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ? null
                               : [
                                   BoxShadow(
-                                    color: AppColors.brand.withOpacity(0.25),
+                                    color: AppColors.brand.withValues(alpha: 0.25),
                                     blurRadius: 24,
                                     offset: const Offset(0, 8),
                                   ),
@@ -559,12 +557,12 @@ class _LoginScreenState extends State<LoginScreen>
                                     const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
                                   color: AppColors.success
-                                      .withOpacity(0.08),
+                                      .withValues(alpha: 0.08),
                                   borderRadius:
                                       BorderRadius.circular(14),
                                   border: Border.all(
                                       color: AppColors.success
-                                          .withOpacity(0.3),
+                                          .withValues(alpha: 0.3),
                                       width: 0.5),
                                 ),
                                 child: Row(
@@ -625,10 +623,10 @@ class _LoginScreenState extends State<LoginScreen>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.danger.withOpacity(0.1),
+                          color: AppColors.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: AppColors.danger.withOpacity(0.3),
+                              color: AppColors.danger.withValues(alpha: 0.3),
                               width: 0.5),
                         ),
                         child: Row(

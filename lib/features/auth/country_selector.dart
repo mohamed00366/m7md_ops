@@ -89,7 +89,7 @@ class _CountrySelectorScreenState extends State<CountrySelectorScreen> {
                 gradient: LinearGradient(
                   colors: [
                     AppColors.brand,
-                    AppColors.brand.withOpacity(0.7),
+                    AppColors.brand.withValues(alpha: 0.7),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -104,7 +104,7 @@ class _CountrySelectorScreenState extends State<CountrySelectorScreen> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(Icons.public,
@@ -133,7 +133,7 @@ class _CountrySelectorScreenState extends State<CountrySelectorScreen> {
                                   ? 'اختر الدولة التي ستعمل عليها'
                                   : 'Choose the country to work on',
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.85),
+                                  color: Colors.white.withValues(alpha: 0.85),
                                   fontSize: 12),
                             ),
                           ],
@@ -151,10 +151,10 @@ class _CountrySelectorScreenState extends State<CountrySelectorScreen> {
                 margin: const EdgeInsets.fromLTRB(14, 14, 14, 0),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.1),
+                  color: AppColors.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: AppColors.warning.withOpacity(0.3),
+                      color: AppColors.warning.withValues(alpha: 0.3),
                       width: 0.5),
                 ),
                 child: Row(
@@ -260,12 +260,12 @@ class _AllCountriesCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.08),
+        color: AppColors.warning.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isSelected
               ? AppColors.warning
-              : AppColors.warning.withOpacity(0.3),
+              : AppColors.warning.withValues(alpha: 0.3),
           width: isSelected ? 2 : 0.5,
         ),
       ),
@@ -282,7 +282,7 @@ class _AllCountriesCard extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.2),
+                    color: AppColors.warning.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   alignment: Alignment.center,
@@ -377,13 +377,13 @@ class _CountryCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         AppColors.brand,
-                        AppColors.brand.withOpacity(0.7),
+                        AppColors.brand.withValues(alpha: 0.7),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.brand.withOpacity(0.25),
+                        color: AppColors.brand.withValues(alpha: 0.25),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),

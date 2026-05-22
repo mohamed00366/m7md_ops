@@ -73,7 +73,7 @@ class _AdminDeviceSessionsScreenState
           FilledButton.tonal(
             style: FilledButton.styleFrom(
                 foregroundColor: AppColors.danger,
-                backgroundColor: AppColors.danger.withOpacity(0.1)),
+                backgroundColor: AppColors.danger.withValues(alpha: 0.1)),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(isAr ? 'حذف' : 'Delete'),
           ),
@@ -284,9 +284,9 @@ class _Kpi extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.25), width: 0.5),
+          border: Border.all(color: color.withValues(alpha: 0.25), width: 0.5),
         ),
         child: Row(
           children: [
@@ -300,7 +300,7 @@ class _Kpi extends StatelessWidget {
                   Text(label,
                       style: TextStyle(
                           fontSize: 10,
-                          color: color.withOpacity(0.85),
+                          color: color.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w600)),
                   Text(value,
                       style: TextStyle(
@@ -394,7 +394,7 @@ class _SessionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: c.withOpacity(0.12),
+                    color: c.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(_platformIcon(session.platform),
@@ -457,7 +457,7 @@ class _SessionCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -580,9 +580,9 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.12),
+        color: c.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: c.withOpacity(0.4), width: 0.5),
+        border: Border.all(color: c.withValues(alpha: 0.4), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

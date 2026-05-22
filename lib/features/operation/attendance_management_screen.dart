@@ -320,7 +320,7 @@ class _AttendanceManagementScreenState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.08),
+                        color: AppColors.brand.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -356,7 +356,7 @@ class _AttendanceManagementScreenState
 
           // ===== 🆕 شَريط التابات: الباصات | النِقاط =====
           Container(
-            color: AppColors.brand.withOpacity(0.06),
+            color: AppColors.brand.withValues(alpha: 0.06),
             child: TabBar(
               controller: _tab,
               labelColor: AppColors.brand,
@@ -590,13 +590,13 @@ class _StatTile extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? color.withOpacity(0.18)
-              : color.withOpacity(0.06),
+              ? color.withValues(alpha: 0.18)
+              : color.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: selected
                 ? color
-                : color.withOpacity(0.25),
+                : color.withValues(alpha: 0.25),
             width: selected ? 1.2 : 0.5,
           ),
         ),
@@ -613,7 +613,7 @@ class _StatTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    color: color.withOpacity(0.85),
+                    color: color.withValues(alpha: 0.85),
                     fontSize: 10,
                     fontWeight: FontWeight.w700)),
           ],
@@ -663,7 +663,7 @@ class _AttendanceCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor.withOpacity(0.4),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
@@ -783,12 +783,12 @@ class _ActionBtn extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.08),
+          color: selected ? color : color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: selected
                   ? color
-                  : color.withOpacity(0.3),
+                  : color.withValues(alpha: 0.3),
               width: 0.5),
         ),
         child: Row(

@@ -58,7 +58,7 @@ class M7AppBar extends StatelessWidget implements PreferredSizeWidget {
     // 🆕 أَسوَد كامِل في الوَضع الفاتِح وَالداكِن — أَقصى تَبايُن لِلنَصّ الأَبيَض
     final bg = backgroundColor ?? Colors.black;
     // 🆕 لَون الأَيقونات: ذَهَبيّ لِلتَبايُن العالي مَع الأَسوَد (هُويّة M7 NEXUS)
-    final iconColor = AppColors.gold;
+    const iconColor = AppColors.gold;
     return AppBar(
       backgroundColor: bg,
       foregroundColor: fg,
@@ -75,8 +75,8 @@ class M7AppBar extends StatelessWidget implements PreferredSizeWidget {
           subtitle == null ? _baseHeight : _withSubtitleHeight,
       leading: leading,
       // 🆕 أَيقونات أَكبَر وَذَهَبيّة لِلوُضوح
-      iconTheme: IconThemeData(color: iconColor, size: 26),
-      actionsIconTheme: IconThemeData(color: iconColor, size: 26),
+      iconTheme: const IconThemeData(color: iconColor, size: 26),
+      actionsIconTheme: const IconThemeData(color: iconColor, size: 26),
       title: subtitle == null
           ? Text(
               title,
@@ -104,7 +104,7 @@ class M7AppBar extends StatelessWidget implements PreferredSizeWidget {
                   subtitle!,
                   style: TextStyle(
                     fontSize: 11,
-                    color: fg.withOpacity(0.85),
+                    color: fg.withValues(alpha: 0.85),
                     fontWeight: FontWeight.w500,
                     height: 1.0,
                   ),

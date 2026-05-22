@@ -20,9 +20,9 @@ class M7StatusChip extends StatelessWidget {
       padding: EdgeInsets.symmetric(
           horizontal: dense ? 6 : 8, vertical: dense ? 2 : 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.40)),
+        border: Border.all(color: color.withValues(alpha: 0.40)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

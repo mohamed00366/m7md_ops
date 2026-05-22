@@ -86,8 +86,8 @@ class _EmployeeUniformViewState extends State<EmployeeUniformView> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: u.isReturned
-                        ? AppColors.success.withOpacity(0.08)
-                        : AppColors.purple.withOpacity(0.08),
+                        ? AppColors.success.withValues(alpha: 0.08)
+                        : AppColors.purple.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

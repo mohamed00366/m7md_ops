@@ -243,9 +243,9 @@ class _SiteMasterSectionState extends State<SiteMasterSection>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.08),
+            color: AppColors.info.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.info.withOpacity(0.25)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [

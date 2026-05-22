@@ -71,9 +71,9 @@ class EntityQrScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.08),
+                  color: color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: color.withOpacity(0.30)),
+                  border: Border.all(color: color.withValues(alpha: 0.30)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -82,7 +82,7 @@ class EntityQrScreen extends StatelessWidget {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.20),
+                        color: color.withValues(alpha: 0.20),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(icon, color: color, size: 26),
@@ -120,7 +120,7 @@ class EntityQrScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.10),
+                      color: Colors.black.withValues(alpha: 0.10),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -146,10 +146,10 @@ class EntityQrScreen extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.08),
+                  color: AppColors.brand.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                      Border.all(color: AppColors.brand.withOpacity(0.25)),
+                      Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
                 ),
                 child: SelectableText(
                   payload,
@@ -163,9 +163,9 @@ class EntityQrScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.06),
+                  color: AppColors.info.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.info.withOpacity(0.25)),
+                  border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
                 ),
                 child: Row(
                   children: [

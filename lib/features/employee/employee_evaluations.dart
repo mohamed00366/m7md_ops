@@ -40,7 +40,7 @@ class EmployeeEvaluationsView extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 AppColors.warning,
-                AppColors.warning.withOpacity(0.7),
+                AppColors.warning.withValues(alpha: 0.7),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

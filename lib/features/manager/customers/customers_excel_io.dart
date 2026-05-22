@@ -231,13 +231,13 @@ class CustomersExcelIO {
       withData: true,
     );
     if (picked == null || picked.files.isEmpty) {
-      return CustomersImportResult(
+      return const CustomersImportResult(
           imported: 0, skipped: 0, errors: ['Cancelled']);
     }
     final f = picked.files.first;
     final bytes = f.bytes;
     if (bytes == null) {
-      return CustomersImportResult(
+      return const CustomersImportResult(
           imported: 0, skipped: 0, errors: ['File has no data']);
     }
     final ext = (f.extension ?? '').toLowerCase();
@@ -254,7 +254,7 @@ class CustomersExcelIO {
     final ws = excel.sheets['Masters'] ??
         (excel.sheets.isEmpty ? null : excel.sheets.values.first);
     if (ws == null) {
-      return CustomersImportResult(
+      return const CustomersImportResult(
           imported: 0, skipped: 0, errors: ['No sheet found']);
     }
     // اقرَأ رَأس الأَعمِدة (row 0)
@@ -288,7 +288,7 @@ class CustomersExcelIO {
   static Future<CustomersImportResult> _importFromCsv(String text) async {
     final lines = const LineSplitter().convert(text);
     if (lines.isEmpty) {
-      return CustomersImportResult(
+      return const CustomersImportResult(
           imported: 0, skipped: 0, errors: ['Empty file']);
     }
     // الفاصِل: فاصِلة أو tab

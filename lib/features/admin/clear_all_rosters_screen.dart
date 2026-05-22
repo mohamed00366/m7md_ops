@@ -114,10 +114,10 @@ class _ClearAllRostersScreenState extends State<ClearAllRostersScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.danger.withOpacity(0.08),
+                  color: AppColors.danger.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: AppColors.danger.withOpacity(0.3)),
+                      color: AppColors.danger.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +279,7 @@ class _ClearAllRostersScreenState extends State<ClearAllRostersScreen> {
                     backgroundColor: AppColors.danger,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor:
-                        AppColors.danger.withOpacity(0.3),
+                        AppColors.danger.withValues(alpha: 0.3),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -291,10 +291,10 @@ class _ClearAllRostersScreenState extends State<ClearAllRostersScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.10),
+                    color: AppColors.warning.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppColors.warning.withOpacity(0.3)),
+                        color: AppColors.warning.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -343,7 +343,7 @@ class _StatTile extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: color, size: 18),

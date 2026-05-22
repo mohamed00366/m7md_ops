@@ -82,7 +82,9 @@ class _FormsSubmissionsReportScreenState
   /// هَل هذا الـsubmission يَنتَظِر مُوافَقَتي حاليّاً؟
   bool _awaitingMe(FormSubmission sub, AuthProvider auth, MockRepository repo) {
     if (sub.status != FormSubmissionStatus.submitted &&
-        sub.status != FormSubmissionStatus.inReview) return false;
+        sub.status != FormSubmissionStatus.inReview) {
+      return false;
+    }
     final match = WorkflowEngine.currentApprover(sub);
     if (match == null || !match.isResolved) return false;
     final empId = auth.account?.employeeId;
@@ -220,13 +222,13 @@ class _FormsSubmissionsReportScreenState
                               horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color: all.isEmpty
-                                ? Colors.grey.withOpacity(0.15)
-                                : AppColors.success.withOpacity(0.15),
+                                ? Colors.grey.withValues(alpha: 0.15)
+                                : AppColors.success.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                                 color: all.isEmpty
-                                    ? Colors.grey.withOpacity(0.3)
-                                    : AppColors.success.withOpacity(0.4)),
+                                    ? Colors.grey.withValues(alpha: 0.3)
+                                    : AppColors.success.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -584,12 +586,12 @@ class _FormsSubmissionsReportScreenState
         decoration: BoxDecoration(
           color: active
               ? AppColors.danger
-              : AppColors.danger.withOpacity(0.10),
+              : AppColors.danger.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: active
                 ? AppColors.danger
-                : AppColors.danger.withOpacity(0.30),
+                : AppColors.danger.withValues(alpha: 0.30),
           ),
         ),
         child: Row(
@@ -720,9 +722,9 @@ class _FormsSubmissionsReportScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.10),
+        color: AppColors.brand.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.brand.withOpacity(0.30)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -842,8 +844,8 @@ class _SubmissionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: awaitingMe
-              ? AppColors.danger.withOpacity(0.50)
-              : statusColor.withOpacity(0.30),
+              ? AppColors.danger.withValues(alpha: 0.50)
+              : statusColor.withValues(alpha: 0.30),
           width: awaitingMe ? 1.5 : 1,
         ),
       ),
@@ -861,7 +863,7 @@ class _SubmissionTile extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.15),
+                      color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(Icons.assignment_outlined,
@@ -913,7 +915,7 @@ class _SubmissionTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.15),
+                                color: statusColor.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -1189,7 +1191,7 @@ class _SubmissionDetailSheetState extends State<_SubmissionDetailSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.4),
+              color: Colors.grey.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1210,7 +1212,7 @@ class _SubmissionDetailSheetState extends State<_SubmissionDetailSheet> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.10),
+                      color: AppColors.brand.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -1238,10 +1240,10 @@ class _SubmissionDetailSheetState extends State<_SubmissionDetailSheet> {
                         decoration: BoxDecoration(
                           color: _editMode
                               ? AppColors.warning
-                              : AppColors.warning.withOpacity(0.15),
+                              : AppColors.warning.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                              color: AppColors.warning.withOpacity(0.5)),
+                              color: AppColors.warning.withValues(alpha: 0.5)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -1282,10 +1284,10 @@ class _SubmissionDetailSheetState extends State<_SubmissionDetailSheet> {
               margin: const EdgeInsets.symmetric(horizontal: 12),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.10),
+                color: AppColors.warning.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                    color: AppColors.warning.withOpacity(0.30)),
+                    color: AppColors.warning.withValues(alpha: 0.30)),
               ),
               child: Row(
                 children: [
@@ -1315,7 +1317,7 @@ class _SubmissionDetailSheetState extends State<_SubmissionDetailSheet> {
               padding: const EdgeInsets.all(14),
               child: FormRenderer(
                 // key لإعادة بِناء الـrenderer عَنَدَ تَبديل الوَضع
-                key: ValueKey('renderer-${_editMode}'),
+                key: ValueKey('renderer-$_editMode'),
                 template: widget.template,
                 initialValues: widget.submission.data,
                 readOnly: !_editMode,

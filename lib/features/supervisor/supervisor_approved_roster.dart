@@ -201,7 +201,7 @@ class _ApprovedHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.08),
+                color: AppColors.success.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -245,12 +245,12 @@ class _ApprovedBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.success.withOpacity(0.15),
-            AppColors.success.withOpacity(0.05),
+            AppColors.success.withValues(alpha: 0.15),
+            AppColors.success.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.success.withOpacity(0.4)),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -389,8 +389,8 @@ class _Hdr extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: accent
-            ? AppColors.warning.withOpacity(0.15)
-            : AppColors.success.withOpacity(0.08),
+            ? AppColors.warning.withValues(alpha: 0.15)
+            : AppColors.success.withValues(alpha: 0.08),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
           bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -446,17 +446,17 @@ class _CellRO extends StatelessWidget {
     String letter;
     String? timeLabel;
     if (a == null || a.shiftType == ShiftType.off) {
-      bg = AppColors.textTertiaryLight.withOpacity(0.1);
+      bg = AppColors.textTertiaryLight.withValues(alpha: 0.1);
       textColor = AppColors.textTertiaryLight;
       letter = 'Off';
       timeLabel = null;
     } else if (a.shiftType == ShiftType.night) {
-      bg = AppColors.info.withOpacity(0.15);
+      bg = AppColors.info.withValues(alpha: 0.15);
       textColor = AppColors.info;
       letter = 'N';
       timeLabel = '${_short(a.startTime)}-${_short(a.endTime)}';
     } else {
-      bg = AppColors.success.withOpacity(0.15);
+      bg = AppColors.success.withValues(alpha: 0.15);
       textColor = AppColors.success;
       letter = 'M';
       timeLabel = '${_short(a.startTime)}-${_short(a.endTime)}';
@@ -507,7 +507,7 @@ class _Total extends StatelessWidget {
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.08),
+        color: AppColors.warning.withValues(alpha: 0.08),
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor),
           bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -612,7 +612,7 @@ class _DayTimeline extends StatelessWidget {
             child: Container(
               height: 18,
               decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor.withOpacity(0.3),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: LayoutBuilder(builder: (_, constraints) {
@@ -634,7 +634,7 @@ class _DayTimeline extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           color: (isNight ? AppColors.info : AppColors.success)
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -822,7 +822,7 @@ class _MiniMetric extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -862,7 +862,7 @@ class _NoApprovedView extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.12),
+                color: AppColors.warning.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.hourglass_empty,

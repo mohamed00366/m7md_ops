@@ -56,7 +56,7 @@ class ImpersonateBanner extends StatelessWidget {
                                   ? 'الحساب الأصليّ: ${auth.realIdentity}'
                                   : 'Original: ${auth.realIdentity}',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withValues(alpha: 0.85),
                                 fontSize: 10,
                               ),
                               maxLines: 1,
@@ -68,7 +68,7 @@ class ImpersonateBanner extends StatelessWidget {
                       const SizedBox(width: 6),
                       // 🆕 زِرّ مُستَقِلّ بِـInkWell مُباشِر — يَخرُج فَوراً بِدون نافِذة تَأكيد
                       Material(
-                        color: Colors.white.withOpacity(0.20),
+                        color: Colors.white.withValues(alpha: 0.20),
                         borderRadius: BorderRadius.circular(6),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(6),

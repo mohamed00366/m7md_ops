@@ -240,13 +240,13 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
       padding: const EdgeInsets.all(40),
       margin: const EdgeInsets.symmetric(vertical: 30),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.06),
+        color: Colors.grey.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
           Icon(Icons.history_toggle_off,
-              size: 64, color: Colors.grey.withOpacity(0.4)),
+              size: 64, color: Colors.grey.withValues(alpha: 0.4)),
           const SizedBox(height: 12),
           Text(
             isAr
@@ -362,12 +362,12 @@ class _DaySection extends StatelessWidget {
             child: Row(
               children: [
                 Icon(Icons.event,
-                    color: AppColors.brand.withOpacity(0.70), size: 14),
+                    color: AppColors.brand.withValues(alpha: 0.70), size: 14),
                 const SizedBox(width: 6),
                 Text(
                   day,
                   style: TextStyle(
-                      color: AppColors.brand.withOpacity(0.85),
+                      color: AppColors.brand.withValues(alpha: 0.85),
                       fontWeight: FontWeight.w900,
                       fontSize: 12,
                       fontFamily: 'monospace'),
@@ -408,7 +408,7 @@ class _EntryTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.20)),
+        border: Border.all(color: color.withValues(alpha: 0.20)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,7 +417,7 @@ class _EntryTile extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -509,7 +509,7 @@ class _EntryTile extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.10),
+                  color: AppColors.gold.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

@@ -725,7 +725,7 @@ class _ParticipantBadgeState extends State<_ParticipantBadge> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.12),
+        color: AppColors.brand.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -862,9 +862,9 @@ class _ParticipantsSheetState extends State<_ParticipantsSheet> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -898,7 +898,7 @@ class _ParticipantsSheetState extends State<_ParticipantsSheet> {
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha: 0.2),
             child: Text(
                 (p.displayName ?? '?').isNotEmpty
                     ? p.displayName![0]
@@ -959,9 +959,9 @@ class _ParticipantsSheetState extends State<_ParticipantsSheet> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.12),
+        color: c.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: c.withOpacity(0.3)),
+        border: Border.all(color: c.withValues(alpha: 0.3)),
       ),
       child: Text(s.labelAr(),
           style: TextStyle(

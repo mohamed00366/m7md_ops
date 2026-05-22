@@ -147,8 +147,9 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
       setState(() => _uploadingAudio = true);
       final ext = (f.extension ?? 'mp3').toLowerCase();
       String mime = 'audio/mpeg';
-      if (ext == 'wav') mime = 'audio/wav';
-      else if (ext == 'ogg') mime = 'audio/ogg';
+      if (ext == 'wav') {
+        mime = 'audio/wav';
+      } else if (ext == 'ogg') mime = 'audio/ogg';
       else if (ext == 'm4a' || ext == 'aac') mime = 'audio/aac';
 
       final url = await SplashVideoSettings.instance.uploadAudio(
@@ -273,11 +274,11 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.08),
+                            color: AppColors.success.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                                 color:
-                                    AppColors.success.withOpacity(0.3)),
+                                    AppColors.success.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [
@@ -313,11 +314,11 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.warning.withOpacity(0.08),
+                            color: AppColors.warning.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                                 color:
-                                    AppColors.warning.withOpacity(0.3)),
+                                    AppColors.warning.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [
@@ -421,11 +422,11 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.08),
+                            color: AppColors.success.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                                 color:
-                                    AppColors.success.withOpacity(0.3)),
+                                    AppColors.success.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [
@@ -631,7 +632,7 @@ class _SplashVideoSettingsScreenState extends State<SplashVideoSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.danger.withOpacity(0.1),
+                      color: AppColors.danger.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(_error!,

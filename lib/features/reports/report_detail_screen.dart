@@ -122,7 +122,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   Widget _summaryBar(bool isAr) {
     return Container(
       padding: const EdgeInsets.all(10),
-      color: AppColors.brand.withOpacity(0.08),
+      color: AppColors.brand.withValues(alpha: 0.08),
       child: Row(
         children: [
           const Icon(Icons.summarize, color: AppColors.brand, size: 18),

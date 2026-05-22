@@ -373,7 +373,7 @@ class _EmployeeDailyMemoScreenState extends State<EmployeeDailyMemoScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppColors.brand.withOpacity(0.15),
+                                color: AppColors.brand.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(Icons.place,
@@ -691,9 +691,9 @@ class _OverlapBanner extends StatelessWidget {
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.danger.withOpacity(0.10),
+        color: AppColors.danger.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.danger.withOpacity(0.40)),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.40)),
       ),
       child: Row(
         children: [
@@ -727,9 +727,9 @@ class _TooManyHoursBanner extends StatelessWidget {
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.10),
+        color: AppColors.warning.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.warning.withOpacity(0.40)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.40)),
       ),
       child: Row(
         children: [
@@ -781,7 +781,7 @@ class _Kpi extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(7),
             ),
             child: Icon(icon, color: color, size: 16),

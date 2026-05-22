@@ -366,10 +366,10 @@ class _BusDriverSectionState extends State<BusDriverSection>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.08),
+              color: AppColors.warning.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
               border:
-                  Border.all(color: AppColors.warning.withOpacity(0.30)),
+                  Border.all(color: AppColors.warning.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -501,10 +501,10 @@ class _BusScheduleSectionState extends State<BusScheduleSection>
                 decoration: BoxDecoration(
                   color: selected
                       ? AppColors.brand
-                      : AppColors.brand.withOpacity(0.10),
+                      : AppColors.brand.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                      color: AppColors.brand.withOpacity(0.40)),
+                      color: AppColors.brand.withValues(alpha: 0.40)),
                 ),
                 child: Text(
                   isAr ? dayLabelsAr[i] : dayLabels[i],
@@ -628,9 +628,9 @@ class _ExpiryHint extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.10),
+        color: c.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c.withOpacity(0.30)),
+        border: Border.all(color: c.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

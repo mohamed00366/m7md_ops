@@ -49,15 +49,13 @@ class AuditLogService extends ChangeNotifier {
           .select()
           .order('at', ascending: false)
           .limit(limit);
-      if (rows is List) {
-        _entries
-          ..clear()
-          ..addAll(rows
-              .whereType<Map>()
-              .map((r) => AuditEntry.fromRow(Map<String, dynamic>.from(r))));
-        notifyListeners();
-      }
-    } catch (e) {
+      _entries
+        ..clear()
+        ..addAll(rows
+            .whereType<Map>()
+            .map((r) => AuditEntry.fromRow(Map<String, dynamic>.from(r))));
+      notifyListeners();
+        } catch (e) {
       _supaErrored = true;
       M7Log.warn('AuditLog', 'load failed: $e');
     }

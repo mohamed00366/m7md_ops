@@ -162,9 +162,9 @@ class _CampUniformSettingsScreenState extends State<CampUniformSettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.08),
+                    color: AppColors.info.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.info.withOpacity(0.30)),
+                    border: Border.all(color: AppColors.info.withValues(alpha: 0.30)),
                   ),
                   child: Row(
                     children: [

@@ -287,9 +287,9 @@ class _DriversTab extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.06),
+            color: AppColors.brand.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.brand.withOpacity(0.25)),
+            border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [
@@ -436,9 +436,9 @@ class _PassengersTab extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.06),
+            color: AppColors.success.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.success.withOpacity(0.25)),
+            border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [
@@ -567,7 +567,7 @@ class _TitleRow extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? accent.withOpacity(0.5)
+                ? accent.withValues(alpha: 0.5)
                 : Theme.of(context).dividerColor,
           ),
         ),
@@ -598,7 +598,7 @@ class _TitleRow extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.15),
+                color: AppColors.warning.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -621,7 +621,7 @@ Widget _statusChip(
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.15),
+      color: color.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Row(

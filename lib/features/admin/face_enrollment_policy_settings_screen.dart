@@ -289,10 +289,10 @@ class _FaceEnrollmentPolicySettingsScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.10),
+              color: AppColors.info.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
               border:
-                  Border.all(color: AppColors.info.withOpacity(0.30)),
+                  Border.all(color: AppColors.info.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -450,10 +450,10 @@ class _FaceEnrollmentPolicySettingsScreenState
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.10),
+                color: AppColors.warning.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                    color: AppColors.warning.withOpacity(0.30)),
+                    color: AppColors.warning.withValues(alpha: 0.30)),
               ),
               child: Row(
                 children: [
@@ -545,10 +545,10 @@ class _JobTitlePickerSheetState extends State<_JobTitlePickerSheet> {
           children: [
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.gold,
                 borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                    BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
                 children: [

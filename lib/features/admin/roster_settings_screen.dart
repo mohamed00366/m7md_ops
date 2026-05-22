@@ -169,7 +169,7 @@ class _SectionLockPastDays extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.1),
+                      color: AppColors.brand.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -409,10 +409,10 @@ class _PatternEditorSheetState extends State<_PatternEditorSheet> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.05),
+                  color: AppColors.brand.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                      Border.all(color: AppColors.brand.withOpacity(0.2)),
+                      Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,8 +491,8 @@ class _PatternEditorSheetState extends State<_PatternEditorSheet> {
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: on
-                        ? AppColors.success.withOpacity(0.06)
-                        : AppColors.textTertiaryLight.withOpacity(0.06),
+                        ? AppColors.success.withValues(alpha: 0.06)
+                        : AppColors.textTertiaryLight.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -712,7 +712,7 @@ class _NumStepper extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.1),
+            color: AppColors.brand.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

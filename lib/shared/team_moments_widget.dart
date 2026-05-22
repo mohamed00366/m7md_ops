@@ -75,21 +75,21 @@ class TeamMomentsWidget extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.gold.withOpacity(0.10),
-            AppColors.brand.withOpacity(0.06),
+            AppColors.gold.withValues(alpha: 0.10),
+            AppColors.brand.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.celebration_outlined,
+              const Icon(Icons.celebration_outlined,
                   color: AppColors.gold, size: 20),
               const SizedBox(width: 6),
               Text(
@@ -226,12 +226,12 @@ class _SectionTitle extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
           decoration: BoxDecoration(
-            color: AppColors.gold.withOpacity(0.20),
+            color: AppColors.gold.withValues(alpha: 0.20),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
             '$count',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,
               color: AppColors.gold,
@@ -381,9 +381,9 @@ class _BaseRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
+          color: Colors.white.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: iconColor.withOpacity(0.2)),
+          border: Border.all(color: iconColor.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -413,7 +413,7 @@ class _BaseRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.15),
+                color: iconColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(

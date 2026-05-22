@@ -222,25 +222,25 @@ class DriverTrackingSettings extends ChangeNotifier {
   DriverTrackingDecision decisionFor(String accountId) {
     final override = _overrides[accountId];
     if (override == true) {
-      return DriverTrackingDecision(
+      return const DriverTrackingDecision(
           tracks: true, reason: DriverTrackingReason.overrideEnforced);
     }
     if (override == false) {
-      return DriverTrackingDecision(
+      return const DriverTrackingDecision(
           tracks: false, reason: DriverTrackingReason.overrideExempt);
     }
     if (!_enabled) {
-      return DriverTrackingDecision(
+      return const DriverTrackingDecision(
           tracks: false,
           reason: DriverTrackingReason.globallyDisabled);
     }
     switch (_scope) {
       case DriverTrackingScope.allDrivers:
-        return DriverTrackingDecision(
+        return const DriverTrackingDecision(
             tracks: true, reason: DriverTrackingReason.scopeAll);
       case DriverTrackingScope.includedOnly:
         if (_accountIds.contains(accountId)) {
-          return DriverTrackingDecision(
+          return const DriverTrackingDecision(
               tracks: true,
               reason: DriverTrackingReason.accountListed);
         }
@@ -251,12 +251,12 @@ class DriverTrackingSettings extends ChangeNotifier {
               reason: DriverTrackingReason.jobTitleListed,
               matchedJobTitleId: jt);
         }
-        return DriverTrackingDecision(
+        return const DriverTrackingDecision(
             tracks: false,
             reason: DriverTrackingReason.notInIncludeList);
       case DriverTrackingScope.excludedOnly:
         if (_accountIds.contains(accountId)) {
-          return DriverTrackingDecision(
+          return const DriverTrackingDecision(
               tracks: false,
               reason: DriverTrackingReason.accountExcluded);
         }
@@ -267,7 +267,7 @@ class DriverTrackingSettings extends ChangeNotifier {
               reason: DriverTrackingReason.jobTitleExcluded,
               matchedJobTitleId: jt);
         }
-        return DriverTrackingDecision(
+        return const DriverTrackingDecision(
             tracks: true,
             reason: DriverTrackingReason.notInExcludeList);
     }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -351,10 +350,10 @@ class _FaceEnrollmentScreenState extends State<FaceEnrollmentScreen>
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.10),
+                        color: AppColors.danger.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppColors.danger.withOpacity(0.30)),
+                            color: AppColors.danger.withValues(alpha: 0.30)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,7 +614,7 @@ class _CaptureView extends StatelessWidget {
                       ? AppColors.success
                       : (i == poseIndex
                           ? Colors.white
-                          : Colors.white.withOpacity(0.3));
+                          : Colors.white.withValues(alpha: 0.3));
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     width: i == poseIndex ? 18 : 8,
@@ -670,12 +669,12 @@ class _CaptureView extends StatelessWidget {
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: statusOk
-                        ? AppColors.success.withOpacity(0.92)
-                        : Colors.black.withOpacity(0.78),
+                        ? AppColors.success.withValues(alpha: 0.92)
+                        : Colors.black.withValues(alpha: 0.78),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -736,7 +735,7 @@ class _OvalGuidePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final color =
-        statusOk ? AppColors.success : Colors.white.withOpacity(0.85);
+        statusOk ? AppColors.success : Colors.white.withValues(alpha: 0.85);
 
     final w = size.width * 0.68;
     final h = size.height * 0.55;
@@ -750,7 +749,7 @@ class _OvalGuidePainter extends CustomPainter {
       ..addOval(ovalRect)
       ..fillType = PathFillType.evenOdd;
     canvas.drawPath(
-        dim, Paint()..color = Colors.black.withOpacity(0.55));
+        dim, Paint()..color = Colors.black.withValues(alpha: 0.55));
 
     // حدود البيضاوي
     canvas.drawOval(
@@ -795,10 +794,10 @@ class _DoneView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.1),
+              color: AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: AppColors.success.withOpacity(0.3)),
+                  color: AppColors.success.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -921,7 +920,7 @@ class _PoseCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Icon(Icons.star,
+                    const Icon(Icons.star,
                         size: 12, color: AppColors.warning),
                     const SizedBox(width: 2),
                     Text(

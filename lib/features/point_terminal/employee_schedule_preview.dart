@@ -164,7 +164,7 @@ class _EmployeeSchedulePreviewState extends State<EmployeeSchedulePreview> {
                   gradient: LinearGradient(
                     colors: [
                       headerColor,
-                      headerColor.withOpacity(0.7),
+                      headerColor.withValues(alpha: 0.7),
                     ],
                   ),
                   borderRadius: const BorderRadius.vertical(
@@ -319,16 +319,16 @@ class _EmployeeSchedulePreviewState extends State<EmployeeSchedulePreview> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 20),

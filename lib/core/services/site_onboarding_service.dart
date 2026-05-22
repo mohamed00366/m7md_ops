@@ -114,7 +114,7 @@ class SiteOnboardingService extends ChangeNotifier {
           .select()
           .eq('id', siteId)
           .single();
-      final updated = SiteOnboarding.fromRow(row as Map<String, dynamic>);
+      final updated = SiteOnboarding.fromRow(row);
       final i = _items.indexWhere((s) => s.id == siteId);
       if (i != -1) _items[i] = updated;
       notifyListeners();

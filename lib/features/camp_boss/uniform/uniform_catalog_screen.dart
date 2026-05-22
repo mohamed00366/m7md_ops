@@ -61,8 +61,9 @@ class _UniformCatalogScreenState extends State<UniformCatalogScreen> {
     for (final u in all) {
       final stock = repo.uniformCurrentStock(u.id,
           countryId: auth.activeCountryId);
-      if (stock <= 0) outCount++;
-      else if (stock < u.minStock) lowCount++;
+      if (stock <= 0) {
+        outCount++;
+      } else if (stock < u.minStock) lowCount++;
     }
 
     final filtered = all.where((u) {
@@ -409,7 +410,7 @@ class _BulkUniformItemsScreenState extends State<_BulkUniformItemsScreen> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: BorderSide(
-                      color: UniformPalette.primary.withOpacity(0.5)),
+                      color: UniformPalette.primary.withValues(alpha: 0.5)),
                   foregroundColor: UniformPalette.primary,
                 ),
               ),
@@ -558,9 +559,9 @@ class _BulkUniformItemsScreenState extends State<_BulkUniformItemsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.08),
+                color: AppColors.info.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: AppColors.info.withOpacity(0.25)),
+                border: Border.all(color: AppColors.info.withValues(alpha: 0.25)),
               ),
               child: Row(
                 children: [
@@ -677,7 +678,7 @@ class _CatalogItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: CampPalette.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -689,7 +690,7 @@ class _CatalogItemCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.checkroom, color: color, size: 22),
@@ -790,7 +791,7 @@ class _CatalogItemCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: pct,
                       minHeight: 6,
-                      backgroundColor: color.withOpacity(0.10),
+                      backgroundColor: color.withValues(alpha: 0.10),
                       valueColor: AlwaysStoppedAnimation<Color>(color),
                     ),
                   ),
@@ -826,7 +827,7 @@ class _MiniBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
@@ -855,7 +856,7 @@ class _MetaPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(label,

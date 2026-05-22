@@ -168,7 +168,7 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
               // Header
               Row(
                 children: [
-                  Icon(Icons.preview_outlined,
+                  const Icon(Icons.preview_outlined,
                       color: AppColors.info, size: 22),
                   const SizedBox(width: 6),
                   Expanded(
@@ -192,12 +192,12 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.08),
+                  color: AppColors.info.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline,
+                    const Icon(Icons.info_outline,
                         color: AppColors.info, size: 14),
                     const SizedBox(width: 4),
                     Expanded(
@@ -288,7 +288,7 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Row(
                 children: [
-                  Icon(Icons.flash_on, color: AppColors.warning, size: 20),
+                  const Icon(Icons.flash_on, color: AppColors.warning, size: 20),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -756,7 +756,7 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.warning,
                         side: BorderSide(
-                            color: AppColors.warning.withOpacity(0.5)),
+                            color: AppColors.warning.withValues(alpha: 0.5)),
                       ),
                     ),
                   ),
@@ -764,11 +764,11 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.warning.withOpacity(0.06),
+                        color: AppColors.warning.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                             color:
-                                AppColors.warning.withOpacity(0.30)),
+                                AppColors.warning.withValues(alpha: 0.30)),
                       ),
                       child: Row(children: [
                         const Icon(Icons.info_outline,
@@ -805,7 +805,7 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.brand,
                       side:
-                          BorderSide(color: AppColors.brand.withOpacity(0.40)),
+                          BorderSide(color: AppColors.brand.withValues(alpha: 0.40)),
                     ),
                   ),
 
@@ -820,10 +820,10 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.info.withOpacity(0.06),
+                        color: AppColors.info.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppColors.info.withOpacity(0.30)),
+                            color: AppColors.info.withValues(alpha: 0.30)),
                       ),
                       child: Row(children: [
                         const Icon(Icons.info_outline,
@@ -859,7 +859,7 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
                                 height: 28,
                                 decoration: BoxDecoration(
                                   color:
-                                      AppColors.brand.withOpacity(0.12),
+                                      AppColors.brand.withValues(alpha: 0.12),
                                   borderRadius:
                                       BorderRadius.circular(6),
                                 ),
@@ -927,7 +927,7 @@ class _TemplateEditorSheetState extends State<TemplateEditorSheet> {
           // Bottom actions
           Container(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: AppPalette.border)),
             ),
@@ -1009,7 +1009,7 @@ class _RoleSelector extends StatelessWidget {
               }
               onChanged(selected);
             },
-            selectedColor: AppColors.brand.withOpacity(0.15),
+            selectedColor: AppColors.brand.withValues(alpha: 0.15),
             checkmarkColor: AppColors.brand,
           ),
       ],
@@ -1052,7 +1052,7 @@ class _WorkflowStepEditor extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.brand.withOpacity(0.30)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1061,7 +1061,7 @@ class _WorkflowStepEditor extends StatelessWidget {
             Container(
               width: 26,
               height: 26,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.brand,
                 shape: BoxShape.circle,
               ),
@@ -1233,13 +1233,13 @@ class _ActorTypeSelector extends StatelessWidget {
     final s = AppStrings.of(context);
     final isAr = s.isAr;
     final options = <_ActorOption>[
-      _ActorOption(
+      const _ActorOption(
         key: 'role',
         labelAr: 'حسب الدور',
         labelEn: 'By Role',
         icon: Icons.shield_outlined,
       ),
-      _ActorOption(
+      const _ActorOption(
         key: 'auto_chain',
         labelAr: 'تلقائي (هرم)',
         labelEn: 'Auto-chain',
@@ -1268,13 +1268,13 @@ class _ActorTypeSelector extends StatelessWidget {
                         vertical: 8, horizontal: 8),
                     decoration: BoxDecoration(
                       color: current == o.key
-                          ? AppColors.brand.withOpacity(0.15)
-                          : Colors.grey.withOpacity(0.06),
+                          ? AppColors.brand.withValues(alpha: 0.15)
+                          : Colors.grey.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: current == o.key
                             ? AppColors.brand
-                            : Colors.grey.withOpacity(0.3),
+                            : Colors.grey.withValues(alpha: 0.3),
                         width: current == o.key ? 1.5 : 1,
                       ),
                     ),
@@ -1344,7 +1344,7 @@ class _MinApprovalPowerSelector extends StatelessWidget {
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.06),
+        color: AppColors.brand.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -1421,7 +1421,7 @@ class _PresetCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+          border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -1429,7 +1429,7 @@ class _PresetCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.12),
+                color: AppColors.warning.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
@@ -1487,14 +1487,14 @@ class _PresetCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.brand.withOpacity(0.10),
+                            color: AppColors.brand.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             isAr
                                 ? '${i + 1}. ${preset.steps[i]['label_ar'] ?? "?"}'
                                 : '${i + 1}. ${preset.steps[i]['label_en'] ?? "?"}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w700,
                               color: AppColors.brand,
@@ -1512,7 +1512,7 @@ class _PresetCard extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Icon(Icons.arrow_forward_ios,
-                size: 12, color: AppColors.warning.withOpacity(0.6)),
+                size: 12, color: AppColors.warning.withValues(alpha: 0.6)),
           ],
         ),
       ),
@@ -1532,7 +1532,7 @@ class _Section extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.brand.withOpacity(0.10),
+          color: AppColors.brand.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(

@@ -2,6 +2,7 @@
 /// العلاقات الهرمية:
 ///   Country → City → Area
 ///   BusinessType (مستقل)
+library;
 
 import '../core/l10n/ar_to_ur_dictionary.dart' as ar2ur;
 

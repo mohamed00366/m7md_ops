@@ -219,10 +219,10 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
               // ===== رَأس السَند (مَع اللوغو) =====
               pw.Container(
                 padding: const pw.EdgeInsets.all(12),
-                decoration: pw.BoxDecoration(
+                decoration: const pw.BoxDecoration(
                   color: pw_pdf.PdfColors.indigo900,
                   borderRadius:
-                      const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      pw.BorderRadius.all(pw.Radius.circular(6)),
                 ),
                 child: pw.Row(
                   children: [
@@ -232,9 +232,9 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                         width: 50,
                         height: 50,
                         padding: const pw.EdgeInsets.all(4),
-                        decoration: pw.BoxDecoration(
+                        decoration: const pw.BoxDecoration(
                           color: pw_pdf.PdfColors.white,
-                          borderRadius: const pw.BorderRadius.all(
+                          borderRadius: pw.BorderRadius.all(
                               pw.Radius.circular(6)),
                         ),
                         child: pw.Image(pw.ImageProxy(logo)),
@@ -260,9 +260,9 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                     pw.Container(
                       padding: const pw.EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
-                      decoration: pw.BoxDecoration(
+                      decoration: const pw.BoxDecoration(
                         color: pw_pdf.PdfColors.white,
-                        borderRadius: const pw.BorderRadius.all(
+                        borderRadius: pw.BorderRadius.all(
                             pw.Radius.circular(4)),
                       ),
                       child: pw.Text(lines.first.issueNo,
@@ -292,7 +292,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Text('المُوَظَّف',
-                              style: pw.TextStyle(
+                              style: const pw.TextStyle(
                                   fontSize: 9,
                                   color: pw_pdf.PdfColors.grey700)),
                           pw.SizedBox(height: 3),
@@ -301,12 +301,12 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                                   fontSize: 14,
                                   fontWeight: pw.FontWeight.bold)),
                           pw.Text('الكود: ${emp?.code ?? "—"}',
-                              style: pw.TextStyle(
+                              style: const pw.TextStyle(
                                   fontSize: 10,
                                   color: pw_pdf.PdfColors.grey800)),
                           if (emp?.jobTitle.isNotEmpty == true)
                             pw.Text('المُسَمَّى: ${emp!.jobTitle}',
-                                style: pw.TextStyle(
+                                style: const pw.TextStyle(
                                     fontSize: 10,
                                     color: pw_pdf.PdfColors.grey800)),
                         ],
@@ -316,7 +316,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text('التاريخ',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: pw_pdf.PdfColors.grey700)),
                         pw.SizedBox(height: 3),
@@ -329,7 +329,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                         if (country != null) ...[
                           pw.SizedBox(height: 4),
                           pw.Text('الدَولة: ${country.nameAr}',
-                              style: pw.TextStyle(
+                              style: const pw.TextStyle(
                                   fontSize: 9,
                                   color: pw_pdf.PdfColors.grey800)),
                         ],
@@ -419,7 +419,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                             fontWeight: pw.FontWeight.bold,
                             fontSize: 11)),
                     pw.Text('المُسلِّم: ${lines.first.issuedByName ?? "—"}',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 10,
                             color: pw_pdf.PdfColors.grey800)),
                   ],
@@ -436,7 +436,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                     border: pw.Border.all(color: pw_pdf.PdfColors.yellow200),
                   ),
                   child: pw.Text('مُلاحَظات: ${lines.first.notes}',
-                      style: pw.TextStyle(fontSize: 9)),
+                      style: const pw.TextStyle(fontSize: 9)),
                 ),
               ],
 
@@ -450,14 +450,14 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('تَوقيع المُوَظَّف',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: pw_pdf.PdfColors.grey700)),
                         pw.SizedBox(height: 4),
                         pw.Container(
                           height: 70,
                           width: 200,
-                          decoration: pw.BoxDecoration(
+                          decoration: const pw.BoxDecoration(
                             border: pw.Border(
                                 bottom: pw.BorderSide(
                                     color: pw_pdf.PdfColors.grey700)),
@@ -469,7 +469,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                         ),
                         pw.SizedBox(height: 2),
                         pw.Text(emp?.fullName ?? '—',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: pw_pdf.PdfColors.grey800)),
                         if (lines.first.signedAt != null)
@@ -488,13 +488,13 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('تَوقيع المُسلِّم',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: pw_pdf.PdfColors.grey700)),
                         pw.SizedBox(height: 4),
                         pw.Container(
                           height: 70,
-                          decoration: pw.BoxDecoration(
+                          decoration: const pw.BoxDecoration(
                             border: pw.Border(
                                 bottom: pw.BorderSide(
                                     color: pw_pdf.PdfColors.grey700)),
@@ -502,7 +502,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                         ),
                         pw.SizedBox(height: 2),
                         pw.Text(lines.first.issuedByName ?? '—',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: pw_pdf.PdfColors.grey800)),
                       ],
@@ -745,9 +745,9 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.08),
+                color: AppColors.warning.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.warning.withOpacity(0.30)),
+                border: Border.all(color: AppColors.warning.withValues(alpha: 0.30)),
               ),
               child: Row(
                 children: [
@@ -792,7 +792,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.12),
+                          color: AppColors.success.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -935,7 +935,7 @@ class _UniformIssueVoucherState extends State<UniformIssueVoucher> {
             width: 22,
             height: 22,
             decoration: BoxDecoration(
-              color: UniformPalette.primary.withOpacity(0.15),
+              color: UniformPalette.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,

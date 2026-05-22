@@ -51,7 +51,7 @@ class SupervisorDashboard extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   AppColors.roleSupervisor,
-                  AppColors.roleSupervisor.withOpacity(0.7),
+                  AppColors.roleSupervisor.withValues(alpha: 0.7),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -91,7 +91,7 @@ class SupervisorDashboard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -153,7 +153,7 @@ class SupervisorDashboard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.1),
+                        color: AppColors.danger.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -205,7 +205,7 @@ class SupervisorDashboard extends StatelessWidget {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: _statusColor(s).withOpacity(0.15),
+        color: _statusColor(s).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(_statusIconData(s), color: _statusColor(s)),

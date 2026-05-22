@@ -206,7 +206,7 @@ class _LeaveApprovalsScreenState extends State<LeaveApprovalsScreen>
                 children: [
                   CircleAvatar(
                     backgroundColor:
-                        AppColors.brand.withOpacity(0.15),
+                        AppColors.brand.withValues(alpha: 0.15),
                     child: Text(
                       emp?.initials ?? '?',
                       style: const TextStyle(
@@ -238,7 +238,7 @@ class _LeaveApprovalsScreenState extends State<LeaveApprovalsScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: _statusColor(r.status).withOpacity(0.15),
+                      color: _statusColor(r.status).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -289,7 +289,7 @@ class _LeaveApprovalsScreenState extends State<LeaveApprovalsScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.15),
+                        color: AppColors.brand.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -576,7 +576,7 @@ class _LateReturnCard extends StatelessWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: color.withOpacity(0.04),
+      color: color.withValues(alpha: 0.04),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -587,7 +587,7 @@ class _LateReturnCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: color.withOpacity(0.2),
+                  backgroundColor: color.withValues(alpha: 0.2),
                   child: Icon(Icons.person, color: color, size: 20),
                 ),
                 const SizedBox(width: 10),
@@ -630,7 +630,7 @@ class _LateReturnCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: color.withOpacity(0.3)),
+                border: Border.all(color: color.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -950,7 +950,7 @@ class _LateReturnCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.1),
+                  color: AppColors.info.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(

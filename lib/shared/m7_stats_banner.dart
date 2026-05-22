@@ -23,14 +23,14 @@ class M7StatsBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: _interleaveDividers(
@@ -47,7 +47,7 @@ class M7StatsBanner extends StatelessWidget {
       out.add(items[i]);
       if (i < items.length - 1) {
         out.add(Container(
-            width: 1, height: 38, color: Colors.grey.withOpacity(0.2)));
+            width: 1, height: 38, color: Colors.grey.withValues(alpha: 0.2)));
       }
     }
     return out;

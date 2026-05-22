@@ -38,7 +38,7 @@ class EmployeeDeductions extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 AppColors.danger,
-                AppColors.danger.withOpacity(0.7),
+                AppColors.danger.withValues(alpha: 0.7),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -82,7 +82,7 @@ class EmployeeDeductions extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.danger.withOpacity(0.15),
+                      color: AppColors.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.money_off, color: AppColors.danger),

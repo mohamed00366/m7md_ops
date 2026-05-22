@@ -56,9 +56,9 @@ class _OrgBuilderScreenState extends State<OrgBuilderScreen>
           margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.06),
+            color: AppColors.brand.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+            border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -281,13 +281,13 @@ class _DeptCard extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isHovered
-            ? AppColors.brand.withOpacity(0.18)
+            ? AppColors.brand.withValues(alpha: 0.18)
             : Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isHovered
               ? AppColors.brand
-              : Colors.grey.withOpacity(0.3),
+              : Colors.grey.withValues(alpha: 0.3),
           width: isHovered ? 2 : 1,
         ),
       ),
@@ -319,7 +319,7 @@ class _DeptCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.15),
+                color: AppColors.brand.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -529,11 +529,11 @@ class _JobCard extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isHovered
-            ? color.withOpacity(0.20)
+            ? color.withValues(alpha: 0.20)
             : Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isHovered ? color : Colors.grey.withOpacity(0.3),
+          color: isHovered ? color : Colors.grey.withValues(alpha: 0.3),
           width: isHovered ? 2 : 1,
         ),
       ),
@@ -574,7 +574,7 @@ class _JobCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -641,13 +641,13 @@ class _TopLevelDropZone extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isHovered
-              ? AppColors.success.withOpacity(0.15)
-              : Colors.grey.withOpacity(0.06),
+              ? AppColors.success.withValues(alpha: 0.15)
+              : Colors.grey.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isHovered
                 ? AppColors.success
-                : Colors.grey.withOpacity(0.4),
+                : Colors.grey.withValues(alpha: 0.4),
             style: BorderStyle.solid,
             width: isHovered ? 2 : 1,
           ),
@@ -693,7 +693,7 @@ class _DraggingChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: AppColors.brand.withOpacity(0.4),
+              color: AppColors.brand.withValues(alpha: 0.4),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

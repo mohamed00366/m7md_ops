@@ -67,16 +67,14 @@ class _AccountReportScreenState extends State<AccountReportScreen> {
           .eq('account_id', widget.account.id)
           .order('last_seen_at', ascending: false)
           .limit(20);
-      if (rows is List) {
-        final list = rows
-            .whereType<Map>()
-            .map((r) => _SessionRow.fromMap(Map<String, dynamic>.from(r)))
-            .toList();
-        _sessions = list;
-        _totalSessions = list.length;
-        _activeSessions = list.where((s) => s.isActive).length;
-      }
-    } catch (e) {
+      final list = rows
+          .whereType<Map>()
+          .map((r) => _SessionRow.fromMap(Map<String, dynamic>.from(r)))
+          .toList();
+      _sessions = list;
+      _totalSessions = list.length;
+      _activeSessions = list.where((s) => s.isActive).length;
+        } catch (e) {
       M7Log.error('AccountReport', 'sessions', error: e);
     }
   }
@@ -89,14 +87,12 @@ class _AccountReportScreenState extends State<AccountReportScreen> {
           .from('notifications')
           .select('id,is_read')
           .eq('user_id', widget.account.id);
-      if (rows is List) {
-        _notificationsTotal = rows.length;
-        _notificationsUnread = rows
-            .whereType<Map>()
-            .where((r) => r['is_read'] == false || r['is_read'] == null)
-            .length;
-      }
-    } catch (e) {
+      _notificationsTotal = rows.length;
+      _notificationsUnread = rows
+          .whereType<Map>()
+          .where((r) => r['is_read'] == false || r['is_read'] == null)
+          .length;
+        } catch (e) {
       // الجَدول قد لا يَكون مَوجوداً في كُلّ البيئات — نَتَجاهَل بِصَمت
       M7Log.warn('AccountReport', 'notifications: $e');
     }
@@ -201,7 +197,7 @@ class _Section extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +205,7 @@ class _Section extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12)),
             ),
@@ -275,7 +271,7 @@ class _Row extends StatelessWidget {
 
 String _fmtDate(DateTime? d, {bool withTime = false}) {
   if (d == null) return '—';
-  final two = (int n) => n.toString().padLeft(2, '0');
+  two(int n) => n.toString().padLeft(2, '0');
   final base = '${d.year}-${two(d.month)}-${two(d.day)}';
   if (!withTime) return base;
   return '$base ${two(d.hour)}:${two(d.minute)}';
@@ -297,15 +293,15 @@ class _AccountHeader extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brand.withOpacity(0.10),
-            AppColors.gold.withOpacity(0.06),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.gold.withValues(alpha: 0.06),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         border:
-            Border.all(color: AppColors.gold.withOpacity(0.30), width: 1),
+            Border.all(color: AppColors.gold.withValues(alpha: 0.30), width: 1),
       ),
       child: Row(
         children: [
@@ -314,8 +310,8 @@ class _AccountHeader extends StatelessWidget {
             height: 60,
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [
-                AppColors.gold.withOpacity(0.40),
-                AppColors.gold.withOpacity(0.15),
+                AppColors.gold.withValues(alpha: 0.40),
+                AppColors.gold.withValues(alpha: 0.15),
               ]),
               shape: BoxShape.circle,
             ),
@@ -397,9 +393,9 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.40)),
+        border: Border.all(color: color.withValues(alpha: 0.40)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -511,10 +507,10 @@ class _RolePermsSection extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: Colors.deepPurple.withOpacity(0.10),
+                        color: Colors.deepPurple.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: Colors.deepPurple.withOpacity(0.30)),
+                            color: Colors.deepPurple.withValues(alpha: 0.30)),
                       ),
                       child: Text(
                         r.nameAr.isNotEmpty
@@ -763,7 +759,7 @@ class _SessionsSection extends StatelessWidget {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        '${s.deviceLabel ?? s.deviceName ?? s.deviceId}',
+                        s.deviceLabel ?? s.deviceName ?? s.deviceId,
                         style: const TextStyle(
                             fontFamily: 'monospace', fontSize: 11),
                         overflow: TextOverflow.ellipsis,

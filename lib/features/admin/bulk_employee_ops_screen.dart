@@ -164,7 +164,7 @@ class _BulkEmployeeOpsScreenState extends State<BulkEmployeeOpsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             color: _selected.isEmpty
                 ? Colors.grey[100]
-                : AppColors.brand.withOpacity(0.10),
+                : AppColors.brand.withValues(alpha: 0.10),
             child: Row(
               children: [
                 Checkbox(
@@ -249,7 +249,7 @@ class _BulkEmployeeOpsScreenState extends State<BulkEmployeeOpsScreen> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, -1),
                     ),
@@ -521,13 +521,13 @@ class _EmpRow extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.brand.withOpacity(0.10)
+              ? AppColors.brand.withValues(alpha: 0.10)
               : Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: selected
                 ? AppColors.brand
-                : Colors.grey.withOpacity(0.25),
+                : Colors.grey.withValues(alpha: 0.25),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -539,7 +539,7 @@ class _EmpRow extends StatelessWidget {
             ),
             CircleAvatar(
               radius: 16,
-              backgroundColor: AppColors.brand.withOpacity(0.15),
+              backgroundColor: AppColors.brand.withValues(alpha: 0.15),
               child: Text(
                 employee.initials,
                 style: const TextStyle(
@@ -575,7 +575,7 @@ class _EmpRow extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: AppColors.danger.withOpacity(0.15),
+                            color: AppColors.danger.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(
@@ -649,12 +649,12 @@ class _DropFilter<T> extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: value == null ? Colors.grey[100] : AppColors.brand.withOpacity(0.10),
+          color: value == null ? Colors.grey[100] : AppColors.brand.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: value == null
-                ? Colors.grey.withOpacity(0.3)
-                : AppColors.brand.withOpacity(0.5),
+                ? Colors.grey.withValues(alpha: 0.3)
+                : AppColors.brand.withValues(alpha: 0.5),
           ),
         ),
         child: Row(

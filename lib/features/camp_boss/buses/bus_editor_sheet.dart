@@ -247,7 +247,7 @@ class _BusEditorSheetState extends State<BusEditorSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: BusesPalette.primary.withOpacity(0.15),
+                    color: BusesPalette.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.directions_bus,
@@ -273,11 +273,11 @@ class _BusEditorSheetState extends State<BusEditorSheet> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: BusesPalette.info.withOpacity(0.10),
+                          color: BusesPalette.info.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                               color:
-                                  BusesPalette.info.withOpacity(0.30)),
+                                  BusesPalette.info.withValues(alpha: 0.30)),
                         ),
                         child: Row(
                           children: [
@@ -613,12 +613,12 @@ class _TimePickButton extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: hasTime
-              ? BusesPalette.primary.withOpacity(0.08)
+              ? BusesPalette.primary.withValues(alpha: 0.08)
               : CampPalette.input,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
               color: hasTime
-                  ? BusesPalette.primary.withOpacity(0.30)
+                  ? BusesPalette.primary.withValues(alpha: 0.30)
                   : CampPalette.border),
         ),
         child: Row(

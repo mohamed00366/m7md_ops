@@ -55,9 +55,9 @@ class AmanaVoucherPdf {
             // رَأس
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              decoration: pw.BoxDecoration(
+              decoration: const pw.BoxDecoration(
                 color: pw_pdf.PdfColors.teal700,
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
               ),
               child: pw.Row(
                 children: [
@@ -66,10 +66,10 @@ class AmanaVoucherPdf {
                       width: 36,
                       height: 36,
                       padding: const pw.EdgeInsets.all(3),
-                      decoration: pw.BoxDecoration(
+                      decoration: const pw.BoxDecoration(
                         color: pw_pdf.PdfColors.white,
                         borderRadius:
-                            const pw.BorderRadius.all(pw.Radius.circular(4)),
+                            pw.BorderRadius.all(pw.Radius.circular(4)),
                       ),
                       child: pw.Image(pw.ImageProxy(logo)),
                     ),
@@ -94,9 +94,9 @@ class AmanaVoucherPdf {
                   pw.Container(
                     padding: const pw.EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
-                    decoration: pw.BoxDecoration(
+                    decoration: const pw.BoxDecoration(
                       color: pw_pdf.PdfColors.white,
-                      borderRadius: const pw.BorderRadius.all(
+                      borderRadius: pw.BorderRadius.all(
                           pw.Radius.circular(3)),
                     ),
                     child: pw.Text(voucher.voucherNumber,
@@ -125,14 +125,14 @@ class AmanaVoucherPdf {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('المُوَظَّف',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 8, color: pw_pdf.PdfColors.grey700)),
                         pw.Text(emp?.fullName ?? '—',
                             style: pw.TextStyle(
                                 fontSize: 12,
                                 fontWeight: pw.FontWeight.bold)),
                         pw.Text('الكود: ${emp?.code ?? "—"}',
-                            style: pw.TextStyle(fontSize: 9)),
+                            style: const pw.TextStyle(fontSize: 9)),
                       ],
                     ),
                   ),
@@ -140,7 +140,7 @@ class AmanaVoucherPdf {
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
                       pw.Text('التاريخ',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                               fontSize: 8, color: pw_pdf.PdfColors.grey700)),
                       pw.Text(_fmtDate(voucher.confirmedAt),
                           style: pw.TextStyle(
@@ -222,7 +222,7 @@ class AmanaVoucherPdf {
                   border: pw.Border.all(color: pw_pdf.PdfColors.yellow300),
                 ),
                 child: pw.Text('مُلاحَظة: ${voucher.note}',
-                    style: pw.TextStyle(fontSize: 9)),
+                    style: const pw.TextStyle(fontSize: 9)),
               ),
             ],
 
@@ -236,7 +236,7 @@ class AmanaVoucherPdf {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('تَوقيع المُوَظَّف',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                               fontSize: 8,
                               color: pw_pdf.PdfColors.grey700)),
                       pw.Container(
@@ -251,7 +251,7 @@ class AmanaVoucherPdf {
                             : null,
                       ),
                       pw.Text(emp?.fullName ?? '—',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                               fontSize: 8,
                               color: pw_pdf.PdfColors.grey800)),
                     ],
@@ -263,7 +263,7 @@ class AmanaVoucherPdf {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('تَوقيع الكَمب بُوص',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                               fontSize: 8,
                               color: pw_pdf.PdfColors.grey700)),
                       pw.Container(

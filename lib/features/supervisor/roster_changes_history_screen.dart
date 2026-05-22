@@ -142,9 +142,9 @@ class _RosterChangesHistoryScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
-          color: c.withOpacity(0.10),
+          color: c.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: c.withOpacity(0.3)),
+          border: Border.all(color: c.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -264,7 +264,7 @@ class _RosterChangesHistoryScreenState
                   padding: const EdgeInsets.symmetric(
                       horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
+                    color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(l.severity.labelAr(),
@@ -298,7 +298,7 @@ class _RosterChangesHistoryScreenState
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(afterText,
@@ -314,7 +314,7 @@ class _RosterChangesHistoryScreenState
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.05),
+                  color: AppColors.brand.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(

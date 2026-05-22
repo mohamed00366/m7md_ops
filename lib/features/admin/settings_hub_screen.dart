@@ -121,7 +121,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final mutedColor = theme.textTheme.bodySmall?.color ??
         (isDark ? Colors.white70 : Colors.grey[700]!);
-    final fadedColor = theme.textTheme.bodySmall?.color?.withOpacity(0.6) ??
+    final fadedColor = theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6) ??
         (isDark ? Colors.white54 : Colors.grey[600]!);
 
     return Scaffold(
@@ -135,7 +135,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.settings_outlined,
+                    const Icon(Icons.settings_outlined,
                         color: AppColors.brand, size: 22),
                     const SizedBox(width: 6),
                     Text(
@@ -148,12 +148,12 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
                       padding:
                           const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.10),
+                        color: AppColors.brand.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         isAr ? '${all.length} إعداد' : '${all.length} settings',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.brand,
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
@@ -258,7 +258,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         decoration: BoxDecoration(
           color: selected
               ? AppColors.brand
-              : theme.dividerColor.withOpacity(0.4),
+              : theme.dividerColor.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? AppColors.brand : theme.dividerColor,
@@ -299,7 +299,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
             decoration: BoxDecoration(
-              color: theme.dividerColor.withOpacity(0.5),
+              color: theme.dividerColor.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -1133,14 +1133,14 @@ class _SetupStatusBannerState extends State<_SetupStatusBanner> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            scoreColor.withOpacity(theme.brightness == Brightness.dark ? 0.18 : 0.10),
-            scoreColor.withOpacity(theme.brightness == Brightness.dark ? 0.08 : 0.04),
+            scoreColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.18 : 0.10),
+            scoreColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.08 : 0.04),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: scoreColor.withOpacity(0.30)),
+        border: Border.all(color: scoreColor.withValues(alpha: 0.30)),
       ),
       child: Column(
         children: [
@@ -1155,7 +1155,7 @@ class _SetupStatusBannerState extends State<_SetupStatusBanner> {
                     child: CircularProgressIndicator(
                       value: score / 100,
                       strokeWidth: 4,
-                      backgroundColor: theme.dividerColor.withOpacity(0.5),
+                      backgroundColor: theme.dividerColor.withValues(alpha: 0.5),
                       valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
                     ),
                   ),
@@ -1295,14 +1295,14 @@ class _StatusPill extends StatelessWidget {
             ? AppColors.warning
             : AppColors.danger;
     final bgColor = status == _Status.ok
-        ? (isDark ? color.withOpacity(0.15) : Colors.white)
-        : color.withOpacity(isDark ? 0.18 : 0.08);
+        ? (isDark ? color.withValues(alpha: 0.15) : Colors.white)
+        : color.withValues(alpha: isDark ? 0.18 : 0.08);
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Column(
         children: [
@@ -1351,7 +1351,7 @@ class _SettingCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: setting.color.withOpacity(0.3)),
+        border: Border.all(color: setting.color.withValues(alpha: 0.3)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
@@ -1375,7 +1375,7 @@ class _SettingCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: setting.color.withOpacity(0.15),
+                  color: setting.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(setting.icon, color: setting.color, size: 22),
@@ -1403,7 +1403,7 @@ class _SettingCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Icon(Icons.arrow_forward_ios,
-                  size: 12, color: setting.color.withOpacity(0.6)),
+                  size: 12, color: setting.color.withValues(alpha: 0.6)),
             ],
           ),
         ),

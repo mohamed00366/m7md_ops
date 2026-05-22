@@ -90,7 +90,7 @@ class _AdminHelpCenterState extends State<AdminHelpCenter> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.10),
+                        color: AppColors.brand.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -197,11 +197,11 @@ class _AdminHelpCenterState extends State<AdminHelpCenter> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brand : Colors.grey.withOpacity(0.10),
+          color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color:
-                selected ? AppColors.brand : Colors.grey.withOpacity(0.4),
+                selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.4),
           ),
         ),
         child: Text(
@@ -234,7 +234,7 @@ class _AdminHelpCenterState extends State<AdminHelpCenter> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.15),
+              color: Colors.grey.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -249,7 +249,7 @@ class _AdminHelpCenterState extends State<AdminHelpCenter> {
           Expanded(
             child: Container(
               height: 1,
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
             ),
           ),
         ],
@@ -489,7 +489,7 @@ class _FeatureCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: feature.color.withOpacity(0.3)),
+        border: Border.all(color: feature.color.withValues(alpha: 0.3)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
@@ -514,7 +514,7 @@ class _FeatureCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: feature.color.withOpacity(0.15),
+                  color: feature.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(feature.icon, color: feature.color, size: 22),

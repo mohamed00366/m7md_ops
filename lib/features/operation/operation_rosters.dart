@@ -185,7 +185,7 @@ class _RosterCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.1),
+                  color: AppColors.brand.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -203,7 +203,7 @@ class _RosterCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.danger.withOpacity(0.08),
+                color: AppColors.danger.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -253,7 +253,7 @@ class _RosterCard extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.warning,
                     side: BorderSide(
-                        color: AppColors.warning.withOpacity(0.5)),
+                        color: AppColors.warning.withValues(alpha: 0.5)),
                   ),
                 ),
               ],
@@ -1149,9 +1149,9 @@ class _ReviewerFlagRowState extends State<_ReviewerFlagRow> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1162,7 +1162,7 @@ class _ReviewerFlagRowState extends State<_ReviewerFlagRow> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.12),
+                  color: AppColors.brand.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(widget.dayLabel,
@@ -1237,9 +1237,9 @@ class _FlaggedShiftsPanel extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.06),
+        color: AppColors.warning.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warning.withOpacity(0.4)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1247,7 +1247,7 @@ class _FlaggedShiftsPanel extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.15),
+              color: AppColors.warning.withValues(alpha: 0.15),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(11)),
             ),
@@ -1297,7 +1297,7 @@ class _FlaggedShiftsPanel extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.brand.withOpacity(0.1),
+                              color: AppColors.brand.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -1315,7 +1315,7 @@ class _FlaggedShiftsPanel extends StatelessWidget {
                           Text(a.reviewerComment!,
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: AppColors.warning.withOpacity(0.9))),
+                                  color: AppColors.warning.withValues(alpha: 0.9))),
                         ],
                       ],
                     ),
@@ -1427,7 +1427,7 @@ class RosterAuditTimeline extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
-                                    color: AppColors.info.withOpacity(0.08),
+                                    color: AppColors.info.withValues(alpha: 0.08),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -1515,7 +1515,7 @@ class _MiniStat extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -1529,7 +1529,7 @@ class _MiniStat extends StatelessWidget {
             const SizedBox(width: 4),
             Text(label,
                 style: TextStyle(
-                    color: color.withOpacity(0.85), fontSize: 10)),
+                    color: color.withValues(alpha: 0.85), fontSize: 10)),
           ],
         ),
       ),
@@ -1549,7 +1549,7 @@ class _Stat extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -1604,9 +1604,9 @@ class _ConflictReport extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.success.withOpacity(0.08),
+          color: AppColors.success.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.success.withOpacity(0.3)),
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -1632,10 +1632,10 @@ class _ConflictReport extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       decoration: BoxDecoration(
-        color: AppColors.danger.withOpacity(0.05),
+        color: AppColors.danger.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: AppColors.danger.withOpacity(0.4), width: 1.5),
+            Border.all(color: AppColors.danger.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1643,7 +1643,7 @@ class _ConflictReport extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.danger.withOpacity(0.15),
+              color: AppColors.danger.withValues(alpha: 0.15),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(11)),
             ),
@@ -1684,7 +1684,7 @@ class _ConflictReport extends StatelessWidget {
                 color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(8),
                 border:
-                    Border.all(color: AppColors.danger.withOpacity(0.3)),
+                    Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1707,7 +1707,7 @@ class _ConflictReport extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.brand.withOpacity(0.1),
+                          color: AppColors.brand.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -1754,7 +1754,7 @@ class _ConflictReport extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
-                            color: AppColors.danger.withOpacity(0.1),
+                            color: AppColors.danger.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(

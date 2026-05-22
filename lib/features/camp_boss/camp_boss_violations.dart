@@ -106,7 +106,7 @@ class _CampBossViolationsState extends State<CampBossViolations> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: CampPalette.red.withOpacity(0.15),
+                  color: CampPalette.red.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.assignment_outlined,
@@ -135,7 +135,7 @@ class _CampBossViolationsState extends State<CampBossViolations> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: CampPalette.border.withOpacity(0.3),
+                  color: CampPalette.border.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.bolt, color: Colors.grey),
@@ -242,7 +242,7 @@ class _ViolationCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(_icon(), color: color, size: 22),

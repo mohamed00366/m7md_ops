@@ -263,9 +263,9 @@ class _CampBossLaundryDashboardState extends State<CampBossLaundryDashboard> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +347,7 @@ class _CampBossLaundryDashboardState extends State<CampBossLaundryDashboard> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.20)),
+            border: Border.all(color: Colors.grey.withValues(alpha: 0.20)),
           ),
           child: Row(
             children: [
@@ -433,7 +433,7 @@ class _LaundryCountryGate extends StatelessWidget {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: LaundryColors.primary.withOpacity(0.12),
+                  color: LaundryColors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.local_laundry_service,
@@ -459,7 +459,7 @@ class _LaundryCountryGate extends StatelessWidget {
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(14),
                     border:
-                        Border.all(color: Colors.grey.withOpacity(0.20)),
+                        Border.all(color: Colors.grey.withValues(alpha: 0.20)),
                   ),
                   child: Column(
                     children: [
@@ -483,7 +483,7 @@ class _LaundryCountryGate extends StatelessWidget {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: LaundryColors.primary
-                                        .withOpacity(0.12),
+                                        .withValues(alpha: 0.12),
                                     borderRadius:
                                         BorderRadius.circular(10),
                                   ),

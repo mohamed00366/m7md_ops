@@ -60,8 +60,8 @@ class DynamicRoleBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            accent.withOpacity(0.95),
-            accent.withOpacity(0.78),
+            accent.withValues(alpha: 0.95),
+            accent.withValues(alpha: 0.78),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -69,7 +69,7 @@ class DynamicRoleBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: accent.withOpacity(0.25),
+            color: accent.withValues(alpha: 0.25),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -85,7 +85,7 @@ class DynamicRoleBanner extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -115,7 +115,7 @@ class DynamicRoleBanner extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -139,7 +139,7 @@ class DynamicRoleBanner extends StatelessWidget {
               _BannerBadge(
                 icon: Icons.dashboard_outlined,
                 text: dashboardLabel,
-                bg: Colors.white.withOpacity(0.2),
+                bg: Colors.white.withValues(alpha: 0.2),
                 fg: Colors.white,
               ),
               if (config.canApprove)
@@ -148,14 +148,14 @@ class DynamicRoleBanner extends StatelessWidget {
                   text: isAr
                       ? 'موافقات: ${config.approvalPower}/5'
                       : 'Approval: ${config.approvalPower}/5',
-                  bg: Colors.white.withOpacity(0.2),
+                  bg: Colors.white.withValues(alpha: 0.2),
                   fg: Colors.white,
                 ),
               if (config.jobTitle?.isSupervisor == true)
                 _BannerBadge(
                   icon: Icons.supervisor_account_outlined,
                   text: isAr ? 'مشرف' : 'Supervisor',
-                  bg: Colors.white.withOpacity(0.2),
+                  bg: Colors.white.withValues(alpha: 0.2),
                   fg: Colors.white,
                 ),
               if (config.kpiTargets.isNotEmpty)
@@ -164,7 +164,7 @@ class DynamicRoleBanner extends StatelessWidget {
                   text: isAr
                       ? 'KPIs: ${config.kpiTargets.length}'
                       : 'KPIs: ${config.kpiTargets.length}',
-                  bg: Colors.white.withOpacity(0.2),
+                  bg: Colors.white.withValues(alpha: 0.2),
                   fg: Colors.white,
                 ),
             ],

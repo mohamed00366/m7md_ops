@@ -24,7 +24,7 @@ class _NetworkStatusBannerState extends State<NetworkStatusBanner> {
         final isAr = AppStrings.of(context).isAr;
         if (online) return const SizedBox.shrink();
         return Material(
-          color: Colors.red.withOpacity(0.08),
+          color: Colors.red.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
           child: Container(
             padding:
@@ -32,7 +32,7 @@ class _NetworkStatusBannerState extends State<NetworkStatusBanner> {
             margin: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.red.withOpacity(0.40)),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.40)),
             ),
             child: Row(
               children: [
@@ -87,9 +87,9 @@ class NetworkStatusChip extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.20),
+            color: color.withValues(alpha: 0.20),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.50)),
+            border: Border.all(color: color.withValues(alpha: 0.50)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

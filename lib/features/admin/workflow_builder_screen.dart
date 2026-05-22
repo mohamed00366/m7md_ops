@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/workflow_engine.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/lookups.dart';
 import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
 import 'workflow_editor_screen.dart';
@@ -87,9 +86,9 @@ class _WorkflowBuilderScreenState extends State<WorkflowBuilderScreen> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.brand.withOpacity(0.08),
+            color: AppColors.brand.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.brand.withOpacity(0.2)),
+            border: Border.all(color: AppColors.brand.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +212,7 @@ class _WorkflowBuilderScreenState extends State<WorkflowBuilderScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.danger.withOpacity(0.15),
+                    color: AppColors.danger.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -238,7 +237,7 @@ class _WorkflowBuilderScreenState extends State<WorkflowBuilderScreen> {
                 child: Container(
                   height: 14,
                   width: 2,
-                  color: AppColors.brand.withOpacity(0.3),
+                  color: AppColors.brand.withValues(alpha: 0.3),
                 ),
               ),
           ],
@@ -266,7 +265,7 @@ class _ChainStepCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Row(
         children: [
@@ -274,7 +273,7 @@ class _ChainStepCard extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -306,7 +305,7 @@ class _ChainStepCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.12),
+                        color: AppColors.brand.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -402,7 +401,7 @@ class _SmallChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.15),
+        color: Colors.grey.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -432,9 +431,9 @@ class _EmptyChainCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.08),
+        color: Colors.grey.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

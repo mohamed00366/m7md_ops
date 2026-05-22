@@ -215,9 +215,9 @@ class _EmployeeLaundryHomeState extends State<EmployeeLaundryHome> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,7 +318,7 @@ class _EmployeeLaundryHomeState extends State<EmployeeLaundryHome> {
                     style: const TextStyle(fontSize: 12)),
                 if (v.totalMissing > 0) ...[
                   const SizedBox(width: 12),
-                  Icon(Icons.warning,
+                  const Icon(Icons.warning,
                       size: 14, color: LaundryColors.danger),
                   const SizedBox(width: 4),
                   Text('مَفقود ${v.totalMissing}',
@@ -392,7 +392,7 @@ class _EmployeeLaundryCountryGate extends StatelessWidget {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: LaundryColors.primary.withOpacity(0.12),
+                  color: LaundryColors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.local_laundry_service,
@@ -421,7 +421,7 @@ class _EmployeeLaundryCountryGate extends StatelessWidget {
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(14),
                     border:
-                        Border.all(color: Colors.grey.withOpacity(0.20)),
+                        Border.all(color: Colors.grey.withValues(alpha: 0.20)),
                   ),
                   child: Column(
                     children: [
@@ -443,7 +443,7 @@ class _EmployeeLaundryCountryGate extends StatelessWidget {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: LaundryColors.primary
-                                        .withOpacity(0.12),
+                                        .withValues(alpha: 0.12),
                                     borderRadius:
                                         BorderRadius.circular(10),
                                   ),

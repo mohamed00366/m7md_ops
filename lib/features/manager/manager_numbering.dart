@@ -86,7 +86,7 @@ class _ManagerNumberingState extends State<ManagerNumbering> {
         // ===== شريط ملاحظة توضيحية =====
         Container(
           width: double.infinity,
-          color: AppColors.brand.withOpacity(0.08),
+          color: AppColors.brand.withValues(alpha: 0.08),
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
@@ -270,7 +270,7 @@ class _RuleDetails extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.15),
+                      color: AppColors.brand.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.tag, color: AppColors.brand),
@@ -376,7 +376,7 @@ class _RuleDetails extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withOpacity(0.12),
+                    color: AppColors.brand.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
@@ -412,7 +412,7 @@ class _RuleDetails extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.success.withOpacity(0.12),
+                              color: AppColors.success.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -761,10 +761,10 @@ class _RuleFormSheetState extends State<_RuleFormSheet> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.brand.withOpacity(0.08),
+                      color: AppColors.brand.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppColors.brand.withOpacity(0.3),
+                          color: AppColors.brand.withValues(alpha: 0.3),
                           width: 0.5),
                     ),
                     child: Row(

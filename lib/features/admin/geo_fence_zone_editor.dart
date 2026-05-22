@@ -158,7 +158,7 @@ class _GeoFenceZoneEditorState extends State<GeoFenceZoneEditor> {
                         CircleMarker(
                           point: _center,
                           color:
-                              AppColors.brand.withOpacity(0.15),
+                              AppColors.brand.withValues(alpha: 0.15),
                           borderColor: AppColors.brand,
                           borderStrokeWidth: 2,
                           radius: _radiusMeters,
@@ -215,7 +215,7 @@ class _GeoFenceZoneEditorState extends State<GeoFenceZoneEditor> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.06),
+              color: AppColors.brand.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(

@@ -547,7 +547,7 @@ class _HrOnPointDetailScreenState extends State<HrOnPointDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.textTertiaryLight.withOpacity(0.1),
+                      color: AppColors.textTertiaryLight.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -576,7 +576,7 @@ class _HrOnPointDetailScreenState extends State<HrOnPointDetailScreen> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: (t.approved! ? AppColors.success : AppColors.danger)
-                          .withOpacity(0.12),
+                          .withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -775,8 +775,8 @@ class _StageControl extends StatelessWidget {
               style: const TextStyle(fontSize: 11),
             ),
             selected: selected,
-            selectedColor: color.withOpacity(0.18),
-            side: BorderSide(color: color.withOpacity(0.5)),
+            selectedColor: color.withValues(alpha: 0.18),
+            side: BorderSide(color: color.withValues(alpha: 0.5)),
             onSelected: (_) => onChange(st),
           );
         }).toList(),
@@ -829,7 +829,7 @@ class _SignatureRow extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: (signed ? AppColors.success : AppColors.textTertiaryLight)
-                .withOpacity(0.15),
+                .withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(

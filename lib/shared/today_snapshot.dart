@@ -54,12 +54,12 @@ class TodaySnapshot extends StatelessWidget {
             child: Row(
               children: [
                 Icon(Icons.insights,
-                    color: AppColors.brand.withOpacity(0.85), size: 16),
+                    color: AppColors.brand.withValues(alpha: 0.85), size: 16),
                 const SizedBox(width: 6),
                 Text(
                   s.t('لَمحة اليَوم', "Today's Snapshot", 'آج کی جھلک'),
                   style: TextStyle(
-                      color: AppColors.brand.withOpacity(0.85),
+                      color: AppColors.brand.withValues(alpha: 0.85),
                       fontWeight: FontWeight.w900,
                       fontSize: 13),
                 ),

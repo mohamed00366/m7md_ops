@@ -204,7 +204,7 @@ class _Header extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 1),
                           decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.1),
+                            color: AppColors.success.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -279,7 +279,7 @@ class _StatusBanner extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.textTertiaryLight.withOpacity(0.1),
+          color: AppColors.textTertiaryLight.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -402,9 +402,9 @@ class _WeekGrid extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.warning.withOpacity(0.08),
+            color: AppColors.warning.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+            border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -427,7 +427,7 @@ class _WeekGrid extends StatelessWidget {
                           : 'Total weekly hours — $activeDays working day(s)',
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.warning.withOpacity(0.85),
+                        color: AppColors.warning.withValues(alpha: 0.85),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -505,7 +505,7 @@ class _DayCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(isToday ? 0.15 : 0.08),
+              color: accentColor.withValues(alpha: isToday ? 0.15 : 0.08),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(11)),
             ),
@@ -649,7 +649,7 @@ class _DayCard extends StatelessWidget {
                             color: (isNight
                                     ? AppColors.info
                                     : AppColors.success)
-                                .withOpacity(0.12),
+                                .withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -669,7 +669,7 @@ class _DayCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.warning.withOpacity(0.15),
+                              color: AppColors.warning.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -716,7 +716,7 @@ class _DayCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.info.withOpacity(0.08),
+                          color: AppColors.info.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(

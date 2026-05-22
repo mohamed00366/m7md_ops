@@ -5,7 +5,6 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
-import '../../models/models.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
@@ -315,10 +314,10 @@ class _ManagerReportsState extends State<ManagerReports> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.brand.withOpacity(0.06),
+                color: AppColors.brand.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(10),
                 border:
-                    Border.all(color: AppColors.brand.withOpacity(0.30)),
+                    Border.all(color: AppColors.brand.withValues(alpha: 0.30)),
               ),
               child: Row(children: [
                 const Icon(Icons.date_range, color: AppColors.brand),
@@ -333,7 +332,7 @@ class _ManagerReportsState extends State<ManagerReports> {
                 Text(
                   isAr ? 'تَغيير الفَترة' : 'Change',
                   style: TextStyle(
-                      color: AppColors.brand.withOpacity(0.80),
+                      color: AppColors.brand.withValues(alpha: 0.80),
                       fontSize: 11,
                       fontWeight: FontWeight.w800),
                 ),
@@ -602,10 +601,10 @@ class _CategorySection extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: category.color.withOpacity(0.10),
+              color: category.color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
               border:
-                  Border.all(color: category.color.withOpacity(0.25)),
+                  Border.all(color: category.color.withValues(alpha: 0.25)),
             ),
             child: Row(
               children: [
@@ -623,7 +622,7 @@ class _CategorySection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
-                    color: category.color.withOpacity(0.20),
+                    color: category.color.withValues(alpha: 0.20),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text('${reports.length}',
@@ -670,7 +669,7 @@ class _ReportTile extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: report.color.withOpacity(0.15),
+            color: report.color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(report.icon, color: report.color),
@@ -686,7 +685,7 @@ class _ReportTile extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: report.color.withOpacity(0.15),
+            color: report.color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(report.value,
@@ -710,14 +709,14 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       margin: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.08),
+        color: AppColors.warning.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warning.withOpacity(0.30)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.30)),
       ),
       child: Column(
         children: [
           Icon(Icons.search_off,
-              size: 48, color: AppColors.warning.withOpacity(0.7)),
+              size: 48, color: AppColors.warning.withValues(alpha: 0.7)),
           const SizedBox(height: 12),
           Text(
             isAr

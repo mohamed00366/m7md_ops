@@ -76,7 +76,7 @@ class AppSelectionScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           AppColors.brand,
-                          AppColors.brand.withOpacity(0.7),
+                          AppColors.brand.withValues(alpha: 0.7),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -84,7 +84,7 @@ class AppSelectionScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.brand.withOpacity(0.3),
+                          color: AppColors.brand.withValues(alpha: 0.3),
                           blurRadius: 14,
                           offset: const Offset(0, 4),
                         ),
@@ -137,7 +137,7 @@ class AppSelectionScreen extends StatelessWidget {
                 shaderCallback: (rect) => LinearGradient(
                   colors: [
                     AppColors.brand,
-                    AppColors.brand.withOpacity(0.7),
+                    AppColors.brand.withValues(alpha: 0.7),
                   ],
                 ).createShader(rect),
                 child: Text(
@@ -158,7 +158,7 @@ class AppSelectionScreen extends StatelessWidget {
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.7),
+                          ?.withValues(alpha: 0.7),
                     ),
               ),
 
@@ -292,7 +292,7 @@ class _AppCardState extends State<_AppCard> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: widget.color.withOpacity(_hovered ? 0.22 : 0.10),
+              color: widget.color.withValues(alpha: _hovered ? 0.22 : 0.10),
               blurRadius: _hovered ? 18 : 10,
               offset: Offset(0, _hovered ? 8 : 4),
             ),
@@ -315,7 +315,7 @@ class _AppCardState extends State<_AppCard> {
                     height: 60,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: widget.color.withOpacity(0.08),
+                      color: widget.color.withValues(alpha: 0.08),
                     ),
                   ),
                 ),
@@ -325,7 +325,7 @@ class _AppCardState extends State<_AppCard> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: widget.color.withOpacity(_hovered ? 0.45 : 0.18),
+                        color: widget.color.withValues(alpha: _hovered ? 0.45 : 0.18),
                         width: 1.2,
                       ),
                     ),
@@ -345,7 +345,7 @@ class _AppCardState extends State<_AppCard> {
                           gradient: LinearGradient(
                             colors: [
                               widget.color,
-                              widget.color.withOpacity(0.65),
+                              widget.color.withValues(alpha: 0.65),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -353,7 +353,7 @@ class _AppCardState extends State<_AppCard> {
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: widget.color.withOpacity(0.35),
+                              color: widget.color.withValues(alpha: 0.35),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -386,7 +386,7 @@ class _AppCardState extends State<_AppCard> {
                               .textTheme
                               .bodySmall
                               ?.color
-                              ?.withOpacity(0.65),
+                              ?.withValues(alpha: 0.65),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -395,7 +395,7 @@ class _AppCardState extends State<_AppCard> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
-                          color: widget.color.withOpacity(0.12),
+                          color: widget.color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(

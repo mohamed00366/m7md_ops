@@ -248,7 +248,7 @@ class _DailyTipsDialogState extends State<DailyTipsDialog> {
                         CircleAvatar(
                           radius: 26,
                           backgroundColor:
-                              AppColors.brand.withOpacity(0.15),
+                              AppColors.brand.withValues(alpha: 0.15),
                           child: Text(
                             widget.employee.fullName.isNotEmpty
                                 ? widget.employee.fullName[0]
@@ -297,10 +297,10 @@ class _DailyTipsDialogState extends State<DailyTipsDialog> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.08),
+                        color: AppColors.brand.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: AppColors.brand.withOpacity(0.3)),
+                            color: AppColors.brand.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -335,10 +335,10 @@ class _DailyTipsDialogState extends State<DailyTipsDialog> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.10),
+                          color: AppColors.warning.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                              color: AppColors.warning.withOpacity(0.4)),
+                              color: AppColors.warning.withValues(alpha: 0.4)),
                         ),
                         child: Row(
                           children: [
@@ -468,7 +468,7 @@ class _DailyTipsDialogState extends State<DailyTipsDialog> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             decoration: BoxDecoration(
-              color: selected ? c.withOpacity(0.18) : Colors.transparent,
+              color: selected ? c.withValues(alpha: 0.18) : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                   color: selected ? c : Colors.grey.shade300,

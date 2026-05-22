@@ -25,8 +25,8 @@ class PinManagementScreen extends StatefulWidget {
 class _PinManagementScreenState extends State<PinManagementScreen> {
   String _query = '';
   String _filter = 'all'; // all | with_pin | without_pin
-  Map<String, String?> _pinByEmployee = {};
-  Map<String, int> _usageByEmployee = {};
+  final Map<String, String?> _pinByEmployee = {};
+  final Map<String, int> _usageByEmployee = {};
   bool _loading = true;
 
   @override
@@ -371,9 +371,9 @@ class _PinManagementScreenState extends State<PinManagementScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: c.withOpacity(0.10),
+          color: c.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: c.withOpacity(0.3)),
+          border: Border.all(color: c.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -414,7 +414,7 @@ class _PinManagementScreenState extends State<PinManagementScreen> {
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.brand.withOpacity(0.15),
+          backgroundColor: AppColors.brand.withValues(alpha: 0.15),
           child: Text(
             e.fullName.isNotEmpty ? e.fullName[0].toUpperCase() : '?',
             style: const TextStyle(
@@ -436,13 +436,13 @@ class _PinManagementScreenState extends State<PinManagementScreen> {
                     horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: hasPin
-                      ? AppColors.success.withOpacity(0.15)
-                      : AppColors.warning.withOpacity(0.15),
+                      ? AppColors.success.withValues(alpha: 0.15)
+                      : AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                       color: hasPin
-                          ? AppColors.success.withOpacity(0.4)
-                          : AppColors.warning.withOpacity(0.4)),
+                          ? AppColors.success.withValues(alpha: 0.4)
+                          : AppColors.warning.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   hasPin ? '🔑 $pin' : (isAr ? '⚠️ بِدون PIN' : '⚠️ no PIN'),

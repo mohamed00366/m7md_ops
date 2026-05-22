@@ -90,7 +90,7 @@ class _LauncherDialogState extends State<_LauncherDialog> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 24,
               offset: const Offset(0, 12),
             ),
@@ -738,7 +738,7 @@ class _ResultRow extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: item.color.withOpacity(0.15),
+                color: item.color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(item.icon, color: item.color, size: 16),

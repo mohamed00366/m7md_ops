@@ -335,10 +335,10 @@ class _Banner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.08),
+        color: AppColors.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: AppColors.brand.withOpacity(0.25), width: 0.5),
+            color: AppColors.brand.withValues(alpha: 0.25), width: 0.5),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -499,12 +499,12 @@ class _ScopeOption extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: active
-              ? color.withOpacity(0.08)
+              ? color.withValues(alpha: 0.08)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: active
-                ? color.withOpacity(0.6)
+                ? color.withValues(alpha: 0.6)
                 : Theme.of(context).dividerColor,
             width: active ? 1.2 : 0.5,
           ),
@@ -514,7 +514,7 @@ class _ScopeOption extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -679,7 +679,7 @@ class _ListCardScaffold extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border:
-            Border.all(color: color.withOpacity(0.3), width: 0.6),
+            Border.all(color: color.withValues(alpha: 0.3), width: 0.6),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -700,7 +700,7 @@ class _ListCardScaffold extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text('$count',
@@ -762,9 +762,9 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -782,7 +782,7 @@ class _Chip extends StatelessWidget {
             const SizedBox(width: 4),
             Text(sub,
                 style: TextStyle(
-                    color: color.withOpacity(0.7), fontSize: 10)),
+                    color: color.withValues(alpha: 0.7), fontSize: 10)),
           ],
           InkWell(
             customBorder: const CircleBorder(),
@@ -993,7 +993,7 @@ class _PickerScaffold extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.brand.withOpacity(0.12),
+                        color: AppColors.brand.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text('$count',
@@ -1071,10 +1071,10 @@ class _AffectedPreview extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.08),
+            color: AppColors.success.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: AppColors.success.withOpacity(0.25), width: 0.5),
+                color: AppColors.success.withValues(alpha: 0.25), width: 0.5),
           ),
           child: Row(
             children: [

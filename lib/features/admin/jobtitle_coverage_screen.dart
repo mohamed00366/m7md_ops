@@ -259,10 +259,10 @@ class _JobTitleCoverageScreenState extends State<JobTitleCoverageScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brand : Colors.grey.withOpacity(0.10),
+          color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.brand : Colors.grey.withOpacity(0.4),
+            color: selected ? AppColors.brand : Colors.grey.withValues(alpha: 0.4),
           ),
         ),
         child: Text(
@@ -290,10 +290,10 @@ class _JobTitleCoverageScreenState extends State<JobTitleCoverageScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? color : color.withOpacity(0.10),
+          color: selected ? color : color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-              color: selected ? color : color.withOpacity(0.4)),
+              color: selected ? color : color.withValues(alpha: 0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -336,9 +336,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
@@ -393,13 +393,13 @@ class _CoverageRow extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isEmpty
-              ? AppColors.warning.withOpacity(0.05)
+              ? AppColors.warning.withValues(alpha: 0.05)
               : Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isEmpty
-                ? AppColors.warning.withOpacity(0.4)
-                : Colors.grey.withOpacity(0.25),
+                ? AppColors.warning.withValues(alpha: 0.4)
+                : Colors.grey.withValues(alpha: 0.25),
             width: isEmpty ? 1.5 : 1,
           ),
         ),
@@ -436,7 +436,7 @@ class _CoverageRow extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.15),
+                            color: color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -483,7 +483,7 @@ class _CoverageRow extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.15),
+                color: statusColor.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,

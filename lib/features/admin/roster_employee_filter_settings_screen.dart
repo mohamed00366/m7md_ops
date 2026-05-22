@@ -138,8 +138,8 @@ class _RosterEmployeeFilterSettingsScreenState
               padding: const EdgeInsets.symmetric(
                   horizontal: 12, vertical: 6),
               color: _lastSyncCloud!
-                  ? AppColors.success.withOpacity(0.15)
-                  : AppColors.warning.withOpacity(0.15),
+                  ? AppColors.success.withValues(alpha: 0.15)
+                  : AppColors.warning.withValues(alpha: 0.15),
               child: Row(
                 children: [
                   Icon(
@@ -176,7 +176,7 @@ class _RosterEmployeeFilterSettingsScreenState
           // ===== شريط معلومات + إعداد "النشطين فقط" =====
           Container(
             padding: const EdgeInsets.all(12),
-            color: AppColors.brand.withOpacity(0.06),
+            color: AppColors.brand.withValues(alpha: 0.06),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

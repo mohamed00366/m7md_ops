@@ -450,7 +450,7 @@ class _DailySchedule extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.08),
+                  color: AppColors.brand.withValues(alpha: 0.08),
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(10)),
                 ),
@@ -530,7 +530,7 @@ class _DailySchedule extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.15),
+                          color: AppColors.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -609,7 +609,7 @@ class _HourlyTimeline extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.10),
+                  color: AppColors.warning.withValues(alpha: 0.10),
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(10)),
                 ),
@@ -678,7 +678,7 @@ class _HourlyTimeline extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 5, vertical: 1),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.15),
+                          color: AppColors.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text('${t.employeeIds.length}',
@@ -751,10 +751,10 @@ class _CapacityReport extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.10),
+              color: AppColors.warning.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
               border:
-                  Border.all(color: AppColors.warning.withOpacity(0.40)),
+                  Border.all(color: AppColors.warning.withValues(alpha: 0.40)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -805,7 +805,7 @@ class _CapacityReport extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withOpacity(0.30)),
+              border: Border.all(color: color.withValues(alpha: 0.30)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -899,7 +899,7 @@ class _PerPointReport extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
                 color: hasMultipleBuses
-                    ? AppColors.warning.withOpacity(0.40)
+                    ? AppColors.warning.withValues(alpha: 0.40)
                     : Theme.of(context).dividerColor),
           ),
           child: Column(
@@ -909,7 +909,7 @@ class _PerPointReport extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.purple.withOpacity(0.08),
+                  color: AppColors.purple.withValues(alpha: 0.08),
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(10)),
                 ),
@@ -938,7 +938,7 @@ class _PerPointReport extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
-                  color: AppColors.warning.withOpacity(0.10),
+                  color: AppColors.warning.withValues(alpha: 0.10),
                   child: Text(
                     isAr
                         ? '💡 ${busesUsed.length} باصات تَخدم نفس النقطة — فرصة دمج محتملة'
@@ -1028,9 +1028,9 @@ class _Kpi extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withOpacity(0.30)),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
         ),
         child: Column(
           children: [
@@ -1056,7 +1056,7 @@ class _MiniBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(label,

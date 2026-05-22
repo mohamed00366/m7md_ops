@@ -60,7 +60,7 @@ class _CampBossUniformState extends State<CampBossUniform>
 
     return Column(children: [
       Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppPalette.card,
           border: Border(
             bottom: BorderSide(color: AppPalette.border),
@@ -179,7 +179,7 @@ class _UniformCountryGate extends StatelessWidget {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: UniformPalette.primary.withOpacity(0.12),
+                  color: UniformPalette.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.checkroom,
@@ -232,7 +232,7 @@ class _UniformCountryGate extends StatelessWidget {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     color: UniformPalette.primary
-                                        .withOpacity(0.12),
+                                        .withValues(alpha: 0.12),
                                     borderRadius:
                                         BorderRadius.circular(10),
                                   ),

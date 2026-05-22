@@ -140,7 +140,7 @@ class _EmployeeEntitlementsScreenState
         ),
       );
 
-  String _money(double v) => '${NumberFormat('#,##0.00').format(v)}';
+  String _money(double v) => NumberFormat('#,##0.00').format(v);
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +251,7 @@ class _EmployeeEntitlementsScreenState
     final d = _data!;
     final color = d.eligibleForLeave ? AppColors.success : AppColors.warning;
     return Card(
-      color: color.withOpacity(0.05),
+      color: color.withValues(alpha: 0.05),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -329,7 +329,7 @@ class _EmployeeEntitlementsScreenState
     final d = _data!;
     final color = d.eligibleForEos ? AppColors.success : AppColors.warning;
     return Card(
-      color: color.withOpacity(0.05),
+      color: color.withValues(alpha: 0.05),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -398,7 +398,7 @@ class _EmployeeEntitlementsScreenState
     final d = _data!;
     final color = d.eligibleForTicket ? AppColors.success : Colors.grey;
     return Card(
-      color: color.withOpacity(0.05),
+      color: color.withValues(alpha: 0.05),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(

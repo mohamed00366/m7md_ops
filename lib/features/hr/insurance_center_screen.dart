@@ -87,7 +87,7 @@ class _InsuranceCenterScreenState extends State<InsuranceCenterScreen>
     if (days <= 7) {
       return (
         color: AppColors.warning,
-        label: '⚠ ${days} يَوم',
+        label: '⚠ $days يَوم',
         icon: Icons.warning_amber
       );
     }
@@ -228,7 +228,7 @@ class _InsuranceCenterScreenState extends State<InsuranceCenterScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: u.color.withOpacity(0.15),
+                      color: u.color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(color: u.color, width: 0.6),
                     ),
@@ -261,7 +261,7 @@ class _InsuranceCenterScreenState extends State<InsuranceCenterScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 5, vertical: 1),
                       decoration: BoxDecoration(
-                        color: AppColors.info.withOpacity(0.15),
+                        color: AppColors.info.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

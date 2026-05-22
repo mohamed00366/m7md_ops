@@ -236,10 +236,10 @@ class _StatusHeader extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
+          colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -282,7 +282,7 @@ class _StatusHeader extends StatelessWidget {
                 CircularProgressIndicator(
                   value: checklist.uploadedCount / 3,
                   strokeWidth: 4,
-                  backgroundColor: color.withOpacity(0.2),
+                  backgroundColor: color.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
                 Text(
@@ -321,9 +321,9 @@ class _InstructionsBanner extends StatelessWidget {
     final s = AppStrings.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.06),
+        color: AppColors.info.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.info.withOpacity(0.3)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -432,7 +432,7 @@ class _PhotoCardState extends State<_PhotoCard> {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: Icon(Icons.camera_alt,
+              leading: const Icon(Icons.camera_alt,
                   color: AppColors.brand, size: 28),
               title: Text(isAr ? 'الكاميرا' : 'Camera',
                   style: const TextStyle(
@@ -445,7 +445,7 @@ class _PhotoCardState extends State<_PhotoCard> {
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
-              leading: Icon(Icons.photo_library,
+              leading: const Icon(Icons.photo_library,
                   color: AppColors.success, size: 28),
               title: Text(isAr ? 'المعرض' : 'Gallery',
                   style: const TextStyle(
@@ -519,7 +519,7 @@ class _PhotoCardState extends State<_PhotoCard> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isUploaded
-              ? widget.color.withOpacity(0.5)
+              ? widget.color.withValues(alpha: 0.5)
               : Theme.of(context).dividerColor,
           width: isUploaded ? 1.5 : 1,
         ),
@@ -531,7 +531,7 @@ class _PhotoCardState extends State<_PhotoCard> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: widget.color.withOpacity(0.08),
+              color: widget.color.withValues(alpha: 0.08),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12)),
             ),
@@ -541,7 +541,7 @@ class _PhotoCardState extends State<_PhotoCard> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: widget.color.withOpacity(0.15),
+                    color: widget.color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(widget.icon,
@@ -559,7 +559,7 @@ class _PhotoCardState extends State<_PhotoCard> {
                               fontWeight: FontWeight.w800)),
                       Text(widget.criterion,
                           style: TextStyle(
-                              color: widget.color.withOpacity(0.8),
+                              color: widget.color.withValues(alpha: 0.8),
                               fontSize: 10)),
                     ],
                   ),
@@ -606,15 +606,15 @@ class _PhotoCardState extends State<_PhotoCard> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          widget.color.withOpacity(0.2),
-                          widget.color.withOpacity(0.05),
+                          widget.color.withValues(alpha: 0.2),
+                          widget.color.withValues(alpha: 0.05),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: widget.color.withOpacity(0.3)),
+                          color: widget.color.withValues(alpha: 0.3)),
                     ),
                     child: Center(
                       child: Column(
@@ -642,7 +642,7 @@ class _PhotoCardState extends State<_PhotoCard> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.1),
+                      color: AppColors.success.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -753,7 +753,7 @@ class _HistoryCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -827,7 +827,7 @@ class _MiniIcon extends StatelessWidget {
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: ok ? color.withOpacity(0.15) : Colors.transparent,
+        color: ok ? color.withValues(alpha: 0.15) : Colors.transparent,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
             color: ok
@@ -855,9 +855,9 @@ class _RosterEmployeesBanner extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.warning.withOpacity(0.10),
+          color: AppColors.warning.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+          border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
         ),
         child: Row(children: [
           const Icon(Icons.info_outline,
@@ -881,9 +881,9 @@ class _RosterEmployeesBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.brand.withOpacity(0.06),
+        color: AppColors.brand.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.brand.withOpacity(0.25)),
+        border: Border.all(color: AppColors.brand.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -924,13 +924,13 @@ class _RosterEmployeesBanner extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: AppColors.brand.withOpacity(0.30)),
+                      color: AppColors.brand.withValues(alpha: 0.30)),
                 ),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   CircleAvatar(
                     radius: 8,
                     backgroundColor:
-                        AppColors.brand.withOpacity(0.15),
+                        AppColors.brand.withValues(alpha: 0.15),
                     child: Text(
                       e.initials,
                       style: const TextStyle(
@@ -1012,15 +1012,15 @@ class _PointPickerViewState extends State<_PointPickerView> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.brand.withOpacity(0.10),
-                  AppColors.gold.withOpacity(0.08),
+                  AppColors.brand.withValues(alpha: 0.10),
+                  AppColors.gold.withValues(alpha: 0.08),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: AppColors.gold.withOpacity(0.30)),
+                  color: AppColors.gold.withValues(alpha: 0.30)),
             ),
             child: Row(
               children: [
@@ -1028,7 +1028,7 @@ class _PointPickerViewState extends State<_PointPickerView> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withOpacity(0.15),
+                    color: AppColors.gold.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.admin_panel_settings,
@@ -1115,7 +1115,7 @@ class _PointPickerViewState extends State<_PointPickerView> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                                 color: AppColors.gold
-                                    .withOpacity(0.20)),
+                                    .withValues(alpha: 0.20)),
                           ),
                           child: Row(
                             children: [
@@ -1124,7 +1124,7 @@ class _PointPickerViewState extends State<_PointPickerView> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   color: AppColors.warning
-                                      .withOpacity(0.15),
+                                      .withValues(alpha: 0.15),
                                   borderRadius:
                                       BorderRadius.circular(10),
                                 ),
