@@ -23,6 +23,7 @@ import 'features/auth/force_change_password_screen.dart';
 import 'features/auth/mandatory_face_enrollment_screen.dart';
 import 'features/point_terminal/point_terminal_home.dart';
 import 'core/services/face_enrollment_policy_settings.dart';
+import 'core/services/login_method_settings.dart';
 import 'core/services/point_terminal_settings.dart';
 import 'core/services/roster_employee_filter_settings.dart';
 import 'models/rbac.dart' show AccountType;
@@ -86,6 +87,9 @@ Future<void> main() async {
   // 🎭 إعدادات Point Terminal — تَحتوي قائِمة المُسَمَّيات المُستَثناة مِن
   // بَصمة الوَجه. لازِم تَكون مُحَمَّلة قَبل بَوَّابة التَسجيل الإجباريّ.
   unawaited(PointTerminalSettings.instance.load());
+  // 🔑 سياسة "طَريقة الدُخول" — مَن يَدخُل بِكَلِمة مُرور وَمَن بِالوَجه
+  // لازِم تَكون مُحَمَّلة قَبل بَوَّابة التَسجيل الإجباريّ.
+  unawaited(LoginMethodSettings.instance.load());
   unawaited(RosterEmployeeFilterSettings.instance.load());
 
   runApp(M7mdOpsApp(
@@ -240,7 +244,10 @@ class _RootRouter extends StatelessWidget {
         final policy = FaceEnrollmentPolicySettings.instance;
         if (policy.enabled && auth.account?.mustEnrollFace == true) {
           final acc = auth.account!;
-          // 🎭 فَحص الاستِثناء أَوَّلاً (فَردِيّ + جَماعيّ بِالمُسَمَّى)
+          // 🎭 فَحص الاستِثناء أَوَّلاً مِن مَصادِر مُتَعَدِّدة:
+          //   (1) Employee.excludedFromFaceLogin (فَردِيّ)
+          //   (2) PointTerminalSettings.isJobTitleExcludedFromFaceLogin (جَماعيّ)
+          //   (3) LoginMethodSettings: لَو الحِساب مُحَدَّد دُخول كَلِمة مُرور
           bool isExcludedFromFace = false;
           if (acc.employeeId != null) {
             try {
@@ -257,6 +264,18 @@ class _RootRouter extends StatelessWidget {
               // مُتَجاهَل — لَو فَشِل البَحث، نَتَّبِع السلوك القَديم
             }
           }
+          // (3) تَحَقُّق مِن LoginMethodSettings (سياسة "طَريقة الدُخول")
+          //     لَو هذا الحِساب مُحَدَّد لِيَدخُل بِكَلِمة مُرور → لا داعي
+          //     لِتَسجيل بَصمة وَجه إجباريّ
+          try {
+            final lm = LoginMethodSettings.instance;
+            if (lm.isLoaded && lm.enabled) {
+              final decision = lm.decisionFor(acc.id);
+              if (decision.method == LoginMethod.password) {
+                isExcludedFromFace = true;
+              }
+            }
+          } catch (_) {/* مُتَجاهَل */}
           if (!isExcludedFromFace) {
             final withinGrace =
                 policy.isWithinGracePeriod(acc.firstLoginAt);
