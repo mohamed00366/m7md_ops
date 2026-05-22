@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/services/file_save_helper.dart';
 import '../../core/services/supabase_data_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -264,6 +268,85 @@ class _BulkPermissionsMatrixScreenState
     }
   }
 
+  /// 📤 تَصدير المَصفوفة كامِلة كَـCSV (مَصفوفة دَور × صَلاحيّة)
+  Future<void> _exportCsv() async {
+    final repo = MockRepository();
+    final s = AppStrings.of(context);
+    final isAr = s.isAr;
+
+    final allPerms = repo.permissionDefs.toList()
+      ..sort((a, b) {
+        final mc = a.module.compareTo(b.module);
+        if (mc != 0) return mc;
+        return a.key.compareTo(b.key);
+      });
+    final allTitles = repo.jobTitles.toList()
+      ..sort((a, b) {
+        final lc = a.level.compareTo(b.level);
+        if (lc != 0) return lc;
+        return a.nameEn.compareTo(b.nameEn);
+      });
+
+    // ===== بِناء الـCSV =====
+    final lines = <String>[];
+    // الـheader: code, module, permission_key, ...job_titles
+    final header = <String>['module', 'permission_key', 'permission_name'];
+    for (final t in allTitles) {
+      header.add('${t.nameEn} (${t.id.substring(0, 8)})');
+    }
+    lines.add(header.map(_csvEscape).join(','));
+
+    // الصُفوف
+    for (final p in allPerms) {
+      final row = <String>[
+        p.module,
+        p.key,
+        isAr ? p.nameAr : p.nameEn,
+      ];
+      for (final t in allTitles) {
+        final has = (_matrix[t.id] ?? const <String>{}).contains(p.key);
+        row.add(has ? '1' : '0');
+      }
+      lines.add(row.map(_csvEscape).join(','));
+    }
+
+    final csvContent = lines.join('\n');
+    // UTF-8 BOM لِيَفتَح بِشَكل صَحيح في Excel
+    final bytes =
+        Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csvContent)]);
+
+    final filename =
+        'permissions_matrix_${DateTime.now().millisecondsSinceEpoch}.csv';
+    try {
+      final msg = await FileSaveHelper.save(
+        bytes: bytes,
+        filename: filename,
+        isAr: isAr,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.success,
+          content: Text(msg),
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(isAr ? 'فَشِل التَصدير: $e' : 'Export failed: $e'),
+        ));
+      }
+    }
+  }
+
+  /// CSV escape: لَو فيه فاصِلة أَو علامة اقتِباس، نُحيط بِـ"...." وَنُضاعِف الـquotes
+  String _csvEscape(String value) {
+    if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+      return '"${value.replaceAll('"', '""')}"';
+    }
+    return value;
+  }
+
   /// ✅ كشف فجوات: مسمّيات ينقصها صلاحيّات لوحة التحكم الخاصّة بها
   /// مثال: مسمّى dashboard=supervisor لكن لا يملك أيّ صلاحية ضمن دور المشرف
   bool _hasGaps(JobTitle jt) {
@@ -362,6 +445,19 @@ class _BulkPermissionsMatrixScreenState
                         ),
                       ),
                       onChanged: (v) => setState(() => _search = v),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // 🆕 زِرّ تَصدير CSV
+                  OutlinedButton.icon(
+                    onPressed: _exportCsv,
+                    icon: const Icon(Icons.download_outlined, size: 14),
+                    label: Text(
+                      isAr ? 'CSV' : 'CSV',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                   ),
                   const SizedBox(width: 6),
