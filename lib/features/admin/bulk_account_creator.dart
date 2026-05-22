@@ -13,6 +13,7 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/services/excel_exporter.dart';
 import '../../core/services/face_enrollment_policy_settings.dart';
+import '../../core/services/point_terminal_settings.dart';
 import '../../core/services/supabase_data_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -177,8 +178,9 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
       _lastCreated.clear();
     });
 
-    // 🔐 حَمِّل سياسة تَسجيل بَصمة الوَجه مَرّة واحِدة قَبل الحَلقة
+    // 🔐 حَمِّل سياسة تَسجيل بَصمة الوَجه + إعدادات النُقطة مَرّة واحِدة قَبل الحَلقة
     await FaceEnrollmentPolicySettings.instance.load();
+    await PointTerminalSettings.instance.load();
     final facePolicy = FaceEnrollmentPolicySettings.instance;
 
     final created = <_CreatedCredential>[];
@@ -205,7 +207,13 @@ class _BulkAccountCreatorScreenState extends State<BulkAccountCreatorScreen> {
 
       final tempPass = _generatePassword();
       // 🔐 إذا السياسة تَشمَل مُسَمَّى الموظَّف، نُضَع mustEnrollFace=true
-      final requireFace = facePolicy.requiresEnrollment(emp.jobTitleId);
+      // 🎭 لَكِن نَستَثني إذا كان المُوَظَّف مُستَثنىً مِن دُخول الوَجه
+      //   (سَواء بِالعَلَم الفَرديّ أَو بِالقائِمة الجَماعيّة)
+      final isExcludedFromFace = emp.excludedFromFaceLogin ||
+          PointTerminalSettings.instance
+              .isJobTitleExcludedFromFaceLogin(emp.jobTitleId);
+      final requireFace = !isExcludedFromFace &&
+          facePolicy.requiresEnrollment(emp.jobTitleId);
       final acc = AppAccount(
         id: repo.generateId(),
         username: username,

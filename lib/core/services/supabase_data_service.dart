@@ -1465,6 +1465,27 @@ class SupabaseDataService {
         shoeSize: (r['shoe_size'] as String?) ?? '',
         // 🆕 الباص الافتراضي للموظّف
         defaultBusId: r['default_bus_id'] as String?,
+        // 🆕 بَدَلات وَ تَذكِرة
+        housingAllowance: (r['housing_allowance'] as num?)?.toDouble() ?? 0,
+        transportAllowance:
+            (r['transport_allowance'] as num?)?.toDouble() ?? 0,
+        otherAllowances: (r['other_allowances'] as num?)?.toDouble() ?? 0,
+        eligibleForTicket: (r['eligible_for_ticket'] as bool?) ?? false,
+        ticketAmount: (r['ticket_amount'] as num?)?.toDouble() ?? 0,
+        // 🆕 جَواز السَفَر
+        passportCustody:
+            (r['passport_custody'] as String?) ?? 'with_employee',
+        passportCustodyNotes:
+            (r['passport_custody_notes'] as String?) ?? '',
+        passportReceivedDate: r['passport_received_date'] == null
+            ? null
+            : DateTime.tryParse(r['passport_received_date'] as String),
+        passportReturnedDate: r['passport_returned_date'] == null
+            ? null
+            : DateTime.tryParse(r['passport_returned_date'] as String),
+        // 🆕 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
+        excludedFromFaceLogin:
+            (r['excluded_from_face_login'] as bool?) ?? false,
       );
 
   Map<String, dynamic> _employeeToPayload(Employee e) {
@@ -1556,6 +1577,29 @@ class SupabaseDataService {
       payload['work_letter_date'] =
           e.workLetterDate!.toIso8601String().substring(0, 10);
     }
+    // 🆕 بَدَلات وَ تَذكِرة (دائماً نُرسِلها — DB-level defaults = 0)
+    payload['housing_allowance'] = e.housingAllowance;
+    payload['transport_allowance'] = e.transportAllowance;
+    payload['other_allowances'] = e.otherAllowances;
+    payload['eligible_for_ticket'] = e.eligibleForTicket;
+    payload['ticket_amount'] = e.ticketAmount;
+    // 🆕 جَواز السَفَر
+    payload['passport_custody'] = e.passportCustody;
+    payload['passport_custody_notes'] = e.passportCustodyNotes;
+    if (e.passportReceivedDate != null) {
+      payload['passport_received_date'] =
+          e.passportReceivedDate!.toIso8601String().substring(0, 10);
+    } else {
+      payload['passport_received_date'] = null;
+    }
+    if (e.passportReturnedDate != null) {
+      payload['passport_returned_date'] =
+          e.passportReturnedDate!.toIso8601String().substring(0, 10);
+    } else {
+      payload['passport_returned_date'] = null;
+    }
+    // 🆕 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
+    payload['excluded_from_face_login'] = e.excludedFromFaceLogin;
     return payload;
   }
 

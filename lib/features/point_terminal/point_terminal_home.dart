@@ -1046,11 +1046,18 @@ class _ClockTabState extends State<_ClockTab> with WidgetsBindingObserver {
       final face = faces.first;
 
       // فَلتَر المُوَظَّفين حَسَب إعداد faceScope
+      // + 🎭 استِثناءات بَصمة الوَجه (جَماعيّ بِالمُسَمَّى + فَرديّ بِالعَلَم)
       final repo = MockRepository();
       final ptSettings = PointTerminalSettings.instance;
       final scope = ptSettings.faceScope;
       final candidates = repo.employees.where((e) {
         if (e.status != EntityStatus.active) return false;
+        // 🎭 استِثناء فَرديّ — Toggle عَلى الشَخص
+        if (e.excludedFromFaceLogin) return false;
+        // 🎭 استِثناء جَماعيّ — بِالمُسَمَّى الوَظيفيّ
+        if (ptSettings.isJobTitleExcludedFromFaceLogin(e.jobTitleId)) {
+          return false;
+        }
         switch (scope) {
           case FaceMatchScope.pointOnly:
             // مُوَظَّفو هذِه النُقطة فَقَط

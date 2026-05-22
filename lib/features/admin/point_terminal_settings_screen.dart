@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/point_terminal_settings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
 
 /// 🏪 شاشة إعدادات Point Terminal (جِهاز نُقطة الدَوام)
@@ -35,6 +36,8 @@ class _PointTerminalSettingsScreenState
   bool _captureAuditPhoto = true;
   FaceMatchScope _faceScope = FaceMatchScope.country;
   double _matchConfidenceMin = 0.65;
+  // 🎭 استِثناء جَماعيّ بِالمُسَمَّى الوَظيفيّ
+  Set<String> _faceLoginExcludedJobTitleIds = <String>{};
 
   @override
   void initState() {
@@ -53,6 +56,8 @@ class _PointTerminalSettingsScreenState
     _captureAuditPhoto = s.captureAuditPhoto;
     _faceScope = s.faceScope;
     _matchConfidenceMin = s.matchConfidenceMin;
+    _faceLoginExcludedJobTitleIds =
+        Set<String>.from(s.faceLoginExcludedJobTitleIds);
     if (!mounted) return;
     setState(() => _ready = true);
   }
@@ -67,6 +72,7 @@ class _PointTerminalSettingsScreenState
       captureAuditPhoto: _captureAuditPhoto,
       faceScope: _faceScope,
       matchConfidenceMin: _matchConfidenceMin,
+      faceLoginExcludedJobTitleIds: _faceLoginExcludedJobTitleIds,
     );
     if (!mounted) return;
     final isAr = AppStrings.of(context).isAr;
@@ -232,7 +238,100 @@ class _PointTerminalSettingsScreenState
             secondary:
                 const Icon(Icons.camera_alt, color: AppColors.gold),
           ),
+          const Divider(height: 24),
+
+          // ===== Face Login Exclusion — by Job Title =====
+          _sectionHeader('🎭 ' +
+              (isAr
+                  ? 'استِثناء مِن دُخول بَصمة الوَجه'
+                  : 'Face Login Exclusion')),
+          _info(isAr
+              ? 'حَدِّد المُسَمَّيات الوَظيفيّة التي يُستَثنَى أَصحابُها مِن مُطابَقة الوَجه عَلى جِهاز النُقطة. '
+                  'مِثال: المُحاسِب — يَدخُل بِكَلِمة سِرّ / PIN مُؤَقَّت فَقَط. '
+                  'يَنطَبِق أَيضاً عَلى مُوَظَّفين أَفراد عَبر إعدادات الشَخص.'
+              : 'Choose job titles whose holders are excluded from face matching on the terminal. '
+                  'Example: Accountant — login only via password / temporary PIN. '
+                  'Also overridable per-employee in their profile.'),
+          _jobTitleExclusionPicker(isAr),
         ],
+      ),
+    );
+  }
+
+  Widget _jobTitleExclusionPicker(bool isAr) {
+    final titles = MockRepository().jobTitles.toList()
+      ..sort((a, b) => a.displayName(isAr).compareTo(b.displayName(isAr)));
+    if (titles.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Text(
+          isAr ? 'لا تُوجَد مُسَمَّيات وَظيفيّة بَعد.' : 'No job titles yet.',
+          style: const TextStyle(fontSize: 12),
+        ),
+      );
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Column(
+          children: [
+            Row(children: [
+              Icon(Icons.badge_outlined,
+                  size: 16, color: AppColors.gold),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  isAr
+                      ? 'المُسَمَّيات المُستَثناة (${_faceLoginExcludedJobTitleIds.length})'
+                      : 'Excluded titles (${_faceLoginExcludedJobTitleIds.length})',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w900, fontSize: 13),
+                ),
+              ),
+              if (_faceLoginExcludedJobTitleIds.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () => setState(
+                      () => _faceLoginExcludedJobTitleIds.clear()),
+                  icon: const Icon(Icons.clear_all, size: 16),
+                  label: Text(
+                    isAr ? 'مَسح' : 'Clear',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ),
+            ]),
+            const Divider(height: 1),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 320),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: titles.length,
+                itemBuilder: (ctx, i) {
+                  final t = titles[i];
+                  final selected =
+                      _faceLoginExcludedJobTitleIds.contains(t.id);
+                  return CheckboxListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    value: selected,
+                    onChanged: (v) {
+                      setState(() {
+                        if (v == true) {
+                          _faceLoginExcludedJobTitleIds.add(t.id);
+                        } else {
+                          _faceLoginExcludedJobTitleIds.remove(t.id);
+                        }
+                      });
+                    },
+                    title: Text(
+                      t.displayName(isAr),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

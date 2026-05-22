@@ -231,6 +231,11 @@ class Employee {
   DateTime? passportReceivedDate;
   /// 🆕 تاريخ إعادة الجَواز لِلمُوَظَّف
   DateTime? passportReturnedDate;
+  /// 🆕 استِثناء فَردِيّ مِن تَسجيل الدُخول بِبَصمة الوَجه عَلى Point Terminal
+  ///
+  /// عِندَما تَكون `true` لا يَظهَر المُوَظَّف في قائِمة المُطابَقة عَلى الكِشك
+  /// (لَكِنَّه يَستَطيع الدُخول بِالطُرُق الأُخرَى — كَلِمة سِرّ / PIN مُؤَقَّت).
+  bool excludedFromFaceLogin;
   // مرفقات الملفات (تستخدم لاحقاً مع Supabase Storage)
   String? photoFileId;
   String? idCardFileId;
@@ -295,6 +300,7 @@ class Employee {
     this.passportCustodyNotes = '',         // 🆕
     this.passportReceivedDate,              // 🆕
     this.passportReturnedDate,              // 🆕
+    this.excludedFromFaceLogin = false,     // 🆕
     this.photoFileId,
     this.idCardFileId,
     this.licenseFileId,

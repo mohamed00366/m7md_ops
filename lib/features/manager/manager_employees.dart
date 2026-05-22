@@ -1348,6 +1348,9 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   // 🚌 الباص الافتراضي للموظف
   String? _defaultBusId;
 
+  // 🎭 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
+  bool _excludedFromFaceLogin = false;
+
   @override
   void initState() {
     super.initState();
@@ -1414,6 +1417,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _passportReturnedDate = e?.passportReturnedDate;
     _workLetterDate = e?.workLetterDate;
     _workLetterFileId = e?.workLetterFileId;
+    _excludedFromFaceLogin = e?.excludedFromFaceLogin ?? false;
 
     _emergencyName = TextEditingController(text: e?.emergencyContactName ?? '');
     _emergencyPhone = TextEditingController(text: e?.emergencyContactPhone ?? '');
@@ -1632,6 +1636,8 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         passportCustodyNotes: _passportCustodyNotes.text.trim(),
         passportReceivedDate: _passportReceivedDate,
         passportReturnedDate: _passportReturnedDate,
+        // 🎭 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
+        excludedFromFaceLogin: _excludedFromFaceLogin,
         // الملفات
         photoFileId: _photoFileId,
         idCardFileId: _idCardFileId,
@@ -1716,6 +1722,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.passportCustodyNotes = _passportCustodyNotes.text.trim();
       e.passportReceivedDate = _passportReceivedDate;
       e.passportReturnedDate = _passportReturnedDate;
+      e.excludedFromFaceLogin = _excludedFromFaceLogin;
       e.photoFileId = _photoFileId;
       e.idCardFileId = _idCardFileId;
       e.licenseFileId = _licenseFileId;
@@ -2136,6 +2143,34 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                         maxLines: 2,
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // 🎭 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color: Colors.orange.withOpacity(0.25)),
+                  ),
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    value: _excludedFromFaceLogin,
+                    onChanged: (v) =>
+                        setState(() => _excludedFromFaceLogin = v),
+                    title: const Text(
+                      '🎭 استِثناء مِن دُخول بَصمة الوَجه (Point Terminal)',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
+                    subtitle: const Text(
+                      'لَن يَظهَر هذا المُوَظَّف في قائِمة مُطابَقة الوَجه عَلى الكِشك. '
+                      'يَستَطيع الدُخول بِكَلِمة سِرّ / PIN مُؤَقَّت فَقَط.',
+                      style: TextStyle(fontSize: 11, height: 1.4),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),

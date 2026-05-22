@@ -84,6 +84,8 @@ class PointTerminalSettings {
   bool _captureAuditPhoto = defaultCaptureAuditPhoto;
   FaceMatchScope _faceScope = defaultFaceScope;
   double _matchConfidenceMin = defaultMatchConfidenceMin;
+  // 🎭 استِثناء جَماعيّ مِن دُخول بَصمة الوَجه — حَسَب المُسَمَّى الوَظيفيّ
+  Set<String> _faceLoginExcludedJobTitleIds = <String>{};
   bool _loaded = false;
 
   int get geoFenceRadiusM => _geoFenceRadiusM;
@@ -94,6 +96,13 @@ class PointTerminalSettings {
   bool get captureAuditPhoto => _captureAuditPhoto;
   FaceMatchScope get faceScope => _faceScope;
   double get matchConfidenceMin => _matchConfidenceMin;
+  Set<String> get faceLoginExcludedJobTitleIds =>
+      Set<String>.unmodifiable(_faceLoginExcludedJobTitleIds);
+
+  bool isJobTitleExcludedFromFaceLogin(String? jobTitleId) {
+    if (jobTitleId == null || jobTitleId.isEmpty) return false;
+    return _faceLoginExcludedJobTitleIds.contains(jobTitleId);
+  }
 
   Future<void> load() async {
     if (_loaded) return;
@@ -119,6 +128,15 @@ class PointTerminalSettings {
         _matchConfidenceMin =
             (v['matchConfidenceMin'] as num?)?.toDouble() ??
                 defaultMatchConfidenceMin;
+        final excluded = v['faceLoginExcludedJobTitleIds'];
+        if (excluded is List) {
+          _faceLoginExcludedJobTitleIds = excluded
+              .whereType<String>()
+              .where((s) => s.isNotEmpty)
+              .toSet();
+        } else {
+          _faceLoginExcludedJobTitleIds = <String>{};
+        }
       }
     } catch (_) {/* defaults */}
     _loaded = true;
@@ -138,6 +156,7 @@ class PointTerminalSettings {
     required bool captureAuditPhoto,
     required FaceMatchScope faceScope,
     required double matchConfidenceMin,
+    Set<String>? faceLoginExcludedJobTitleIds,
   }) async {
     _geoFenceRadiusM = geoFenceRadiusM.clamp(20, 2000);
     _idleTimeoutMinutes = idleTimeoutMinutes.clamp(1, 240);
@@ -148,6 +167,11 @@ class PointTerminalSettings {
     _faceScope = faceScope;
     _matchConfidenceMin =
         matchConfidenceMin.clamp(0.50, 0.95);
+    if (faceLoginExcludedJobTitleIds != null) {
+      _faceLoginExcludedJobTitleIds = faceLoginExcludedJobTitleIds
+          .where((s) => s.isNotEmpty)
+          .toSet();
+    }
     _loaded = true;
     return AppSettingsService.instance.setJson(_kKey, {
       'geoFenceRadiusM': _geoFenceRadiusM,
@@ -158,6 +182,8 @@ class PointTerminalSettings {
       'captureAuditPhoto': _captureAuditPhoto,
       'faceScope': _faceScope.key,
       'matchConfidenceMin': _matchConfidenceMin,
+      'faceLoginExcludedJobTitleIds':
+          _faceLoginExcludedJobTitleIds.toList(),
     });
   }
 }
