@@ -51,13 +51,81 @@ extension UserRoleX on UserRole {
           orElse: () => UserRole.employee);
 }
 
-enum EntityStatus { active, inactive, maintenance, vacation }
+/// 🆕 حالات المُوَظَّف المُوَحَّدة (May 22, 2026)
+///
+/// تَتَرَتَّب أَولوِيَّتُها كَالتالي (الأَعلى يَدوس عَلى الأَدنى):
+///   1. terminated  — مَفصول نِهائيّاً (لا رُجوع)
+///   2. resigned    — مُستَقيل
+///   3. suspended   — مُوقَف عَن العَمَل (مِن أَمر خَصم)
+///   4. inactive    — غَير نَشِط يَدَويّ
+///   5. maintenance — مُعَطَّل (بُنية تَحتيّة فَقَط، لِلباصات)
+///   6. vacation    — في إجازة (مُؤَقَّت)
+///   7. active      — يَعمَل
+enum EntityStatus {
+  active,
+  inactive,
+  maintenance,
+  vacation,
+  suspended,   // 🆕 مُوقَف عَن العَمَل (خَصم بِإيقاف)
+  resigned,    // 🆕 مُستَقيل
+  terminated,  // 🆕 مَفصول
+}
 
 extension EntityStatusX on EntityStatus {
   String get key => toString().split('.').last;
   static EntityStatus fromKey(String k) => EntityStatus.values.firstWhere(
       (e) => e.key == k,
       orElse: () => EntityStatus.active);
+
+  /// تَسمِية ثُنائيّة اللُغة لِكُلّ حالة
+  String label({required bool isAr}) {
+    switch (this) {
+      case EntityStatus.active:
+        return isAr ? 'نَشِط' : 'Active';
+      case EntityStatus.inactive:
+        return isAr ? 'غَير نَشِط' : 'Inactive';
+      case EntityStatus.maintenance:
+        return isAr ? 'مُعَطَّل' : 'Maintenance';
+      case EntityStatus.vacation:
+        return isAr ? 'في إجازة' : 'On Leave';
+      case EntityStatus.suspended:
+        return isAr ? 'مَوقوف عَن العَمَل' : 'Suspended';
+      case EntityStatus.resigned:
+        return isAr ? 'مُستَقيل' : 'Resigned';
+      case EntityStatus.terminated:
+        return isAr ? 'مَفصول' : 'Terminated';
+    }
+  }
+
+  /// 🎨 لَون الحالة (لِلبادج/الكَرت)
+  /// (مُستَخدَم في UI فَقَط — يُعَيَّن مِن AppColors في موضِع الاستِدعاء)
+  int get priority {
+    switch (this) {
+      case EntityStatus.terminated:
+        return 100;
+      case EntityStatus.resigned:
+        return 90;
+      case EntityStatus.suspended:
+        return 80;
+      case EntityStatus.inactive:
+        return 70;
+      case EntityStatus.maintenance:
+        return 60;
+      case EntityStatus.vacation:
+        return 50;
+      case EntityStatus.active:
+        return 10;
+    }
+  }
+
+  /// هَل الحالة تُعَدّ "تَوَقُّف نِهائيّ"؟ (لا تَتَغَيَّر تِلقائيّاً)
+  bool get isPermanent =>
+      this == EntityStatus.resigned ||
+      this == EntityStatus.terminated;
+
+  /// هَل الحالة تُعَدّ "تَوَقُّف مُؤَقَّت"؟ (تَعود تِلقائيّاً)
+  bool get isTemporary =>
+      this == EntityStatus.vacation || this == EntityStatus.suspended;
 }
 
 enum RosterStatus { draft, submitted, underReview, approved, rejected }

@@ -241,6 +241,7 @@ class Employee {
   String? idCardFileId;
   String? licenseFileId;
   String? workLetterFileId;
+  String? passportFileId;
   DateTime? workLetterDate;
 
   /// 🆕 مِلَفّات إضافيّة لِكُلّ وَثيقة (صُوَر + PDF) — حَتّى 5 مِلَفّات
@@ -248,6 +249,7 @@ class Employee {
   List<String> idCardFiles;
   List<String> licenseFiles;
   List<String> workLetterFiles;
+  List<String> passportFiles;
 
   /// 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
   String visaFileNumber;
@@ -322,10 +324,12 @@ class Employee {
     this.idCardFileId,
     this.licenseFileId,
     this.workLetterFileId,
+    this.passportFileId,
     this.workLetterDate,
     List<String>? idCardFiles,
     List<String>? licenseFiles,
     List<String>? workLetterFiles,
+    List<String>? passportFiles,
     this.visaFileNumber = '',
     this.eidExpiry,
     this.establishmentFileNumber = '',
@@ -335,7 +339,8 @@ class Employee {
     this.waslUid = '',
   })  : idCardFiles = idCardFiles ?? <String>[],
         licenseFiles = licenseFiles ?? <String>[],
-        workLetterFiles = workLetterFiles ?? <String>[];
+        workLetterFiles = workLetterFiles ?? <String>[],
+        passportFiles = passportFiles ?? <String>[];
 
   /// إجمالي الراتب = الأساسي + others فقط (حسب الصور)
   double get totalSalary => basicSalary + others;

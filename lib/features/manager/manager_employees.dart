@@ -1090,7 +1090,9 @@ class _EmployeeGridCard extends StatelessWidget {
                         ],
                       ),
                       child: Text(
-                        isActive ? 'نشط' : 'موقوف',
+                        isActive
+                            ? (s.isAr ? 'نَشِط' : 'Active')
+                            : (s.isAr ? 'مَوقوف' : 'Inactive'),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 9,
@@ -1364,6 +1366,9 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   List<String> _idCardFiles = <String>[];
   List<String> _licenseFiles = <String>[];
   List<String> _workLetterFiles = <String>[];
+  // 📎 جَواز السَفَر — مِلَفّ رَئيسيّ + مِلَفّات إضافيّة
+  String? _passportFileId;
+  List<String> _passportFiles = <String>[];
 
   @override
   void initState() {
@@ -1437,6 +1442,8 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _licenseFiles = List<String>.from(e?.licenseFiles ?? const <String>[]);
     _workLetterFiles =
         List<String>.from(e?.workLetterFiles ?? const <String>[]);
+    _passportFileId = e?.passportFileId;
+    _passportFiles = List<String>.from(e?.passportFiles ?? const <String>[]);
 
     // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
     _visaFileNumber = TextEditingController(text: e?.visaFileNumber ?? '');
@@ -1685,6 +1692,8 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         idCardFiles: _idCardFiles,
         licenseFiles: _licenseFiles,
         workLetterFiles: _workLetterFiles,
+        passportFileId: _passportFileId,
+        passportFiles: _passportFiles,
         // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
         visaFileNumber: _visaFileNumber.text.trim(),
         eidExpiry: _eidExpiry,
@@ -1781,6 +1790,8 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.idCardFiles = List<String>.from(_idCardFiles);
       e.licenseFiles = List<String>.from(_licenseFiles);
       e.workLetterFiles = List<String>.from(_workLetterFiles);
+      e.passportFileId = _passportFileId;
+      e.passportFiles = List<String>.from(_passportFiles);
       // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
       e.visaFileNumber = _visaFileNumber.text.trim();
       e.eidExpiry = _eidExpiry;
@@ -2057,14 +2068,6 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   isAr: s.isAr,
                 ),
                 const SizedBox(height: 12),
-                // 🚌 الباص الافتراضيّ للموظّف
-                // (يُستخدم كباص افتراضي في خطّة الباصات اليوميّة، ويمكن تجاوزه ليوم محدّد)
-                _DefaultBusField(
-                  value: _defaultBusId,
-                  onChanged: (v) => setState(() => _defaultBusId = v),
-                  isAr: s.isAr,
-                ),
-                const SizedBox(height: 12),
                 // 🆕 📄 وَثائِق الموظَّف (إصدارات) — يَظهَر بَعدَ الحِفظ
                 // 🆕 بَصمة الوَجه نُقِلَت إلى شاشة المُستَخدِمين (Admin → Users)
                 if (widget.existing != null) ...[
@@ -2141,13 +2144,17 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: const [
-                        Icon(Icons.book_outlined,
+                      Row(children: [
+                        const Icon(Icons.book_outlined,
                             size: 18, color: AppColors.brand),
-                        SizedBox(width: 6),
-                        Text('📓 مَوضِع جَواز السَفَر',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w900, fontSize: 13)),
+                        const SizedBox(width: 6),
+                        Text(
+                          s.isAr
+                              ? '📓 مَوضِع جَواز السَفَر'
+                              : '📓 Passport Custody',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w900, fontSize: 13),
+                        ),
                       ]),
                       const SizedBox(height: 8),
                       Row(children: [
@@ -2155,8 +2162,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                           child: RadioListTile<String>(
                             contentPadding: EdgeInsets.zero,
                             dense: true,
-                            title: const Text('مَع المُوَظَّف',
-                                style: TextStyle(fontSize: 12)),
+                            title: Text(
+                              s.isAr ? 'مَع المُوَظَّف' : 'With Employee',
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             value: 'with_employee',
                             groupValue: _passportCustody,
                             onChanged: (v) =>
@@ -2167,8 +2176,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                           child: RadioListTile<String>(
                             contentPadding: EdgeInsets.zero,
                             dense: true,
-                            title: const Text('مَع الشَركة',
-                                style: TextStyle(fontSize: 12)),
+                            title: Text(
+                              s.isAr ? 'مَع الشَركة' : 'With Company',
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             value: 'with_company',
                             groupValue: _passportCustody,
                             onChanged: (v) =>
@@ -2181,7 +2192,9 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                         Row(children: [
                           Expanded(
                             child: _DateField(
-                              label: 'تاريخ الاستِلام',
+                              label: s.isAr
+                                  ? 'تاريخ الاستِلام'
+                                  : 'Received Date',
                               value: _passportReceivedDate,
                               onPicked: (d) => setState(
                                   () => _passportReceivedDate = d),
@@ -2191,7 +2204,9 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: _DateField(
-                              label: 'تاريخ التَسليم',
+                              label: s.isAr
+                                  ? 'تاريخ التَسليم'
+                                  : 'Returned Date',
                               value: _passportReturnedDate,
                               onPicked: (d) => setState(
                                   () => _passportReturnedDate = d),
@@ -2203,11 +2218,15 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _passportCustodyNotes,
-                        decoration: const InputDecoration(
-                          labelText: 'مُلاحَظات / سَبَب',
-                          hintText: 'مَثَلاً: لِتَجديد الإقامة',
+                        decoration: InputDecoration(
+                          labelText: s.isAr
+                              ? 'مُلاحَظات / سَبَب'
+                              : 'Notes / Reason',
+                          hintText: s.isAr
+                              ? 'مَثَلاً: لِتَجديد الإقامة'
+                              : 'e.g., for residence renewal',
                           isDense: true,
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         maxLines: 2,
                       ),
@@ -2215,32 +2234,29 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // 🎭 استِثناء فَردِيّ مِن دُخول بَصمة الوَجه
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: Colors.orange.withOpacity(0.25)),
-                  ),
-                  child: SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    value: _excludedFromFaceLogin,
-                    onChanged: (v) =>
-                        setState(() => _excludedFromFaceLogin = v),
-                    title: const Text(
-                      '🎭 استِثناء مِن دُخول بَصمة الوَجه (Point Terminal)',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 13),
-                    ),
-                    subtitle: const Text(
-                      'لَن يَظهَر هذا المُوَظَّف في قائِمة مُطابَقة الوَجه عَلى الكِشك. '
-                      'يَستَطيع الدُخول بِكَلِمة سِرّ / PIN مُؤَقَّت فَقَط.',
-                      style: TextStyle(fontSize: 11, height: 1.4),
-                    ),
-                  ),
+                // 📎 رَفع مِلَفّ جَواز السَفَر (Multi-file: صُوَر + PDF)
+                M7MultiUploadBox(
+                  label: s.isAr ? 'مِلَفّ الجَواز' : 'Passport Document',
+                  hint: s.isAr
+                      ? 'ارفَع صُوَر + PDF لِجَواز السَفَر'
+                      : 'Upload images + PDF of passport',
+                  icon: Icons.book_outlined,
+                  bucket: 'passports',
+                  pathPrefix:
+                      'emp_${widget.existing?.id ?? "new"}_passport',
+                  urls: [
+                    if (_passportFileId != null) _passportFileId!,
+                    ..._passportFiles,
+                  ],
+                  onChanged: (list) => setState(() {
+                    if (list.isEmpty) {
+                      _passportFileId = null;
+                      _passportFiles = <String>[];
+                    } else {
+                      _passportFileId = list.first;
+                      _passportFiles = list.skip(1).toList();
+                    }
+                  }),
                 ),
                 const SizedBox(height: 10),
                 Row(children: [

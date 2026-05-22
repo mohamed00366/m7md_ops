@@ -1496,6 +1496,10 @@ class SupabaseDataService {
         workLetterFiles: ((r['work_letter_files'] as List?) ?? const [])
             .map((e) => e.toString())
             .toList(),
+        passportFileId: r['passport_file_id'] as String?,
+        passportFiles: ((r['passport_files'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
         // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
         visaFileNumber: (r['visa_file_number'] as String?) ?? '',
         eidExpiry: r['eid_expiry'] == null
@@ -1627,6 +1631,10 @@ class SupabaseDataService {
     payload['id_card_files'] = e.idCardFiles;
     payload['license_files'] = e.licenseFiles;
     payload['work_letter_files'] = e.workLetterFiles;
+    if (e.passportFileId != null) {
+      payload['passport_file_id'] = e.passportFileId;
+    }
+    payload['passport_files'] = e.passportFiles;
     // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
     if (e.visaFileNumber.isNotEmpty) {
       payload['visa_file_number'] = e.visaFileNumber;
