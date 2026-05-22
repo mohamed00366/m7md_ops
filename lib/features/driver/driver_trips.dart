@@ -2231,6 +2231,7 @@ class _EmployeePickerSheet extends StatefulWidget {
   final Set<String>? includeOnlyIds;
   const _EmployeePickerSheet({
     required this.title,
+    this.excludeIds = const <String>{},
     this.includeOnlyIds,
   });
 

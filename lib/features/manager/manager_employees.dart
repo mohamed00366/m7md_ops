@@ -984,6 +984,7 @@ class _EmployeeAvatar extends StatelessWidget {
   final Color color;
   const _EmployeeAvatar({
     required this.employee,
+    this.color = AppColors.brand,
     this.radius = 22,
   });
 
@@ -3948,6 +3949,7 @@ class _DateField extends StatelessWidget {
     required this.onPicked,
     required this.pickFn,
     this.lastDate,
+    this.firstDate,
   });
 
   @override

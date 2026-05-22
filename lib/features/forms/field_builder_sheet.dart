@@ -357,6 +357,8 @@ class _FieldCard extends StatelessWidget {
     required this.typeOptions,
     required this.onEdit,
     required this.onDelete,
+    this.onMoveUp,
+    this.onMoveDown,
   });
 
   @override

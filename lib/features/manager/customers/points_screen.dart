@@ -500,7 +500,7 @@ class _PointCard extends StatelessWidget {
 // ============================================================
 class _PointEditor extends StatefulWidget {
   final Point? existing;
-  const _PointEditor();
+  const _PointEditor({this.existing});
 
   @override
   State<_PointEditor> createState() => _PointEditorState();
