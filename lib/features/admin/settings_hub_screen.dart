@@ -335,16 +335,19 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
     final catTransport = isAr ? '🚌 النقل'                  : '🚌 Transport';
     final catCamp      = isAr ? '🏕️ الكمب'                  : '🏕️ Camp';
     final catForms     = isAr ? '📋 النماذج'                : '📋 Forms';
-    final catAdmin     = isAr ? '⚙️ الإدارة والأمن'         : '⚙️ Admin & Security';
+    // 🆕 Admin مُقَسَّم إلى 3 أَقسام فَرعيّة بَدَل 20 عُنصُر مُكَدَّس
+    final catSecurity     = isAr ? '🔐 الأَمان'             : '🔐 Security';
+    final catNotifications = isAr ? '🔔 التَنبيهات'         : '🔔 Notifications';
+    final catSystemTools  = isAr ? '🛠 أَدوات النِظام'      : '🛠 System Tools';
     final catPolicies  = isAr ? '📖 السياسات'               : '📖 Policies';
 
-    // ⚠️ Legacy aliases — للتوافق مع entries لم تُحدَّث بعد.
-    // ستُحذف بعد تحديث جميع المراجع.
-    final catEmployees = catHr;        // legacy
-    final catBuses     = catTransport; // legacy
-    final catRoles     = catAdmin;     // legacy
-    final catSystem    = catAdmin;     // legacy
-    final catTraining  = catHr;        // legacy
+    // ⚠️ Legacy aliases — تَوجيه القِيَم القَديمة لِلأَقسام الجَديدة
+    final catAdmin     = catSystemTools; // legacy → System Tools (الأَكثَر شُمولاً)
+    final catEmployees = catHr;          // legacy
+    final catBuses     = catTransport;   // legacy
+    final catRoles     = catSecurity;    // legacy → Security
+    final catSystem    = catSystemTools; // legacy
+    final catTraining  = catHr;          // legacy
 
     return [
       // 🏛️ الهيكل التنظيمي
@@ -588,7 +591,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
       ),
       // 🔔 قَوالِب الإشعارات — نُصوص قابِلة لِلتَخصيص
       _SettingEntry(
-        category: catAdmin,
+        category: catNotifications,
         icon: Icons.notifications_active_outlined,
         color: Colors.indigo,
         titleAr: '🔔 قَوالِب الإشعارات',
@@ -602,7 +605,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
       ),
       // 🎯 تَوجيه الإشعارات — مَن يَتَلَقَّى ماذا (صَلاحِيّات + مَنح/سَحب)
       _SettingEntry(
-        category: catAdmin,
+        category: catNotifications,
         icon: Icons.alt_route_outlined,
         color: Colors.teal,
         titleAr: '🎯 تَوجيه الإشعارات',
@@ -666,24 +669,8 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.evaluationCriteriaView,
       ),
 
-      // ============================================================
-      // 📍 التتبع (تحت Buses)
-      // ============================================================
-      _SettingEntry(
-        category: catBuses,
-        icon: Icons.gps_fixed,
-        color: AppColors.info,
-        titleAr: 'إعدادات التتبّع',
-        titleEn: 'Tracking Settings',
-        descAr: 'Geofence، الخمول، السرعة، انقطاع GPS',
-        descEn: 'Geofence, idle, speed, GPS dropouts',
-        builder: (_) => GenericModuleSettingsScreen(
-          titleAr: 'إعدادات التتبّع',
-          titleEn: 'Tracking Settings',
-          settings: AppModuleSettings.tracking,
-        ),
-        requiredPermission: P.settingsTrackingView,
-      ),
+      // ✅ تَمّ حَذف "Tracking Settings" العام — مُغَطّى بِـFleet Tracking (سَطر 498)
+      //    + Driver Tracking (سَطر 1002) — نَفس الصَلاحيّة + نَفس الـAppModuleSettings
 
       // ============================================================
       // 👨‍💼 HR
@@ -870,7 +857,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         // لا نَضَع requiredPermission — الشاشة نَفسها تَفرِض isSuperAdmin
       ),
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.devices_other,
         color: AppColors.brand,
         titleAr: 'جلسات الأجهزة',
@@ -881,7 +868,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.adminDeviceSessionsView,
       ),
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.policy_outlined,
         color: AppColors.warning,
         titleAr: 'سياسة الأجهزة ورسالة الرفض',
@@ -892,7 +879,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.settingsDeviceSessionView,
       ),
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.public,
         color: AppColors.brand,
         titleAr: 'سياسة الموقع الجغرافي',
@@ -903,7 +890,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.settingsGeoFenceView,
       ),
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.face,
         color: AppColors.success,
         titleAr: 'طريقة الدخول (كلمة مرور / بصمة وجه)',
@@ -914,7 +901,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.settingsLoginMethodView,
       ),
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.refresh,
         color: AppColors.brand,
         titleAr: 'إعادة حساب بصمات الوجه (FaceNet)',
@@ -926,7 +913,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
       ),
       // 🆕 سياسة "التَطبيق على رَأس العَمَل فَقَط"
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.work_off,
         color: AppColors.warning,
         titleAr: '🚧 التَطبيق على رَأس العَمَل فَقَط',
@@ -954,7 +941,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
       ),
       // 🆕 سياسة تَسجيل بَصمة الوَجه الإجباريّ
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.face_retouching_natural,
         color: AppColors.success,
         titleAr: '🔐 سياسة تَسجيل بَصمة الوَجه',
@@ -1006,7 +993,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.settingsDriverTrackingView,
       ),
       _SettingEntry(
-        category: catSystem,
+        category: catSecurity,
         icon: Icons.bookmark_outline,
         color: AppColors.brand,
         titleAr: 'سياسة الجلسات (تذكّرني)',

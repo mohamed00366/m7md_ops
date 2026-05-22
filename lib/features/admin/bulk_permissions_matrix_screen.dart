@@ -38,10 +38,94 @@ class _BulkPermissionsMatrixScreenState
   final Map<String, Set<String>> _matrix = {};
   final Set<String> _dirtyJobTitleIds = {};
   String? _moduleFilter;
+  String? _domainFilter; // 🆕 فِلتَر فِئة عُليا (org/hr/roster/etc.)
   DashboardType? _dashboardFilter;
   String _search = '';
   bool _onlyGaps = false;
   bool _saving = false;
+
+  // 🆕 خَريطة المُوديولات إلى فِئات domain (لِلتَنظيم البَصَريّ)
+  // كُلّ سَطر: module name → (domain key, domain label ar/en, icon)
+  static const Map<String, _Domain> _moduleDomains = {
+    // 🏢 Organization
+    'departments':    _Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    'job_titles':     _Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    'customers':      _Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    'sites':          _Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    'org':            _Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    'site_onboarding':_Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    'countries':      _Domain('org', '🏢 المُؤَسَّسة', '🏢 Organization'),
+    // 👥 HR
+    'employees':      _Domain('hr', '👥 HR', '👥 HR'),
+    'employee':       _Domain('hr', '👥 HR', '👥 HR'),
+    'documents':      _Domain('hr', '👥 HR', '👥 HR'),
+    'employee_documents': _Domain('hr', '👥 HR', '👥 HR'),
+    'evaluations':    _Domain('hr', '👥 HR', '👥 HR'),
+    'evaluation_criteria': _Domain('hr', '👥 HR', '👥 HR'),
+    'training':       _Domain('hr', '👥 HR', '👥 HR'),
+    'attendance':     _Domain('hr', '👥 HR', '👥 HR'),
+    'leaves':         _Domain('hr', '👥 HR', '👥 HR'),
+    'deductions':     _Domain('hr', '👥 HR', '👥 HR'),
+    'entitlements':   _Domain('hr', '👥 HR', '👥 HR'),
+    'hr':             _Domain('hr', '👥 HR', '👥 HR'),
+    // 📅 Rosters
+    'rosters':        _Domain('roster', '📅 الرواتِر', '📅 Rosters'),
+    'roster_creator': _Domain('roster', '📅 الرواتِر', '📅 Rosters'),
+    'rosters_center': _Domain('roster', '📅 الرواتِر', '📅 Rosters'),
+    'roster_approvals': _Domain('roster', '📅 الرواتِر', '📅 Rosters'),
+    'approved_roster': _Domain('roster', '📅 الرواتِر', '📅 Rosters'),
+    'my_roster':      _Domain('roster', '📅 الرواتِر', '📅 Rosters'),
+    // 🚌 Transport
+    'buses':          _Domain('transport', '🚌 النَقل', '🚌 Transport'),
+    'drivers':        _Domain('transport', '🚌 النَقل', '🚌 Transport'),
+    'tracking':       _Domain('transport', '🚌 النَقل', '🚌 Transport'),
+    'fleet':          _Domain('transport', '🚌 النَقل', '🚌 Transport'),
+    'gps_devices':    _Domain('transport', '🚌 النَقل', '🚌 Transport'),
+    // 🏕 Camp
+    'camp_rooms':     _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'camp_uniform':   _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'camp_buses':     _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'camp_violations':_Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'camp_laundry':   _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'camp_amana':     _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'camp_inventory': _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'uniform_catalog':_Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'uniform_issue':  _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'uniform_requests': _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'uniform_reports': _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'uniform_purchases': _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    'laundry':        _Domain('camp', '🏕 الكَمب', '🏕 Camp'),
+    // 📋 Forms & Workflows
+    'forms':          _Domain('forms', '📋 النَماذِج', '📋 Forms'),
+    'workflows':      _Domain('forms', '📋 النَماذِج', '📋 Forms'),
+    'form_approvals': _Domain('forms', '📋 النَماذِج', '📋 Forms'),
+    // 📊 Reports
+    'reports':        _Domain('reports', '📊 التَقارير', '📊 Reports'),
+    'dashboard':      _Domain('reports', '📊 التَقارير', '📊 Reports'),
+    // 🔔 Notifications
+    'notifications':  _Domain('notif', '🔔 الإشعارات', '🔔 Notifications'),
+    // 🔐 Security
+    'face':           _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'device_sessions':_Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'geo_fence':      _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'login_method':   _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'pin':            _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'audit':          _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'point_terminal': _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    // ⚙ Admin / System
+    'admin':          _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'users':          _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'roles':          _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'settings':       _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'system':         _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'policies':       _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'company_events': _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+    'tasks':          _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
+  };
+
+  _Domain _domainOf(String module) =>
+      _moduleDomains[module] ??
+      const _Domain('other', '📦 أُخرى', '📦 Other');
 
   @override
   void initState() {
@@ -216,6 +300,10 @@ class _BulkPermissionsMatrixScreenState
 
     // الأعمدة (الصلاحيّات) بعد الفلاتر
     var cols = repo.permissionDefs.toList();
+    // 🆕 فِلتَر domain أَوَّلاً (أَوسَع), ثُمَّ module
+    if (_domainFilter != null) {
+      cols = cols.where((p) => _domainOf(p.module).key == _domainFilter).toList();
+    }
     if (_moduleFilter != null) {
       cols = cols.where((p) => p.module == _moduleFilter).toList();
     }
@@ -227,6 +315,20 @@ class _BulkPermissionsMatrixScreenState
 
     final modules =
         repo.permissionDefs.map((p) => p.module).toSet().toList()..sort();
+
+    // 🆕 المُوديولات المَرئيّة حَسَب الـdomain المُختار (لِفِلتَر الـchips الثاني)
+    final visibleModules = _domainFilter == null
+        ? modules
+        : modules.where((m) => _domainOf(m).key == _domainFilter).toList();
+
+    // 🆕 قائِمة الـdomains الفَريدة (لِشَريط الفِلتَر العُلويّ)
+    final domains = <String, _Domain>{};
+    for (final m in modules) {
+      final d = _domainOf(m);
+      domains[d.key] = d;
+    }
+    final domainList = domains.values.toList();
+    domainList.sort((a, b) => _domainOrder(a.key).compareTo(_domainOrder(b.key)));
 
     return Column(
       children: [
@@ -283,6 +385,35 @@ class _BulkPermissionsMatrixScreenState
                   ),
                 ],
               ),
+              // 🆕 شَريط فِلتَر الـDomain (أَوسَع — يَجمَع عِدّة مُوديولات)
+              const SizedBox(height: 6),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _filterChip(
+                      label: isAr ? 'كُلّ الأَقسام' : 'All sections',
+                      selected: _domainFilter == null,
+                      onTap: () => setState(() {
+                        _domainFilter = null;
+                        _moduleFilter = null;
+                      }),
+                    ),
+                    for (final d in domainList) ...[
+                      const SizedBox(width: 4),
+                      _filterChip(
+                        label: isAr ? d.labelAr : d.labelEn,
+                        selected: _domainFilter == d.key,
+                        onTap: () => setState(() {
+                          _domainFilter = _domainFilter == d.key ? null : d.key;
+                          _moduleFilter = null; // أَعِد ضَبط الفِلتَر الفَرعيّ
+                        }),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // 🆕 شَريط فِلتَر الـModule (تَفاصيل ضِمن الـdomain)
               const SizedBox(height: 6),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -293,7 +424,7 @@ class _BulkPermissionsMatrixScreenState
                       selected: _moduleFilter == null,
                       onTap: () => setState(() => _moduleFilter = null),
                     ),
-                    for (final m in modules) ...[
+                    for (final m in visibleModules) ...[
                       const SizedBox(width: 4),
                       _filterChip(
                         label: m,
@@ -509,6 +640,32 @@ class _BulkPermissionsMatrixScreenState
       onSelected: (v) => setState(() => _dashboardFilter = v),
     );
   }
+
+  /// 🆕 تَرتيب فِئات الـDomain (1 = أَوَّل)
+  int _domainOrder(String key) {
+    const order = {
+      'org': 1,
+      'hr': 2,
+      'roster': 3,
+      'transport': 4,
+      'camp': 5,
+      'forms': 6,
+      'reports': 7,
+      'notif': 8,
+      'security': 9,
+      'admin': 10,
+      'other': 99,
+    };
+    return order[key] ?? 50;
+  }
+}
+
+/// 🆕 فِئة Domain — تَجميع لِعِدّة modules تَحت قِسم واحِد بَصَريّ
+class _Domain {
+  final String key;       // 'org', 'hr', 'roster', 'camp', etc.
+  final String labelAr;   // '🏢 المُؤَسَّسة'
+  final String labelEn;   // '🏢 Organization'
+  const _Domain(this.key, this.labelAr, this.labelEn);
 }
 
 // ============================================================

@@ -283,6 +283,24 @@ class AuthProvider extends ChangeNotifier {
     return keys.any(_permissions.contains);
   }
 
+  /// 🔄 إعادة تَحميل صَلاحيّات المُستَخدِم الحاليّ مِن المَخزَن
+  ///
+  /// تُستَدعى عِندَ تَغيير أَدوار/صَلاحيّات المُستَخدِم في صَفحة الإدارة
+  /// لِيَنعَكِس التَغيير فَوراً بِدون تَسجيل خُروج/دُخول.
+  ///
+  /// مَثَلاً: عِندَ تَوكيل permission جَديد في `BulkPermissionsMatrixScreen`،
+  /// نادِ هذه الدالّة لِتَحديث `_permissions` + `notifyListeners()`.
+  Future<void> refreshPermissions() async {
+    final acc = _account;
+    if (acc == null) return;
+    try {
+      _permissions = _repo.effectivePermissionKeys(acc.id);
+      notifyListeners();
+    } catch (e) {
+      // مُتَجاهَل — احتِفاظ بِالصَلاحيّات الحاليّة لَو فَشِل التَحديث
+    }
+  }
+
   bool hasRole(String roleKey) =>
       _roles.any((r) => r.key == roleKey);
 

@@ -231,13 +231,14 @@ class ModulesRegistry {
           builder: (_) => const AttendanceManagementScreen(),
         ),
         // 🆕 مَركَز التَقارير المُوَحَّد (Hybrid: KPIs + Quick Insights + Library)
+        // ✅ تَصحيح: نُقِلَ مِن organization إلى reports (المَكان المَنطِقيّ)
         AppModule(
           key: 'reports_hub',
           titleAr: '📊 التَقارير وَالتَحليلات',
           titleEn: '📊 Reports & Analytics',
           icon: Icons.bar_chart,
-          color: ModuleCategory.organization.color(),
-          category: ModuleCategory.organization,
+          color: ModuleCategory.reports.color(),
+          category: ModuleCategory.reports,
           requiredPermission: P.dashboardManagerView,
           builder: (_) => const ReportsHubScreen(),
         ),
