@@ -476,15 +476,73 @@ class _CategorySectionState extends State<_CategorySection> {
             ),
           ),
         if (!canCollapse || _expanded)
-          ...modules.map((m) => _ModuleTile(
+          ..._buildModulesWithGroups(modules),
+      ],
+    );
+  }
+
+  /// 🆕 يَبني قائِمة الموديولات مَع headers لِلـgroupKey (لَو وُجِد)
+  /// — لَو كُلّ الموديولات بِدون groupKey → تَعرِضها مُباشَرة
+  /// — لَو بَعضها مَع groupKey → تَعرِض header قَبل كُلّ مَجموعة
+  List<Widget> _buildModulesWithGroups(List<AppModule> modules) {
+    // هَل هُناك أَيّ groupKey؟
+    final hasGroups = modules.any((m) => m.groupKey != null);
+    if (!hasGroups) {
+      // لا تَجميع — أَعرِض كَالمُعتاد
+      return modules
+          .map((m) => _ModuleTile(
                 module: m,
                 active: m.key == widget.activeKey,
                 onTap: () => widget.onSelect(m.key),
                 isAr: widget.isAr,
                 isDark: widget.isDark,
-              )),
-      ],
-    );
+              ))
+          .toList();
+    }
+
+    // تَجميع: نُحافِظ عَلى تَرتيب الظُهور الأَوَّل لِكُلّ groupKey
+    final groupOrder = <String?>[];
+    final groupedModules = <String?, List<AppModule>>{};
+    for (final m in modules) {
+      final key = m.groupKey;
+      if (!groupOrder.contains(key)) {
+        groupOrder.add(key);
+      }
+      groupedModules.putIfAbsent(key, () => []).add(m);
+    }
+
+    final widgets = <Widget>[];
+    for (final groupKey in groupOrder) {
+      final groupModules = groupedModules[groupKey] ?? const [];
+      if (groupKey != null && groupModules.isNotEmpty) {
+        // عُنوان المَجموعة (Sub-header)
+        final title = groupModules.first.groupTitle(widget.isAr);
+        if (title != null) {
+          widgets.add(Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(28, 8, 12, 2),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+                color: widget.isDark
+                    ? Colors.white54
+                    : Colors.grey.shade600,
+              ),
+            ),
+          ));
+        }
+      }
+      widgets.addAll(groupModules.map((m) => _ModuleTile(
+            module: m,
+            active: m.key == widget.activeKey,
+            onTap: () => widget.onSelect(m.key),
+            isAr: widget.isAr,
+            isDark: widget.isDark,
+          )));
+    }
+    return widgets;
   }
 }
 
