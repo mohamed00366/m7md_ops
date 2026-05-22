@@ -211,6 +211,14 @@ class _AdminRolesState extends State<AdminRoles> {
                           repo.setRolePermissions(
                               _selected!.id, updated.toList(), byUser);
                         }
+                        // 🆕 تَحديث صَلاحيّات المُستَخدِم الحاليّ فَوريّاً
+                        if (mounted) {
+                          try {
+                            await context
+                                .read<AuthProvider>()
+                                .refreshPermissions();
+                          } catch (_) {}
+                        }
                         if (mounted) setState(() {});
                       },
                     );

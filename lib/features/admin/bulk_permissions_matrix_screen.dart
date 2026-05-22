@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/l10n/app_strings.dart';
+import '../../core/providers/auth_provider.dart';
 import '../../core/services/supabase_data_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -239,6 +241,13 @@ class _BulkPermissionsMatrixScreenState
       }
       repo.setRolePermissionsByKeys(roleId, keys, '');
       savedCount++;
+    }
+
+    // 🆕 تَحديث صَلاحيّات المُستَخدِم الحاليّ فَوريّاً (لَو كان دَوره ضِمن المُغَيَّر)
+    if (mounted) {
+      try {
+        await context.read<AuthProvider>().refreshPermissions();
+      } catch (_) {/* غَير حاسِم */}
     }
 
     if (mounted) {
