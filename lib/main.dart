@@ -23,8 +23,10 @@ import 'features/auth/force_change_password_screen.dart';
 import 'features/auth/mandatory_face_enrollment_screen.dart';
 import 'features/point_terminal/point_terminal_home.dart';
 import 'core/services/face_enrollment_policy_settings.dart';
+import 'core/services/point_terminal_settings.dart';
 import 'core/services/roster_employee_filter_settings.dart';
 import 'models/rbac.dart' show AccountType;
+import 'repositories/mock_repository.dart';
 import 'core/services/splash_video_settings.dart';
 import 'features/auth/login_screen.dart';
 import 'features/splash/splash_video_screen.dart';
@@ -81,6 +83,9 @@ Future<void> main() async {
     }
   }());
   unawaited(FaceEnrollmentPolicySettings.instance.load());
+  // 🎭 إعدادات Point Terminal — تَحتوي قائِمة المُسَمَّيات المُستَثناة مِن
+  // بَصمة الوَجه. لازِم تَكون مُحَمَّلة قَبل بَوَّابة التَسجيل الإجباريّ.
+  unawaited(PointTerminalSettings.instance.load());
   unawaited(RosterEmployeeFilterSettings.instance.load());
 
   runApp(M7mdOpsApp(
@@ -229,20 +234,40 @@ class _RootRouter extends StatelessWidget {
         // المَنطِق:
         //   - السياسة العالميّة مُفَعَّلة (FaceEnrollmentPolicySettings.enabled)؟
         //   - mustEnrollFace=true على الحِساب نَفسه؟
+        //   - الحِساب لَيسَ مُستَثنىً (فَردِيّاً أَو جَماعِيّاً بِالمُسَمَّى)
         //   - فَحص مُهلة التَأجيل
         //   - إذا أَيّ شَرط سابِق فَشَل → نَسمَح بِالدُخول مُباشَرةً
         final policy = FaceEnrollmentPolicySettings.instance;
         if (policy.enabled && auth.account?.mustEnrollFace == true) {
           final acc = auth.account!;
-          final withinGrace =
-              policy.isWithinGracePeriod(acc.firstLoginAt);
-          if (!withinGrace) {
-            return const MandatoryFaceEnrollmentScreen();
+          // 🎭 فَحص الاستِثناء أَوَّلاً (فَردِيّ + جَماعيّ بِالمُسَمَّى)
+          bool isExcludedFromFace = false;
+          if (acc.employeeId != null) {
+            try {
+              final emp = MockRepository().employeeById(acc.employeeId!);
+              if (emp != null) {
+                final ptSettings = PointTerminalSettings.instance;
+                if (emp.excludedFromFaceLogin ||
+                    ptSettings.isJobTitleExcludedFromFaceLogin(
+                        emp.jobTitleId)) {
+                  isExcludedFromFace = true;
+                }
+              }
+            } catch (_) {
+              // مُتَجاهَل — لَو فَشِل البَحث، نَتَّبِع السلوك القَديم
+            }
           }
-          // داخِل المُهلة — لكِن لا بُدّ من عَرض الشاشة مَرّة واحِدة على الأَقَلّ
-          // لِيُمَكِّن المُستَخدِم من البَدء (مع زِرّ تَأجيل) قَبل دُخول التَطبيق:
-          if (acc.firstLoginAt == null) {
-            return const MandatoryFaceEnrollmentScreen();
+          if (!isExcludedFromFace) {
+            final withinGrace =
+                policy.isWithinGracePeriod(acc.firstLoginAt);
+            if (!withinGrace) {
+              return const MandatoryFaceEnrollmentScreen();
+            }
+            // داخِل المُهلة — لكِن لا بُدّ من عَرض الشاشة مَرّة واحِدة على الأَقَلّ
+            // لِيُمَكِّن المُستَخدِم من البَدء (مع زِرّ تَأجيل) قَبل دُخول التَطبيق:
+            if (acc.firstLoginAt == null) {
+              return const MandatoryFaceEnrollmentScreen();
+            }
           }
         }
 

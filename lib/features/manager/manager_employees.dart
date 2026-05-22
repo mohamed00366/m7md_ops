@@ -1300,6 +1300,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   DateTime? _passportExpiry;
   String? _visaTypeId;
   String? _idCardFileId;
+  // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+  late final TextEditingController _visaFileNumber;
+  DateTime? _eidExpiry;
+  late final TextEditingController _establishmentFileNumber;
+  late final TextEditingController _labourCardNumber;
+  DateTime? _labourCardExpiry;
+  late final TextEditingController _mohreNumber;
+  late final TextEditingController _waslUid;
 
   // License
   late final TextEditingController _licenseNumber;
@@ -1429,6 +1437,17 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _licenseFiles = List<String>.from(e?.licenseFiles ?? const <String>[]);
     _workLetterFiles =
         List<String>.from(e?.workLetterFiles ?? const <String>[]);
+
+    // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+    _visaFileNumber = TextEditingController(text: e?.visaFileNumber ?? '');
+    _eidExpiry = e?.eidExpiry;
+    _establishmentFileNumber =
+        TextEditingController(text: e?.establishmentFileNumber ?? '');
+    _labourCardNumber =
+        TextEditingController(text: e?.labourCardNumber ?? '');
+    _labourCardExpiry = e?.labourCardExpiry;
+    _mohreNumber = TextEditingController(text: e?.mohreNumber ?? '');
+    _waslUid = TextEditingController(text: e?.waslUid ?? '');
     _excludedFromFaceLogin = e?.excludedFromFaceLogin ?? false;
 
     _emergencyName = TextEditingController(text: e?.emergencyContactName ?? '');
@@ -1470,6 +1489,12 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _shirtSize.dispose();
     _pantSize.dispose();
     _shoeSize.dispose();
+    // 🇦🇪 حُقول حُكومِيّة إضافيّة
+    _visaFileNumber.dispose();
+    _establishmentFileNumber.dispose();
+    _labourCardNumber.dispose();
+    _mohreNumber.dispose();
+    _waslUid.dispose();
     super.dispose();
   }
 
@@ -1660,6 +1685,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         idCardFiles: _idCardFiles,
         licenseFiles: _licenseFiles,
         workLetterFiles: _workLetterFiles,
+        // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+        visaFileNumber: _visaFileNumber.text.trim(),
+        eidExpiry: _eidExpiry,
+        establishmentFileNumber: _establishmentFileNumber.text.trim(),
+        labourCardNumber: _labourCardNumber.text.trim(),
+        labourCardExpiry: _labourCardExpiry,
+        mohreNumber: _mohreNumber.text.trim(),
+        waslUid: _waslUid.text.trim(),
       );
       if (supaReady) {
         final created = await dataService.createEmployee(newEmp, countryId: cid);
@@ -1748,6 +1781,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.idCardFiles = List<String>.from(_idCardFiles);
       e.licenseFiles = List<String>.from(_licenseFiles);
       e.workLetterFiles = List<String>.from(_workLetterFiles);
+      // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+      e.visaFileNumber = _visaFileNumber.text.trim();
+      e.eidExpiry = _eidExpiry;
+      e.establishmentFileNumber = _establishmentFileNumber.text.trim();
+      e.labourCardNumber = _labourCardNumber.text.trim();
+      e.labourCardExpiry = _labourCardExpiry;
+      e.mohreNumber = _mohreNumber.text.trim();
+      e.waslUid = _waslUid.text.trim();
       if (supaReady) {
         final ok = await dataService.updateEmployee(e);
         if (!ok && mounted) {
@@ -2206,10 +2247,26 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   Expanded(
                     child: TextField(
                       controller: _idNumber,
-                      decoration: InputDecoration(labelText: s.idNumber),
+                      decoration: InputDecoration(
+                          labelText: s.isAr
+                              ? 'رَقم الهَوِيّة الإماراتيّة'
+                              : 'Emirates ID'),
                     ),
                   ),
                   const SizedBox(width: 10),
+                  Expanded(
+                    child: _DateField(
+                      label: s.isAr
+                          ? 'انتِهاء الهَوِيّة الإماراتيّة'
+                          : 'EID Expiry',
+                      value: _eidExpiry,
+                      onPicked: (d) => setState(() => _eidExpiry = d),
+                      pickFn: _pickDate,
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 10),
+                Row(children: [
                   Expanded(
                     child: DropdownButtonFormField<String?>(
                       value: _visaTypeId,
@@ -2226,7 +2283,84 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                       onChanged: (v) => setState(() => _visaTypeId = v),
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _visaFileNumber,
+                      decoration: InputDecoration(
+                          labelText: s.isAr
+                              ? 'رَقم مِلَفّ التَأشيرة'
+                              : 'Visa File Number'),
+                    ),
+                  ),
                 ]),
+                const SizedBox(height: 10),
+                // 🇦🇪 صَفّ MOHRE + Establishment File
+                Row(children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _mohreNumber,
+                      decoration: InputDecoration(
+                          labelText: s.isAr
+                              ? 'رَقم MOHRE الشَخصيّ'
+                              : 'MOHRE Personal No.',
+                          helperText: s.isAr
+                              ? 'رَقم العامِل في وِزارة المَوارِد البَشَريّة'
+                              : 'Worker ID at MOHRE',
+                          helperMaxLines: 2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _establishmentFileNumber,
+                      decoration: InputDecoration(
+                          labelText: s.isAr
+                              ? 'رَقم مِلَفّ المُنشَأة'
+                              : 'Establishment File No.'),
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 10),
+                // 🇦🇪 صَفّ بِطاقة العَمَل (رَقم + انتِهاء)
+                Row(children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _labourCardNumber,
+                      decoration: InputDecoration(
+                          labelText: s.isAr
+                              ? 'رَقم بِطاقة العَمَل'
+                              : 'Labour Card No.'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _DateField(
+                      label: s.isAr
+                          ? 'انتِهاء بِطاقة العَمَل'
+                          : 'Labour Card Expiry',
+                      value: _labourCardExpiry,
+                      onPicked: (d) =>
+                          setState(() => _labourCardExpiry = d),
+                      pickFn: _pickDate,
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 10),
+                // 🚗 WASL VIP UID (لِسائِقي النَقل)
+                TextField(
+                  controller: _waslUid,
+                  decoration: InputDecoration(
+                    labelText: s.isAr
+                        ? 'رَقم WASL VIP UID'
+                        : 'WASL VIP UID',
+                    helperText: s.isAr
+                        ? 'مَطلوب لِسائِقي خِدمات النَقل في الإمارات'
+                        : 'Required for transport drivers in UAE',
+                    helperMaxLines: 2,
+                    prefixIcon: const Icon(Icons.directions_car, size: 18),
+                  ),
+                ),
                 const SizedBox(height: 10),
                 M7MultiUploadBox(
                   label: s.idCardDoc,

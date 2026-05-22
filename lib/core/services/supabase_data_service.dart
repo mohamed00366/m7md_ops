@@ -1496,6 +1496,19 @@ class SupabaseDataService {
         workLetterFiles: ((r['work_letter_files'] as List?) ?? const [])
             .map((e) => e.toString())
             .toList(),
+        // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+        visaFileNumber: (r['visa_file_number'] as String?) ?? '',
+        eidExpiry: r['eid_expiry'] == null
+            ? null
+            : DateTime.tryParse(r['eid_expiry'] as String),
+        establishmentFileNumber:
+            (r['establishment_file_number'] as String?) ?? '',
+        labourCardNumber: (r['labour_card_number'] as String?) ?? '',
+        labourCardExpiry: r['labour_card_expiry'] == null
+            ? null
+            : DateTime.tryParse(r['labour_card_expiry'] as String),
+        mohreNumber: (r['mohre_number'] as String?) ?? '',
+        waslUid: (r['wasl_uid'] as String?) ?? '',
       );
 
   Map<String, dynamic> _employeeToPayload(Employee e) {
@@ -1614,6 +1627,44 @@ class SupabaseDataService {
     payload['id_card_files'] = e.idCardFiles;
     payload['license_files'] = e.licenseFiles;
     payload['work_letter_files'] = e.workLetterFiles;
+    // 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+    if (e.visaFileNumber.isNotEmpty) {
+      payload['visa_file_number'] = e.visaFileNumber;
+    } else {
+      payload['visa_file_number'] = null;
+    }
+    if (e.eidExpiry != null) {
+      payload['eid_expiry'] =
+          e.eidExpiry!.toIso8601String().substring(0, 10);
+    } else {
+      payload['eid_expiry'] = null;
+    }
+    if (e.establishmentFileNumber.isNotEmpty) {
+      payload['establishment_file_number'] = e.establishmentFileNumber;
+    } else {
+      payload['establishment_file_number'] = null;
+    }
+    if (e.labourCardNumber.isNotEmpty) {
+      payload['labour_card_number'] = e.labourCardNumber;
+    } else {
+      payload['labour_card_number'] = null;
+    }
+    if (e.labourCardExpiry != null) {
+      payload['labour_card_expiry'] =
+          e.labourCardExpiry!.toIso8601String().substring(0, 10);
+    } else {
+      payload['labour_card_expiry'] = null;
+    }
+    if (e.mohreNumber.isNotEmpty) {
+      payload['mohre_number'] = e.mohreNumber;
+    } else {
+      payload['mohre_number'] = null;
+    }
+    if (e.waslUid.isNotEmpty) {
+      payload['wasl_uid'] = e.waslUid;
+    } else {
+      payload['wasl_uid'] = null;
+    }
     return payload;
   }
 

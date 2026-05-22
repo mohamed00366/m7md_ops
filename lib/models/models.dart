@@ -249,6 +249,17 @@ class Employee {
   List<String> licenseFiles;
   List<String> workLetterFiles;
 
+  /// 🇦🇪 حُقول حُكومِيّة إضافيّة (UAE)
+  String visaFileNumber;
+  DateTime? eidExpiry;
+  String establishmentFileNumber;
+  String labourCardNumber;
+  DateTime? labourCardExpiry;
+  /// رَقم MOHRE الشَخصيّ (Personal Number / Worker ID)
+  String mohreNumber;
+  /// رَقم WASL VIP UID لِسائِقي النَقل
+  String waslUid;
+
   Employee({
     required this.id,
     required this.code,
@@ -315,6 +326,13 @@ class Employee {
     List<String>? idCardFiles,
     List<String>? licenseFiles,
     List<String>? workLetterFiles,
+    this.visaFileNumber = '',
+    this.eidExpiry,
+    this.establishmentFileNumber = '',
+    this.labourCardNumber = '',
+    this.labourCardExpiry,
+    this.mohreNumber = '',
+    this.waslUid = '',
   })  : idCardFiles = idCardFiles ?? <String>[],
         licenseFiles = licenseFiles ?? <String>[],
         workLetterFiles = workLetterFiles ?? <String>[];
