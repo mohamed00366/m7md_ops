@@ -906,4 +906,47 @@ class P {
   static const settingsLaborRulesView = 'settings.labor_rules.view';
   /// تَعديل قَواعِد قانون العَمَل لِلدُوَل
   static const settingsLaborRulesManage = 'settings.labor_rules.manage';
+
+  // ============================================================
+  // 🆕 PHASE 1 — صَلاحيّات الميزات الجَديدة (2026-05-23)
+  // ============================================================
+
+  // ===== 💰 Tips (البَقاشيش) =====
+  static const tipsView = 'tips.view';
+  static const tipsCreate = 'tips.create';
+  static const tipsDelete = 'tips.delete';
+  static const tipsLeaderboardView = 'tips.leaderboard.view';
+  static const tipsExport = 'tips.export';
+
+  // ===== 💾 Backups (النُسَخ الاحتِياطيّة) =====
+  static const backupsView = 'backups.view';
+  static const backupsRunStats = 'backups.run.stats';
+  static const backupsRunFull = 'backups.run.full';
+  static const backupsDownload = 'backups.download';
+
+  // ===== 🔒 GDPR / Anonymization =====
+  /// إخفاء هُوِيّة مُوَظَّف نِهائيّاً (Super Admin فَقَط)
+  static const gdprAnonymize = 'gdpr.anonymize';
+  static const gdprCandidatesView = 'gdpr.candidates.view';
+
+  // ===== 📜 Audit splits (تَفصيل سِجِلّ التَدقيق) =====
+  /// عَرض سِجِلّ تَغييرات الإعدادات
+  static const auditSettingsView = 'audit.settings.view';
+  /// عَرض تَدَفُّق النَشاطات المُوَحَّد
+  static const auditActivityView = 'audit.activity.view';
+
+  // ===== 👤 Employee Status (سِجِلّ حالة المُوَظَّف) =====
+  static const employeeStatusHistoryView = 'employees.status_history.view';
+  /// تَغيير حالة المُوَظَّف يَدَويّاً (active/inactive)
+  static const employeeStatusChange = 'employees.status.change';
+
+  // ===== 🇦🇪 UAE Government Fields (حِماية البَيانات الحَسّاسة) =====
+  /// عَرض EID, MOHRE, Labour Card, WASL, etc.
+  static const employeesGovFieldsView = 'employees.gov_fields.view';
+  /// تَعديل الحُقول الحُكومِيّة (يُغَلَّق غالِباً عَلى HR + Admin)
+  static const employeesGovFieldsEdit = 'employees.gov_fields.edit';
+
+  // ===== 📤 Exports (تَصدير عامّ) =====
+  static const exportExcel = 'export.excel';
+  static const exportPdf = 'export.pdf';
 }

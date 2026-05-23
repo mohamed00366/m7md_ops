@@ -118,6 +118,11 @@ class _BulkPermissionsMatrixScreenState
     'pin':            _Domain('security', '🔐 الأَمان', '🔐 Security'),
     'audit':          _Domain('security', '🔐 الأَمان', '🔐 Security'),
     'point_terminal': _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'gdpr':           _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    'backups':        _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    // 💰 Finance (جَديد)
+    'tips':           _Domain('finance', '💰 المالِيّة', '💰 Finance'),
+    'export':         _Domain('finance', '💰 المالِيّة', '💰 Finance'),
     // ⚙ Admin / System
     'admin':          _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
     'users':          _Domain('admin', '⚙ الإدارة', '⚙ Admin'),
@@ -574,7 +579,60 @@ class _BulkPermissionsMatrixScreenState
                 style: const TextStyle(
                     fontSize: 11, fontWeight: FontWeight.w700),
               ),
-              const Spacer(),
+              const SizedBox(width: 14),
+              // 🎨 Sensitivity legend
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _legendDot(
+                          _Sensitivity.critical.color,
+                          isAr
+                              ? _Sensitivity.critical.labelAr()
+                              : _Sensitivity.critical.labelEn()),
+                      _legendDot(
+                          _Sensitivity.financial.color,
+                          isAr
+                              ? _Sensitivity.financial.labelAr()
+                              : _Sensitivity.financial.labelEn()),
+                      _legendDot(
+                          _Sensitivity.operational.color,
+                          isAr
+                              ? _Sensitivity.operational.labelAr()
+                              : _Sensitivity.operational.labelEn()),
+                      _legendDot(
+                          _Sensitivity.reports.color,
+                          isAr
+                              ? _Sensitivity.reports.labelAr()
+                              : _Sensitivity.reports.labelEn()),
+                      _legendDot(
+                          _Sensitivity.neutral.color,
+                          isAr
+                              ? _Sensitivity.neutral.labelAr()
+                              : _Sensitivity.neutral.labelEn()),
+                      const SizedBox(width: 8),
+                      Container(
+                          width: 1, height: 14, color: Colors.grey[400]),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFD600),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAr ? 'جَديدة' : 'NEW',
+                        style: const TextStyle(
+                            fontSize: 10, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               if (_dirtyJobTitleIds.isNotEmpty)
                 Text(
                   isAr
@@ -614,6 +672,31 @@ class _BulkPermissionsMatrixScreenState
                 ),
         ),
       ],
+    );
+  }
+
+  /// 🎨 نُقطة لَوْنيّة صَغيرة لِأَجل شَريط دَليل الحَساسيّة
+  Widget _legendDot(Color color, String label) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
     );
   }
 
@@ -756,9 +839,10 @@ class _BulkPermissionsMatrixScreenState
       'camp': 5,
       'forms': 6,
       'reports': 7,
-      'notif': 8,
-      'security': 9,
-      'admin': 10,
+      'finance': 8,
+      'notif': 9,
+      'security': 10,
+      'admin': 11,
       'other': 99,
     };
     return order[key] ?? 50;
@@ -772,6 +856,149 @@ class _Domain {
   final String labelEn;   // '🏢 Organization'
   const _Domain(this.key, this.labelAr, this.labelEn);
 }
+
+// ============================================================
+// 🎨 Permission sensitivity helpers (Phase 4 of perms overhaul)
+// ============================================================
+
+/// مُستَوى الحَساسيّة — يُحَدِّد لَون شَريط رأس العَمود
+enum _Sensitivity {
+  critical, // 🔴 GDPR / Backups / Gov fields / Admin deletes
+  financial, // 🟠 Tips / Deductions / Salary / Entitlements
+  operational, // 🟢 Rosters / Attendance / Daily ops
+  reports, // 🔵 Reports / Exports / Read-only views
+  neutral, // ⚪ Default / lookup / generic CRUD
+}
+
+extension _SensitivityX on _Sensitivity {
+  Color get color {
+    switch (this) {
+      case _Sensitivity.critical:
+        return const Color(0xFFE53935); // red
+      case _Sensitivity.financial:
+        return const Color(0xFFFB8C00); // orange
+      case _Sensitivity.operational:
+        return const Color(0xFF43A047); // green
+      case _Sensitivity.reports:
+        return const Color(0xFF1E88E5); // blue
+      case _Sensitivity.neutral:
+        return const Color(0xFF9E9E9E); // grey
+    }
+  }
+
+  String labelAr() {
+    switch (this) {
+      case _Sensitivity.critical:
+        return '🔴 حَرِجة';
+      case _Sensitivity.financial:
+        return '🟠 مالِيّة';
+      case _Sensitivity.operational:
+        return '🟢 تَشغيليّة';
+      case _Sensitivity.reports:
+        return '🔵 تَقارير';
+      case _Sensitivity.neutral:
+        return '⚪ عامّة';
+    }
+  }
+
+  String labelEn() {
+    switch (this) {
+      case _Sensitivity.critical:
+        return '🔴 Critical';
+      case _Sensitivity.financial:
+        return '🟠 Financial';
+      case _Sensitivity.operational:
+        return '🟢 Operational';
+      case _Sensitivity.reports:
+        return '🔵 Reports';
+      case _Sensitivity.neutral:
+        return '⚪ General';
+    }
+  }
+}
+
+/// يُرجِع حَساسيّة صَلاحيّة مُعَيَّنة بِناءً عَلى مِفتاحها
+_Sensitivity _sensitivityFor(String permKey) {
+  final k = permKey.toLowerCase();
+  // 🔴 Critical — GDPR, backups, gov fields, admin deletes, role/perm changes
+  if (k.startsWith('gdpr.') ||
+      k.startsWith('backups.') ||
+      k.contains('gov_fields') ||
+      k.startsWith('audit.') ||
+      k.contains('status_history') ||
+      k.contains('roles.delete') ||
+      k.contains('roles.create') ||
+      k.contains('permissions') ||
+      k.contains('anonymize') ||
+      k == 'employees.delete' ||
+      k == 'admin.users.delete' ||
+      k.contains('rls') ||
+      k.contains('security')) {
+    return _Sensitivity.critical;
+  }
+  // 🟠 Financial — tips, deductions, salary, entitlements
+  if (k.startsWith('tips.') ||
+      k.startsWith('deductions.') ||
+      k.startsWith('entitlements.') ||
+      k.contains('salary') ||
+      k.contains('payroll') ||
+      k.contains('finance') ||
+      k.contains('expense')) {
+    return _Sensitivity.financial;
+  }
+  // 🔵 Reports & Exports
+  if (k.startsWith('reports.') ||
+      k.startsWith('export.') ||
+      k.startsWith('dashboard.') ||
+      k.endsWith('.view') && (k.contains('report') || k.contains('analytics'))) {
+    return _Sensitivity.reports;
+  }
+  // 🟢 Operational — rosters, attendance, daily field ops
+  if (k.startsWith('rosters.') ||
+      k.startsWith('attendance.') ||
+      k.startsWith('roster_') ||
+      k.startsWith('tracking.') ||
+      k.startsWith('buses.') ||
+      k.startsWith('drivers.') ||
+      k.startsWith('camp_') ||
+      k.startsWith('uniform_') ||
+      k.startsWith('forms.') ||
+      k.startsWith('workflows.')) {
+    return _Sensitivity.operational;
+  }
+  return _Sensitivity.neutral;
+}
+
+/// قائِمة الصَلاحيّات الجَديدة المُضافة في 2026-05-23 (Phase 1)
+/// تَظهَر بِشارة "NEW" في رَأس العَمود
+const Set<String> _newPermissions = {
+  // 💰 Tips
+  'tips.view',
+  'tips.create',
+  'tips.delete',
+  'tips.leaderboard.view',
+  'tips.export',
+  // 💾 Backups
+  'backups.view',
+  'backups.run.stats',
+  'backups.run.full',
+  'backups.download',
+  // 🔒 GDPR
+  'gdpr.anonymize',
+  'gdpr.candidates.view',
+  // 📜 Audit
+  'audit.settings.view',
+  'audit.activity.view',
+  // 👤 Employee Status
+  'employees.status_history.view',
+  'employees.status.change',
+  // 🇦🇪 Gov Fields
+  'employees.gov_fields.view',
+  'employees.gov_fields.edit',
+  // 📤 Exports
+  'export.excel',
+  'export.pdf',
+};
 
 // ============================================================
 // المصفوفة الفعليّة (مع تثبيت رأس الصف والعمود)
@@ -926,6 +1153,8 @@ class _MatrixGridState extends State<_MatrixGrid> {
                               has: has,
                               width: _colW,
                               height: _rowH,
+                              sensitivityColor:
+                                  _sensitivityFor(p.key).color,
                               onTap: () => widget.onToggle(jt.id, p.key),
                             );
                           }).toList(),
@@ -957,33 +1186,70 @@ class _ColumnHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sensitivity = _sensitivityFor(permission.key);
+    final isNew = _newPermissions.contains(permission.key);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
+    // Build rich tooltip: key + label + description + sensitivity tag
+    final tipLines = <String>[
+      '🔑 ${permission.key}',
+      '📦 ${permission.module}',
+      isAr ? permission.nameAr : permission.nameEn,
+    ];
+    final desc = isAr
+        ? (permission.descriptionAr ?? permission.descriptionEn)
+        : (permission.descriptionEn ?? permission.descriptionAr);
+    if (desc != null && desc.isNotEmpty) tipLines.add('— $desc');
+    tipLines.add(isAr ? sensitivity.labelAr() : sensitivity.labelEn());
+    if (isNew) tipLines.add(isAr ? '🆕 جَديدة' : '🆕 NEW');
+
     return InkWell(
       onTap: onTap,
       child: Tooltip(
-        message: '${permission.module}.${permission.key}\n${permission.nameAr}',
+        message: tipLines.join('\n'),
+        waitDuration: const Duration(milliseconds: 250),
         child: Container(
           width: width,
           height: height,
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.grey[200],
             border: Border(
               right: BorderSide(color: Colors.grey[400]!),
               bottom: BorderSide(color: Colors.grey[400]!),
+              top: BorderSide(color: sensitivity.color, width: 3),
             ),
           ),
-          child: RotatedBox(
-            quarterTurns: 3,
-            child: Text(
-              permission.key.split('.').last,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'monospace',
+          child: Stack(
+            children: [
+              Center(
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: Text(
+                    permission.key.split('.').last,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
               ),
-            ),
+              if (isNew)
+                Positioned(
+                  top: 1,
+                  right: 1,
+                  child: Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFD600),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -1077,12 +1343,14 @@ class _Cell extends StatelessWidget {
   final double width;
   final double height;
   final VoidCallback onTap;
+  final Color sensitivityColor;
 
   const _Cell({
     required this.has,
     required this.width,
     required this.height,
     required this.onTap,
+    required this.sensitivityColor,
   });
 
   @override
@@ -1094,15 +1362,17 @@ class _Cell extends StatelessWidget {
         height: height,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: has ? AppColors.success.withValues(alpha: 0.18) : Colors.white,
+          color: has
+              ? sensitivityColor.withValues(alpha: 0.18)
+              : Colors.white,
           border: Border(
             right: BorderSide(color: Colors.grey[300]!),
             bottom: BorderSide(color: Colors.grey[300]!),
           ),
         ),
         child: has
-            ? const Icon(Icons.check, size: 14, color: AppColors.success)
-            : Container(),
+            ? Icon(Icons.check, size: 14, color: sensitivityColor)
+            : null,
       ),
     );
   }

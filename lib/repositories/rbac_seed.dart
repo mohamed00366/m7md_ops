@@ -778,6 +778,61 @@ RbacSeedResult seedRbac(String Function() generateId,
     perm(P.settingsPointTerminalEdit, 'settings',
         'تَعديل إعدادات Point Terminal',
         'Edit Point Terminal settings'),
+
+    // ============================================================
+    // 🆕 PHASE 1 — صَلاحيّات الميزات الجَديدة (2026-05-23)
+    // ============================================================
+
+    // 💰 Tips
+    perm(P.tipsView, 'tips', 'عَرض البَقاشيش', 'View tips'),
+    perm(P.tipsCreate, 'tips', 'تَسجيل بَقشيش', 'Record tip'),
+    perm(P.tipsDelete, 'tips', 'حَذف بَقشيش', 'Delete tip'),
+    perm(P.tipsLeaderboardView, 'tips',
+        'عَرض لَوحة المُتَصَدِّرين', 'View leaderboard'),
+    perm(P.tipsExport, 'tips', 'تَصدير تَقرير البَقاشيش', 'Export tips report'),
+
+    // 💾 Backups
+    perm(P.backupsView, 'backups',
+        'عَرض النُسَخ الاحتِياطيّة', 'View backups'),
+    perm(P.backupsRunStats, 'backups',
+        'تَشغيل نَسخة إحصاءات', 'Run stats backup'),
+    perm(P.backupsRunFull, 'backups',
+        'تَشغيل نَسخة فِعليّة كامِلة', 'Run full data backup'),
+    perm(P.backupsDownload, 'backups',
+        'تَنزيل نَسخة احتِياطيّة', 'Download backup'),
+
+    // 🔒 GDPR
+    perm(P.gdprAnonymize, 'gdpr',
+        '🔒 إخفاء هُوِيّة مُوَظَّف (لا رَجعة فيه)',
+        '🔒 Anonymize employee (irreversible)'),
+    perm(P.gdprCandidatesView, 'gdpr',
+        'عَرض المُرَشَّحين لِلإخفاء', 'View anonymization candidates'),
+
+    // 📜 Audit splits
+    perm(P.auditSettingsView, 'audit',
+        'عَرض سِجِلّ تَدقيق الإعدادات', 'View settings audit'),
+    perm(P.auditActivityView, 'audit',
+        'عَرض تَدَفُّق النَشاطات', 'View activity feed'),
+
+    // 👤 Employee Status
+    perm(P.employeeStatusHistoryView, 'employees',
+        'عَرض سِجِلّ حالة المُوَظَّف', 'View employee status history'),
+    perm(P.employeeStatusChange, 'employees',
+        'تَغيير حالة المُوَظَّف يَدَويّاً', 'Change employee status manually'),
+
+    // 🇦🇪 UAE Gov fields
+    perm(P.employeesGovFieldsView, 'employees',
+        'عَرض الحُقول الحُكومِيّة (EID/MOHRE/WASL)',
+        'View government fields (EID/MOHRE/WASL)'),
+    perm(P.employeesGovFieldsEdit, 'employees',
+        'تَعديل الحُقول الحُكومِيّة',
+        'Edit government fields'),
+
+    // 📤 Generic exports
+    perm(P.exportExcel, 'export',
+        'تَصدير إلى Excel', 'Export to Excel'),
+    perm(P.exportPdf, 'export',
+        'تَصدير إلى PDF', 'Export to PDF'),
   ];
 
   // ========================================

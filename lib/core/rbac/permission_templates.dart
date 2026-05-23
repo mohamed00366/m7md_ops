@@ -57,6 +57,11 @@ class PermissionTemplates {
     // 🆕 الهيكل التنظيمي — قراءة فقط
     P.orgView, P.orgChartView, P.orgDepartmentProfileView,
     P.orgJobTitleProfileView,
+    // 🆕 PHASE 3 — Operations يُسَجِّل البَقاشيش
+    P.tipsView, P.tipsCreate, P.tipsLeaderboardView,
+    P.auditActivityView,
+    P.employeeStatusHistoryView,
+    P.exportExcel,
   ];
 
   /// قالب الموظف الإداري
@@ -138,6 +143,13 @@ class PermissionTemplates {
     // 🆕 صلاحيّات Admin أساسيّة للمدير
     P.adminSystemHealthView, P.adminWhatsNewView, P.adminWhatsNewEdit,
     P.adminJobTitlePermissionsView, P.adminJobTitlePermissionsManage,
+    // 🆕 PHASE 3 — صَلاحيّات جَديدة لِلمُدير
+    P.tipsView, P.tipsLeaderboardView, // يَرى لا يُسَجِّل
+    P.backupsView, // مُراقَبة
+    P.auditActivityView, P.auditSettingsView,
+    P.employeeStatusHistoryView, P.employeeStatusChange,
+    P.employeesGovFieldsView, // يَرى الحُقول الحُكومِيّة
+    P.exportExcel, P.exportPdf,
   ];
 
   /// قالب المشرف: عرض موظفيه + إنشاء روسترات + التتبع + الحضور
@@ -167,6 +179,12 @@ class PermissionTemplates {
     P.reportsSmartAlertsView, P.reportsAnalyticsView,
     P.reportsDataQualityView, P.reportsCompanyCalendarView,
     P.settingsLookupsView,
+    // 🆕 PHASE 3 — صَلاحيّات مالِيّة جَديدة لِلمُحاسِب
+    P.tipsView, P.tipsLeaderboardView, P.tipsExport,
+    P.exportExcel, P.exportPdf,
+    P.auditSettingsView, // لِلتَدقيق المالِيّ
+    P.backupsView, // لِلتَحَقُّق
+    P.employeeStatusHistoryView, // لِتَتَبُّع الرَواتِب
   ];
 
   /// قالب Camp Boss: كل الكامب + إنشاء/تعديل
