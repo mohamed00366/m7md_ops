@@ -17,6 +17,7 @@ import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/m7_app_bar.dart';
 import '../../shared/m7_empty_state.dart';
+import '../../shared/m7_print_view.dart';
 
 class ActivityFeedScreen extends StatefulWidget {
   const ActivityFeedScreen({super.key});
@@ -205,6 +206,27 @@ class _ActivityFeedScreenState extends State<ActivityFeedScreen> {
             onPressed: _load,
             tooltip: isAr ? 'تَحديث' : 'Refresh',
           ),
+          if (filtered.isNotEmpty)
+            M7PrintButton(
+              title: isAr ? 'تَدَفُّق النَشاطات' : 'Activity Feed',
+              subtitle:
+                  isAr ? '${filtered.length} نَشاط' : '${filtered.length} entries',
+              columns: isAr
+                  ? const ['الوَقت', 'النَوع', 'العُنوان', 'التَفاصيل']
+                  : const ['Time', 'Type', 'Title', 'Details'],
+              rowsBuilder: () => filtered
+                  .map((e) => [
+                        '${e.when.year}-${e.when.month.toString().padLeft(2, '0')}-${e.when.day.toString().padLeft(2, '0')} '
+                            '${e.when.hour.toString().padLeft(2, '0')}:${e.when.minute.toString().padLeft(2, '0')}',
+                        e.kind.name,
+                        e.title,
+                        e.subtitle ?? '',
+                      ])
+                  .toList(),
+              footerNote: isAr
+                  ? 'M7 Nexus — تَدَفُّق النَشاطات'
+                  : 'M7 Nexus — Activity Feed',
+            ),
         ],
       ),
       body: _loading

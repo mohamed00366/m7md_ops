@@ -31,7 +31,11 @@ import 'impersonate_picker.dart';
 import 'login_method_settings_screen.dart';
 import 'activity_feed_screen.dart';
 import 'anonymization_screen.dart';
+import 'ai_insights_screen.dart';
+import 'custom_reports_list_screen.dart';
 import 'database_backups_screen.dart';
+import 'error_tracking_settings_screen.dart';
+import 'performance_insights_screen.dart';
 import 'session_settings_screen.dart';
 import 'settings_audit_trail_screen.dart';
 import 'labor_rules_settings_screen.dart';
@@ -533,6 +537,62 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
             'Erase PII of terminated employees on request — Super Admin only',
         builder: (_) => const AnonymizationScreen(),
         // الشاشة نَفسها تَفرِض isSuperAdmin
+      ),
+      // 🐛 تَتَبُّع الأَخطاء (Sentry)
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.bug_report_outlined,
+        color: AppColors.danger,
+        titleAr: '🐛 تَتَبُّع الأَخطاء (Sentry)',
+        titleEn: '🐛 Error Tracking (Sentry)',
+        descAr:
+            'DSN + opt-out + حَدَث اختِبار. الأَخطاء تُرسَل بِدون بَيانات شَخصيّة',
+        descEn:
+            'DSN + opt-out + test event. Errors are sent without personal data',
+        builder: (_) => const ErrorTrackingSettingsScreen(),
+        requiredPermission: P.adminAuditView,
+      ),
+      // 📈 رُؤى الأَداء (Performance Insights)
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.speed,
+        color: AppColors.info,
+        titleAr: '📈 رُؤى الأَداء',
+        titleEn: '📈 Performance Insights',
+        descAr:
+            'مُدَد تَحميل الشاشات وَالـRPC مَع median/p95/p99 — مَحَلِّيّ + Sentry',
+        descEn:
+            'Screen load and RPC durations with median/p95/p99 — local + Sentry',
+        builder: (_) => const PerformanceInsightsScreen(),
+        requiredPermission: P.adminAuditView,
+      ),
+      // 📊 التَقارير المُخَصَّصة (Custom Report Builder)
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.assessment_outlined,
+        color: AppColors.brand,
+        titleAr: '📊 التَقارير المُخَصَّصة',
+        titleEn: '📊 Custom Reports',
+        descAr:
+            'بِناء تَقارير مُخَصَّصة بِاختِيار المَصدَر وَالأَعمِدة وَالفِلاتِر وَالتَجميع',
+        descEn:
+            'Build custom reports by picking source, columns, filters, grouping',
+        builder: (_) => const CustomReportsListScreen(),
+        requiredPermission: P.reportsCustomView,
+      ),
+      // 🤖 رُؤى ذَكيّة (AI Insights)
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.psychology_outlined,
+        color: AppColors.info,
+        titleAr: '🤖 رُؤى ذَكيّة',
+        titleEn: '🤖 AI Insights',
+        descAr:
+            'تَحليلات ذَكيّة (OpenAI): مُلَخَّص الحُضور، تَحليل الخُصومات، اكتِشاف الشُذوذ — بِدون بَيانات شَخصيّة',
+        descEn:
+            'AI-powered analysis (OpenAI): attendance summary, deduction analysis, anomaly detection — no personal data',
+        builder: (_) => const AiInsightsScreen(),
+        requiredPermission: P.adminAuditView,
       ),
 
       // 📜 إعدادات التدريب — أُزيلت (لم يعد فيه Training Hub منفصل)

@@ -368,6 +368,13 @@ RbacSeedResult seedRbac(String Function() generateId,
     // Reports
     perm(P.reportsView, 'reports', 'عرض التقارير', 'View reports'),
     perm(P.reportsExport, 'reports', 'تصدير التقارير', 'Export reports'),
+    // 📊 Custom Report Builder (2026-05-23)
+    perm(P.reportsCustomView, 'reports', 'عَرض التَقارير المُخَصَّصة',
+        'View custom reports'),
+    perm(P.reportsCustomCreate, 'reports', 'إنشاء/تَعديل تَقارير مُخَصَّصة',
+        'Create/edit custom reports'),
+    perm(P.reportsCustomDelete, 'reports', 'حَذف تَقارير مُخَصَّصة',
+        'Delete custom reports'),
     // 🆕 Reports — dedicated per-screen permissions
     perm(P.reportsSmartAlertsView, 'reports',
         'عرض مَركَز التَنبيهات الذَكيّة', 'View Smart Alerts dashboard'),

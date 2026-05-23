@@ -62,6 +62,8 @@ class PermissionTemplates {
     P.auditActivityView,
     P.employeeStatusHistoryView,
     P.exportExcel,
+    // 📊 Custom Report Builder — Operations يَرى التَقارير المُخَصَّصة
+    P.reportsCustomView,
   ];
 
   /// قالب الموظف الإداري
@@ -150,6 +152,8 @@ class PermissionTemplates {
     P.employeeStatusHistoryView, P.employeeStatusChange,
     P.employeesGovFieldsView, // يَرى الحُقول الحُكومِيّة
     P.exportExcel, P.exportPdf,
+    // 📊 Custom Report Builder — المُدير يَبني تَقارير تَشغيليّة
+    P.reportsCustomView, P.reportsCustomCreate, P.reportsCustomDelete,
   ];
 
   /// قالب المشرف: عرض موظفيه + إنشاء روسترات + التتبع + الحضور
@@ -185,6 +189,8 @@ class PermissionTemplates {
     P.auditSettingsView, // لِلتَدقيق المالِيّ
     P.backupsView, // لِلتَحَقُّق
     P.employeeStatusHistoryView, // لِتَتَبُّع الرَواتِب
+    // 📊 Custom Report Builder — المُحاسِب يَبني تَقارير مالِيّة مُخَصَّصة
+    P.reportsCustomView, P.reportsCustomCreate,
   ];
 
   /// قالب Camp Boss: كل الكامب + إنشاء/تعديل

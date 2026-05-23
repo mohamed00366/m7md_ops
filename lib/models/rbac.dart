@@ -372,6 +372,11 @@ class P {
   static const reportsView = 'reports.view';
   static const reportsExport = 'reports.export';
 
+  // 📊 Custom Report Builder (2026-05-23)
+  static const reportsCustomView   = 'reports.custom.view';
+  static const reportsCustomCreate = 'reports.custom.create';
+  static const reportsCustomDelete = 'reports.custom.delete';
+
   // ===== Reports (dedicated per-screen) =====
   /// 🚨 Smart Alerts — لَوحة التَنبيهات الذَكيّة (مَركَزة لِلتَنبيهات الحَرِجة وَالعاجِلة)
   static const reportsSmartAlertsView = 'reports.smart_alerts.view';

@@ -8,7 +8,9 @@ import '../../repositories/mock_repository.dart';
 import '../services/active_duty_settings.dart';
 import '../services/audit_logger.dart';
 import '../services/device_session_service.dart';
+import '../services/error_tracking_service.dart';
 import '../services/fcm_service.dart';
+import '../services/tenant_context.dart';
 import '../services/point_terminal_session_service.dart';
 import '../services/device_session_settings.dart';
 import '../services/face_attempt_tracker.dart';
@@ -824,6 +826,30 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('⚠ FCM bindToUser failed (non-fatal): $e');
     }
 
+    // 🐛 عَيِّن المُستَخدِم في Sentry (لا اسم/email — فَقَط ID وَدَور)
+    try {
+      ErrorTrackingService.instance.setUser(
+        accountId: acc.id,
+        employeeId: acc.employeeId,
+        role: _activeRole?.key,
+        accountType: acc.accountType.name,
+      );
+      ErrorTrackingService.instance.addBreadcrumb(
+        message: 'login_success',
+        category: 'auth',
+        data: {'account_type': acc.accountType.name},
+      );
+    } catch (_) {/* غَير حاسِم */}
+
+    // 🏢 حَمِّل tenant context (Multi-tenancy Phase 1)
+    try {
+      await TenantContext.instance.loadFor(acc.id);
+      if (TenantContext.instance.tenantId != null) {
+        ErrorTrackingService.instance
+            .setTag('tenant_id', TenantContext.instance.tenantId!);
+      }
+    } catch (_) {/* غَير حاسِم — backward compat */}
+
     notifyListeners();
     return LoginResult.success;
   }
@@ -973,6 +999,18 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _supabase.signOut();
     } catch (_) {}
+    // 🐛 امسَح المُستَخدِم مِن Sentry (لا تَرتَبِط أَخطاء مُستَقبَليّة بِهذا الحِساب)
+    try {
+      ErrorTrackingService.instance.clearUser();
+      ErrorTrackingService.instance.addBreadcrumb(
+        message: 'logout',
+        category: 'auth',
+      );
+    } catch (_) {/* غَير حاسِم */}
+    // 🏢 امسَح tenant context
+    try {
+      TenantContext.instance.clear();
+    } catch (_) {/* غَير حاسِم */}
     notifyListeners();
   }
 
@@ -1314,3 +1352,4 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 }
+

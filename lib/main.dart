@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +13,9 @@ import 'core/providers/auth_provider.dart';
 import 'firebase_options.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/theme_provider.dart';
+import 'core/services/error_tracking_service.dart';
 import 'core/services/fcm_service.dart';
+import 'core/services/performance_service.dart';
 import 'core/services/supabase_data_service.dart';
 import 'core/services/supabase_service.dart';
 import 'core/services/system_settings_service.dart';
@@ -36,7 +39,27 @@ import 'shared/branded_background.dart';
 import 'shared/impersonate_banner.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // 🐛 Sentry: نَلِفّ كُلّ شَيء داخِل runZonedGuarded لِالتِقاط الأَخطاء
+  //         غَير المُتَوَقَّعة في كامل شَجَرة التَطبيق.
+  await runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    // 🐛 تَهيئَة Sentry قَبل أَيّ شَيء آخَر (no-op لَو DSN غَير مُعَيَّن)
+    await ErrorTrackingService.instance.init(
+      release: 'm7md_ops@1.0.0+1',
+      environment: kReleaseMode ? 'production' : 'development',
+    );
+    // التِقاط أَخطاء Flutter framework (build/layout/paint)
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      ErrorTrackingService.instance.captureException(
+        details.exception,
+        details.stack,
+        context: {
+          'library': details.library,
+          'context': details.context?.toDescription(),
+        },
+      );
+    };
   // 🆕 شريط الحالة بلون الـ brand + أيقوناته بيضاء لتكون واضحة فوق الـ AppBar
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -91,11 +114,19 @@ Future<void> main() async {
   // لازِم تَكون مُحَمَّلة قَبل بَوَّابة التَسجيل الإجباريّ.
   unawaited(LoginMethodSettings.instance.load());
   unawaited(RosterEmployeeFilterSettings.instance.load());
+  // 📈 حَمِّل عَيِّنات الأَداء المَحفوظة سابِقاً (لِلَوحة Performance Insights)
+  unawaited(PerformanceService.instance.load());
 
   runApp(M7mdOpsApp(
     localeProvider: localeProvider,
     themeProvider: themeProvider,
   ));
+  }, (error, stack) {
+    // 🐛 أَيّ خَطَأ غَير مُتَوَقَّع في الـzone (مَثَلاً في Future لَم يُلتَقَط) → Sentry
+    ErrorTrackingService.instance.captureException(error, stack, context: {
+      'source': 'runZonedGuarded',
+    });
+  });
 }
 
 class M7mdOpsApp extends StatelessWidget {

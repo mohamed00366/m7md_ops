@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/services/excel_exporter.dart';
+import '../../core/services/performance_service.dart';
 import '../../core/services/roster_settings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
@@ -27,6 +28,7 @@ class _RostersCenterState extends State<RostersCenter>
     with SingleTickerProviderStateMixin {
   late TabController _tabs;
   late DateTime _weekStart;
+  ScreenTracker? _perfTracker;
 
   // Shared filters
   RosterStatus? _filterStatus;
@@ -37,17 +39,25 @@ class _RostersCenterState extends State<RostersCenter>
   @override
   void initState() {
     super.initState();
+    // 📈 ابدأ قِياس مُدّة تَحميل الشاشة
+    _perfTracker = PerformanceService.instance.trackScreen('RostersCenter');
     _tabs = TabController(length: 3, vsync: this);
     _weekStart = MockRepository().currentWeekStart();
     MockRepository().addListener(_onChange);
     RosterSettings.instance.addListener(_onChange);
     RosterSettings.instance.load().then((_) {
       if (mounted) setState(() {});
+      // 📈 أَنهِ التَتَبُّع — البَيانات الأَوّليّة تَوَفَّرَت
+      _perfTracker?.finish();
+      _perfTracker = null;
     });
   }
 
   @override
   void dispose() {
+    // 📈 لَو الشاشة أُغلِقَت قَبل اكتِمال التَحميل — سَجِّل عَيِّنة فاشِلة
+    _perfTracker?.finish(success: false, extra: {'reason': 'disposed_early'});
+    _perfTracker = null;
     _tabs.dispose();
     MockRepository().removeListener(_onChange);
     RosterSettings.instance.removeListener(_onChange);

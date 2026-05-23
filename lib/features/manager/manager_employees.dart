@@ -11,6 +11,7 @@ import '../../core/l10n/ar_to_ur_dictionary.dart' as ar2ur;
 import '../../core/providers/auth_provider.dart';
 import '../../core/services/employee_bulk_io.dart';
 import '../../core/services/image_picker_service.dart';
+import '../../core/services/performance_service.dart';
 import '../../core/services/supabase_data_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../shared/country_guard.dart';
@@ -60,6 +61,14 @@ class _ManagerEmployeesState extends State<ManagerEmployees> {
   @override
   void initState() {
     super.initState();
+    // 📈 قِياس مُدّة تَحميل الشاشة (مُجَرَّد build واحِد كافٍ — قائمة مَحَلِّيّة)
+    final tracker =
+        PerformanceService.instance.trackScreen('ManagerEmployees');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tracker.finish(extra: {
+        'employees_count': MockRepository().employees.length,
+      });
+    });
     // 🆕 استمع لتغييرات Repository ليعاد بناء الواجهة فوراً عند حفظ موظف
     MockRepository().addListener(_onChange);
   }
