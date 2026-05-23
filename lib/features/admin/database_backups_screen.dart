@@ -10,11 +10,15 @@
 // عَلى مُستَوى السيرفر. هذا النِظام إضافيّ لِلتَدقيق + الإحصاءات.
 // =============================================================================
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/services/file_save_helper.dart';
 import '../../core/services/m7_log.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -62,23 +66,31 @@ class _DatabaseBackupsScreenState extends State<DatabaseBackupsScreen> {
     }
   }
 
-  Future<void> _runManualBackup() async {
+  Future<void> _runManualBackup({bool fullData = false}) async {
     final supa = SupabaseService();
     final isAr = AppStrings.of(context).isAr;
     if (!supa.isReady) return;
     setState(() => _running = true);
     try {
       final auth = context.read<AuthProvider>();
-      await supa.client.rpc('execute_backup_snapshot', params: {
-        'p_backup_type': 'manual',
+      final fnName =
+          fullData ? 'execute_full_backup' : 'execute_backup_snapshot';
+      await supa.client.rpc(fnName, params: {
+        if (!fullData) 'p_backup_type': 'manual',
         'p_triggered_by': auth.account?.id,
-        'p_notes': isAr ? 'تَشغيل يَدَويّ مِن الواجِهة' : 'Manual run from UI',
+        'p_notes': isAr
+            ? (fullData
+                ? 'نَسخة فِعليّة (بَيانات JSON كامِلة)'
+                : 'تَشغيل يَدَويّ مِن الواجِهة')
+            : (fullData
+                ? 'Full data snapshot (JSON)'
+                : 'Manual run from UI'),
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: AppColors.success,
           content: Text(isAr
-              ? '✅ تَمّت النَسخة الاحتِياطيّة'
+              ? '✅ تَمّت النَسخة'
               : '✅ Backup completed'),
         ));
       }
@@ -92,6 +104,64 @@ class _DatabaseBackupsScreenState extends State<DatabaseBackupsScreen> {
       }
     } finally {
       if (mounted) setState(() => _running = false);
+    }
+  }
+
+  /// 🆕 تَنزيل النَسخة كَـJSON file
+  Future<void> _downloadBackup(_BackupEntry backup) async {
+    final supa = SupabaseService();
+    final isAr = AppStrings.of(context).isAr;
+    if (!supa.isReady) return;
+    try {
+      final rows = await supa.client
+          .from('database_backups')
+          .select('data_snapshot,table_counts,created_at,backup_type')
+          .eq('id', backup.id)
+          .limit(1);
+      if ((rows as List).isEmpty) return;
+      final r = Map<String, dynamic>.from(rows.first as Map);
+      final snapshot = r['data_snapshot'];
+      if (snapshot == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: AppColors.warning,
+            content: Text(isAr
+                ? '⚠ هذه نَسخة metadata فَقَط — لَيست بِها بَيانات كامِلة'
+                : '⚠ This is metadata only — no full data snapshot'),
+          ));
+        }
+        return;
+      }
+      final wrapper = {
+        'backup_id': backup.id,
+        'backup_type': r['backup_type'],
+        'created_at': r['created_at'],
+        'table_counts': r['table_counts'],
+        'data': snapshot,
+      };
+      final jsonStr = const JsonEncoder.withIndent('  ').convert(wrapper);
+      final bytes = Uint8List.fromList(utf8.encode(jsonStr));
+      final filename =
+          'm7_backup_${backup.createdAt.millisecondsSinceEpoch}.json';
+      final msg = await FileSaveHelper.save(
+        bytes: bytes,
+        filename: filename,
+        isAr: isAr,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.success,
+          content: Text(msg),
+        ));
+      }
+    } catch (e) {
+      M7Log.error('DbBackup', 'download', error: e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.danger,
+          content: Text(isAr ? 'فَشِل: $e' : 'Failed: $e'),
+        ));
+      }
     }
   }
 
@@ -149,23 +219,50 @@ class _DatabaseBackupsScreenState extends State<DatabaseBackupsScreen> {
                     ],
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _running ? null : _runManualBackup,
-                  icon: _running
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.play_arrow, size: 16),
-                  label: Text(
-                      isAr ? 'تَشغيل الآن' : 'Run Now',
-                      style: const TextStyle(fontSize: 12)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brand,
-                    foregroundColor: Colors.white,
-                  ),
+                Column(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _running ? null : () => _runManualBackup(),
+                      icon: _running
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.analytics_outlined, size: 16),
+                      label: Text(
+                          isAr ? 'إحصاءات فَقَط' : 'Stats only',
+                          style: const TextStyle(fontSize: 11)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.info,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ElevatedButton.icon(
+                      onPressed: _running
+                          ? null
+                          : () => _runManualBackup(fullData: true),
+                      icon: _running
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.cloud_download_outlined, size: 16),
+                      label: Text(
+                          isAr ? 'نَسخة فِعليّة' : 'Full data',
+                          style: const TextStyle(fontSize: 11)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.brand,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -199,6 +296,7 @@ class _DatabaseBackupsScreenState extends State<DatabaseBackupsScreen> {
                         itemBuilder: (_, i) => _BackupTile(
                           backup: _backups[i],
                           isAr: isAr,
+                          onDownload: () => _downloadBackup(_backups[i]),
                         ),
                       ),
           ),
@@ -211,7 +309,12 @@ class _DatabaseBackupsScreenState extends State<DatabaseBackupsScreen> {
 class _BackupTile extends StatelessWidget {
   final _BackupEntry backup;
   final bool isAr;
-  const _BackupTile({required this.backup, required this.isAr});
+  final VoidCallback? onDownload;
+  const _BackupTile({
+    required this.backup,
+    required this.isAr,
+    this.onDownload,
+  });
 
   Color get _statusColor {
     switch (backup.status) {
@@ -287,6 +390,18 @@ class _BackupTile extends StatelessWidget {
               Text(_fmtDateTime(backup.createdAt),
                   style:
                       const TextStyle(fontSize: 11, color: Colors.grey)),
+              if (onDownload != null && backup.status == 'completed') ...[
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: onDownload,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(Icons.download,
+                        size: 16, color: AppColors.brand),
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 6),
