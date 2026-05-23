@@ -30,6 +30,7 @@ import 'geo_fence_settings_screen.dart';
 import 'impersonate_picker.dart';
 import 'login_method_settings_screen.dart';
 import 'activity_feed_screen.dart';
+import 'anonymization_screen.dart';
 import 'database_backups_screen.dart';
 import 'session_settings_screen.dart';
 import 'settings_audit_trail_screen.dart';
@@ -518,6 +519,20 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
             'Live feed of changes: settings, employee status, backups',
         builder: (_) => const ActivityFeedScreen(),
         requiredPermission: P.adminAuditView,
+      ),
+      // 🆕 إخفاء هُوِيّة المُوَظَّفين (GDPR Right to be Forgotten)
+      _SettingEntry(
+        category: catSecurity,
+        icon: Icons.privacy_tip_outlined,
+        color: AppColors.danger,
+        titleAr: '🔒 إخفاء هُوِيّة المُوَظَّفين (GDPR)',
+        titleEn: '🔒 Employee Anonymization (GDPR)',
+        descAr:
+            'حَذف بَيانات المُوَظَّفين الشَخصيّة لِلمُتَقاعِدين بِناءً عَلى طَلَب — Super Admin فَقَط',
+        descEn:
+            'Erase PII of terminated employees on request — Super Admin only',
+        builder: (_) => const AnonymizationScreen(),
+        // الشاشة نَفسها تَفرِض isSuperAdmin
       ),
 
       // 📜 إعدادات التدريب — أُزيلت (لم يعد فيه Training Hub منفصل)
