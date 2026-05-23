@@ -40,7 +40,7 @@ class AppColors {
   static const borderDark = AppPalette.borderDark;
   static const textDark = AppPalette.textDark;
   static const textSecondaryDark = AppPalette.textSecondaryDark;
-  static const textTertiaryDark = Color(0xFF707070);
+  static const textTertiaryDark = AppPalette.textTertiaryDark;
 
   // ===== Role colors =====
   static const roleManager = AppPalette.roleManager;

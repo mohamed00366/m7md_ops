@@ -41,8 +41,9 @@ class AppPalette {
   static const info = Color(0xFF0EA5E9);
   static const infoSoft = Color(0xFFE0F2FE);
 
-  // ============= الخلفيات والأسطح =============
-  static const surface = Color(0xFFFAFAFA);
+  // ============= الخلفيات والأسطح (light) =============
+  // 🆕 2026-05-23: bg أَغمَق قَليلاً ⇒ Cards البَيضاء تَنفَصِل بِوُضوح
+  static const surface = Color(0xFFF5F5F7);
   static const card = Color(0xFFFFFFFF);
   static const input = Color(0xFFF3F4F6);
   static const border = Color(0xFFE5E7EB);
@@ -55,12 +56,19 @@ class AppPalette {
   static const textOnDark = Color(0xFFF5F5F5);
 
   // ============= وضع داكن =============
-  static const surfaceDark = Color(0xFF0A0A0A);
-  static const cardDark = Color(0xFF161616);
-  static const inputDark = Color(0xFF222222);
-  static const borderDark = Color(0xFF2E2E2E);
+  // 🆕 2026-05-23: تَدَرُّج elevation قياسيّ (Material 3) — كان OLED black
+  // وَكانَت Cards تَختَفي. الآن bg #121212 ⇒ card #1E1E1E ⇒ input #2A2A2A.
+  static const surfaceDark = Color(0xFF121212);
+  static const cardDark = Color(0xFF1E1E1E);
+  static const inputDark = Color(0xFF2A2A2A);
+  // 🆕 borderDark #383838 (كان #2E2E2E غَير مَرئيّ عَلى bg)
+  static const borderDark = Color(0xFF383838);
   static const textDark = Color(0xFFF5F5F5);
   static const textSecondaryDark = Color(0xFFB0B0B0);
+  // 🆕 textTertiaryDark #888 (كان #707070 → WCAG AA fail)
+  static const textTertiaryDark = Color(0xFF888888);
+  // 🆕 surface تَأثير M3 elevation tint (لِـCards مُرتَفِعة في dark)
+  static const surfaceTintDark = Color(0xFF252525);
 
   // ============= ألوان الأدوار =============
   static const roleAdmin = brand;

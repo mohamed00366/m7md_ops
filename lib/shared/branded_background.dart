@@ -6,20 +6,39 @@ import '../core/theme/app_colors.dart';
 
 /// خلفية موحدة لكل الشاشات: تدرّج + شعار خافت في الوسط
 /// تُطبق على كل شاشات التطبيق عبر MaterialApp.builder.
+///
+/// **2026-05-23 — مَنطِق الـwatermark:**
+///   - شاشات Auth/Splash/Home → watermark + glow blobs (هُوِيّة)
+///   - شاشات تَشغيليّة (rosters, employees, إلخ) → gradient فَقَط
+///   - الـwrapper الـglobal يَستَخدِم `BrandedBackgroundScope.of(context)`
+///     لِيُقَرِّر مِنَ الشاشة نَفسها مِن خِلال InheritedWidget.
 class BrandedBackground extends StatelessWidget {
   final Widget child;
-  const BrandedBackground({super.key, required this.child});
+  /// إذا true (افتِراضيّ) ⇒ يَعرِض الـwatermark logo في الوَسَط
+  final bool showWatermark;
+  /// إذا true (افتِراضيّ) ⇒ يَعرِض glow blobs + waves (native only)
+  final bool showDecorations;
+
+  const BrandedBackground({
+    super.key,
+    required this.child,
+    this.showWatermark = true,
+    this.showDecorations = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? AppColors.bgDark : AppColors.bgLight;
 
-    // 🆕 على الويب نُلغي الـ blur الثقيل (سبب تجمّد Chrome) ونعتمد فقط
-    // على التدرّج + الـ watermark — أخفّ بكثير ولا يفقد الهويّة.
+    // قِراءة الـscope مِن الـsubtree (لَو شاشة طَلَبَت تَعطيل decorations)
+    final scope = BrandedBackgroundScope.maybeOf(context);
+    final effectiveShowWatermark = scope?.showWatermark ?? showWatermark;
+    final effectiveShowDecorations = scope?.showDecorations ?? showDecorations;
+
     return Stack(
       children: [
-        // طبقة 1: تدرّج لوني ناعم (Gradient)
+        // طبقة 1: تدرّج لوني ناعم (Gradient) — دائِماً
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -33,17 +52,16 @@ class BrandedBackground extends StatelessWidget {
                         const Color(0xFF1A1A1A),
                       ]
                     : [
-                        const Color(0xFFFAFAFA),
+                        const Color(0xFFF0F1F4),
                         bgColor,
-                        const Color(0xFFF3F4F6),
+                        const Color(0xFFE8EAEF),
                       ],
               ),
             ),
           ),
         ),
-        // طبقة 2: دوائر ضوئية باهتة (Glow blobs) — مُعطَّلة على الويب
-        // لأنّ MaskFilter.blur بقطر 80-100 بكسل يُجمّد Chrome.
-        if (!kIsWeb)
+        // طبقة 2: glow blobs + waves — مَشروط
+        if (effectiveShowDecorations && !kIsWeb)
           Positioned.fill(
             child: IgnorePointer(
               child: CustomPaint(
@@ -51,29 +69,58 @@ class BrandedBackground extends StatelessWidget {
               ),
             ),
           ),
-        // طبقة 3: شعار باهت في الوسط (watermark)
-        // الـ PNG عنده خلفيّة بيضاء + رسم أسود. في الوضع الليلي نقلب
-        // الألوان عبر BrandLogo(forceInvert: true) فتذوب الخلفيّة في
-        // الثيم الداكن ويظهر الرسم أبيض.
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Center(
-              child: Opacity(
-                opacity: isDark ? 0.05 : 0.04,
-                child: FractionallySizedBox(
-                  widthFactor: 0.55,
-                  heightFactor: 0.55,
-                  child: BrandLogo(forceInvert: isDark),
+        // طبقة 3: شعار باهت في الوسط — مَشروط
+        if (effectiveShowWatermark)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Center(
+                child: Opacity(
+                  opacity: isDark ? 0.05 : 0.04,
+                  child: FractionallySizedBox(
+                    widthFactor: 0.55,
+                    heightFactor: 0.55,
+                    child: BrandLogo(forceInvert: isDark),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         // المحتوى
         child,
       ],
     );
   }
+}
+
+/// 🆕 2026-05-23: InheritedWidget يَسمَح لِلشاشات بِتَعطيل watermark/decorations
+/// مِن داخِل الـsubtree بِدون تَعديل MaterialApp.builder.
+///
+/// **مِثال — شاشة تَشغيليّة كَثيفة:**
+/// ```dart
+/// BrandedBackgroundScope(
+///   showWatermark: false,
+///   showDecorations: false,
+///   child: MyHeavyScreen(),
+/// )
+/// ```
+class BrandedBackgroundScope extends InheritedWidget {
+  final bool showWatermark;
+  final bool showDecorations;
+
+  const BrandedBackgroundScope({
+    super.key,
+    required super.child,
+    this.showWatermark = false,
+    this.showDecorations = false,
+  });
+
+  static BrandedBackgroundScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BrandedBackgroundScope>();
+
+  @override
+  bool updateShouldNotify(BrandedBackgroundScope oldWidget) =>
+      oldWidget.showWatermark != showWatermark ||
+      oldWidget.showDecorations != showDecorations;
 }
 
 /// رسّام النمط المائي - دوائر ضوئية + موجات منحنية باهتة

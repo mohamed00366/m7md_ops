@@ -42,9 +42,70 @@ class AppTheme {
     final base =
         isDark ? ThemeData.dark(useMaterial3: true) : ThemeData.light(useMaterial3: true);
 
-    final textTheme = GoogleFonts.cairoTextTheme(base.textTheme).apply(
+    final baseTextTheme = GoogleFonts.cairoTextTheme(base.textTheme).apply(
       bodyColor: text,
       displayColor: text,
+    );
+
+    // 🆕 2026-05-23: hierarchy واضِحة — Headers أَكبَر + أَوزان أَقوى
+    // displayLarge/Medium لِـHeroes (welcome screens, splash)
+    // headlineLarge/Medium لِعَناوين الشاشات
+    // titleLarge لِعَناوين Cards وَSections
+    final textTheme = baseTextTheme.copyWith(
+      displayLarge: baseTextTheme.displayLarge?.copyWith(
+        fontSize: 36,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.5,
+        color: text,
+      ),
+      displayMedium: baseTextTheme.displayMedium?.copyWith(
+        fontSize: 28,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.3,
+        color: text,
+      ),
+      headlineLarge: baseTextTheme.headlineLarge?.copyWith(
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        color: text,
+      ),
+      headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        color: text,
+      ),
+      titleLarge: baseTextTheme.titleLarge?.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: text,
+      ),
+      titleMedium: baseTextTheme.titleMedium?.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: text,
+      ),
+      bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+        fontSize: 14,
+        color: text,
+      ),
+      bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+        fontSize: 13,
+        color: text,
+      ),
+      bodySmall: baseTextTheme.bodySmall?.copyWith(
+        fontSize: 11,
+        color: textSecondary,
+      ),
+      labelLarge: baseTextTheme.labelLarge?.copyWith(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: text,
+      ),
+      labelSmall: baseTextTheme.labelSmall?.copyWith(
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        color: textSecondary,
+      ),
     );
 
     return base.copyWith(
@@ -64,12 +125,19 @@ class AppTheme {
       ),
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
-        // 🆕 أَسوَد كامِل في الوَضع الفاتِح وَالداكِن — لِأَقصى تَبايُن.
-        backgroundColor: Colors.black,
+        // 🆕 2026-05-23: AppBar dynamic per mode
+        //   • Light: brand (أَسوَد) مَع شَريط ذَهَبيّ سُفليّ لِلَمسة الهُوِيّة
+        //   • Dark:  surface مُرتَفِع (#1E1E1E) بَدَلاً مِن أَسوَد كامِل — يَنفَصِل
+        //     عَن الـbg بِتَدَرُّج elevation طَبيعيّ، لا تَبايُن قاسٍ
+        backgroundColor: isDark ? AppColors.surfaceDark : AppColors.brand,
         foregroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
+        // شَريط ذَهَبيّ سُفليّ — يُؤَكِّد هُوِيّة "أَسوَد + ذَهَبيّ" في كِلا الوَضعَين
+        shape: const Border(
+          bottom: BorderSide(color: AppColors.gold, width: 2),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
         actionsIconTheme: const IconThemeData(color: Colors.white),
         // 🔧 نَستَخدِم GoogleFonts.cairo مُباشَرَةً (لا نَمُرّ بِالـ textTheme
@@ -94,8 +162,12 @@ class AppTheme {
         ),
       ),
       cardTheme: CardTheme(
+        // 🆕 2026-05-23: في light نُضيف elevation خَفيفة لِتَنفَصِل Cards
+        // عَن الـbg. في dark نَعتَمِد عَلى surface tint (M3 standard).
         color: surface,
-        elevation: 0,
+        elevation: isDark ? 0 : 1.5,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
+        surfaceTintColor: isDark ? AppColors.brandAccent : Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
@@ -179,10 +251,24 @@ class AppTheme {
         labelTextStyle: WidgetStatePropertyAll(textTheme.labelSmall),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStatePropertyAll(
-            isDark ? Colors.white : AppColors.brand),
-        trackColor: WidgetStatePropertyAll(
-            AppColors.brand.withValues(alpha: isDark ? 0.5 : 0.3)),
+        // 🆕 2026-05-23: thumb أَبيَض دائِماً، track ذَهَبيّ عِندَ ON
+        // (كانَ thumb أَسوَد في light ⇒ يَبدو OFF حَتّى لَو مُفَعَّل)
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return Colors.grey[400];
+          return Colors.white;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return Colors.grey.withValues(alpha: 0.3);
+          }
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.gold; // 🥇 ذَهَبيّ عِندَ التَفعيل
+          }
+          return isDark
+              ? Colors.grey[700]
+              : Colors.grey[400]; // OFF track
+        }),
+        trackOutlineColor: WidgetStatePropertyAll(Colors.transparent),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
