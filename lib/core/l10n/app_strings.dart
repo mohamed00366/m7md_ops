@@ -158,10 +158,8 @@ class AppStrings {
       'اسم المستخدم أو كلمة المرور غير صحيحة',
       'Invalid credentials',
       'غلط معلومات');
-  String get demoCredentials => _t(
-      'بيانات تجريبية: admin / 123456',
-      'Demo: admin / 123456',
-      'ٹیسٹ: admin / 123456');
+  // 🔒 SECURITY: أُزيلت بيانات الدخول التجريبية (كانت تعلن الباب الخلفي).
+  String get demoCredentials => _t('', '', '');
 
   // ========== Manager / Dashboard ==========
   String get dashboard => _t('لوحة التحكم', 'Dashboard', 'ڈیش بورڈ');
@@ -231,6 +229,12 @@ class AppStrings {
   String get basicSalary =>
       _t('الراتب الأساسي', 'Basic Salary', 'بنیادی تنخواہ');
   String get overtime => _t('الإضافي', 'Overtime', 'اضافی وقت');
+  String get overtimeHourlyRate => _t(
+      'سعر ساعة الأوفرتايم', 'Overtime Hourly Rate', 'اوور ٹائم گھنٹہ ریٹ');
+  String get housingAllowance =>
+      _t('بدل سكن', 'Housing Allowance', 'رہائش الاؤنس');
+  String get transportAllowance =>
+      _t('بدل مواصلات', 'Transport Allowance', 'ٹرانسپورٹ الاؤنس');
   String get totalSalary => _t('إجمالي الراتب', 'Total Salary', 'کل تنخواہ');
   String get iban => _t('IBAN', 'IBAN', 'IBAN');
   String get emergencyContact =>
@@ -843,9 +847,9 @@ class AppStrings {
   String get workLetterDate => _t(
       'تاريخ خطاب العمل', 'Work Letter Date', 'کام کے خط کی تاریخ');
   String get totalSalaryHint => _t(
-      '(الأساسي + Others فقط)',
-      '(Basic Salary + Others only)',
-      '(بنیادی تنخواہ + دیگر صرف)');
+      '(الأساسي + بدل سكن + بدل مواصلات + أخرى)',
+      '(Basic + Housing + Transport + Other)',
+      '(بنیادی + رہائش + ٹرانسپورٹ + دیگر)');
   String get emergencyContactName2 => _t(
       'اسم جهة الطوارئ',
       'Emergency Contact Name',

@@ -434,17 +434,51 @@ class _FaceEnrollmentScreenState extends State<FaceEnrollmentScreen>
       );
 
       // 🆕 Phase E: احسب أفضل embedding (FaceNet إن متاح، وإلّا landmarks)
-      if (saved != null && _lastFace != null) {
-        final result = await FaceLoginService.instance.computeBestEmbedding(
-          face: _lastFace!,
-          imageBytes: bytes,
-        );
-        if (result != null) {
-          await FaceLoginService.instance.saveEmbedding(
-            enrollmentId: saved.id,
-            embedding: result.embedding,
+      // 🛡 2026-05-23: إنذار صَريح لَو فَشِل حِفظ الـembedding
+      // (السَبَب التاريخيّ لِفَشَل التَعَرُّف: photos تُحفَظ بِدون embeddings)
+      bool embeddingSaved = false;
+      if (saved != null) {
+        if (_lastFace == null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: AppColors.warning,
+            duration: const Duration(seconds: 3),
+            content: const Text('⚠ لَم يُحسَب embedding (وَجه ضائِع لَحظَة الحِفظ) — '
+                'شَغِّل "إعادة حِساب البَصمات" لاحِقاً'),
+          ));
+        } else {
+          final result =
+              await FaceLoginService.instance.computeBestEmbedding(
+            face: _lastFace!,
+            imageBytes: bytes,
           );
+          if (result == null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              backgroundColor: AppColors.warning,
+              duration: const Duration(seconds: 3),
+              content: const Text(
+                  '⚠ تَعَذَّر حِساب embedding (وَجه بِدون landmarks كافِية)'),
+            ));
+          } else {
+            embeddingSaved = await FaceLoginService.instance.saveEmbedding(
+              enrollmentId: saved.id,
+              embedding: result.embedding,
+            );
+            if (!embeddingSaved) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                backgroundColor: AppColors.danger,
+                duration: const Duration(seconds: 3),
+                content: const Text(
+                    '❌ فَشِل حِفظ embedding في Supabase — تَحَقَّق مِن الاتِّصال'),
+              ));
+            }
+          }
         }
+      }
+      if (kDebugMode) {
+        // ignore: avoid_print
+        debugPrint(
+            '🔐 Enrollment ${pose.key()}: photo saved=${saved != null}, '
+            'embedding saved=$embeddingSaved');
       }
 
       if (!mounted) return;

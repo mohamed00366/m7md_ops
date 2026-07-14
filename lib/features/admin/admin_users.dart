@@ -519,52 +519,9 @@ class _UserCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // 🆕 زِرّ سَريع لِبَصمة الوَجه
-                IconButton(
-                  tooltip: s.isAr
-                      ? 'تَسجيل بَصمة الوَجه'
-                      : 'Face Enrollment',
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 36, minHeight: 36),
-                  icon: const Icon(Icons.face_retouching_natural,
-                      color: Colors.deepOrange, size: 20),
-                  onPressed: () {
-                    final empId = account.employeeId;
-                    if (empId == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        backgroundColor: AppColors.warning,
-                        content: Text(s.isAr
-                            ? 'الحِساب غَير مَربوط بِمُوظَّف — اربِطه أَوَّلاً.'
-                            : 'Account not linked to an employee — link first.'),
-                      ));
-                      return;
-                    }
-                    Employee? emp;
-                    try {
-                      emp = MockRepository()
-                          .employees
-                          .firstWhere((e) => e.id == empId);
-                    } catch (_) {
-                      emp = null;
-                    }
-                    if (emp == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        backgroundColor: AppColors.danger,
-                        content: Text(s.isAr
-                            ? 'سِجِلّ المُوظَّف غَير مَوجود'
-                            : 'Linked employee record not found'),
-                      ));
-                      return;
-                    }
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) =>
-                          FaceEnrollmentScreen(employee: emp!),
-                      fullscreenDialog: true,
-                    ));
-                  },
-                ),
+                // 🆕 2026-05-23: حُذِفَ زِرّ بَصمة الوَجه السَريع — مُكَرَّر مَع
+                // _UserFaceEnrollmentCard في شاشة Edit User. وُحِّدَ المَدخَل
+                // لِتَجَنُّب تَضارُب UX.
                 // 🆕 زِرّ تَقرير الحِساب (Account 360)
                 IconButton(
                   tooltip: s.isAr
@@ -1183,7 +1140,11 @@ class _UserFormSheetState extends State<_UserFormSheet> {
                 ),
                 child: ListView(
                   controller: controller,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  // 🆕 2026-05-23: padding سُفليّ يَحسِب شَريط النِظام
+                  // (kept 20 sides; bottom = nav-bar height + 20 لِئَلّا يَختَفي زِرّ "Save")
+                  padding: EdgeInsets.fromLTRB(
+                      20, 0, 20,
+                      MediaQuery.of(context).viewPadding.bottom + 20),
                   children: [
                   _Section(title: s.isAr ? 'البيانات الأساسية' : 'Basic Info'),
                   _Field(

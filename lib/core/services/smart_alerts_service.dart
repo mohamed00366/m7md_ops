@@ -19,8 +19,37 @@ class SmartAlertsService {
   SmartAlertsService._();
   static final instance = SmartAlertsService._();
 
+  // 🆕 2026-05-24: Memoization layer — يُخَزِّن نَتيجة الـscan لِـ5 دَقائِق
+  // المُشكِلة قَبل: كُلّ فَتح لِشاشة dashboard ⇒ scan جَديد عَلى 1000 مُوَظَّف
+  // ⇒ تَجَمُّد 1-3 ثَوانٍ. الآن: scan مَرَّة كُلّ 5 دَقائِق فَقَط.
+  static const Duration _cacheTTL = Duration(minutes: 5);
+  final Map<String, _CachedScan> _cache = {};
+
+  /// مَسح الكاش — يُستَخدَم لَو حَدَثَ تَعديل مُهِمّ (مَثَلاً save employee)
+  void invalidateCache() => _cache.clear();
+
   /// فَحص كامِل لِلبَيانات → قائِمة تَنبيهات مَفلتَرة بِالدَولة المَعنيّة (إن وُجِدَت).
-  List<M7Alert> scan({String? countryId}) {
+  ///
+  /// مَع cache: لَو scan لِنَفس countryId خِلال آخِر 5 دَقائِق ⇒ يُرجِع الكاش
+  /// مُباشَرة بَدَلاً مِن إعادة الحِساب.
+  List<M7Alert> scan({String? countryId, bool forceRefresh = false}) {
+    final cacheKey = countryId ?? '__all__';
+    final cached = _cache[cacheKey];
+    if (!forceRefresh &&
+        cached != null &&
+        DateTime.now().difference(cached.computedAt) < _cacheTTL) {
+      return cached.alerts;
+    }
+    final result = _scanInternal(countryId: countryId);
+    _cache[cacheKey] = _CachedScan(
+      alerts: result,
+      computedAt: DateTime.now(),
+    );
+    return result;
+  }
+
+  /// الـimplementation الفِعليّ (مَا كانَ في scan قَبل التَعديل)
+  List<M7Alert> _scanInternal({String? countryId}) {
     final repo = MockRepository();
     final out = <M7Alert>[];
 
@@ -503,3 +532,10 @@ class M7Alert {
 
 /// 🆕 صَلاحيّة عَرض مَركَز التَنبيهات — نَستَخدِم صَلاحيّة التَقارير العامّة
 const String alertsViewPermission = P.reportsView;
+
+/// 🆕 2026-05-24: تَخزين نَتيجة الـscan لِـmemoization
+class _CachedScan {
+  final List<M7Alert> alerts;
+  final DateTime computedAt;
+  const _CachedScan({required this.alerts, required this.computedAt});
+}

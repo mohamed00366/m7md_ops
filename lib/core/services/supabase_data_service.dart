@@ -47,56 +47,125 @@ class SupabaseDataService {
   bool _initialSynced = false;
   bool get isSynced => _initialSynced;
 
-  /// مزامنة كاملة عند الإقلاع
+  /// 🆕 2026-05-24: مُزامَنة مُتَدَرِّجة (essential → background → on-demand)
+  ///
+  /// **المُشكِلة قَبل:** كانَت تُحَمِّل 30+ جَدوَل تَسَلسُليّاً ⇒ 5-15 ثانية تَجَمُّد
+  /// قَبل ظُهور الـUI. مَع 1000 مُوَظَّف ⇒ 30+ ثانية.
+  ///
+  /// **الحَلّ الآن:**
+  ///   - Phase 1 (essential, sequential): ما يَحتاجه الـlogin + dashboard
+  ///   - Phase 2 (background, parallel): باقي الـlookups
+  ///   - Phase 3 (background, parallel): بَيانات تَشغيليّة كَبيرة
   Future<void> initialSync() async {
     if (!_supabase.isReady) return;
     try {
+      // ============================================================
+      // 🟢 Phase 1 — Essential (الـUI لا يَعمَل بِدونها)
+      // ============================================================
+      // كُلّ هذه صَغيرة جِدّاً وَمَطلوبة لِلـlogin + first paint
       await syncCountries();
-      await syncCities();
-      await syncAreas();
-      await syncBusinessTypes();
-      await syncJobTitles();
-      await syncDepartments();
-      await syncMaritalStatuses();
-      await syncNationalities();
-      await syncVisaTypes();
-      await syncNumberingRules();
-      await syncNumberingCounters();
-      await syncMasters();
-      await syncPoints();
-      await syncSites();
-      await syncPointClientLinks();
-      await syncEmployees();
-      await syncBuses();
-      await syncBusEmployees();         // 🆕
-      await syncBusDriverShifts();      // 🆕
-      await syncEmployeeBusAssignments(); // 🆕 overrides اليوميّة (موظّف/أسبوع/يوم)
-      await syncEmployeeDailyMemos();     // 🆕 مذكّرة الموظّف اليوميّة
-      await syncRosters();
-      await syncBusPlans();
-      await syncTransportModes();       // 🆕 قبل syncEmployees غير ضروري لكن مفيد
-      await syncRoomTypes();            // 🆕 قبل syncRooms (references room_type_id)
-      await syncRooms();
-      await syncViolations();
-      await syncLaundryBatches();       // 🆕 قبل التذاكر
-      await syncLaundryTickets();
-      await syncUniformItems();         // 🆕 يونيفورم
-      await syncUniformReceipts();      // 🆕
-      await syncEmployeeUniforms();     // 🆕
-      await syncMorningChecklists();
       await syncRoles();
       await syncPermissions();
       await syncRolePermissions();
-      await syncRoomEvaluations();      // 🆕
-      await syncEmployeeEvaluations();  // 🆕
-      await syncDriverEvaluations();    // 🆕
       await syncAccounts();
-      _initialSynced = true;
-      // ignore: avoid_print
-      M7Log.info('DataService', 'initial sync done');
+      _initialSynced = true; // 🆕 ضَع flag مُبَكِّراً — الـUI يَستَطيع البَدء
+
+      M7Log.info('DataService', 'Phase 1 (essential) done — UI ready');
+
+      // ============================================================
+      // 🟡 Phase 2 — Background lookups (parallel, fire-and-forget)
+      // ============================================================
+      // كُلّ هذه lookups صَغيرة — تَجري بِالتَوازي بَدَلاً مِنَ التَسَلسُل
+      // ignore: unawaited_futures
+      _syncPhase2InBackground();
+
+      // ============================================================
+      // 🟠 Phase 3 — Heavy data (rosters, evaluations, إلخ)
+      // ============================================================
+      // ignore: unawaited_futures
+      _syncPhase3InBackground();
+
+      M7Log.info('DataService', 'initial sync orchestrated (phased)');
     } catch (e) {
-      // ignore: avoid_print
       M7Log.error('DataService', 'sync failed', error: e);
+    }
+  }
+
+  /// Phase 2: lookups مُتَوَسِّطة (يَجري بِالتَوازي)
+  Future<void> _syncPhase2InBackground() async {
+    try {
+      // المَجموعة A: lookups مُستَقِلّة تَماماً (parallel)
+      await Future.wait([
+        syncCities(),
+        syncBusinessTypes(),
+        syncMaritalStatuses(),
+        syncNationalities(),
+        syncVisaTypes(),
+        syncDepartments(),
+        syncJobTitles(),
+        syncTransportModes(),
+        syncRoomTypes(),
+        syncNumberingRules(),
+      ]);
+
+      // المَجموعة B: تَعتَمِد عَلى المَجموعة A
+      await Future.wait([
+        syncAreas(), // needs cities
+        syncNumberingCounters(),
+        syncMasters(),
+        syncPoints(),
+        syncSites(),
+      ]);
+
+      await syncPointClientLinks(); // needs points + sites
+
+      // المَجموعة C: المُوَظَّفون (يَحتاجون lookups)
+      await syncEmployees();
+
+      M7Log.info('DataService', 'Phase 2 (lookups + employees) done');
+    } catch (e) {
+      M7Log.error('DataService', 'Phase 2 failed', error: e);
+    }
+  }
+
+  /// Phase 3: بَيانات تَشغيليّة كَبيرة (يَجري بِالتَوازي بَعد Phase 2)
+  Future<void> _syncPhase3InBackground() async {
+    try {
+      // اِنتَظِر حَتّى Phase 2 يَكتَمِل (مَطلوب: employees)
+      // (في حال _syncPhase2InBackground لَم يَكتَمِل بَعد، نَنتَظِر بِشَكل آمِن)
+      while (_repo.employees.isEmpty && _supabase.isReady) {
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+
+      // كُلّ هذه يَحتاج employees — لكِنّها مُستَقِلّة عَن بَعضِها (parallel)
+      await Future.wait([
+        syncBuses(),
+        syncRosters(),
+        syncRooms(),
+        syncUniformItems(),
+        syncLaundryBatches(),
+        syncMorningChecklists(),
+        syncEmployeeDailyMemos(),
+        syncViolations(),
+      ]);
+
+      // المَجموعة D: تَعتَمِد عَلى المَجموعة C
+      await Future.wait([
+        syncBusEmployees(),
+        syncBusDriverShifts(),
+        syncEmployeeBusAssignments(),
+        syncBusPlans(),
+        syncLaundryTickets(),
+        syncUniformReceipts(),
+        syncEmployeeUniforms(),
+        syncRoomEvaluations(),
+        syncEmployeeEvaluations(),
+        syncDriverEvaluations(),
+      ]);
+
+      M7Log.info('DataService', 'Phase 3 (operational data) done — fully synced');
+    } catch (e) {
+      M7Log.error('DataService', 'Phase 3 failed', error: e);
     }
   }
 
@@ -1459,7 +1528,11 @@ class SupabaseDataService {
         housingType: (r['housing_type'] as String?) == 'on_camp'
             ? HousingType.onCamp
             : HousingType.offCamp,
-        hireType: EmployeeHireTypeX.fromKey(r['hire_type'] as String?),
+        // 🆕 null/فارغ = محترف (لا يظهر في شاشة تدريب الجُدد).
+        // فقط من حُدِّد له 'trainee' صراحةً يُعتبر متدرّباً.
+        hireType: r['hire_type'] == null
+            ? EmployeeHireType.professional
+            : EmployeeHireTypeX.fromKey(r['hire_type'] as String?),
         shirtSize: (r['shirt_size'] as String?) ?? '',
         pantSize: (r['pant_size'] as String?) ?? '',
         shoeSize: (r['shoe_size'] as String?) ?? '',
@@ -1470,6 +1543,8 @@ class SupabaseDataService {
         transportAllowance:
             (r['transport_allowance'] as num?)?.toDouble() ?? 0,
         otherAllowances: (r['other_allowances'] as num?)?.toDouble() ?? 0,
+        overtimeHourlyRate:
+            (r['overtime_hourly_rate'] as num?)?.toDouble() ?? 0,
         eligibleForTicket: (r['eligible_for_ticket'] as bool?) ?? false,
         ticketAmount: (r['ticket_amount'] as num?)?.toDouble() ?? 0,
         // 🆕 جَواز السَفَر
@@ -1608,6 +1683,7 @@ class SupabaseDataService {
     payload['housing_allowance'] = e.housingAllowance;
     payload['transport_allowance'] = e.transportAllowance;
     payload['other_allowances'] = e.otherAllowances;
+    payload['overtime_hourly_rate'] = e.overtimeHourlyRate;
     payload['eligible_for_ticket'] = e.eligibleForTicket;
     payload['ticket_amount'] = e.ticketAmount;
     // 🆕 جَواز السَفَر

@@ -30,6 +30,10 @@ import 'm7_log.dart';
 class M7ExcelExport {
   M7ExcelExport._();
 
+  /// 🆕 2026-05-24: حُدود لِتَجَنُّب OOM عَلى أَجهِزة ضَعيفة
+  static const int _softWarnRows = 10000;   // تَحذير المُستَخدِم
+  static const int _hardLimitRows = 50000;  // رَفض التَصدير
+
   /// تَصدير قائِمة مِن Maps إلى ملَفّ Excel
   ///
   /// [rows] — قائِمة الصُفوف (كُلّ Map = صَفّ). مَفاتيح الـMap هيَ أَعمِدة الـsheet.
@@ -52,6 +56,66 @@ class M7ExcelExport {
       ));
       return false;
     }
+
+    // 🆕 حُدود أَمان لِلصُفوف
+    if (rows.length > _hardLimitRows) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red.shade700,
+        duration: const Duration(seconds: 5),
+        content: Text(isAr
+            ? '❌ ${rows.length} صَفّ كَثير جِدّاً — الحَدّ الأَقصى $_hardLimitRows. اِستَخدِم فِلاتِر لِلتَقليل.'
+            : '❌ ${rows.length} rows too many — max $_hardLimitRows. Use filters to narrow.'),
+      ));
+      return false;
+    }
+
+    if (rows.length > _softWarnRows) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(isAr ? '⚠ تَصدير كَبير' : '⚠ Large Export'),
+          content: Text(
+            isAr
+                ? '${rows.length} صَفّ سَيُصَدَّر. قَد يَستَغرِق 30-60 ثانية وَيَستَهلِك ذاكِرة كَبيرة. اِستَمِرّ؟'
+                : '${rows.length} rows will be exported. May take 30-60s and use significant memory. Continue?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(isAr ? 'إلغاء' : 'Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(isAr ? 'مُتابَعة' : 'Continue'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true) return false;
+    }
+
+    // 🆕 progress dialog لِلتَصديرات الكَبيرة
+    final showProgress = rows.length > 1000;
+    if (showProgress && context.mounted) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(isAr
+                  ? 'تَصدير ${rows.length} صَفّ...'
+                  : 'Exporting ${rows.length} rows...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     try {
       final excel = Excel.createExcel();
       // أَنشِئ sheet أَو خُذ الافتِراضيّ
@@ -79,13 +143,17 @@ class M7ExcelExport {
         );
       }
 
-      // 2) صُفوف البَيانات
+      // 2) صُفوف البَيانات — مَع yield-to-UI كُلّ 500 صَفّ لِتَجَنُّب ANR
       for (var r = 0; r < rows.length; r++) {
         for (var c = 0; c < columns.length; c++) {
           final v = rows[r][columns[c]];
           final cell = sheet.cell(CellIndex.indexByColumnRow(
               columnIndex: c, rowIndex: r + 1));
           cell.value = _toCellValue(v);
+        }
+        // 🆕 كُلّ 500 صَفّ، تَنازَل لِلـUI thread لِتَجَنُّب ANR
+        if (r > 0 && r % 500 == 0) {
+          await Future.delayed(Duration.zero);
         }
       }
 
@@ -105,7 +173,13 @@ class M7ExcelExport {
 
       // 4) حَفظ
       final bytes = excel.save();
-      if (bytes == null) return false;
+      if (bytes == null) {
+        // 🆕 أَغلِق progress dialog لَو مَفتوح
+        if (showProgress && context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        return false;
+      }
 
       final fullFilename =
           '${filename}_${DateTime.now().millisecondsSinceEpoch}.xlsx';
@@ -115,6 +189,11 @@ class M7ExcelExport {
         isAr: isAr,
       );
 
+      // 🆕 أَغلِق progress dialog قَبل عَرض النَتيجة
+      if (showProgress && context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(msg),
@@ -123,6 +202,10 @@ class M7ExcelExport {
       return true;
     } catch (e) {
       M7Log.error('ExcelExport', 'export', error: e);
+      // 🆕 أَغلِق progress dialog لَو خَطَأ
+      if (showProgress && context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(isAr ? 'فَشِل: $e' : 'Failed: $e'),

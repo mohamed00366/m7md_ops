@@ -38,6 +38,22 @@ class RealtimeSyncService extends ChangeNotifier {
   DateTime? _lastSync;
   int _eventCount = 0;
 
+  // 🆕 2026-05-24: Debouncing لِكُلّ نَوع جَدوَل
+  // المُشكِلة: 100 تَعديل في ثانية = 100 sync. الآن: 100 تَعديل = 1 sync بَعد 500ms
+  final Map<String, Timer?> _debounceTimers = {};
+  static const Duration _debounceDuration = Duration(milliseconds: 500);
+
+  void _debouncedSync(String table, Future<void> Function() syncFn) {
+    _debounceTimers[table]?.cancel();
+    _debounceTimers[table] = Timer(_debounceDuration, () async {
+      try {
+        await syncFn();
+      } catch (e) {
+        M7Log.error('Realtime', 'debounced sync failed for $table', error: e);
+      }
+    });
+  }
+
   bool get isConnected => _isConnected;
   DateTime? get lastSync => _lastSync;
   int get eventCount => _eventCount;
@@ -59,6 +75,11 @@ class RealtimeSyncService extends ChangeNotifier {
   Future<void> stop() async {
     _periodicTimer?.cancel();
     _periodicTimer = null;
+    // 🆕 إِلغاء أَيّ debouncers مُعَلَّقة
+    for (final t in _debounceTimers.values) {
+      t?.cancel();
+    }
+    _debounceTimers.clear();
     for (final ch in _channels) {
       try {
         await SupabaseService().client.removeChannel(ch);
@@ -126,28 +147,30 @@ class RealtimeSyncService extends ChangeNotifier {
           ),
     );
 
-    // 👥 4) الموظَّفون (تَعديلات الـHR على بَيانات المُوَظَّف الحاليّ)
+    // 👥 4) الموظَّفون — 🆕 debounced (تَجَنُّب 100 sync لِـ100 تَعديل)
     _subscribe(
       client.channel('realtime:employees').onPostgresChanges(
             event: PostgresChangeEvent.all,
             schema: 'public',
             table: 'employees',
-            callback: (payload) async {
+            callback: (payload) {
               _onEvent('employees', payload);
-              await SupabaseDataService().syncEmployees();
+              _debouncedSync('employees',
+                  () => SupabaseDataService().syncEmployees());
             },
           ),
     );
 
-    // 📅 5) الروسترات
+    // 📅 5) الروسترات — debounced
     _subscribe(
       client.channel('realtime:rosters').onPostgresChanges(
             event: PostgresChangeEvent.all,
             schema: 'public',
             table: 'rosters',
-            callback: (payload) async {
+            callback: (payload) {
               _onEvent('rosters', payload);
-              await SupabaseDataService().syncRosters();
+              _debouncedSync('rosters',
+                  () => SupabaseDataService().syncRosters());
             },
           ),
     );

@@ -58,7 +58,6 @@ class _LoginScreenState extends State<LoginScreen>
       _loading = true;
       _error = null;
     });
-    // افتَح شاشة الكَشف
     final outcome = await Navigator.of(context).push(
       MaterialPageRoute<FaceDetectOutcome>(
         builder: (_) => const FaceDetectLoginScreen(),
@@ -74,24 +73,88 @@ class _LoginScreenState extends State<LoginScreen>
           : 'Face not recognized');
       return;
     }
-    // أَكمِل تَسجيل الدُخول بِحِساب المُطابِق
     final res = await auth.finalizeFaceLogin(
       accountId: outcome.matchedAccountId!,
       matchScore: outcome.score,
     );
     if (!mounted) return;
     if (res != LoginResult.success) {
-      setState(() => _error = s.isAr
-          ? 'فَشِل تَسجيل الدُخول'
-          : 'Login failed');
+      // 🆕 2026-05-25: رِسالة تَفصيليّة لِكَشف السَبَب الحَقيقيّ
+      String detailedMsg;
+      switch (res) {
+        case LoginResult.invalidCredentials:
+          detailedMsg = s.isAr
+              ? 'الحِساب غَير مَوجود في الذاكِرة المَحَلِّيّة (accId=${outcome.matchedAccountId})'
+              : 'Account not in local repo (accId=${outcome.matchedAccountId})';
+          break;
+        case LoginResult.inactiveAccount:
+          detailedMsg = s.isAr
+              ? '⛔ الحِساب مُعَطَّل'
+              : 'Account disabled';
+          break;
+        case LoginResult.noRoles:
+          detailedMsg = s.isAr
+              ? '⚠ لا تُوجَد أَدوار مَربوطة بِالحِساب — رَاجِع الإدارة'
+              : 'No roles assigned';
+          break;
+        case LoginResult.deviceBlocked:
+          detailedMsg = s.isAr
+              ? '⛔ جِهاز آخَر مُسَجَّل — اِخرُج مِن الجِهاز السابِق أَوَّلاً'
+              : 'Another device is active';
+          break;
+        case LoginResult.geoFenceRejected:
+          detailedMsg = s.isAr
+              ? '📍 خارِج المِنطَقة المَسموحة'
+              : 'Outside geo-fence';
+          break;
+        case LoginResult.geoFenceMockLocation:
+          detailedMsg = s.isAr
+              ? '📍 كُشِفَ تَزييف المَوقِع'
+              : 'Mock location detected';
+          break;
+        case LoginResult.geoFencePermissionDenied:
+          detailedMsg = s.isAr
+              ? '📍 إذن المَوقِع مَرفوض'
+              : 'Location permission denied';
+          break;
+        case LoginResult.onApprovedLeave:
+          detailedMsg = auth.lastDutyBlockMessageAr ??
+              (s.isAr ? '🌴 في إجازة' : 'On leave');
+          break;
+        case LoginResult.accountSuspended:
+          detailedMsg = auth.lastDutyBlockMessageAr ??
+              (s.isAr ? '⛔ الحِساب مُعَلَّق' : 'Suspended');
+          break;
+        case LoginResult.networkError:
+          detailedMsg = s.isAr
+              ? '🌐 خَطَأ في الشَبَكة'
+              : 'Network error';
+          break;
+        default:
+          detailedMsg = s.isAr
+              ? 'فَشِل تَسجيل الدُخول (${res.name})'
+              : 'Login failed (${res.name})';
+      }
+      setState(() => _error = detailedMsg);
     }
-    // النَجاح يَتَولّى أَمر التَوجيه عَبر _RootRouter
   }
 
+  /// 🔐 الدُخول بِالوَجه — مَنطِق مُوَحَّد
+  ///
+  /// **2026-05-23 (مُراجَع):** عُدنا إلى Username-First كَطَريقة أَساسيّة لِأَنّ
+  /// رَسائِل الخَطَأ أَوضَح + Liveness check + دِقّة أَعلى. الـIdentify Me يَبقى
+  /// كَـfallback عِندَ ترك حَقل الاسم فارِغ (مُفيد لِـPoint Terminal kiosk mode).
   Future<void> _faceLogin() async {
     final s = AppStrings.of(context);
     final auth = context.read<AuthProvider>();
-    // 🆕 إذا اسم المُستَخدِم فارِغ، استَخدِم الكَشف التِلقائيّ
+    // 🆕 2026-05-23: face login = Identify Me دائِماً (بِدون اسم مُستَخدِم)
+    return _faceLoginAutoDetect();
+  }
+
+  // ignore: unused_element
+  Future<void> _legacyFaceLoginWithUsername() async {
+    final s = AppStrings.of(context);
+    final auth = context.read<AuthProvider>();
     if (_userCtrl.text.trim().isEmpty) {
       return _faceLoginAutoDetect();
     }

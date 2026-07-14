@@ -260,6 +260,7 @@ create table public.employees (
   overtime numeric(10,2) default 0,
   training_fee numeric(10,2) default 0,
   others numeric(10,2) default 0,
+  overtime_hourly_rate numeric(10,2) default 0,
   iban text,
   emergency_contact_name text,
   emergency_contact_phone text,

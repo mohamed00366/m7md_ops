@@ -27,10 +27,13 @@ class FaceLoginService {
   static final instance = FaceLoginService._();
 
   /// عتبة قبول التشابه — تختلف بحسب مصدر embedding
-  /// • FaceNet:  0.65 (cosine similarity)
-  /// • ML Kit features:  0.82 (نسب المسافات، أعلى لأنّها بسيطة)
-  static const double matchThresholdFaceNet = 0.65;
-  static const double matchThresholdLandmarks = 0.82;
+  /// • FaceNet:  0.60 (cosine similarity)
+  /// • ML Kit features:  0.65 (كانَ 0.82 صارِم جِدّاً عَمَلِيّاً)
+  ///
+  /// 🆕 2026-05-23: خُفِضَت العَتَبَتان لِأَنّ landmarks لا تَتَجاوَز
+  /// 0.75-0.80 حَتّى مَع تَطابُق تامّ.
+  static const double matchThresholdFaceNet = 0.60;
+  static const double matchThresholdLandmarks = 0.65;
 
   /// حدّ أدنى للجودة لقبول الإطار
   static const double minQuality = 0.55;
@@ -325,24 +328,65 @@ class FaceLoginService {
         ? matchThresholdFaceNet
         : matchThresholdLandmarks;
 
-    // 2) لِكُلّ مُوظَّف، اقرَأ بَصماتِه وَاحسُب أَفضَل تَشابُه
     double bestScore = 0;
     String? bestEmpId;
     FaceEnrollment? bestEnrollment;
 
-    for (final empId in employeeIds) {
-      final enrollments =
-          await FaceEnrollmentService.instance.listForEmployee(empId);
-      if (enrollments.isEmpty) continue;
-      for (final enr in enrollments) {
+    // 🆕 2026-05-24: pgvector RPC — أَسرَع 50x لِـ500+ مُوَظَّف
+    // فَقَط لِـlandmarks 15-dim (الـRPC مُخَصَّص لِهذِه الأَبعاد)
+    final supa = SupabaseService();
+    if (liveLen == 15 && supa.isReady) {
+      try {
+        final result = await supa.client.rpc(
+          'find_face_match',
+          params: {
+            'p_embedding': liveResult.embedding,
+            'p_employee_ids': employeeIds,
+            'p_threshold': threshold,
+          },
+        ).timeout(const Duration(seconds: 10));
+
+        if (result is List && result.isNotEmpty) {
+          final row = result.first as Map<String, dynamic>;
+          bestScore = (row['similarity'] as num?)?.toDouble() ?? 0.0;
+          bestEmpId = row['employee_id'] as String?;
+          // نَبني FaceEnrollment مُلَخَّص — لا نَحتاج كامِل البَيانات
+          if (bestEmpId != null) {
+            bestEnrollment = FaceEnrollment(
+              id: (row['enrollment_id'] as String?) ?? '',
+              employeeId: bestEmpId,
+              pose: FacePoseX.fromKey(row['pose'] as String?),
+              embedding: const [],
+              qualityScore: 0,
+              faceWidthRatio: 0,
+              brightness: 0,
+              headAngleY: 0,
+              smileProbability: 0,
+              enrolledAt: DateTime.now(),
+            );
+          }
+        }
+      } catch (e) {
+        // fallback إلى الحَلّ القَديم
+        M7Log.error('FaceLogin',
+            'find_face_match RPC failed, fallback to client-side',
+            error: e);
+      }
+    }
+
+    // Fallback: تَحميل كُلّ الـenrollments وَحِساب client-side
+    // (يُستَخدَم لَو فَشِل الـRPC أَو embedding != 15-dim)
+    if (bestEmpId == null) {
+      final allEnrollments = await FaceEnrollmentService.instance
+          .listForEmployees(employeeIds);
+      for (final enr in allEnrollments) {
         final stored = enr.embedding;
         if (stored == null || stored.isEmpty) continue;
-        // فَلتَر بِالطول (FaceNet vs landmarks)
         if ((stored.length - liveLen).abs() > liveLen * 0.1) continue;
         final sim = cosineSimilarity(liveResult.embedding, stored);
         if (sim > bestScore) {
           bestScore = sim;
-          bestEmpId = empId;
+          bestEmpId = enr.employeeId;
           bestEnrollment = enr;
         }
       }

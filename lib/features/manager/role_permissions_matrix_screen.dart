@@ -69,6 +69,65 @@ class _RolePermissionsMatrixScreenState
     'roster_approvals':  ['✅ اعتماد الروسترات', '✅ Roster Approvals'],
     'approved_roster':   ['📋 الروستر المعتمد', '📋 Approved Roster'],
     'my_roster':         ['👤 روستري', '👤 My Roster'],
+    // 🆕 2026-05-23: تَرجَمات نَاقِصة لِلـmodules الظاهِرة بِالإنجليزيّة
+    'site_onboarding':   ['🏢 إعداد المَوقِع', '🏢 Site Onboarding'],
+    'documents':         ['📄 الوَثائِق', '📄 Documents'],
+    'employee_documents':['📄 وَثائِق المُوَظَّفين', '📄 Employee Documents'],
+    'point_terminal':    ['🖥️ نَقاط الخِدمة', '🖥️ Point Terminals'],
+    'amana':             ['🛡️ الأَمانات', '🛡️ Trust Items (Amana)'],
+    'notifications':     ['🔔 الإشعارات', '🔔 Notifications'],
+    'calendar':          ['📅 التَقويم', '📅 Calendar'],
+    'company_events':    ['🎉 فَعَّاليّات الشَركة', '🎉 Company Events'],
+    'tasks':             ['✅ المَهامّ', '✅ Tasks'],
+    // 🔐 أَمان
+    'face':              ['👤 بَصمة الوَجه', '👤 Face Recognition'],
+    'device_sessions':   ['📱 جَلَسات الأَجهِزة', '📱 Device Sessions'],
+    'geo_fence':         ['📍 السِياج الجُغرافيّ', '📍 Geo-fence'],
+    'login_method':      ['🔑 طَريقة الدُخول', '🔑 Login Method'],
+    'pin':               ['🔢 رَمز PIN', '🔢 PIN Code'],
+    'audit':             ['📜 سِجِلّ التَدقيق', '📜 Audit Log'],
+    'gdpr':              ['🔒 خُصوصيّة GDPR', '🔒 GDPR Privacy'],
+    'backups':           ['💾 النُسَخ الاحتِياطيّة', '💾 Backups'],
+    // 💰 مالِيّة
+    'tips':              ['💰 البَقاشيش', '💰 Driver Tips'],
+    'export':            ['📤 التَصدير', '📤 Export'],
+    'entitlements':      ['💼 المُستَحَقّات', '💼 Entitlements'],
+    // 🏕 الكامب — تَفاصيل
+    'camp_rooms':        ['🛏️ غُرَف الكامب', '🛏️ Camp Rooms'],
+    'camp_uniform':      ['👕 يونيفورم الكامب', '👕 Camp Uniform'],
+    'camp_buses':        ['🚌 باصات الكامب', '🚌 Camp Buses'],
+    'camp_violations':   ['⚠️ مُخالَفات الكامب', '⚠️ Camp Violations'],
+    'camp_laundry':      ['🧺 مَغسَلة الكامب', '🧺 Camp Laundry'],
+    'camp_amana':        ['🛡️ أَمانات الكامب', '🛡️ Camp Trust Items'],
+    'camp_inventory':    ['📦 مَخزون الكامب', '📦 Camp Inventory'],
+    'laundry':           ['🧺 المَغسَلة', '🧺 Laundry'],
+    'uniform_catalog':   ['👕 كَتالوغ الزِيّ', '👕 Uniform Catalog'],
+    'uniform_issue':     ['👕 صَرف الزِيّ', '👕 Uniform Issue'],
+    'uniform_requests':  ['👕 طَلَبات الزِيّ', '👕 Uniform Requests'],
+    'uniform_reports':   ['👕 تَقارير الزِيّ', '👕 Uniform Reports'],
+    'uniform_purchases': ['👕 مُشتَرَيات الزِيّ', '👕 Uniform Purchases'],
+    // 🚌 النَقل
+    'drivers':           ['🚖 السائِقون', '🚖 Drivers'],
+    'fleet':             ['🚛 الأُسطول', '🚛 Fleet'],
+    'gps_devices':       ['📡 أَجهِزة GPS', '📡 GPS Devices'],
+    // 👥 HR — تَفاصيل
+    'evaluation_criteria': ['📋 مَعايير التَقييم', '📋 Evaluation Criteria'],
+    'leaves':            ['🌴 الإجازات', '🌴 Leaves'],
+    // 📋 forms
+    'workflows':         ['🔁 سَير الموافَقات', '🔁 Workflows'],
+    'form_approvals':    ['✅ اعتِمادات النَماذِج', '✅ Form Approvals'],
+    // 📊 reports
+    'reports_smart_alerts':  ['🚨 التَنبيهات الذَكيّة', '🚨 Smart Alerts'],
+    'reports_analytics':     ['📈 تَحليلات', '📈 Analytics'],
+    'reports_data_quality':  ['🔍 جَودة البَيانات', '🔍 Data Quality'],
+    'reports_company_calendar': ['📅 تَقويم الشَركة', '📅 Company Calendar'],
+    // ⚙ إدارة
+    'users':             ['👤 المُستَخدِمون', '👤 Users'],
+    'roles':             ['🎭 الأَدوار', '🎭 Roles'],
+    'system':            ['⚙️ النِظام', '⚙️ System'],
+    'countries':         ['🌍 الدُوَل', '🌍 Countries'],
+    'departments':       ['🏢 الأَقسام', '🏢 Departments'],
+    'job_titles':        ['💼 المُسَمَّيات الوَظيفيّة', '💼 Job Titles'],
   };
 
   static const _moduleIcons = <String, IconData>{
@@ -102,6 +161,57 @@ class _RolePermissionsMatrixScreenState
     'roster_approvals': Icons.fact_check_outlined,
     'approved_roster':  Icons.verified_outlined,
     'my_roster':        Icons.calendar_month_outlined,
+    // 🆕 2026-05-23
+    'site_onboarding':  Icons.business_outlined,
+    'documents':        Icons.description_outlined,
+    'employee_documents': Icons.folder_shared_outlined,
+    'point_terminal':   Icons.point_of_sale_outlined,
+    'amana':            Icons.shield_outlined,
+    'notifications':    Icons.notifications_outlined,
+    'calendar':         Icons.calendar_today_outlined,
+    'company_events':   Icons.celebration_outlined,
+    'tasks':            Icons.check_circle_outline,
+    'face':             Icons.face_outlined,
+    'device_sessions':  Icons.devices_outlined,
+    'geo_fence':        Icons.gps_fixed_outlined,
+    'login_method':     Icons.login_outlined,
+    'pin':              Icons.pin_outlined,
+    'audit':            Icons.history_edu_outlined,
+    'gdpr':             Icons.privacy_tip_outlined,
+    'backups':          Icons.backup_outlined,
+    'tips':             Icons.attach_money_outlined,
+    'export':           Icons.file_download_outlined,
+    'entitlements':     Icons.account_balance_wallet_outlined,
+    'camp_rooms':       Icons.bed_outlined,
+    'camp_uniform':     Icons.checkroom_outlined,
+    'camp_buses':       Icons.airport_shuttle_outlined,
+    'camp_violations':  Icons.warning_amber_outlined,
+    'camp_laundry':     Icons.local_laundry_service_outlined,
+    'camp_amana':       Icons.inventory_2_outlined,
+    'camp_inventory':   Icons.inventory_outlined,
+    'laundry':          Icons.local_laundry_service_outlined,
+    'uniform_catalog':  Icons.style_outlined,
+    'uniform_issue':    Icons.outbox_outlined,
+    'uniform_requests': Icons.request_quote_outlined,
+    'uniform_reports':  Icons.assessment_outlined,
+    'uniform_purchases':Icons.shopping_cart_outlined,
+    'drivers':          Icons.directions_car_outlined,
+    'fleet':            Icons.airport_shuttle_outlined,
+    'gps_devices':      Icons.sensors_outlined,
+    'evaluation_criteria': Icons.rule_outlined,
+    'leaves':           Icons.beach_access_outlined,
+    'workflows':        Icons.account_tree_outlined,
+    'form_approvals':   Icons.task_alt_outlined,
+    'reports_smart_alerts':   Icons.crisis_alert_outlined,
+    'reports_analytics':      Icons.analytics_outlined,
+    'reports_data_quality':   Icons.fact_check_outlined,
+    'reports_company_calendar': Icons.event_outlined,
+    'users':            Icons.person_outlined,
+    'roles':            Icons.theater_comedy_outlined,
+    'system':           Icons.settings_suggest_outlined,
+    'countries':        Icons.public_outlined,
+    'departments':      Icons.account_balance_outlined,
+    'job_titles':       Icons.work_outline,
   };
 
   static const _moduleColors = <String, Color>{
@@ -135,6 +245,57 @@ class _RolePermissionsMatrixScreenState
     'roster_approvals': Color(0xFF10B981),
     'approved_roster':  Color(0xFF14B8A6),
     'my_roster':        Color(0xFF06B6D4),
+    // 🆕 2026-05-23
+    'site_onboarding':  Color(0xFF0EA5E9),
+    'documents':        Color(0xFF6366F1),
+    'employee_documents': Color(0xFF6366F1),
+    'point_terminal':   Color(0xFF8B5CF6),
+    'amana':            Color(0xFFA855F7),
+    'notifications':    Color(0xFFF59E0B),
+    'calendar':         Color(0xFFEC4899),
+    'company_events':   Color(0xFFEC4899),
+    'tasks':            Color(0xFF22C55E),
+    'face':             Color(0xFF7C3AED),
+    'device_sessions':  Color(0xFF6366F1),
+    'geo_fence':        Color(0xFF14B8A6),
+    'login_method':     Color(0xFF6366F1),
+    'pin':              Color(0xFF8B5CF6),
+    'audit':            Color(0xFF6B7280),
+    'gdpr':             Color(0xFFDC2626),
+    'backups':          Color(0xFF0F766E),
+    'tips':             Color(0xFFEAB308),
+    'export':           Color(0xFF10B981),
+    'entitlements':     Color(0xFF10B981),
+    'camp_rooms':       Color(0xFF8B5CF6),
+    'camp_uniform':     Color(0xFFEC4899),
+    'camp_buses':       Color(0xFF2563EB),
+    'camp_violations':  Color(0xFFDC2626),
+    'camp_laundry':     Color(0xFF06B6D4),
+    'camp_amana':       Color(0xFFA855F7),
+    'camp_inventory':   Color(0xFF8B5CF6),
+    'laundry':          Color(0xFF06B6D4),
+    'uniform_catalog':  Color(0xFFEC4899),
+    'uniform_issue':    Color(0xFFEC4899),
+    'uniform_requests': Color(0xFFEC4899),
+    'uniform_reports':  Color(0xFFEC4899),
+    'uniform_purchases':Color(0xFFEC4899),
+    'drivers':          Color(0xFF2563EB),
+    'fleet':            Color(0xFF2563EB),
+    'gps_devices':      Color(0xFF14B8A6),
+    'evaluation_criteria': Color(0xFFF59E0B),
+    'leaves':           Color(0xFF06B6D4),
+    'workflows':        Color(0xFF7C3AED),
+    'form_approvals':   Color(0xFF10B981),
+    'reports_smart_alerts':   Color(0xFFDC2626),
+    'reports_analytics':      Color(0xFF3B82F6),
+    'reports_data_quality':   Color(0xFFF59E0B),
+    'reports_company_calendar': Color(0xFFEC4899),
+    'users':            Color(0xFF6366F1),
+    'roles':            Color(0xFF8B5CF6),
+    'system':           Color(0xFF6B7280),
+    'countries':        Color(0xFF059669),
+    'departments':      Color(0xFF1F2937),
+    'job_titles':       Color(0xFF374151),
   };
 
   @override
@@ -185,6 +346,18 @@ class _RolePermissionsMatrixScreenState
       }
       _dirty = true;
     });
+  }
+
+  /// 🆕 2026-05-23: تَحويل مِفتاح module (snake_case) إلى اسم مَقروء
+  /// مَثَلاً: `site_onboarding` → `['Site Onboarding', 'Site Onboarding']`
+  /// (نُكَرِّر لِكِلتا اللُغَتَين كَـfallback لِأَنّ الاسم العَرَبيّ غَير مَوجود)
+  static List<String> _humanizeModuleKey(String key) {
+    final parts = key.split('_').where((p) => p.isNotEmpty).map((p) {
+      if (p.isEmpty) return p;
+      return p[0].toUpperCase() + p.substring(1).toLowerCase();
+    });
+    final humanized = parts.join(' ');
+    return [humanized, humanized];
   }
 
   /// 🆕 يجمع صلاحيّات الموديول بحسب الصفحة (resource).
@@ -978,8 +1151,9 @@ class _RolePermissionsMatrixScreenState
             itemBuilder: (_, i) {
               final m = keys[i];
               final perms = byModule[m]!;
-              final labels = _moduleLabels[m] ??
-                  [m, m.substring(0, 1).toUpperCase() + m.substring(1)];
+              // 🆕 fallback ذَكيّ — يُحَوِّل snake_case إلى Title Case
+              // مَثَلاً 'site_onboarding' → 'Site Onboarding' (بَدَلاً مِن raw key)
+              final labels = _moduleLabels[m] ?? _humanizeModuleKey(m);
               final icon = _moduleIcons[m] ?? Icons.folder_outlined;
               final color = _moduleColors[m] ?? Colors.grey.shade700;
               final selectedInModule =

@@ -116,29 +116,65 @@ class FaceEnrollmentService extends ChangeNotifier {
   /// 🆕 كَشف تَكرار الوَجه — يَفحَص هَل البَصمة الجَديدة مُطابِقة لِبَصمة
   /// مَوظَّف آخَر مَوجود في النِظام.
   ///
-  /// المَنطِق:
-  ///   - اقرَأ كُلّ البَصمات المَوجودة (مَع embedding)
-  ///   - استَثنِ مُوَظَّف الـ"current employee" (لِنَسمَح بِإعادة تَسجيله)
-  ///   - احسُب أَعلى تَشابُه cosine
-  ///   - إذا تَجاوَزَ العَتَبة (0.85 افتِراضيّاً) → اعتَبِرها تَكراراً
+  /// 🆕 2026-05-24: العَتَبة تِلقائيّة بِناءً عَلى نَوع embedding:
+  ///   - FaceNet (128-512 بُعد): 0.85 (دِقّة عالِية)
+  ///   - Landmarks (15 بُعد):  0.95 (تَجَنُّب false positives)
+  ///
+  /// السَبَب: landmarks تَستَخدِم 15 نِسبة مَسافة فَقَط، يُمكِن لِشَخصَين
+  /// مُختَلِفَين بِبُنية وَجه مُتَشابِهة الحُصول عَلى 0.85+ بِسُهولة.
   ///
   /// يُرجِع `DuplicateMatch` إذا وُجِدَ تَطابُق، أَو null إذا الوَجه فَريد.
   Future<DuplicateMatch?> findDuplicate({
     required List<double> embedding,
     required String currentEmployeeId,
-    double threshold = 0.85,
+    double? threshold, // null = تِلقائيّ بِناءً عَلى الطول
   }) async {
+    // العَتَبة التِلقائيّة
+    final effectiveThreshold =
+        threshold ?? (embedding.length > 50 ? 0.85 : 0.95);
     final supa = SupabaseService();
     if (!supa.isReady) return null;
+
+    // 🆕 2026-05-24: استِخدام pgvector RPC (أَسرَع 50x مِنَ الحَلّ السابِق)
+    // فَقَط لِـlandmarks 15-dim (الـRPC مُخَصَّص لِهذِه الأَبعاد)
+    if (embedding.length == 15) {
+      try {
+        final result = await supa.client.rpc(
+          'find_face_duplicate',
+          params: {
+            'p_embedding': embedding,
+            'p_current_employee_id': currentEmployeeId,
+            'p_threshold': effectiveThreshold,
+          },
+        ).timeout(const Duration(seconds: 10));
+
+        if (result is List && result.isNotEmpty) {
+          final row = result.first as Map<String, dynamic>;
+          final sim = (row['similarity'] as num?)?.toDouble() ?? 0.0;
+          if (sim >= effectiveThreshold) {
+            return DuplicateMatch(
+              employeeId: row['employee_id'] as String,
+              score: sim,
+            );
+          }
+        }
+        return null;
+      } catch (e) {
+        // fallback إلى الحَلّ القَديم لَو فَشِل الـRPC (مَثَلاً migration لَم تُشَغَّل)
+        M7Log.error('FaceEnroll',
+            'findDuplicate RPC failed, falling back to client-side',
+            error: e);
+      }
+    }
+
+    // Fallback / FaceNet: الحَلّ القَديم (client-side cosine)
     try {
-      // اقرَأ كُلّ البَصمات (employee_id + embedding فَقَط لِلسُرعة)
       final rows = await supa.client
           .from('employee_face_enrollments')
           .select('employee_id, embedding, pose, id')
-          .neq('employee_id', currentEmployeeId);
+          .neq('employee_id', currentEmployeeId)
+          .timeout(const Duration(seconds: 15));
       final list = List<Map<String, dynamic>>.from(rows as List);
-
-      // فَلتَر بِالطول (FaceNet 128/512 vs landmarks 16)
       final liveLen = embedding.length;
       double bestScore = 0;
       String? bestEmpId;
@@ -146,11 +182,9 @@ class FaceEnrollmentService extends ChangeNotifier {
       for (final r in list) {
         final stored = r['embedding'];
         if (stored is! List) continue;
-        final storedEmb = stored
-            .map((e) => (e as num).toDouble())
-            .toList();
+        final storedEmb =
+            stored.map((e) => (e as num).toDouble()).toList();
         if (storedEmb.isEmpty) continue;
-        // فَلتَر الطول (±10%)
         if ((storedEmb.length - liveLen).abs() > liveLen * 0.1) continue;
 
         final sim = _cosineSimilarity(embedding, storedEmb);
@@ -160,7 +194,7 @@ class FaceEnrollmentService extends ChangeNotifier {
         }
       }
 
-      if (bestScore >= threshold && bestEmpId != null) {
+      if (bestScore >= effectiveThreshold && bestEmpId != null) {
         return DuplicateMatch(
           employeeId: bestEmpId,
           score: bestScore,
@@ -202,13 +236,38 @@ class FaceEnrollmentService extends ChangeNotifier {
           .from('employee_face_enrollments')
           .select()
           .eq('employee_id', employeeId)
-          .order('enrolled_at', ascending: true);
+          .order('enrolled_at', ascending: true)
+          .timeout(const Duration(seconds: 10));
       return List<Map<String, dynamic>>.from(rows as List)
           .map(_fromRow)
           .toList();
     } catch (e) {
       // ignore: avoid_print
       M7Log.error('FaceEnroll', 'list', error: e);
+      return [];
+    }
+  }
+
+  /// 🆕 2026-05-23: طَلَب واحِد لِبَصمات قائِمة مُوَظَّفين دَفعَة واحِدة
+  /// يَحُلّ مُشكِلة HANG في face login عِندَ وُجود مُوَظَّفين كَثيرين
+  /// (كانَ N طَلَب مُتَتالٍ ⇒ 15-60 ثانية. الآن طَلَب واحِد ⇒ ~1 ثانية)
+  Future<List<FaceEnrollment>> listForEmployees(
+      List<String> employeeIds) async {
+    if (employeeIds.isEmpty) return [];
+    final supa = SupabaseService();
+    if (!supa.isReady) return [];
+    try {
+      final rows = await supa.client
+          .from('employee_face_enrollments')
+          .select()
+          .inFilter('employee_id', employeeIds)
+          .order('enrolled_at', ascending: true)
+          .timeout(const Duration(seconds: 15));
+      return List<Map<String, dynamic>>.from(rows as List)
+          .map(_fromRow)
+          .toList();
+    } catch (e) {
+      M7Log.error('FaceEnroll', 'listForEmployees', error: e);
       return [];
     }
   }

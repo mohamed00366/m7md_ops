@@ -58,6 +58,24 @@ class _ManagerEmployeesState extends State<ManagerEmployees> {
   String? _filterHire; // trainee | professional | null=all
   String? _filterHousing; // on_camp | off_camp | null=all
 
+  // 🆕 2026-05-24: pagination لِأَداء عالٍ مَع 1000+ مُوَظَّف
+  // - يَعرِض 100 مُوَظَّف فَقَط في البِداية
+  // - زِرّ "تَحميل المَزيد" يَزيد بِـ100
+  // - يَعود لِـ100 عِندَ تَغيير الفِلتَر/البَحث
+  static const int _initialPageSize = 100;
+  static const int _pageIncrement = 100;
+  int _visibleLimit = _initialPageSize;
+
+  void _resetPagination() {
+    if (_visibleLimit != _initialPageSize) {
+      setState(() => _visibleLimit = _initialPageSize);
+    }
+  }
+
+  void _loadMore() {
+    setState(() => _visibleLimit += _pageIncrement);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -268,7 +286,12 @@ class _ManagerEmployeesState extends State<ManagerEmployees> {
                           prefixIcon: const Icon(Icons.search),
                           isDense: true,
                         ),
-                        onChanged: (v) => setState(() => _query = v),
+                        onChanged: (v) {
+                          setState(() {
+                            _query = v;
+                            _visibleLimit = _initialPageSize; // 🆕 reset
+                          });
+                        },
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -523,50 +546,121 @@ class _ManagerEmployeesState extends State<ManagerEmployees> {
   Widget _buildContent(List<Employee> filtered) {
     // padding سفلي إضافي لكي لا يغطّي الـ FAB البطاقة الأخيرة
     const bottomPad = EdgeInsets.fromLTRB(12, 0, 12, 88);
-    // 🆕 صلاحيّة التعديل — تحدّد ما إذا كان النقر على البطاقة يَفتح المحرّر
     final auth = context.read<AuthProvider>();
     final canEdit = auth.isSuperAdmin ||
         auth.permissions.contains(P.employeesEdit);
+
+    // 🆕 2026-05-24: تَطبيق pagination
+    final totalCount = filtered.length;
+    final visibleCount = _visibleLimit.clamp(0, totalCount);
+    final visible = filtered.take(visibleCount).toList();
+    final hasMore = visibleCount < totalCount;
+
+    // عَدّاد إجماليّ + زِرّ "تَحميل المَزيد" في النِهاية
+    Widget loadMoreFooter() {
+      if (!hasMore) {
+        if (totalCount > _initialPageSize) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Text(
+                '— كُلّ $totalCount مُوَظَّف مَعروض —',
+                style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700),
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      }
+      final remaining = totalCount - visibleCount;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        child: Column(
+          children: [
+            Text(
+              'يَعرِض $visibleCount مِن $totalCount',
+              style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: _loadMore,
+              icon: const Icon(Icons.expand_more, size: 18),
+              label: Text(
+                'تَحميل المَزيد (+${remaining.clamp(0, _pageIncrement)})',
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brand,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(220, 40),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     switch (_view) {
       case _EmployeesView.grid:
-        return GridView.builder(
-          padding: bottomPad,
-          // 🆕 childAspectRatio أصغر = بطاقة أطول → مكان كافٍ للاسم + الكود
-          //    تحت الصورة بدون overflow في الـ 30 بكسل
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 220,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 0.78,
-          ),
-          itemCount: filtered.length,
-          itemBuilder: (_, i) => _EmployeeGridCard(
-            employee: filtered[i],
-            onTap:
-                canEdit ? () => _openEditor(existing: filtered[i]) : null,
-          ),
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 220,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.78,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => _EmployeeGridCard(
+                    employee: visible[i],
+                    onTap: canEdit
+                        ? () => _openEditor(existing: visible[i])
+                        : null,
+                  ),
+                  childCount: visible.length,
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(child: loadMoreFooter()),
+            const SliverPadding(padding: EdgeInsets.only(bottom: 88)),
+          ],
         );
       case _EmployeesView.compact:
         return ListView.separated(
           padding: bottomPad,
-          itemCount: filtered.length,
+          itemCount: visible.length + 1,
           separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (_, i) => _EmployeeCompactRow(
-            employee: filtered[i],
-            onTap:
-                canEdit ? () => _openEditor(existing: filtered[i]) : null,
-          ),
+          itemBuilder: (_, i) {
+            if (i == visible.length) return loadMoreFooter();
+            return _EmployeeCompactRow(
+              employee: visible[i],
+              onTap:
+                  canEdit ? () => _openEditor(existing: visible[i]) : null,
+            );
+          },
         );
       case _EmployeesView.list:
       default:
         return ListView.builder(
           padding: bottomPad,
-          itemCount: filtered.length,
-          itemBuilder: (_, i) => _EmployeeCard(
-            employee: filtered[i],
-            onTap:
-                canEdit ? () => _openEditor(existing: filtered[i]) : null,
-          ),
+          itemCount: visible.length + 1,
+          itemBuilder: (_, i) {
+            if (i == visible.length) return loadMoreFooter();
+            return _EmployeeCard(
+              employee: visible[i],
+              onTap:
+                  canEdit ? () => _openEditor(existing: visible[i]) : null,
+            );
+          },
         );
     }
   }
@@ -1344,6 +1438,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   late final TextEditingController _housingAllowance;
   late final TextEditingController _transportAllowance;
   late final TextEditingController _otherAllowances;
+  late final TextEditingController _overtimeHourlyRate; // 🆕 سعر ساعة الأوفرتايم
   late final TextEditingController _ticketAmount;
   bool _eligibleForTicket = false;
   // 🆕 جَواز السَفَر — الحَفظ + المُلاحَظات + التَواريخ
@@ -1442,6 +1537,8 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         TextEditingController(text: (e?.transportAllowance ?? 0).toString());
     _otherAllowances =
         TextEditingController(text: (e?.otherAllowances ?? 0).toString());
+    _overtimeHourlyRate =
+        TextEditingController(text: (e?.overtimeHourlyRate ?? 0).toString());
     _ticketAmount =
         TextEditingController(text: (e?.ticketAmount ?? 0).toString());
     _eligibleForTicket = e?.eligibleForTicket ?? false;
@@ -1505,6 +1602,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     _housingAllowance.dispose();
     _transportAllowance.dispose();
     _otherAllowances.dispose();
+    _overtimeHourlyRate.dispose();
     _ticketAmount.dispose();
     _passportCustodyNotes.dispose();
     _emergencyName.dispose();
@@ -1542,8 +1640,10 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
 
   double get _totalSalary {
     final basic = double.tryParse(_basicSalary.text) ?? 0;
+    final housing = double.tryParse(_housingAllowance.text) ?? 0;
+    final transport = double.tryParse(_transportAllowance.text) ?? 0;
     final others = double.tryParse(_others.text) ?? 0;
-    return basic + others;
+    return basic + housing + transport + others;
   }
 
   /// 🆕 يُعيد توليد رمز الموظف بناءً على تصنيف القسم/المسمّى المختار
@@ -1709,6 +1809,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
         housingAllowance: double.tryParse(_housingAllowance.text) ?? 0,
         transportAllowance: double.tryParse(_transportAllowance.text) ?? 0,
         otherAllowances: double.tryParse(_otherAllowances.text) ?? 0,
+        overtimeHourlyRate: double.tryParse(_overtimeHourlyRate.text) ?? 0,
         eligibleForTicket: _eligibleForTicket,
         ticketAmount: double.tryParse(_ticketAmount.text) ?? 0,
         passportCustody: _passportCustody,
@@ -1809,6 +1910,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       e.housingAllowance = double.tryParse(_housingAllowance.text) ?? 0;
       e.transportAllowance = double.tryParse(_transportAllowance.text) ?? 0;
       e.otherAllowances = double.tryParse(_otherAllowances.text) ?? 0;
+      e.overtimeHourlyRate = double.tryParse(_overtimeHourlyRate.text) ?? 0;
       e.eligibleForTicket = _eligibleForTicket;
       e.ticketAmount = double.tryParse(_ticketAmount.text) ?? 0;
       e.passportCustody = _passportCustody;
@@ -2571,6 +2673,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
           SectionCard(
             child: Column(
               children: [
+                // 🆕 جزء واحد للراتب: أساسي / سكن / مواصلات / أخرى + سعر ساعة الأوفرتايم
                 Row(children: [
                   Expanded(
                     child: TextField(
@@ -2583,9 +2686,11 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
-                      controller: _overtime,
+                      controller: _housingAllowance,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: s.overtime),
+                      decoration:
+                          InputDecoration(labelText: s.housingAllowance),
+                      onChanged: (_) => setState(() {}),
                     ),
                   ),
                 ]),
@@ -2593,9 +2698,11 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                 Row(children: [
                   Expanded(
                     child: TextField(
-                      controller: _trainingFee,
+                      controller: _transportAllowance,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: s.trainingFee),
+                      decoration:
+                          InputDecoration(labelText: s.transportAllowance),
+                      onChanged: (_) => setState(() {}),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -2609,72 +2716,17 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                   ),
                 ]),
                 const SizedBox(height: 10),
+                // سعر ساعة الأوفرتايم (حقل مستقل لا يدخل في الإجمالي)
+                TextField(
+                  controller: _overtimeHourlyRate,
+                  keyboardType: TextInputType.number,
+                  decoration:
+                      InputDecoration(labelText: s.overtimeHourlyRate),
+                ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: _iban,
                   decoration: InputDecoration(labelText: s.iban),
-                ),
-                const SizedBox(height: 14),
-                // 🆕 البَدَلات الإضافيّة (تُحسَب لاحِقاً في المُستَحَقّات)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.purple.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(10),
-                    border:
-                        Border.all(color: AppColors.purple.withValues(alpha: 0.2)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.account_balance_wallet,
-                              size: 18, color: AppColors.purple),
-                          SizedBox(width: 6),
-                          Text('💰 البَدَلات الإضافيّة',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 13)),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _housingAllowance,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: '🏠 بَدَل سَكَن',
-                              isDense: true,
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _transportAllowance,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: '🚌 بَدَل مُواصَلات',
-                              isDense: true,
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                      ]),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _otherAllowances,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: '✨ بَدَلات أُخرى',
-                          isDense: true,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 14),
                 // 🎫 تَذكِرة السَفَر (حَسَب قانون العَمَل)

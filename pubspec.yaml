@@ -83,6 +83,7 @@ dependencies:
   flutter_local_notifications: ^17.2.3
   # حِزمة device_info لِتَمييز الأَجهزة
   device_info_plus: ^10.1.2
+  package_info_plus: ^8.1.0
   # حِفظ token محلّيّاً قَبل الـlogin
   flutter_secure_storage: ^9.2.2
   # 🆕 QR codes لِلكِيانات (مُوظَّفون، باصات، فُروع، نُقاط)
@@ -90,11 +91,11 @@ dependencies:
 
   # 🐛 Sentry — تَتَبُّع الأَخطاء في الإنتاج (مَع opt-out في إعدادات المُستَخدِم)
   sentry_flutter: ^8.9.0
-  # ملاحظة: tflite_flutter غير متوافق حالياً مع Flutter 3.29+
-  # للحصول على دقّة FaceNet (~99%)، استخدم بدلاً منه:
-  #   - cloud-based recognition (AWS Rekognition / Azure Face)
-  #   - أو انتظر إصدار tflite_flutter متوافق
-  # المطابقة الحاليّة تعمل بدقّة ~85% عبر ML Kit landmarks (offline)
+
+  # 🤖 FaceNet — تَعَرُّف عَلى الوَجه بِدِقّة 99% (2026-05-24)
+  # تَستَبدِل ML Kit landmarks ضَعيفة (~85%) بِنَموذَج TFLite حَقيقيّ
+  # يَحتاج: assets/models/mobilefacenet.tflite (~5 MB) أَو facenet.tflite (~95 MB)
+  tflite_flutter: ^0.11.0
 
 dev_dependencies:
   flutter_test:

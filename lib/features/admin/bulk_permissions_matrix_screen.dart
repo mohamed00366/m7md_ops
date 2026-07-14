@@ -198,6 +198,9 @@ class _BulkPermissionsMatrixScreenState
   }
 
   /// ✅ حفظ جماعي
+  ///
+  /// 🆕 2026-05-24: مُتَوازِي — كانَت تَسَلسُليّة (50 role = 25 ثانية)
+  /// الآن parallel batches مِن 5 (نَفس الـ50 role = ~5 ثَوانٍ)
   Future<void> _saveAll() async {
     if (_dirtyJobTitleIds.isEmpty) return;
     final s = AppStrings.of(context);
@@ -206,51 +209,64 @@ class _BulkPermissionsMatrixScreenState
     final supaReady = SupabaseService().isReady;
     setState(() => _saving = true);
 
-    var savedCount = 0;
+    // Phase 1: أَنشِئ الأَدوار النَّاقِصة (sequentially — لِأَنّ كُلّ create
+    // يُعيد ID جَديد يَحتاجه الـupdate التالي)
     for (final jtId in _dirtyJobTitleIds) {
       final jt = repo.jobTitleById(jtId);
-      if (jt == null) continue;
-      String? roleId = jt.roleId;
-      // إنشاء دور تلقائياً إن لم يوجد
-      if (roleId == null) {
-        if (supaReady) {
-          final r = await ds.createRole(
-              nameAr: jt.nameAr, nameEn: jt.nameEn, priority: 10);
-          roleId = r?.id;
-        } else {
-          final newId = repo.generateId();
-          repo.roleDefs.add(RoleDef(
-            id: newId,
-            key: jt.nameEn
-                .toLowerCase()
-                .replaceAll(RegExp(r'[^a-z0-9]+'), '_'),
-            nameAr: jt.nameAr,
-            nameEn: jt.nameEn,
-            priority: 10,
-          ));
-          roleId = newId;
-        }
-        if (roleId == null) continue;
-        jt.roleId = roleId;
-        if (supaReady) {
+      if (jt == null || jt.roleId != null) continue;
+      if (supaReady) {
+        final r = await ds.createRole(
+            nameAr: jt.nameAr, nameEn: jt.nameEn, priority: 10);
+        if (r != null) {
+          jt.roleId = r.id;
           try {
             await ds.client
                 .from('job_titles')
-                .update({'role_id': roleId}).eq('id', jt.id);
+                .update({'role_id': r.id}).eq('id', jt.id);
           } catch (_) {}
         }
+      } else {
+        final newId = repo.generateId();
+        repo.roleDefs.add(RoleDef(
+          id: newId,
+          key: jt.nameEn
+              .toLowerCase()
+              .replaceAll(RegExp(r'[^a-z0-9]+'), '_'),
+          nameAr: jt.nameAr,
+          nameEn: jt.nameEn,
+          priority: 10,
+        ));
+        jt.roleId = newId;
       }
+    }
+
+    // Phase 2: setRolePermissions بِالتَوازي (batch of 5 لِتَجَنُّب overload)
+    final futures = <Future<void>>[];
+    var savedCount = 0;
+    for (final jtId in _dirtyJobTitleIds) {
+      final jt = repo.jobTitleById(jtId);
+      if (jt == null || jt.roleId == null) continue;
       final keys = _matrix[jtId] ?? <String>{};
+      final roleId = jt.roleId!;
+      // local update فَوريّ (لا async)
+      repo.setRolePermissionsByKeys(roleId, keys, '');
+      savedCount++;
+      // remote update (async)
       if (supaReady) {
         final ids = repo.permissionDefs
             .where((p) => keys.contains(p.key))
             .map((p) => p.id)
             .toList();
-        await ds.setRolePermissions(roleId, ids);
+        futures.add(ds.setRolePermissions(roleId, ids));
+        // اِنتَظِر كُلّ 5 لِتَجَنُّب فَتح مِئات الاتِّصالات دَفعَة واحِدة
+        if (futures.length >= 5) {
+          await Future.wait(futures);
+          futures.clear();
+        }
       }
-      repo.setRolePermissionsByKeys(roleId, keys, '');
-      savedCount++;
     }
+    // أَنهِ الباقي
+    if (futures.isNotEmpty) await Future.wait(futures);
 
     // 🆕 تَحديث صَلاحيّات المُستَخدِم الحاليّ فَوريّاً (لَو كان دَوره ضِمن المُغَيَّر)
     if (mounted) {

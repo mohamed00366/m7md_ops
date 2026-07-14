@@ -218,6 +218,8 @@ class Employee {
   double housingAllowance;
   double transportAllowance;
   double otherAllowances;
+  /// 🆕 سعر ساعة الأوفرتايم للموظف (حقل مستقل لا يدخل في إجمالي الراتب)
+  double overtimeHourlyRate;
   /// 🆕 هَل المُوَظَّف مُؤَهَّل لِتَذكِرة سَفَر؟ (لَيس الجَميع)
   bool eligibleForTicket;
   /// 🆕 مَبلَغ التَذكِرة (إذا كانَ مُؤَهَّلاً)
@@ -313,6 +315,7 @@ class Employee {
     this.housingAllowance = 0,    // 🆕
     this.transportAllowance = 0,  // 🆕
     this.otherAllowances = 0,     // 🆕
+    this.overtimeHourlyRate = 0,  // 🆕 سعر ساعة الأوفرتايم
     this.eligibleForTicket = false, // 🆕
     this.ticketAmount = 0,        // 🆕
     this.passportCustody = 'with_employee', // 🆕
@@ -342,10 +345,17 @@ class Employee {
         workLetterFiles = workLetterFiles ?? <String>[],
         passportFiles = passportFiles ?? <String>[];
 
-  /// إجمالي الراتب = الأساسي + others فقط (حسب الصور)
-  double get totalSalary => basicSalary + others;
+  /// إجمالي الراتب = الأساسي + بدل سكن + بدل مواصلات + أخرى
+  double get totalSalary =>
+      basicSalary + housingAllowance + transportAllowance + others;
   /// المجموع الكامل بما في ذلك OT و Training
-  double get grossPayout => basicSalary + overtime + trainingFee + others;
+  double get grossPayout =>
+      basicSalary +
+      housingAllowance +
+      transportAllowance +
+      others +
+      overtime +
+      trainingFee;
 
   String get initials {
     final trimmed = fullName.trim();

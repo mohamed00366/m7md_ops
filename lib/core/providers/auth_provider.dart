@@ -713,33 +713,8 @@ class AuthProvider extends ChangeNotifier {
   Future<LoginResult> _loginMock(String username, String password) async {
     final acc = _repo.authenticate(username, password);
     if (acc == null) {
-      // Legacy fallback: admin/123456
-      if (password == '123456') {
-        try {
-          final legacy = _repo.users.firstWhere(
-              (u) => u.username.toLowerCase() == username.toLowerCase());
-          _legacyUser = legacy;
-          _account = AppAccount(
-            id: legacy.id,
-            username: legacy.username,
-            passwordHash: '',
-            fullName: legacy.fullName,
-          );
-          // ابني الأدوار من القديم
-          final r = _repo.roleDefs.firstWhere(
-            (r) => r.key == _legacyKeyFromRole(legacy.role),
-            orElse: () => _repo.roleDefs.first,
-          );
-          _roles = [r];
-          _activeRole = r;
-          _permissions = _repo.effectivePermissionKeys(legacy.id);
-          _countryIds = _repo.countries.map((c) => c.id).toList();
-          _activeCountryId =
-              _countryIds.isNotEmpty ? _countryIds.first : null;
-          notifyListeners();
-          return LoginResult.success;
-        } catch (_) {}
-      }
+      // 🔒 SECURITY: تَمّت إزالة الباب الخلفي القديم (أي مستخدم + كلمة المرور
+      // "123456" كان يُسجِّل الدخول). لا يوجد الآن مسار دخول بلا كلمة مرور صحيحة.
       return LoginResult.invalidCredentials;
     }
 
@@ -1050,22 +1025,8 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  String _legacyKeyFromRole(UserRole role) {
-    switch (role) {
-      case UserRole.manager:
-        return SystemRoles.manager;
-      case UserRole.operation:
-        return SystemRoles.operation;
-      case UserRole.supervisor:
-        return SystemRoles.supervisor;
-      case UserRole.campBoss:
-        return SystemRoles.campBoss;
-      case UserRole.driver:
-        return SystemRoles.driver;
-      case UserRole.employee:
-        return SystemRoles.employee;
-    }
-  }
+  // 🔒 SECURITY: أُزيلت الدالة _legacyKeyFromRole (كانت تُستخدَم فقط في الباب
+  // الخلفي القديم الذي حُذف).
 
   // ============================================================
   // 👤 Face login pre-flight + finalize
@@ -1160,6 +1121,27 @@ class AuthProvider extends ChangeNotifier {
     if (_roles.isEmpty && !acc.isSuperAdmin) {
       _account = null;
       return LoginResult.noRoles;
+    }
+
+    // 🆕 2026-05-25: نَجاح الدُخول بِالوَجه يُثبِت وُجود تَسجيل صالِح
+    // → اِرفَع علم mustEnrollFace + ضَع faceEnrolledAt إذا لَم يَكُن مَوجوداً
+    // (يَمنَع التَوجيه إلى MandatoryFaceEnrollmentScreen بَعد الدُخول)
+    if (acc.mustEnrollFace || acc.faceEnrolledAt == null) {
+      acc.mustEnrollFace = false;
+      acc.faceEnrolledAt ??= DateTime.now();
+      try {
+        final supa = SupabaseService();
+        if (supa.isReady) {
+          // ignore: discarded_futures
+          supa.client.from('accounts').update({
+            'must_enroll_face': false,
+            'face_enrolled_at':
+                (acc.faceEnrolledAt ?? DateTime.now()).toUtc().toIso8601String(),
+          }).eq('id', acc.id);
+        }
+      } catch (e) {
+        M7Log.warn('FaceLogin', 'failed to clear mustEnrollFace: $e');
+      }
     }
 
     // فحص Geo-fence
