@@ -18,8 +18,9 @@
 
 set -e
 
-# الإصدار المُثَبَّت — يُطابِق المَحَلِّيّ + CI
-FLUTTER_VERSION="${FLUTTER_VERSION:-3.24.5}"
+# الإصدار المُثَبَّت — يُطابِق المَحَلِّيّ + pubspec.lock (Flutter 3.29.x)
+# ملاحظة: pubspec.lock مُولَّد على 3.29؛ استخدام 3.24.5 يُفشِل flutter pub get.
+FLUTTER_VERSION="${FLUTTER_VERSION:-3.29.2}"
 FLUTTER_HOME="$HOME/flutter"
 
 echo "🚀 Cloudflare Pages — Flutter Web Build"
