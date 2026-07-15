@@ -440,9 +440,10 @@ class EmployeeBulkIO {
         : HousingType.offCamp;
 
     final hireRaw = v0('hire_type').toLowerCase();
-    final hire = hireRaw == 'professional'
-        ? EmployeeHireType.professional
-        : EmployeeHireType.trainee;
+    // الافتراضي: محترف — متدرّب فقط إذا كُتِب 'trainee' صراحةً في ملف الاستيراد
+    final hire = hireRaw == 'trainee'
+        ? EmployeeHireType.trainee
+        : EmployeeHireType.professional;
 
     final statusRaw = v0('status').toLowerCase();
     final status = statusRaw == 'inactive'

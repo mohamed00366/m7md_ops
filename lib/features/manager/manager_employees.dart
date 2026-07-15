@@ -1463,7 +1463,8 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   HousingType _housingType = HousingType.offCamp;
 
   // 🎓 نوع التحاق الموظف (متدرّب / محترف)
-  EmployeeHireType _hireType = EmployeeHireType.trainee;
+  // الافتراضي: محترف — لا يُعتبر متدرّباً إلا إذا سُجِّل صراحةً كذلك
+  EmployeeHireType _hireType = EmployeeHireType.professional;
 
   // 👕 مقاسات اليونيفورم
   late final TextEditingController _shirtSize;
@@ -1587,7 +1588,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
 
     _status = e?.status ?? EntityStatus.active;
     _housingType = e?.housingType ?? HousingType.offCamp;
-    _hireType = e?.hireType ?? EmployeeHireType.trainee;
+    _hireType = e?.hireType ?? EmployeeHireType.professional;
     _shirtSize = TextEditingController(text: e?.shirtSize ?? '');
     _pantSize = TextEditingController(text: e?.pantSize ?? '');
     _shoeSize = TextEditingController(text: e?.shoeSize ?? '');

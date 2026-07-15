@@ -309,7 +309,7 @@ class Employee {
     this.transportModeId, // 🆕
     this.category = 'worker', // 🆕
     this.housingType = HousingType.offCamp, // 🆕 افتراضي: خارج الكمب
-    this.hireType = EmployeeHireType.trainee, // 🆕 افتراضي: متدرّب
+    this.hireType = EmployeeHireType.professional, // 🆕 افتراضي: محترف (متدرّب فقط عند التسجيل صراحةً)
     this.shirtSize = '',
     this.pantSize = '',
     this.shoeSize = '',
