@@ -187,6 +187,14 @@ class _ReviewRequestScreenState extends State<_ReviewRequestScreen> {
       (i) => _confirmedQty[i.clothingTypeId] != i.requestedQty);
 
   Future<void> _confirm() async {
+    // 🐛 سبب التعديل إجباريّ عند تغيير الكميّات — كان اللابل يقول إجباري بلا تحقّق فعليّ
+    if (_hasChanges && _noteCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: LaundryColors.danger,
+        content: Text('سَبَب التَعديل إجباريّ عند تَغيير الكَمِّيّات'),
+      ));
+      return;
+    }
     setState(() => _saving = true);
 
     final v = await LaundryDataSource.instance.confirmRequestAsVoucher(

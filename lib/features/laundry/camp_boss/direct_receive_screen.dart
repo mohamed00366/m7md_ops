@@ -301,8 +301,11 @@ class _DirectReceiveItemsScreenState extends State<DirectReceiveItemsScreen> {
         backgroundColor: LaundryColors.success,
         content: Text('✅ تَمّ إصدار السَند ${v.voucherNumber}'),
       ));
-      Navigator.of(context).pop(true);
-      Navigator.of(context).pop(true);
+      // 🐛 التقاط الـ navigator مرّة واحدة — الـ context يتعطّل بعد أوّل pop
+      // فيُصبح الـ pop الثاني على context ميّت (قد يُغلق شاشة خاطئة).
+      final nav = Navigator.of(context);
+      nav.pop(true); // إغلاق شاشة الأصناف
+      nav.pop(true); // إغلاق شاشة البحث → العودة للوحة
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: LaundryColors.danger,
