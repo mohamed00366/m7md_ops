@@ -47,6 +47,20 @@ class CampPalette {
   static const textSecondary = AppPalette.textSecondary;
   static const textTertiary = AppPalette.textTertiary;
 
+  // 🌙 نسخ theme-aware (تُستخدَم داخل build فقط) — تُصلِح الوضع الداكن للبطاقات
+  static bool _dark(BuildContext c) =>
+      Theme.of(c).brightness == Brightness.dark;
+  static Color cardColor(BuildContext c) =>
+      _dark(c) ? AppPalette.cardDark : AppPalette.card;
+  static Color textColor(BuildContext c) =>
+      _dark(c) ? AppPalette.textDark : AppPalette.text;
+  static Color textSecondaryColor(BuildContext c) =>
+      _dark(c) ? AppPalette.textSecondaryDark : AppPalette.textSecondary;
+  static Color textTertiaryColor(BuildContext c) =>
+      _dark(c) ? AppPalette.textTertiaryDark : AppPalette.textTertiary;
+  static Color borderColor(BuildContext c) =>
+      _dark(c) ? AppPalette.borderDark : AppPalette.border;
+
   // ============= حدود وأنصاف أقطار =============
   static const rCardLg = BorderRadius.all(Radius.circular(AppRadii.xl));
   static const rCard = BorderRadius.all(Radius.circular(AppRadii.lg));

@@ -135,7 +135,7 @@ class CampBossDashboard extends StatelessWidget {
                         valueColor: CampPalette.primary,
                         label: s.isAr ? 'سرير متاح' : 'Beds free',
                         subLabel: '/$totalBeds',
-                        subLabelColor: CampPalette.textSecondary,
+                        subLabelColor: CampPalette.textSecondaryColor(context),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -193,7 +193,7 @@ class CampBossDashboard extends StatelessWidget {
                         _pushScreen(context, const CampBossBusesWeekly()),
                     child: Text(
                       s.isAr ? 'عرض الكل ›' : 'See all ›',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: CampPalette.primary,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -221,8 +221,8 @@ class CampBossDashboard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
                 child: Text(
                   s.isAr ? 'إجراءات سريعة' : 'Quick actions',
-                  style: const TextStyle(
-                      color: CampPalette.text,
+                  style: TextStyle(
+                      color: CampPalette.textColor(context),
                       fontSize: 12,
                       fontWeight: FontWeight.w600),
                 ),
@@ -336,7 +336,7 @@ class _DashHeader extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.65))),
                 const SizedBox(height: 2),
                 Text(user?.fullName ?? (isAr ? 'كامب بوس' : 'Camp Boss'),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
                         fontWeight: FontWeight.w500)),
@@ -357,7 +357,7 @@ class _DashHeader extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.notifications_none,
+                child: Icon(Icons.notifications_none,
                     color: Colors.white, size: 18),
               ),
               Positioned(
@@ -441,7 +441,7 @@ class _AlertBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: CampPalette.amberText,
                         fontSize: 12,
                         fontWeight: FontWeight.w600)),
@@ -456,7 +456,7 @@ class _AlertBanner extends StatelessWidget {
           GestureDetector(
             onTap: onAction,
             child: Text(actionText,
-                style: const TextStyle(
+                style: TextStyle(
                     color: CampPalette.amberText,
                     fontSize: 11,
                     fontWeight: FontWeight.w600)),
@@ -488,7 +488,7 @@ class _TodayTimeline extends StatelessWidget {
         child: Center(
           child: Text(
             s.isAr ? 'لا توجد رحلات اليوم' : 'No trips today',
-            style: const TextStyle(color: CampPalette.textSecondary),
+            style: TextStyle(color: CampPalette.textSecondaryColor(context)),
           ),
         ),
       );
@@ -522,8 +522,8 @@ class _TodayTimeline extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(d.time,
-                          style: const TextStyle(
-                              color: CampPalette.text,
+                          style: TextStyle(
+                              color: CampPalette.textColor(context),
                               fontSize: 12,
                               fontWeight: FontWeight.w500)),
                     ),
@@ -532,7 +532,7 @@ class _TodayTimeline extends StatelessWidget {
                         child: Container(
                           width: 1.5,
                           margin: const EdgeInsets.only(top: 4),
-                          color: CampPalette.border,
+                          color: CampPalette.borderColor(context),
                         ),
                       ),
                   ],
@@ -575,13 +575,13 @@ class _TodayTimeline extends StatelessWidget {
                                   : 'No bus assigned'),
                           style: TextStyle(
                               color:
-                                  hasBus ? CampPalette.text : CampPalette.amberText,
+                                  hasBus ? CampPalette.textColor(context) : CampPalette.amberText,
                               fontSize: 12,
                               fontWeight: FontWeight.w500)),
                       const SizedBox(height: 2),
                       Text(stopName,
-                          style: const TextStyle(
-                              color: CampPalette.textSecondary, fontSize: 10)),
+                          style: TextStyle(
+                              color: CampPalette.textSecondaryColor(context), fontSize: 10)),
                       if (emps.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Wrap(
@@ -598,14 +598,14 @@ class _TodayTimeline extends StatelessWidget {
                               Container(
                                 width: 22,
                                 height: 22,
-                                decoration: const BoxDecoration(
-                                  color: CampPalette.border,
+                                decoration: BoxDecoration(
+                                  color: CampPalette.borderColor(context),
                                   shape: BoxShape.circle,
                                 ),
                                 alignment: Alignment.center,
                                 child: Text('+${emps.length - 4}',
-                                    style: const TextStyle(
-                                        color: CampPalette.textSecondary,
+                                    style: TextStyle(
+                                        color: CampPalette.textSecondaryColor(context),
                                         fontSize: 9)),
                               ),
                           ],
@@ -624,7 +624,7 @@ class _TodayTimeline extends StatelessWidget {
                               s.isAr
                                   ? '${d.employeeIds.length} موظفين بالانتظار'
                                   : '${d.employeeIds.length} employees waiting',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: CampPalette.amberText,
                                   fontSize: 10)),
                         ),
@@ -654,7 +654,7 @@ class _LaundrySummary extends StatelessWidget {
     final missing =
         repo.laundryTickets.where((t) => t.missingItems.isNotEmpty).length;
     return Material(
-      color: CampPalette.card,
+      color: CampPalette.cardColor(context),
       borderRadius: CampPalette.rCardSm,
       child: InkWell(
         onTap: () => _openLaundry(context),
@@ -668,25 +668,25 @@ class _LaundrySummary extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(s.isAr ? 'المغسلة' : 'Laundry',
-                        style: const TextStyle(
-                            color: CampPalette.text,
+                        style: TextStyle(
+                            color: CampPalette.textColor(context),
                             fontSize: 12,
                             fontWeight: FontWeight.w500)),
                   ),
-                  const Icon(Icons.chevron_right,
-                      color: CampPalette.textTertiary, size: 14),
+                  Icon(Icons.chevron_right,
+                      color: CampPalette.textTertiaryColor(context), size: 14),
                 ],
               ),
               const SizedBox(height: 10),
               Text('$pending',
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: CampPalette.primary,
                       fontSize: 22,
                       fontWeight: FontWeight.w500)),
               const SizedBox(height: 2),
               Text(s.isAr ? 'إيصالات معلّقة' : 'pending receipts',
-                  style: const TextStyle(
-                      color: CampPalette.textSecondary, fontSize: 10)),
+                  style: TextStyle(
+                      color: CampPalette.textSecondaryColor(context), fontSize: 10)),
               if (missing > 0) ...[
                 const SizedBox(height: 8),
                 Container(
@@ -698,7 +698,7 @@ class _LaundrySummary extends StatelessWidget {
                   ),
                   child: Text(
                     s.isAr ? '$missing قطع ناقصة' : '$missing items missing',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: CampPalette.redText,
                         fontSize: 10,
                         fontWeight: FontWeight.w500),
@@ -729,7 +729,7 @@ class _RoomsSummary extends StatelessWidget {
     final occupancy = totalBeds == 0 ? 0.0 : used / totalBeds;
 
     return Material(
-      color: CampPalette.card,
+      color: CampPalette.cardColor(context),
       borderRadius: CampPalette.rCardSm,
       child: InkWell(
         onTap: () => _pushScreen(context, const CampBossRooms()),
@@ -743,25 +743,25 @@ class _RoomsSummary extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(s.isAr ? 'الغرف' : 'Rooms',
-                        style: const TextStyle(
-                            color: CampPalette.text,
+                        style: TextStyle(
+                            color: CampPalette.textColor(context),
                             fontSize: 12,
                             fontWeight: FontWeight.w500)),
                   ),
-                  const Icon(Icons.chevron_right,
-                      color: CampPalette.textTertiary, size: 14),
+                  Icon(Icons.chevron_right,
+                      color: CampPalette.textTertiaryColor(context), size: 14),
                 ],
               ),
               const SizedBox(height: 10),
               Text('$count',
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: CampPalette.primary,
                       fontSize: 22,
                       fontWeight: FontWeight.w500)),
               const SizedBox(height: 2),
               Text(s.isAr ? 'غرفة بالمجموع' : 'rooms total',
-                  style: const TextStyle(
-                      color: CampPalette.textSecondary, fontSize: 10)),
+                  style: TextStyle(
+                      color: CampPalette.textSecondaryColor(context), fontSize: 10)),
               const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2),
@@ -776,8 +776,8 @@ class _RoomsSummary extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                   '${s.isAr ? "متوسط" : "Avg"} ${avgRating.toStringAsFixed(1)} / 5',
-                  style: const TextStyle(
-                      color: CampPalette.textSecondary, fontSize: 9)),
+                  style: TextStyle(
+                      color: CampPalette.textSecondaryColor(context), fontSize: 9)),
             ],
           ),
         ),

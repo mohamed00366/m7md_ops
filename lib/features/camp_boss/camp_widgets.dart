@@ -7,7 +7,7 @@ class CampStatCard extends StatelessWidget {
   final String label;
   final String? subLabel;
   final Color? subLabelColor;
-  final Color valueColor;
+  final Color? valueColor;
   final VoidCallback? onTap;
   const CampStatCard({
     super.key,
@@ -15,14 +15,14 @@ class CampStatCard extends StatelessWidget {
     required this.label,
     this.subLabel,
     this.subLabelColor,
-    this.valueColor = CampPalette.text,
+    this.valueColor,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: CampPalette.card,
+      color: CampPalette.cardColor(context),
       borderRadius: CampPalette.rCardSm,
       child: InkWell(
         onTap: onTap,
@@ -35,21 +35,22 @@ class CampStatCard extends StatelessWidget {
             children: [
               Text(value,
                   style: TextStyle(
-                      color: valueColor,
+                      color: valueColor ?? CampPalette.textColor(context),
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       height: 1.0)),
               const SizedBox(height: 4),
               Text(label,
-                  style: const TextStyle(
-                      color: CampPalette.textSecondary,
+                  style: TextStyle(
+                      color: CampPalette.textSecondaryColor(context),
                       fontSize: 9,
                       fontWeight: FontWeight.w500)),
               if (subLabel != null) ...[
                 const SizedBox(height: 2),
                 Text(subLabel!,
                     style: TextStyle(
-                        color: subLabelColor ?? CampPalette.textSecondary,
+                        color: subLabelColor ??
+                            CampPalette.textSecondaryColor(context),
                         fontSize: 9,
                         fontWeight: FontWeight.w500)),
               ],
@@ -86,7 +87,7 @@ class CampOverviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: CampPalette.card,
+      color: CampPalette.cardColor(context),
       borderRadius: CampPalette.rCard,
       elevation: 0,
       child: InkWell(
@@ -112,8 +113,8 @@ class CampOverviewCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(value,
-                        style: const TextStyle(
-                            color: CampPalette.text,
+                        style: TextStyle(
+                            color: CampPalette.textColor(context),
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             height: 1.0)),
@@ -121,16 +122,17 @@ class CampOverviewCard extends StatelessWidget {
                     Text(label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: CampPalette.textSecondary, fontSize: 10)),
+                        style: TextStyle(
+                            color: CampPalette.textSecondaryColor(context),
+                            fontSize: 10)),
                     if (subLabel != null) ...[
                       const SizedBox(height: 2),
                       Text(subLabel!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                              color:
-                                  subLabelColor ?? CampPalette.textSecondary,
+                              color: subLabelColor ??
+                                  CampPalette.textSecondaryColor(context),
                               fontSize: 9,
                               fontWeight: FontWeight.w500)),
                     ],
@@ -264,7 +266,7 @@ class CampSectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: CampPalette.card,
+        color: CampPalette.cardColor(context),
         borderRadius: CampPalette.rCardLg,
         border: borderRightColor == null
             ? null
@@ -282,8 +284,8 @@ class CampSectionCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(title!,
-                        style: const TextStyle(
-                            color: CampPalette.text,
+                        style: TextStyle(
+                            color: CampPalette.textColor(context),
                             fontSize: 13,
                             fontWeight: FontWeight.w600)),
                   ),
@@ -361,12 +363,13 @@ class CampFieldRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(label,
-                style: const TextStyle(
-                    color: CampPalette.textSecondary, fontSize: 12)),
+                style: TextStyle(
+                    color: CampPalette.textSecondaryColor(context),
+                    fontSize: 12)),
           ),
           Text(value,
               style: TextStyle(
-                  color: color ?? CampPalette.text,
+                  color: color ?? CampPalette.textColor(context),
                   fontSize: 13,
                   fontWeight: FontWeight.w700)),
         ],
