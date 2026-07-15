@@ -92,7 +92,8 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               .isFilter('signed_at', null)
               .eq('status', 'active');
           _unsignedDeductions = (unsigned as List).length;
-        } catch (_) {
+        } catch (e) {
+          M7Log.warn('HrDashboard', 'unsignedDeductions query failed: $e');
           _unsignedDeductions = 0;
         }
 
@@ -109,7 +110,8 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               .map((r) => (r as Map)['employee_id'])
               .toSet()
               .length;
-        } catch (_) {
+        } catch (e) {
+          M7Log.warn('HrDashboard', 'clockedInToday query failed: $e');
           _clockedInToday = 0;
         }
 
@@ -124,7 +126,8 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               .lte('start_date', todayIso)
               .gte('end_date', todayIso);
           _onLeaveToday = (lv as List).length;
-        } catch (_) {
+        } catch (e) {
+          M7Log.warn('HrDashboard', 'onLeaveToday query failed: $e');
           _onLeaveToday = 0;
         }
 
@@ -141,7 +144,8 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               .order('joining_date', ascending: false)
               .limit(5);
           _recentHires = (hires as List).cast<Map<String, dynamic>>();
-        } catch (_) {
+        } catch (e) {
+          M7Log.warn('HrDashboard', 'recentHires query failed: $e');
           _recentHires = [];
         }
 
@@ -161,7 +165,8 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
               .limit(5);
           _recentTerminations =
               (term as List).cast<Map<String, dynamic>>();
-        } catch (_) {
+        } catch (e) {
+          M7Log.warn('HrDashboard', 'recentTerminations query failed: $e');
           _recentTerminations = [];
         }
       }
