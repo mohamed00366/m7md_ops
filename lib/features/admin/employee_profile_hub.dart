@@ -59,7 +59,8 @@ class _EmployeeProfileHubState extends State<EmployeeProfileHub>
     return Scaffold(
       appBar: M7AppBar(
         title: employee.fullName,
-        subtitle: '${employee.code} · ${_completionLabel(completion, isAr)}',
+        subtitle:
+            '${employee.code}${employee.fileNo.isNotEmpty ? " · ${employee.fileNo}" : ""} · ${_completionLabel(completion, isAr)}',
         actions: [
           // 🆕 QR Code
           M7AppBarAction(
@@ -452,12 +453,15 @@ class _ProfileHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  employee.code,
+                  employee.fileNo.isNotEmpty
+                      ? '${employee.code}  •  ${employee.fileNo}'
+                      : employee.code,
                   style: const TextStyle(
                       fontSize: 11,
                       fontFamily: 'monospace',
                       color: Colors.grey),
                 ),
+
                 if (employee.jobTitle.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(employee.jobTitle,

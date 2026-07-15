@@ -118,6 +118,7 @@ class _EmployeePersonalSectionState extends State<EmployeePersonalSection>
     with M7DirtyTrackerMixin<EmployeePersonalSection> {
   late final TextEditingController _fullName;
   late final TextEditingController _code;
+  late final TextEditingController _fileNo; // 🆕 رقم الملف
   late final TextEditingController _education;
   DateTime? _birthDate;
   DateTime? _joiningDate;
@@ -131,6 +132,7 @@ class _EmployeePersonalSectionState extends State<EmployeePersonalSection>
     final e = widget.employee;
     _fullName = TextEditingController(text: e.fullName);
     _code = TextEditingController(text: e.code);
+    _fileNo = TextEditingController(text: e.fileNo); // 🆕
     _education = TextEditingController(text: e.education);
     _birthDate = e.birthDate;
     _joiningDate = e.joiningDate;
@@ -138,6 +140,7 @@ class _EmployeePersonalSectionState extends State<EmployeePersonalSection>
     _nationalityId = e.nationalityId;
     track(_fullName);
     track(_code);
+    track(_fileNo);
     track(_education);
   }
 
@@ -145,6 +148,7 @@ class _EmployeePersonalSectionState extends State<EmployeePersonalSection>
   void dispose() {
     _fullName.dispose();
     _code.dispose();
+    _fileNo.dispose();
     _education.dispose();
     super.dispose();
   }
@@ -161,6 +165,7 @@ class _EmployeePersonalSectionState extends State<EmployeePersonalSection>
     final e = widget.employee;
     e.fullName = _fullName.text.trim();
     e.code = _code.text.trim();
+    e.fileNo = _fileNo.text.trim(); // 🆕
     e.education = _education.text.trim();
     e.birthDate = _birthDate;
     e.joiningDate = _joiningDate;
@@ -209,6 +214,13 @@ class _EmployeePersonalSectionState extends State<EmployeePersonalSection>
           controller: _code,
           decoration: _dec(isAr ? 'الرَقم الوَظيفيّ' : 'Employee code',
               icon: Icons.tag),
+        ),
+        const SizedBox(height: 12),
+        // 🆕 رقم الملف
+        TextField(
+          controller: _fileNo,
+          decoration: _dec(isAr ? 'رَقم المِلَفّ' : 'File number',
+              icon: Icons.folder_outlined),
         ),
         const SizedBox(height: 12),
         Row(
@@ -762,6 +774,11 @@ class _EmployeeFinancialSectionState
   late final TextEditingController _ot;
   late final TextEditingController _train;
   late final TextEditingController _others;
+  // 🆕 بَدَلات + سِعر ساعة الأوفرتايم
+  late final TextEditingController _housing;
+  late final TextEditingController _transport;
+  late final TextEditingController _otherAllow;
+  late final TextEditingController _otRate;
   late final TextEditingController _iban;
   bool _saving = false;
 
@@ -777,11 +794,24 @@ class _EmployeeFinancialSectionState
         text: e.trainingFee > 0 ? e.trainingFee.toString() : '');
     _others =
         TextEditingController(text: e.others > 0 ? e.others.toString() : '');
+    // 🆕
+    _housing = TextEditingController(
+        text: e.housingAllowance > 0 ? e.housingAllowance.toString() : '');
+    _transport = TextEditingController(
+        text: e.transportAllowance > 0 ? e.transportAllowance.toString() : '');
+    _otherAllow = TextEditingController(
+        text: e.otherAllowances > 0 ? e.otherAllowances.toString() : '');
+    _otRate = TextEditingController(
+        text: e.overtimeHourlyRate > 0 ? e.overtimeHourlyRate.toString() : '');
     _iban = TextEditingController(text: e.iban);
     track(_basic);
     track(_ot);
     track(_train);
     track(_others);
+    track(_housing);
+    track(_transport);
+    track(_otherAllow);
+    track(_otRate);
     track(_iban);
   }
 
@@ -791,6 +821,10 @@ class _EmployeeFinancialSectionState
     _ot.dispose();
     _train.dispose();
     _others.dispose();
+    _housing.dispose();
+    _transport.dispose();
+    _otherAllow.dispose();
+    _otRate.dispose();
     _iban.dispose();
     super.dispose();
   }
@@ -802,6 +836,11 @@ class _EmployeeFinancialSectionState
     e.overtime = double.tryParse(_ot.text) ?? 0;
     e.trainingFee = double.tryParse(_train.text) ?? 0;
     e.others = double.tryParse(_others.text) ?? 0;
+    // 🆕 بَدَلات + سِعر ساعة الأوفرتايم
+    e.housingAllowance = double.tryParse(_housing.text) ?? 0;
+    e.transportAllowance = double.tryParse(_transport.text) ?? 0;
+    e.otherAllowances = double.tryParse(_otherAllow.text) ?? 0;
+    e.overtimeHourlyRate = double.tryParse(_otRate.text) ?? 0;
     e.iban = _iban.text.trim();
     final ok = await _persistEmployee(context, e);
     if (!mounted) return;
@@ -826,7 +865,10 @@ class _EmployeeFinancialSectionState
     final ot = double.tryParse(_ot.text) ?? 0;
     final tr = double.tryParse(_train.text) ?? 0;
     final oth = double.tryParse(_others.text) ?? 0;
-    final gross = basic + ot + tr + oth;
+    final housing = double.tryParse(_housing.text) ?? 0;
+    final transport = double.tryParse(_transport.text) ?? 0;
+    final otherAllow = double.tryParse(_otherAllow.text) ?? 0;
+    final gross = basic + ot + tr + oth + housing + transport + otherAllow;
     return M7SectionScaffold(
       titleAr: 'الراتِب وَالماليّات',
       titleEn: 'Salary & Financials',
@@ -878,6 +920,64 @@ class _EmployeeFinancialSectionState
           decoration: _dec(isAr ? 'بُنود أُخرى' : 'Other items',
               icon: Icons.list_alt),
           onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 12),
+        // 🆕 بَدَل السَكَن + بَدَل المُواصَلات
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _housing,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: _dec(
+                    isAr ? 'بَدَل السَكَن' : 'Housing allowance',
+                    icon: Icons.home_outlined),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _transport,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: _dec(
+                    isAr ? 'بَدَل المُواصَلات' : 'Transport allowance',
+                    icon: Icons.directions_bus_outlined),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // 🆕 بَدَلات أُخرى + سِعر ساعة الأوفرتايم
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _otherAllow,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: _dec(
+                    isAr ? 'بَدَلات أُخرى' : 'Other allowances',
+                    icon: Icons.add_circle_outline),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _otRate,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: _dec(
+                    isAr ? 'سِعر ساعة الأوفرتايم' : 'Overtime hourly rate',
+                    icon: Icons.schedule),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         TextField(
