@@ -65,8 +65,10 @@ class CampThemeWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🌙 خلفية متوافقة مع الوضع الداكن (كانت ثابتة فاتحة تكسر الـ dark mode)
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: CampPalette.bg,
+      color: isDark ? AppPalette.surfaceDark : AppPalette.surface,
       child: child,
     );
   }

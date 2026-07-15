@@ -28,12 +28,14 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final card = Container(
       decoration: BoxDecoration(
-        color: color ?? AppPalette.card,
+        color: color ?? (isDark ? AppPalette.cardDark : AppPalette.card),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: borderColor ?? AppPalette.border,
+          color: borderColor ??
+              (isDark ? AppPalette.borderDark : AppPalette.border),
         ),
         boxShadow: elevated ? AppShadows.md : null,
       ),
@@ -122,6 +124,7 @@ class AppKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: width,
       child: AppCard(
@@ -141,10 +144,10 @@ class AppKpiCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: AppFontSizes.headline,
                 fontWeight: FontWeight.w900,
-                color: AppPalette.text,
+                color: isDark ? AppPalette.textDark : AppPalette.text,
               ),
             ),
             const SizedBox(height: 2),
@@ -152,8 +155,10 @@ class AppKpiCard extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppPalette.textSecondary,
+              style: TextStyle(
+                color: isDark
+                    ? AppPalette.textSecondaryDark
+                    : AppPalette.textSecondary,
                 fontSize: AppFontSizes.captionLg,
               ),
             ),
@@ -194,7 +199,9 @@ class AppEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? AppPalette.textTertiary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final c = color ??
+        (isDark ? AppPalette.textTertiaryDark : AppPalette.textTertiary);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl + AppSpacing.lg),
@@ -204,8 +211,8 @@ class AppEmptyState extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: const BoxDecoration(
-                color: AppPalette.input,
+              decoration: BoxDecoration(
+                color: isDark ? AppPalette.inputDark : AppPalette.input,
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 36, color: c),
@@ -214,10 +221,12 @@ class AppEmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: AppFontSizes.title,
                 fontWeight: FontWeight.w800,
-                color: AppPalette.textSecondary,
+                color: isDark
+                    ? AppPalette.textSecondaryDark
+                    : AppPalette.textSecondary,
               ),
             ),
             if (subtitle != null) ...[
@@ -225,8 +234,10 @@ class AppEmptyState extends StatelessWidget {
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppPalette.textTertiary,
+                style: TextStyle(
+                  color: isDark
+                      ? AppPalette.textTertiaryDark
+                      : AppPalette.textTertiary,
                   fontSize: AppFontSizes.body,
                 ),
               ),
@@ -289,12 +300,17 @@ class _AppSearchBarState extends State<AppSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDark
+        ? AppPalette.textSecondaryDark
+        : AppPalette.textSecondary;
     return Container(
       margin: widget.margin,
       decoration: BoxDecoration(
-        color: AppPalette.input,
+        color: isDark ? AppPalette.inputDark : AppPalette.input,
         borderRadius: AppRadii.rLg,
-        border: Border.all(color: AppPalette.border),
+        border: Border.all(
+            color: isDark ? AppPalette.borderDark : AppPalette.border),
       ),
       child: TextField(
         controller: _ctrl,
@@ -302,22 +318,24 @@ class _AppSearchBarState extends State<AppSearchBar> {
         style: const TextStyle(fontSize: AppFontSizes.bodyLg),
         decoration: InputDecoration(
           hintText: widget.hint,
-          hintStyle: const TextStyle(
-            color: AppPalette.textTertiary,
+          hintStyle: TextStyle(
+            color: isDark
+                ? AppPalette.textTertiaryDark
+                : AppPalette.textTertiary,
             fontSize: AppFontSizes.bodyLg,
           ),
           prefixIcon: Icon(
             widget.icon ?? Icons.search,
             size: 18,
-            color: AppPalette.textSecondary,
+            color: secondary,
           ),
           suffixIcon: _ctrl.text.isEmpty
               ? null
               : IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.clear,
                     size: 16,
-                    color: AppPalette.textSecondary,
+                    color: secondary,
                   ),
                   onPressed: () {
                     _ctrl.clear();
@@ -535,8 +553,10 @@ class AppPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: backgroundColor ?? AppPalette.surface,
+      backgroundColor: backgroundColor ??
+          (isDark ? AppPalette.surfaceDark : AppPalette.surface),
       body: body,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
@@ -561,21 +581,23 @@ class AppInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDark
+        ? AppPalette.textSecondaryDark
+        : AppPalette.textSecondary;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon,
-                size: 14,
-                color: color ?? AppPalette.textSecondary),
+            Icon(icon, size: 14, color: color ?? secondary),
             const SizedBox(width: 8),
           ],
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: AppFontSizes.captionLg,
-              color: AppPalette.textSecondary,
+              color: secondary,
               fontWeight: FontWeight.w700,
             ),
           ),
