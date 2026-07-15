@@ -455,7 +455,8 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
                               fontSize: 16,
                               fontWeight: FontWeight.w900)),
                       const SizedBox(height: 2),
-                      Text('${e.code} · ${e.jobTitle}',
+                      Text(
+                          '${e.code}${e.fileNo.isNotEmpty ? " · ${e.fileNo}" : ""} · ${e.jobTitle}',
                           style: TextStyle(
                               fontSize: 12, color: Colors.grey.shade700)),
                       const SizedBox(height: 2),
@@ -486,7 +487,22 @@ class _EmployeeAggregatedReportState extends State<EmployeeAggregatedReport> {
                         ? '—'
                         : e.joiningDate!.toIso8601String().substring(0, 10)),
                 _miniInfo(Icons.attach_money,
-                    'AED ${e.basicSalary.toStringAsFixed(0)}'),
+                    'AED ${e.totalSalary.toStringAsFixed(0)}'),
+                if (e.basicSalary > 0)
+                  _miniInfo(Icons.account_balance_wallet_outlined,
+                      '${isAr ? "أساسي" : "Basic"} ${e.basicSalary.toStringAsFixed(0)}'),
+                if (e.housingAllowance > 0)
+                  _miniInfo(Icons.home_outlined,
+                      '${isAr ? "سكن" : "Housing"} ${e.housingAllowance.toStringAsFixed(0)}'),
+                if (e.transportAllowance > 0)
+                  _miniInfo(Icons.directions_bus_outlined,
+                      '${isAr ? "مواصلات" : "Transport"} ${e.transportAllowance.toStringAsFixed(0)}'),
+                if (e.otherAllowances > 0)
+                  _miniInfo(Icons.add_circle_outline,
+                      '${isAr ? "أخرى" : "Other"} ${e.otherAllowances.toStringAsFixed(0)}'),
+                if (e.overtimeHourlyRate > 0)
+                  _miniInfo(Icons.timer_outlined,
+                      '${isAr ? "ساعة أوفرتايم" : "OT/hr"} ${e.overtimeHourlyRate.toStringAsFixed(0)}'),
               ],
             ),
           ],

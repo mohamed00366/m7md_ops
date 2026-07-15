@@ -268,6 +268,7 @@ class _EmployeesReportScreenState extends State<EmployeesReportScreen> {
       return [
         e.fullName,
         e.code,
+        e.fileNo, // 🆕 رقم الملف
         e.mobile,
         e.email,
         jt == null ? '' : (isAr ? jt.nameAr : jt.nameEn),
@@ -275,6 +276,14 @@ class _EmployeesReportScreenState extends State<EmployeesReportScreen> {
         e.status == EntityStatus.active
             ? (isAr ? 'نشط' : 'Active')
             : (isAr ? 'غير نشط' : 'Inactive'),
+        // 🆕 تفاصيل الراتب
+        e.basicSalary,
+        e.housingAllowance,
+        e.transportAllowance,
+        e.otherAllowances,
+        e.overtimeHourlyRate,
+        e.totalSalary,
+        e.iban,
         e.emergencyContactName,
         e.emergencyContactPhone,
       ];
@@ -286,12 +295,16 @@ class _EmployeesReportScreenState extends State<EmployeesReportScreen> {
         ExcelSheet(
           name: isAr ? 'الموظفون' : 'Employees',
           headers: isAr
-              ? ['الاسم الكامل', 'الكود', 'الجوال', 'البريد',
+              ? ['الاسم الكامل', 'الكود', 'رقم الملف', 'الجوال', 'البريد',
                   'المسمى', 'القسم', 'الحالة',
+                  'الراتب الأساسي', 'بدل السكن', 'بدل المواصلات', 'بدلات أخرى',
+                  'سعر ساعة الأوفرتايم', 'إجمالي الراتب', 'الآيبان',
                   'جهة الطوارئ', 'جوال الطوارئ']
-              : ['Full Name', 'Code', 'Mobile', 'Email',
+              : ['Full Name', 'Code', 'File No', 'Mobile', 'Email',
                   'Title', 'Department', 'Status',
-                  'Emergency Contact', 'Emergency Phone'],
+                  'Basic Salary', 'Housing Allowance', 'Transport Allowance',
+                  'Other Allowances', 'Overtime Hourly Rate', 'Total Salary',
+                  'IBAN', 'Emergency Contact', 'Emergency Phone'],
           rows: rows,
         ),
       ],
@@ -380,7 +393,9 @@ class _EmployeeCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        employee.code,
+                        employee.fileNo.isNotEmpty
+                            ? '${employee.code}  •  ${employee.fileNo}'
+                            : employee.code,
                         style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey.shade600,
@@ -450,6 +465,36 @@ class _EmployeeCard extends StatelessWidget {
                   ],
                 ),
               ),
+            // 🆕 ====== الراتب ======
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  const Icon(Icons.payments_outlined,
+                      size: 14, color: AppColors.brand),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      isAr
+                          ? 'الإجمالي: ${employee.totalSalary.toStringAsFixed(0)}'
+                              ' (أساسي ${employee.basicSalary.toStringAsFixed(0)}'
+                              '${employee.housingAllowance > 0 ? ' · سكن ${employee.housingAllowance.toStringAsFixed(0)}' : ''}'
+                              '${employee.transportAllowance > 0 ? ' · مواصلات ${employee.transportAllowance.toStringAsFixed(0)}' : ''}'
+                              '${employee.otherAllowances > 0 ? ' · أخرى ${employee.otherAllowances.toStringAsFixed(0)}' : ''})'
+                              '${employee.overtimeHourlyRate > 0 ? ' · ساعة أوفرتايم ${employee.overtimeHourlyRate.toStringAsFixed(0)}' : ''}'
+                          : 'Total: ${employee.totalSalary.toStringAsFixed(0)}'
+                              ' (Basic ${employee.basicSalary.toStringAsFixed(0)}'
+                              '${employee.housingAllowance > 0 ? ' · Housing ${employee.housingAllowance.toStringAsFixed(0)}' : ''}'
+                              '${employee.transportAllowance > 0 ? ' · Transport ${employee.transportAllowance.toStringAsFixed(0)}' : ''}'
+                              '${employee.otherAllowances > 0 ? ' · Other ${employee.otherAllowances.toStringAsFixed(0)}' : ''})'
+                              '${employee.overtimeHourlyRate > 0 ? ' · OT/hr ${employee.overtimeHourlyRate.toStringAsFixed(0)}' : ''}',
+                      style: const TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             // ====== الجوال ======
             _ContactRow(
               icon: Icons.phone_outlined,
