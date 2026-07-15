@@ -183,7 +183,7 @@ class _BusesListScreenState extends State<BusesListScreen> {
       ..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ===== البحث =====

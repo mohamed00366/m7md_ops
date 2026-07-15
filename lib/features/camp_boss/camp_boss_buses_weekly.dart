@@ -60,7 +60,7 @@ class _CampBossBusesWeeklyState extends State<CampBossBusesWeekly> {
     final groups = repo.hourGroupsForDay(_weekStart, _dayIndex);
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ===== ترويسة الأسبوع =====

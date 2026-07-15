@@ -1050,7 +1050,7 @@ class _RolePermissionsMatrixScreenState
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F4FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xFF7C3AED),
         foregroundColor: Colors.white,

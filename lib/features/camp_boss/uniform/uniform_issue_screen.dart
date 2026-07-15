@@ -127,7 +127,7 @@ class _UniformIssueScreenState extends State<UniformIssueScreen> {
         auth.isInScope(u.countryId) && u.isFullyReturned).length;
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(

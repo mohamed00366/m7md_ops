@@ -95,7 +95,7 @@ class _BusReportsScreenState extends State<BusReportsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 30),
         children: [

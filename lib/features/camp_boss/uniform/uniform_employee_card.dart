@@ -103,7 +103,7 @@ class _UniformEmployeeCardState extends State<UniformEmployeeCard> {
     }
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: UniformPalette.primary,
         foregroundColor: Colors.white,

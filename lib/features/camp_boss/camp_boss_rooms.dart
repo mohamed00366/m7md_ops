@@ -47,7 +47,7 @@ class _CampBossRoomsState extends State<CampBossRooms> {
     final rooms = auth.filterByCountry(repo.rooms, (r) => r.countryId);
     return CampThemeWrapper(
       child: Scaffold(
-        backgroundColor: CampPalette.bg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: rooms.isEmpty
             ? Center(
                 child: Text(s.noData,

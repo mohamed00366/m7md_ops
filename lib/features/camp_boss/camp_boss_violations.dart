@@ -37,7 +37,7 @@ class _CampBossViolationsState extends State<CampBossViolations> {
 
     return CampThemeWrapper(
       child: Scaffold(
-        backgroundColor: CampPalette.bg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: list.isEmpty
             ? Center(
                 child: Column(

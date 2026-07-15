@@ -86,7 +86,7 @@ class _UniformCatalogScreenState extends State<UniformCatalogScreen> {
       ..sort((a, b) => a.nameAr.compareTo(b.nameAr));
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(

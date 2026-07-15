@@ -174,7 +174,7 @@ class _UniformReportsScreenState extends State<UniformReportsScreen> {
     }).take(60).toList();
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 30),
         children: [

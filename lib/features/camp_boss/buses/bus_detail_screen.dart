@@ -92,7 +92,7 @@ class _BusDetailScreenState extends State<BusDetailScreen> {
         : CampPalette.textTertiary;
 
     return Scaffold(
-      backgroundColor: CampPalette.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: color,
         foregroundColor: Colors.white,

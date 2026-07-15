@@ -116,7 +116,7 @@ class _CampBossRoomsReportsState extends State<CampBossRoomsReports> {
 
     return CampThemeWrapper(
       child: Scaffold(
-        backgroundColor: CampPalette.bg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(14),
           child: Column(
