@@ -96,7 +96,8 @@ class _HrOnPointDetailScreenState extends State<HrOnPointDetailScreen> {
     if (SupabaseService().isReady) {
       await SupabaseDataService().upsertOnPointTraining(t);
     } else {
-      _persist(t);
+      // 🐛 كان يستدعي _persist(t) نفسه → تكرار لا نهائي وكراش. الصحيح: حفظ محلّي.
+      MockRepository().upsertOnPointTraining(t);
     }
   }
 

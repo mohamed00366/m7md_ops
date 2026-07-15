@@ -8,6 +8,27 @@ import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
 import 'camp_palette.dart';
 import 'camp_widgets.dart';
+import 'camp_boss_rooms.dart';
+import 'camp_boss_violations.dart';
+import 'camp_boss_buses_weekly.dart';
+import '../laundry/camp_boss/camp_boss_dashboard.dart' as amana;
+
+/// تنقّل موحّد من الداشبورد لأي شاشة camp boss
+void _pushScreen(BuildContext context, Widget screen) {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+}
+
+/// يفتح شاشة استلام الغسيل (تحتاج معرّف الكمب بوص + الدولة)
+void _openLaundry(BuildContext context) {
+  final auth = context.read<AuthProvider>();
+  final empId = auth.account?.employeeId ?? auth.account?.id ?? '';
+  final countryId =
+      MockRepository().employeeById(empId)?.countryId ?? auth.activeCountryId;
+  _pushScreen(
+    context,
+    amana.CampBossLaundryDashboard(campBossId: empId, countryId: countryId),
+  );
+}
 
 /// Camp Boss Dashboard - تصميم احترافي بـ Header دارك بلو + بطاقات بيضاء
 class CampBossDashboard extends StatelessWidget {
@@ -152,14 +173,13 @@ class CampBossDashboard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
                   child: _AlertBanner(
-                    title: s.isAr
-                        ? 'باص مطلوب — 13:00 اليوم'
-                        : 'Bus needed — 13:00 today',
+                    title: s.isAr ? 'ساعة بدون باص' : 'Hour without a bus',
                     subtitle: s.isAr
-                        ? '6 موظفين بانتظار • محطتان غير معيّنتان'
-                        : '6 employees waiting • 2 stops unassigned',
+                        ? 'توجد ساعة غير معيّنة لباص — راجع خطة الباصات'
+                        : 'An hour has no bus assigned — review the bus plan',
                     actionText: s.isAr ? 'إصلاح ›' : 'Fix ›',
-                    onAction: () {},
+                    onAction: () =>
+                        _pushScreen(context, const CampBossBusesWeekly()),
                   ),
                 ),
 
@@ -169,7 +189,8 @@ class CampBossDashboard extends StatelessWidget {
                 child: CampSectionCard(
                   title: s.isAr ? 'جدول اليوم' : "Today's roster",
                   action: GestureDetector(
-                    onTap: () {},
+                    onTap: () =>
+                        _pushScreen(context, const CampBossBusesWeekly()),
                     child: Text(
                       s.isAr ? 'عرض الكل ›' : 'See all ›',
                       style: const TextStyle(
@@ -192,15 +213,6 @@ class CampBossDashboard extends StatelessWidget {
                     SizedBox(width: 8),
                     Expanded(child: _RoomsSummary()),
                   ],
-                ),
-              ),
-
-              // ============ Recent activity ============
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-                child: CampSectionCard(
-                  title: s.isAr ? 'النشاطات الأخيرة' : 'Recent activity',
-                  child: const _ActivityFeed(),
                 ),
               ),
 
@@ -233,7 +245,8 @@ class CampBossDashboard extends StatelessWidget {
                       iconColor: Colors.white.withValues(alpha: 0.85),
                       background: CampPalette.headerStart,
                       primary: true,
-                      onTap: () {},
+                      onTap: () =>
+                          _pushScreen(context, const CampBossBusesWeekly()),
                     ),
                     CampQuickActionButton(
                       icon: Icons.local_laundry_service_outlined,
@@ -242,7 +255,7 @@ class CampBossDashboard extends StatelessWidget {
                       titleColor: CampPalette.headerStart,
                       iconColor: CampPalette.headerStart,
                       background: CampPalette.bg,
-                      onTap: () {},
+                      onTap: () => _openLaundry(context),
                     ),
                     CampQuickActionButton(
                       icon: Icons.home_outlined,
@@ -251,7 +264,7 @@ class CampBossDashboard extends StatelessWidget {
                       titleColor: CampPalette.headerStart,
                       iconColor: CampPalette.headerStart,
                       background: CampPalette.bg,
-                      onTap: () {},
+                      onTap: () => _pushScreen(context, const CampBossRooms()),
                     ),
                     CampQuickActionButton(
                       icon: Icons.error_outline,
@@ -260,7 +273,8 @@ class CampBossDashboard extends StatelessWidget {
                       titleColor: CampPalette.red,
                       iconColor: CampPalette.red,
                       background: CampPalette.bg,
-                      onTap: () {},
+                      onTap: () =>
+                          _pushScreen(context, const CampBossViolations()),
                     ),
                   ],
                 ),
@@ -643,7 +657,7 @@ class _LaundrySummary extends StatelessWidget {
       color: CampPalette.card,
       borderRadius: CampPalette.rCardSm,
       child: InkWell(
-        onTap: () {},
+        onTap: () => _openLaundry(context),
         borderRadius: CampPalette.rCardSm,
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -718,7 +732,7 @@ class _RoomsSummary extends StatelessWidget {
       color: CampPalette.card,
       borderRadius: CampPalette.rCardSm,
       child: InkWell(
-        onTap: () {},
+        onTap: () => _pushScreen(context, const CampBossRooms()),
         borderRadius: CampPalette.rCardSm,
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -770,120 +784,4 @@ class _RoomsSummary extends StatelessWidget {
       ),
     );
   }
-}
-
-/// ============ خلاصة النشاطات ============
-class _ActivityFeed extends StatelessWidget {
-  const _ActivityFeed();
-  @override
-  Widget build(BuildContext context) {
-    final s = AppStrings.of(context);
-    final activities = [
-      _ActivityItem(
-        icon: Icons.directions_bus,
-        iconColor: CampPalette.green,
-        iconBg: CampPalette.greenBg,
-        title: s.isAr ? 'تعيين باص A — 06:00' : 'Bus A assigned — 06:00',
-        subtitle: s.isAr
-            ? '9 موظفين • البوابة الرئيسية'
-            : '9 employees • Main Gate, North District',
-        time: '8:20 AM',
-      ),
-      _ActivityItem(
-        icon: Icons.local_laundry_service_outlined,
-        iconColor: CampPalette.purple,
-        iconBg: CampPalette.purpleBg,
-        title: s.isAr ? 'إيصال مغسلة #LND-024' : 'Laundry receipt #LND-024',
-        subtitle:
-            s.isAr ? 'أحمد علي — 4 قطع مستلمة' : 'Ahmed Ali — 4 items received',
-        time: '7:45 AM',
-      ),
-      _ActivityItem(
-        icon: Icons.home_outlined,
-        iconColor: CampPalette.amberDark,
-        iconBg: CampPalette.amberBg,
-        title: s.isAr ? 'تقييم الغرفة 104: 2/5' : 'Room 104 rated 2/5',
-        subtitle:
-            s.isAr ? 'ملابس على الأرض — مُسجل' : 'Clothes on floor — noted',
-        time: '7:10 AM',
-      ),
-      _ActivityItem(
-        icon: Icons.error_outline,
-        iconColor: CampPalette.red,
-        iconBg: CampPalette.redBg,
-        title: s.isAr ? 'مخالفة — خالد محمد' : 'Violation — Khaled Mohamed',
-        subtitle: s.isAr
-            ? 'تأخير عن الوردية — بانتظار الموافقة'
-            : 'Late to shift — pending approval',
-        time: s.isAr ? 'أمس' : 'Yesterday',
-      ),
-    ];
-    return Column(
-      children: activities.asMap().entries.map((e) {
-        final isLast = e.key == activities.length - 1;
-        final a = e.value;
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            border: isLast
-                ? null
-                : const Border(
-                    bottom: BorderSide(
-                        color: CampPalette.borderLight, width: 0.5)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: a.iconBg,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(a.icon, color: a.iconColor, size: 14),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(a.title,
-                        style: const TextStyle(
-                            color: CampPalette.text,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 1),
-                    Text(a.subtitle,
-                        style: const TextStyle(
-                            color: CampPalette.textSecondary, fontSize: 10)),
-                  ],
-                ),
-              ),
-              Text(a.time,
-                  style: const TextStyle(
-                      color: CampPalette.textTertiary, fontSize: 10)),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _ActivityItem {
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBg;
-  final String title;
-  final String subtitle;
-  final String time;
-  _ActivityItem({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBg,
-    required this.title,
-    required this.subtitle,
-    required this.time,
-  });
 }
