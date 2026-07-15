@@ -160,10 +160,10 @@ class _FormRendererState extends State<FormRenderer> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(12)),
-              border: Border.all(color: AppPalette.border),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: Column(
               children: [
@@ -1003,8 +1003,8 @@ class _FormRendererState extends State<FormRenderer> {
         child: Text(text.isEmpty ? '—' : text,
             style: TextStyle(
                 color: text.isEmpty
-                    ? AppPalette.textTertiary
-                    : AppPalette.text)),
+                    ? Theme.of(context).hintColor
+                    : Theme.of(context).textTheme.bodyLarge?.color)),
       ),
     );
   }
