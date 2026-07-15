@@ -34,6 +34,7 @@ class _AttendanceManagementScreenState
   DateTime _date = DateTime.now();
   String? _busFilter; // null = كلّ الباصات
   BusAttendanceStatus? _statusFilter;
+  bool _filterUnmarked = false; // فلتر "لم يُحدَّد" — منفصل عن حالات الإينَم
   String _query = '';
 
   @override
@@ -142,12 +143,10 @@ class _AttendanceManagementScreenState
 
   List<_EmployeeAttendanceRow> _filtered() {
     var rows = _allRows();
-    if (_statusFilter != null) {
-      if (_statusFilter == _kUnmarked) {
-        rows = rows.where((r) => r.status == null).toList();
-      } else {
-        rows = rows.where((r) => r.status == _statusFilter).toList();
-      }
+    if (_filterUnmarked) {
+      rows = rows.where((r) => r.status == null).toList();
+    } else if (_statusFilter != null) {
+      rows = rows.where((r) => r.status == _statusFilter).toList();
     }
     if (_query.isNotEmpty) {
       final q = _query.toLowerCase();
@@ -159,10 +158,6 @@ class _AttendanceManagementScreenState
     }
     return rows;
   }
-
-  /// قيمة وهميّة لتمييز "غير محدّد"
-  static const _kUnmarked = BusAttendanceStatus.changed; // placeholder
-  // نُميّز بشكل مختلف داخل الفلتر — نستخدم null في الواقع
 
   void _setStatus(_EmployeeAttendanceRow row, BusAttendanceStatus s) {
     final repo = MockRepository();
@@ -420,6 +415,7 @@ class _AttendanceManagementScreenState
                     icon: Icons.check_circle,
                     selected: _statusFilter == BusAttendanceStatus.present,
                     onTap: () => setState(() {
+                      _filterUnmarked = false;
                       _statusFilter = _statusFilter ==
                               BusAttendanceStatus.present
                           ? null
@@ -436,6 +432,7 @@ class _AttendanceManagementScreenState
                     icon: Icons.cancel,
                     selected: _statusFilter == BusAttendanceStatus.missing,
                     onTap: () => setState(() {
+                      _filterUnmarked = false;
                       _statusFilter = _statusFilter ==
                               BusAttendanceStatus.missing
                           ? null
@@ -452,6 +449,7 @@ class _AttendanceManagementScreenState
                     icon: Icons.swap_horiz,
                     selected: _statusFilter == BusAttendanceStatus.changed,
                     onTap: () => setState(() {
+                      _filterUnmarked = false;
                       _statusFilter = _statusFilter ==
                               BusAttendanceStatus.changed
                           ? null
@@ -466,8 +464,11 @@ class _AttendanceManagementScreenState
                     count: unmarked,
                     color: AppColors.textSecondaryLight,
                     icon: Icons.help_outline,
-                    selected: false,
-                    onTap: () {},
+                    selected: _filterUnmarked,
+                    onTap: () => setState(() {
+                      _filterUnmarked = !_filterUnmarked;
+                      _statusFilter = null;
+                    }),
                   ),
                 ),
               ],
