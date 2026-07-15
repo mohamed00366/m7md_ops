@@ -2,6 +2,7 @@
 // 📦 شاشة الدُفعات + استِلام مِن المَغسلة
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
@@ -46,10 +47,10 @@ class _BatchesScreenState extends State<BatchesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('📦 الدُفعات'),
+        title: '📦 الدُفعات',
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -217,10 +218,10 @@ class _BatchDetailScreenState extends State<_BatchDetailScreen> {
   Widget build(BuildContext context) {
     final canReceive = widget.batch.status == BatchStatus.inLaundry;
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: Text(widget.batch.batchNumber),
+        title: widget.batch.batchNumber,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

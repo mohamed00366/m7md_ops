@@ -2,6 +2,7 @@
 // 📋 شاشة تَفاصيل السَند — مَع زِرّ طِباعة PDF
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
@@ -64,11 +65,10 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
     final emp = MockRepository().employeeById(v.employeeId);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: Text('سَند ${v.voucherNumber}',
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 14)),
+        title: 'سَند ${v.voucherNumber}',
         actions: [
           IconButton(
             tooltip: 'طِباعة',

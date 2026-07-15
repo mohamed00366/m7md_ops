@@ -2,6 +2,7 @@
 // 📋 السَنَدات النَشطة + تَجهيز دُفعة جَديدة
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
@@ -84,10 +85,10 @@ class _ActiveVouchersScreenState extends State<ActiveVouchersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('📋 السَنَدات النَشطة'),
+        title: '📋 السَنَدات النَشطة',
         actions: [
           if (_vouchers.isNotEmpty)
             TextButton(

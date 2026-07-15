@@ -5,6 +5,7 @@
 // لكِن لَم تُسَلَّم لِلمُوَظَّف بَعد (status != delivered)
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
@@ -81,10 +82,10 @@ class _ReadyToDeliverScreenState extends State<ReadyToDeliverScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.success,
         foregroundColor: Colors.white,
-        title: const Text('🟢 جاهِزة لِلتَسليم'),
+        title: '🟢 جاهِزة لِلتَسليم',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

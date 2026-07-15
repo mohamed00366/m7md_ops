@@ -2,6 +2,7 @@
 // ⏰ إعدادات أَوقات الكَمب بُوص
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../data/laundry_datasource.dart';
 import '../domain/models.dart';
@@ -113,10 +114,10 @@ class _ScheduleSettingsScreenState extends State<ScheduleSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('⏰ إعدادات الأَوقات'),
+        title: '⏰ إعدادات الأَوقات',
         actions: [
           IconButton(
             icon: _saving

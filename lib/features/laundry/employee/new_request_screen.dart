@@ -2,6 +2,7 @@
 // 📝 شاشة طَلَب تَسليم جَديد — لِلمُوَظَّف
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../data/laundry_datasource.dart';
 import '../domain/models.dart';
@@ -141,8 +142,8 @@ class _NewLaundryRequestScreenState extends State<NewLaundryRequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('طَلَب تَسليم جَديد'),
+      appBar: M7AppBar(
+        title: 'طَلَب تَسليم جَديد',
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
       ),

@@ -2,6 +2,7 @@
 // ⚠️ شاشة بَلاغات المَفقودات (Missing Reports)
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
@@ -49,10 +50,10 @@ class _LaundryReportsScreenState extends State<LaundryReportsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.danger,
         foregroundColor: Colors.white,
-        title: const Text('⚠️ بَلاغات المَفقودات'),
+        title: '⚠️ بَلاغات المَفقودات',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -278,11 +279,10 @@ class _MissingReportDetailScreenState
     final emp = MockRepository().employeeById(r.employeeId);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.danger,
         foregroundColor: Colors.white,
-        title: Text('بَلاغ ${r.reportNumber}',
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 13)),
+        title: 'بَلاغ ${r.reportNumber}',
       ),
       body: ListView(
         padding: const EdgeInsets.all(12),

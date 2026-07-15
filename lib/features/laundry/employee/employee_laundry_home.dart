@@ -2,6 +2,7 @@
 // 🏠 شاشة المَغسلة الرَئيسيّة لِلمُوَظَّف
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/auth_provider.dart';
@@ -73,8 +74,8 @@ class _EmployeeLaundryHomeState extends State<EmployeeLaundryHome> {
       return _EmployeeLaundryCountryGate();
     }
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🧺 المَغسلة'),
+      appBar: M7AppBar(
+        title: '🧺 المَغسلة',
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -376,8 +377,8 @@ class _EmployeeLaundryCountryGate extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🧺 مَغسَلَتي (أَمانة)'),
+      appBar: M7AppBar(
+        title: '🧺 مَغسَلَتي (أَمانة)',
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
       ),

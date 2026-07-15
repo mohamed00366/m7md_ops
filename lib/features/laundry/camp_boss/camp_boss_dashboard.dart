@@ -2,6 +2,7 @@
 // 📊 لَوحة تَحَكُّم الكَمب بُوص — الشاشة الرَئيسيّة لِنِظام أَمانة
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/auth_provider.dart';
@@ -94,10 +95,9 @@ class _CampBossLaundryDashboardState extends State<CampBossLaundryDashboard> {
     }
     final L = LaundryStrings.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('🧺 ${L.amana} — ${L.dashboard}'),
+      appBar: M7AppBar(
+        title: '🧺 ${L.amana} — ${L.dashboard}',
         backgroundColor: LaundryColors.primary,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -417,8 +417,8 @@ class _LaundryCountryGate extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🧺 المَغسلة (أَمانة)'),
+      appBar: M7AppBar(
+        title: '🧺 المَغسلة (أَمانة)',
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
       ),

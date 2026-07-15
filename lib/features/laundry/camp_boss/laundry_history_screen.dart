@@ -2,6 +2,7 @@
 // 📜 السِجِلّ الكامِل + تَقارير نِظام أَمانة
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../core/services/supabase_service.dart';
 import '../../../repositories/mock_repository.dart';
@@ -79,10 +80,10 @@ class _LaundryHistoryScreenState extends State<LaundryHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('📜 السِجِلّ + تَقارير'),
+        title: '📜 السِجِلّ + تَقارير',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

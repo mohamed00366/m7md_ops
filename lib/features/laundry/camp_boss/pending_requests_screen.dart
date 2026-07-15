@@ -2,6 +2,7 @@
 // 📨 شاشة الطَلَبات الواردة — الكَمب بُوص يُراجِع طَلَبات المُوَظَّفين
 // =============================================================================
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../repositories/mock_repository.dart';
 import '../data/laundry_datasource.dart';
@@ -51,10 +52,10 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('📨 الطَلَبات الواردة'),
+        title: '📨 الطَلَبات الواردة',
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -262,10 +263,10 @@ class _ReviewRequestScreenState extends State<_ReviewRequestScreen> {
   Widget build(BuildContext context) {
     final emp = MockRepository().employeeById(widget.request.employeeId);
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: Text('مُراجَعة ${widget.request.requestNumber}'),
+        title: 'مُراجَعة ${widget.request.requestNumber}',
       ),
       body: Column(
         children: [

@@ -5,6 +5,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import '../../../shared/m7_app_bar.dart';
 
 import '../../../models/enums.dart';
 import '../../../models/models.dart';
@@ -72,10 +73,10 @@ class _DirectReceiveSearchScreenState extends State<DirectReceiveSearchScreen> {
     final showNewEmployeeBtn = _query.trim().isNotEmpty && results.isEmpty;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('⚡ استِلام مُباشِر'),
+        title: '⚡ استِلام مُباشِر',
       ),
       body: Column(
         children: [
@@ -313,11 +314,10 @@ class _DirectReceiveItemsScreenState extends State<DirectReceiveItemsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: M7AppBar(
         backgroundColor: LaundryColors.primary,
         foregroundColor: Colors.white,
-        title: Text('استِلام: ${widget.employee.fullName}',
-            style: const TextStyle(fontSize: 14)),
+        title: 'استِلام: ${widget.employee.fullName}',
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
