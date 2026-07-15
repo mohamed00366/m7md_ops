@@ -1395,6 +1395,8 @@ class EmployeeEditorScreen extends StatefulWidget {
 class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   // Personal
   late final TextEditingController _code;
+  late final TextEditingController _fileNo; // 🆕 رقم الملف
+  String _autoFileNo = ''; // القيمة المقترحة تلقائيًا (لمعرفة إن عدّلها المستخدم)
   late final TextEditingController _fullName;
   late final TextEditingController _mobile;
   late final TextEditingController _email;
@@ -1502,6 +1504,14 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       });
     }
     _code = TextEditingController(text: e?.code ?? autoCode);
+    _fileNo = TextEditingController(text: e?.fileNo ?? ''); // 🆕
+    // 🆕 أي موظف (جديد أو قديم) مالوش رقم ملف بعد → اقترح الرقم التالي تلقائيًا
+    if ((e?.fileNo ?? '').isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _refreshFileNoPreview();
+      });
+    }
     _fullName = TextEditingController(text: e?.fullName ?? '');
     _mobile = TextEditingController(text: e?.mobile ?? '');
     _email = TextEditingController(text: e?.email ?? '');
@@ -1587,6 +1597,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
   @override
   void dispose() {
     _code.dispose();
+    _fileNo.dispose(); // 🆕
     _fullName.dispose();
     _mobile.dispose();
     _email.dispose();
@@ -1673,6 +1684,24 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     setState(() => _code.text = preview!);
   }
 
+  /// 🆕 يُعبّئ "رقم الملف" بالرقم التالي من قاعدة الترقيم 'employee_file'.
+  /// الحقل يبقى قابلاً للتعديل؛ لو أبقى المستخدم القيمة المقترحة استُهلك العدّاد عند الحفظ.
+  void _refreshFileNoPreview() {
+    final repo = MockRepository();
+    final auth = context.read<AuthProvider>();
+    final cid = widget.existing?.countryId ??
+        auth.selectedCountryId ??
+        auth.activeCountryId;
+    final preview =
+        cid != null ? repo.previewCodeFor(cid, 'employee_file') : null;
+    if (preview != null && preview.isNotEmpty) {
+      setState(() {
+        _fileNo.text = preview;
+        _autoFileNo = preview;
+      });
+    }
+  }
+
   Future<void> _pickDate(DateTime? current, ValueChanged<DateTime> onPicked,
       {DateTime? first, DateTime? last}) async {
     final d = await showDatePicker(
@@ -1745,6 +1774,24 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       }
     }
 
+    // 🆕 رقم الملف: لو أبقى المستخدم الرقم المقترح تلقائيًا كما هو → استهلكه
+    // لتقديم عدّاد الدولة (+1)؛ لو عدّله يدويًا نستخدم قيمته كما هي (بلا استهلاك).
+    // ينطبق على الموظف الجديد وعلى القديم الذي يُسنَد له رقم لأول مرة.
+    String finalFileNo = _fileNo.text.trim();
+    final fileCid = cid ?? widget.existing?.countryId;
+    if (finalFileNo.isNotEmpty &&
+        finalFileNo == _autoFileNo &&
+        fileCid != null) {
+      String? fno;
+      if (supaReady) {
+        fno = await dataService.consumeNextCode(
+            technicalId: 'employee_file', countryId: fileCid);
+      } else {
+        fno = repo.generateCodeFor(fileCid, 'employee_file');
+      }
+      if (fno != null && fno.isNotEmpty) finalFileNo = fno;
+    }
+
     final basic = double.tryParse(_basicSalary.text) ?? 0;
     final ot = double.tryParse(_overtime.text) ?? 0;
     final tf = double.tryParse(_trainingFee.text) ?? 0;
@@ -1763,6 +1810,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
       final newEmp = Employee(
         id: repo.generateId(),
         code: finalCode,
+        fileNo: finalFileNo, // 🆕 رقم الملف
         fullName: _fullName.text.trim(),
         jobTitle: jobTitleName,
         department: deptName,
@@ -1869,6 +1917,7 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
     } else {
       final e = widget.existing!;
       e.code = _code.text.trim();
+      e.fileNo = finalFileNo; // 🆕 رقم الملف (بعد الاستهلاك إن لزم)
       e.fullName = _fullName.text.trim();
       e.jobTitle = jobTitleName;
       e.department = deptName;
@@ -2359,6 +2408,26 @@ class _EmployeeEditorScreenState extends State<EmployeeEditorScreen> {
                               : '📓 Passport Custody',
                           style: const TextStyle(
                               fontWeight: FontWeight.w900, fontSize: 13),
+                        ),
+                      ]),
+                      const SizedBox(height: 8),
+                      // 🆕 رقم الملف — ترقيم أوتوماتيكي قابل للتعديل
+                      Row(children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _fileNo,
+                            decoration: InputDecoration(
+                              labelText:
+                                  s.isAr ? 'رَقم المِلَفّ' : 'File Number',
+                              prefixIcon: const Icon(Icons.tag, size: 18),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          tooltip: s.isAr ? 'توليد رقم جديد' : 'Regenerate',
+                          icon: const Icon(Icons.refresh),
+                          onPressed: _refreshFileNoPreview,
                         ),
                       ]),
                       const SizedBox(height: 8),

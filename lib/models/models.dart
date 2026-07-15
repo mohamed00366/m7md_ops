@@ -160,6 +160,7 @@ class Site {
 class Employee {
   final String id;
   String code;
+  String fileNo; // 🆕 رقم ملف الموظف (ترقيم أوتوماتيكي قابل للتعديل)
   String fullName;
   String jobTitle;
   String department;
@@ -267,6 +268,7 @@ class Employee {
   Employee({
     required this.id,
     required this.code,
+    this.fileNo = '', // 🆕
     required this.fullName,
     this.jobTitle = '',
     this.department = '',

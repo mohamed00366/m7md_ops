@@ -1487,6 +1487,7 @@ class SupabaseDataService {
         visaTypeId: r['visa_type_id'] as String?,
         transportModeId: r['transport_mode_id'] as String?, // 🆕
         category: (r['category'] as String?) ?? 'worker', // 🆕
+        fileNo: (r['file_no'] as String?) ?? '', // 🆕 رقم الملف
         passportNumber: (r['passport_number'] as String?) ?? '',
         passportExpiry: r['passport_expiry'] == null
             ? null
@@ -1590,6 +1591,12 @@ class SupabaseDataService {
         waslUid: (r['wasl_uid'] as String?) ?? '',
       );
 
+  // 🆕 يُضبَط true لو عمود employees.file_no غير موجود بعد (قبل تشغيل الـ migration).
+  // ساعتها نتجاهل الحقل في الحفظ حتى لا يفشل حفظ الموظف. يُعاد ضبطه عند إعادة تشغيل التطبيق.
+  static bool _fileNoColumnMissing = false;
+  bool _isFileNoColumnError(Object ex) =>
+      ex.toString().toLowerCase().contains('file_no');
+
   Map<String, dynamic> _employeeToPayload(Employee e) {
     final payload = <String, dynamic>{
       'code': e.code,
@@ -1602,6 +1609,10 @@ class SupabaseDataService {
       'category': e.category, // 🆕 worker | admin
     };
     // الحقول النصية الاختيارية - نضيفها فقط إن لم تكن فارغة
+    // 🆕 رقم الملف — يُرسَل فقط إن كان له قيمة والعمود موجود (آمن قبل تشغيل الـ migration)
+    if (e.fileNo.isNotEmpty && !_fileNoColumnMissing) {
+      payload['file_no'] = e.fileNo;
+    }
     if (e.email.isNotEmpty) payload['email'] = e.email;
     if (e.mobile.isNotEmpty) payload['mobile'] = e.mobile;
     if (e.passportNumber.isNotEmpty) payload['passport_number'] = e.passportNumber;
@@ -1776,6 +1787,11 @@ class SupabaseDataService {
       );
       return created;
     } catch (ex) {
+      // 🆕 لو الفشل بسبب عمود file_no غير الموجود → تجاهله وأعد المحاولة مرة واحدة
+      if (!_fileNoColumnMissing && _isFileNoColumnError(ex)) {
+        _fileNoColumnMissing = true;
+        return createEmployee(e, countryId: countryId);
+      }
       lastError = ex.toString();
       M7Log.error('DataService', 'createEmployee', error: ex);
       return null;
@@ -1821,6 +1837,11 @@ class SupabaseDataService {
       }
       return true;
     } catch (ex) {
+      // 🆕 لو الفشل بسبب عمود file_no غير الموجود → تجاهله وأعد المحاولة مرة واحدة
+      if (!_fileNoColumnMissing && _isFileNoColumnError(ex)) {
+        _fileNoColumnMissing = true;
+        return updateEmployee(e);
+      }
       lastError = ex.toString();
       M7Log.error('DataService', 'updateEmployee', error: ex);
       return false;
