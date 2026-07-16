@@ -6,6 +6,8 @@ import '../../core/providers/auth_provider.dart';
 import '../../models/enums.dart';
 import '../../models/models.dart';
 import '../../repositories/mock_repository.dart';
+import '../../shared/m7_stats_banner.dart';
+import '../../core/theme/app_colors.dart';
 import 'camp_palette.dart';
 import 'camp_widgets.dart';
 import 'camp_boss_rooms.dart';
@@ -61,8 +63,6 @@ class CampBossDashboard extends StatelessWidget {
         .length;
     final activeBuses =
         scopedBuses.where((b) => b.status == EntityStatus.active).length;
-    final assignedToday = repo.countTodayTrips();
-
     final totalBeds = scopedRooms.fold<int>(0, (a, r) => a + r.capacity);
     final usedBeds = scopedRooms.fold<int>(0, (a, r) => a + r.used);
     final freeBeds = totalBeds - usedBeds;
@@ -70,10 +70,6 @@ class CampBossDashboard extends StatelessWidget {
     final laundryPending = scopedLaundry
         .where((t) => t.stage != LaundryStage.deliveredToEmployee)
         .length;
-    final missingLaundry = scopedLaundry
-        .where((t) => t.missingItems.isNotEmpty)
-        .length;
-
     final pendingViolations =
         scopedViolations.where((v) => v.status == ViolationStatus.pending).length;
 
@@ -87,85 +83,59 @@ class CampBossDashboard extends StatelessWidget {
             children: [
               // ============ HEADER ============
               _DashHeader(user: auth.currentUser, isAr: s.isAr),
-              // ============ Overview floating cards ============
-              Transform.translate(
-                offset: const Offset(0, -18),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CampOverviewCard(
-                          icon: Icons.directions_bus,
-                          iconColor: CampPalette.green,
-                          iconBg: CampPalette.greenBg,
-                          value: '$activeBuses',
-                          label: s.isAr ? 'باصات نشطة' : 'Active buses',
-                          subLabel: s.isAr
-                              ? '$assignedToday مُعيّن اليوم'
-                              : '$assignedToday assigned today',
-                          subLabelColor: CampPalette.greenText,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: CampOverviewCard(
-                          icon: Icons.people,
-                          iconColor: CampPalette.amberDark,
-                          iconBg: CampPalette.amberBg,
-                          value: '$empCount',
-                          label: s.isAr ? 'الموظفون' : 'Employees',
-                          subLabel: s.isAr ? 'محدّث' : 'updated',
-                          subLabelColor: CampPalette.amberDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ============ Stat row (3 cards) ============
+              // ============ لَمحة اليوم — نفس تصميم الصفحة الرئيسية (M7StatsBanner) ============
               Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: CampStatCard(
-                        value: '$freeBeds',
-                        valueColor: CampPalette.primary,
-                        label: s.isAr ? 'سرير متاح' : 'Beds free',
-                        subLabel: '/$totalBeds',
-                        subLabelColor: CampPalette.textSecondaryColor(context),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: CampStatCard(
-                        value: '$laundryPending',
-                        valueColor: CampPalette.red,
-                        label: s.isAr ? 'مغسلة' : 'Laundry',
-                        subLabel: missingLaundry > 0
-                            ? (s.isAr
-                                ? '$missingLaundry ناقص'
-                                : '$missingLaundry missing')
-                            : null,
-                        subLabelColor: CampPalette.red,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: CampStatCard(
-                        value: '$pendingViolations',
-                        valueColor: CampPalette.amber,
-                        label: s.isAr ? 'مخالفات' : 'Violations',
-                        subLabel: pendingViolations > 0
-                            ? (s.isAr ? 'معلقة' : 'Pending')
-                            : null,
-                        subLabelColor: CampPalette.amber,
-                      ),
+                    Icon(Icons.insights,
+                        color: AppColors.gold.withValues(alpha: 0.9),
+                        size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      s.isAr ? 'لَمحة اليَوم' : "Today's Snapshot",
+                      style: TextStyle(
+                          color: CampPalette.textColor(context),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13),
                     ),
                   ],
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                child: M7StatsBanner(stats: [
+                  M7Stat(
+                    icon: Icons.people,
+                    label: s.isAr ? 'موظفون' : 'Employees',
+                    value: empCount,
+                    color: AppColors.brand,
+                  ),
+                  M7Stat(
+                    icon: Icons.directions_bus,
+                    label: s.isAr ? 'باصات' : 'Buses',
+                    value: activeBuses,
+                    color: AppColors.info,
+                  ),
+                  M7Stat(
+                    icon: Icons.hotel,
+                    label: s.isAr ? 'أسِرّة' : 'Beds',
+                    value: freeBeds,
+                    color: AppColors.gold,
+                  ),
+                  M7Stat(
+                    icon: Icons.local_laundry_service,
+                    label: s.isAr ? 'مغسلة' : 'Laundry',
+                    value: laundryPending,
+                    color: AppColors.danger,
+                  ),
+                  M7Stat(
+                    icon: Icons.error_outline,
+                    label: s.isAr ? 'مخالفات' : 'Violations',
+                    value: pendingViolations,
+                    color: AppColors.warning,
+                  ),
+                ]),
               ),
 
               // ============ Alert banner ============
