@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/widgets.dart';
+import '../../shared/m7_stats_banner.dart';
 
 class OperationDashboard extends StatelessWidget {
   const OperationDashboard({super.key});
@@ -68,27 +69,41 @@ class OperationDashboard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          GridResponsive(
-            columns: 3,
-            aspectRatio: 1,
-            children: [
-              StatCard(
-                  label: s.pendingRosters,
-                  value: '$pending',
-                  icon: Icons.pending,
-                  color: AppColors.warning),
-              StatCard(
-                  label: s.approvedRosters,
-                  value: '$approved',
-                  icon: Icons.check_circle,
-                  color: AppColors.success),
-              StatCard(
-                  label: s.rejectedRosters,
-                  value: '$rejected',
-                  icon: Icons.cancel,
-                  color: AppColors.danger),
-            ],
+          // لَمحة اليوم — نفس تصميم الصفحة الرئيسية (M7StatsBanner)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.insights,
+                    color: AppColors.gold.withValues(alpha: 0.9), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  s.isAr ? 'لَمحة اليَوم' : "Today's Snapshot",
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13),
+                ),
+              ],
+            ),
           ),
+          M7StatsBanner(stats: [
+            M7Stat(
+                icon: Icons.pending,
+                label: s.pendingRosters,
+                value: pending,
+                color: AppColors.warning),
+            M7Stat(
+                icon: Icons.check_circle,
+                label: s.approvedRosters,
+                value: approved,
+                color: AppColors.success),
+            M7Stat(
+                icon: Icons.cancel,
+                label: s.rejectedRosters,
+                value: rejected,
+                color: AppColors.danger),
+          ]),
           const SizedBox(height: 14),
           // الروسترات المعلقة - وصول سريع
           SectionCard(

@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/widgets.dart';
+import '../../shared/m7_stats_banner.dart';
 
 class SupervisorDashboard extends StatelessWidget {
   const SupervisorDashboard({super.key});
@@ -178,23 +179,36 @@ class SupervisorDashboard extends StatelessWidget {
             const SizedBox(height: 14),
           ],
 
-          // إحصاءات
-          GridResponsive(
-            columns: 2,
-            aspectRatio: 1.4,
-            children: [
-              StatCard(
-                  label: s.isAr ? 'موظفو الموقع' : 'Site Employees',
-                  value: '${empsAtSite.length}',
-                  icon: Icons.people,
-                  color: AppColors.brand),
-              StatCard(
-                  label: s.isAr ? 'الورديات' : 'Shifts',
-                  value: '${myRoster?.assignments.length ?? 0}',
-                  icon: Icons.schedule,
-                  color: AppColors.warning),
-            ],
+          // لَمحة اليوم — نفس تصميم الصفحة الرئيسية (M7StatsBanner)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.insights,
+                    color: AppColors.gold.withValues(alpha: 0.9), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  s.isAr ? 'لَمحة اليَوم' : "Today's Snapshot",
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13),
+                ),
+              ],
+            ),
           ),
+          M7StatsBanner(stats: [
+            M7Stat(
+                icon: Icons.people,
+                label: s.isAr ? 'موظفو الموقع' : 'Site Employees',
+                value: empsAtSite.length,
+                color: AppColors.brand),
+            M7Stat(
+                icon: Icons.schedule,
+                label: s.isAr ? 'الورديات' : 'Shifts',
+                value: myRoster?.assignments.length ?? 0,
+                color: AppColors.warning),
+          ]),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/widgets.dart';
+import '../../shared/m7_stats_banner.dart';
 import 'manager_reports.dart';
 
 class ManagerDashboard extends StatelessWidget {
@@ -16,15 +17,10 @@ class ManagerDashboard extends StatelessWidget {
     final s = AppStrings.of(context);
     final repo = MockRepository();
 
-    final totalEmps = repo.employees.length;
     final activeEmps = repo.countActiveEmployees();
-    final inactiveEmps = totalEmps - activeEmps;
-    final totalSites = repo.sites.length;
     final activeSites = repo.countActiveSites();
-    final totalBuses = repo.buses.length;
     final activeBuses = repo.countActiveBuses();
     final workingToday = repo.countWorkingToday();
-    final offToday = activeEmps - workingToday;
     final todayTrips = repo.countTodayTrips();
     final pending = repo.rostersByStatus(RosterStatus.submitted).length;
     final approved = repo.rostersByStatus(RosterStatus.approved).length;
@@ -82,61 +78,51 @@ class ManagerDashboard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // البطاقات الإحصائية
-          GridResponsive(
-            columns: 2,
-            aspectRatio: 1.4,
-            children: [
-              StatCard(
-                label: s.totalEmployees,
-                value: '$totalEmps',
-                icon: Icons.people,
-                color: AppColors.brand,
-              ),
-              StatCard(
-                label: s.activeEmployees,
-                value: '$activeEmps',
-                icon: Icons.person,
-                color: AppColors.success,
-              ),
-              StatCard(
-                label: s.inactiveEmployees,
-                value: '$inactiveEmps',
-                icon: Icons.person_off,
-                color: AppColors.danger,
-              ),
-              StatCard(
-                label: s.activeSites,
-                value: '$activeSites/$totalSites',
-                icon: Icons.business,
-                color: AppColors.purple,
-              ),
-              StatCard(
-                label: s.activeBuses,
-                value: '$activeBuses/$totalBuses',
-                icon: Icons.directions_bus,
-                color: AppColors.warning,
-              ),
-              StatCard(
-                label: s.todayTrips,
-                value: '$todayTrips',
-                icon: Icons.route,
-                color: AppColors.teal,
-              ),
-              StatCard(
-                label: s.workingToday,
-                value: '$workingToday',
-                icon: Icons.work,
-                color: AppColors.success,
-              ),
-              StatCard(
-                label: s.offToday,
-                value: '$offToday',
-                icon: Icons.beach_access,
-                color: AppColors.info,
-              ),
-            ],
+          // لَمحة اليوم — نفس تصميم الصفحة الرئيسية (M7StatsBanner)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.insights,
+                    color: AppColors.gold.withValues(alpha: 0.9), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  s.isAr ? 'لَمحة اليَوم' : "Today's Snapshot",
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13),
+                ),
+              ],
+            ),
           ),
+          M7StatsBanner(stats: [
+            M7Stat(
+                icon: Icons.people,
+                label: s.activeEmployees,
+                value: activeEmps,
+                color: AppColors.brand),
+            M7Stat(
+                icon: Icons.business,
+                label: s.activeSites,
+                value: activeSites,
+                color: AppColors.purple),
+            M7Stat(
+                icon: Icons.directions_bus,
+                label: s.activeBuses,
+                value: activeBuses,
+                color: AppColors.info),
+            M7Stat(
+                icon: Icons.route,
+                label: s.todayTrips,
+                value: todayTrips,
+                color: AppColors.teal),
+            M7Stat(
+                icon: Icons.work,
+                label: s.workingToday,
+                value: workingToday,
+                color: AppColors.success),
+          ]),
           const SizedBox(height: 14),
 
           // الورديات
