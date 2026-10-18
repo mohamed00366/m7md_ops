@@ -1,3 +1,5 @@
+import 'dart:async';
+import '../../features/valet/valet_admin.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/enums.dart';
@@ -360,6 +362,10 @@ class AuthProvider extends ChangeNotifier {
         if (userId != null) {
           result = await _loadFromSupabase(userId);
           await _saveRememberMeIfRequested(rememberMe);
+          // 🚗 جَلسة الفاليه (نَفس البَيانات) — بِدون انتِظار وَبِدون أَخطاء
+          if (result == LoginResult.success) {
+            unawaited(ValetAdmin.I.signInSilently(cleanUser, password));
+          }
           return result;
         }
       } catch (e) {
@@ -925,6 +931,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    unawaited(ValetAdmin.I.logout());
     AuditLogger.instance.log(
       entityType: 'session',
       action: AuditAction.logout,

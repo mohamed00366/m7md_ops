@@ -767,6 +767,13 @@ RbacSeedResult seedRbac(String Function() generateId,
     perm(P.employeeDocumentsExpiryReport, 'documents',
         'تَقرير الوَثائِق المُنتَهية', 'Documents expiry report'),
 
+    // 🚗 الفاليه
+    perm(P.valetDashboardView, 'valet', 'عرض داشبورد الفاليه', 'View valet dashboard'),
+    perm(P.valetSettingsManage, 'valet', 'إدارة إعدادات النقاط والأسعار', 'Manage valet point settings & prices'),
+    perm(P.valetClientsManage, 'valet', 'إدارة عملاء الفاليه', 'Manage valet clients'),
+    perm(P.valetReportsView, 'valet', 'تقارير الفاليه', 'View valet reports'),
+    perm(P.valetTicketsManage, 'valet', 'إلغاء التذاكر وإغلاق الورديات', 'Void tickets & force-close shifts'),
+
     // 🆕 جِهاز نُقطة الدَوام (Point Terminal)
     perm(P.pointTerminalView, 'point_terminal',
         'عَرض حِسابات أَجهِزة النِقاط', 'View terminal accounts'),

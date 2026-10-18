@@ -21,6 +21,8 @@ enum ModuleCategory {
   home,
   // 2) المؤسّسة والهيكل
   organization,
+  // 🚗 الفاليه — التَحَكُّم في تَطبيقات الفاليه + المَفاتيح + العُمَلاء
+  valet,
   // 3) الموارد البشرية (يضمّ الحضور والتقييم والخصومات والتدريب)
   hr,
   // 4) الروسترات
@@ -54,6 +56,7 @@ extension ModuleCategoryX on ModuleCategory {
     switch (this) {
       case ModuleCategory.home:         return 'الرئيسية';
       case ModuleCategory.organization: return 'المؤسّسة';
+      case ModuleCategory.valet:        return 'الفاليه';
       case ModuleCategory.hr:           return 'الموارد البشرية';
       case ModuleCategory.roster:       return 'الروستر';
       case ModuleCategory.transport:    return 'النقل';
@@ -76,6 +79,7 @@ extension ModuleCategoryX on ModuleCategory {
     switch (this) {
       case ModuleCategory.home:         return 'Home';
       case ModuleCategory.organization: return 'Organization';
+      case ModuleCategory.valet:        return 'Valet';
       case ModuleCategory.hr:           return 'HR';
       case ModuleCategory.roster:       return 'Roster';
       case ModuleCategory.transport:    return 'Transport';
@@ -98,6 +102,7 @@ extension ModuleCategoryX on ModuleCategory {
     switch (this) {
       case ModuleCategory.home:         return Icons.home;
       case ModuleCategory.organization: return Icons.account_tree_outlined;
+      case ModuleCategory.valet:        return Icons.local_parking;
       case ModuleCategory.hr:           return Icons.people_alt_outlined;
       case ModuleCategory.roster:       return Icons.calendar_today;
       case ModuleCategory.transport:    return Icons.directions_bus;
@@ -120,6 +125,7 @@ extension ModuleCategoryX on ModuleCategory {
     switch (this) {
       case ModuleCategory.home:         return const Color(0xFF2F6FED); // أزرق
       case ModuleCategory.organization: return const Color(0xFF1F2937); // كحلي
+      case ModuleCategory.valet:        return const Color(0xFFC9A227); // ذَهَبيّ VIP
       case ModuleCategory.hr:           return const Color(0xFF7C3AED); // بنفسجي
       case ModuleCategory.roster:       return const Color(0xFFF59E0B); // كهرماني
       case ModuleCategory.transport:    return const Color(0xFF2563EB); // أزرق غامق
@@ -143,6 +149,7 @@ extension ModuleCategoryX on ModuleCategory {
     switch (this) {
       case ModuleCategory.home:         return 0;
       case ModuleCategory.organization: return 1;
+      case ModuleCategory.valet:        return 1;
       case ModuleCategory.hr:           return 2;
       case ModuleCategory.roster:       return 3;
       case ModuleCategory.transport:    return 4;

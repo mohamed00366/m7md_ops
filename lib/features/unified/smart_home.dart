@@ -1,3 +1,4 @@
+import '../valet/valet_home_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -215,6 +216,8 @@ class _SmartHomeState extends State<SmartHome> {
         const MyDayCard(),
         // 🆕 لَمحة اليَوم — إحصائيّات سَريعة في الأَعلى
         const TodaySnapshot(),
+        // 🚗 الفاليه الآن (لِمَن لَدَيه صَلاحيّة الفاليه)
+        const ValetHomeCard(),
         const SizedBox(height: 4),
         // 🆕 بانِر التَنبيهات الذَكيّة (يَختَفي لَو لا تُوجَد تَنبيهات)
         const SmartAlertsBanner(),

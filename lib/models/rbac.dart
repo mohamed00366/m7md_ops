@@ -734,6 +734,18 @@ class P {
   static const employeeDocumentsExpiryReport =
       'employee_documents.expiry_report.view';
 
+  // ===== 🚗 Valet (تَطبيقات الفاليه / المَفاتيح / العُمَلاء) =====
+  /// عَرض قِسم الفاليه + المُراقَبة الحَيّة
+  static const valetDashboardView = 'valet.dashboard.view';
+  /// إعدادات النِقاط وَالأَسعار وَحِسابات الأَجهِزة
+  static const valetSettingsManage = 'valet.settings.manage';
+  /// عُمَلاء تَطبيق العُمَلاء (الرَبط، الحِسابات، قَواعِد التَحَقُّق)
+  static const valetClientsManage = 'valet.clients.manage';
+  /// تَقارير / تَذاكِر / وَرديّات الفاليه
+  static const valetReportsView = 'valet.reports.view';
+  /// إلغاء تَذكَرة + إغلاق وَرديّة عالِقة
+  static const valetTicketsManage = 'valet.tickets.manage';
+
   // ===== 🆕 Point Terminal (جِهاز نُقطة الدَوام) =====
   /// عَرض حِسابات Point Terminal في شاشة Points
   static const pointTerminalView = 'point_terminal.view';

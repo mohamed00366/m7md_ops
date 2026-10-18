@@ -74,6 +74,15 @@ import '../admin/settings_hub_screen.dart';
 import '../supervisor/supervisor_approved_roster.dart';
 import '../camp_boss/evaluations_center.dart';
 import '../supervisor/supervisor_roster_creator.dart';
+// 🚗 Valet (VIP Valet / Key Rack / Customer apps control)
+import '../valet/valet_audit_screen.dart';
+import '../valet/valet_clients_screen.dart';
+import '../valet/valet_keyrack_screen.dart';
+import '../valet/valet_live_screen.dart';
+import '../valet/valet_points_screen.dart';
+import '../valet/valet_reports_screen.dart';
+import '../valet/valet_shifts_screen.dart';
+import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
 
@@ -269,6 +278,91 @@ class ModulesRegistry {
         ),
         // 🚫 admin_countries أُزيلَ من الدرور — مُتاح في مَركَز الإعدادات
         // 🚫 assign_supervisors نُقِلَ إلى قِسم الروستر (أَكثَر مَنطِقيّة)
+
+        // ═══════════════════════════════════════════════════
+        // 🚗 VALET — التَحَكُّم في تَطبيقات الفاليه / المَفاتيح / العُمَلاء
+        //    (البَيانات عَبر دَوالّ vva_* + صَلاحيّات valet.*)
+        // ═══════════════════════════════════════════════════
+        AppModule(
+          key: 'valet_live',
+          titleAr: 'المُراقَبة الحَيّة',
+          titleEn: 'Live monitoring',
+          icon: Icons.sensors,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetDashboardView,
+          builder: (_) => const ValetLiveScreen(),
+        ),
+        AppModule(
+          key: 'valet_points',
+          titleAr: 'تَطبيق الفاليه',
+          titleEn: 'Valet app',
+          icon: Icons.local_parking,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetDashboardView,
+          builder: (_) => const ValetPointsScreen(),
+        ),
+        AppModule(
+          key: 'valet_keyrack',
+          titleAr: 'تَطبيق المَفاتيح',
+          titleEn: 'Key rack app',
+          icon: Icons.key,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetDashboardView,
+          builder: (_) => const ValetKeyRackScreen(),
+        ),
+        AppModule(
+          key: 'valet_clients',
+          titleAr: 'تَطبيق العُمَلاء',
+          titleEn: 'Customer app',
+          icon: Icons.handshake_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetDashboardView,
+          builder: (_) => const ValetClientsScreen(),
+        ),
+        AppModule(
+          key: 'valet_tickets',
+          titleAr: 'تَذاكِر الفاليه',
+          titleEn: 'Valet tickets',
+          icon: Icons.confirmation_number_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetTicketsScreen(),
+        ),
+        AppModule(
+          key: 'valet_shifts',
+          titleAr: 'وَرديّات الفاليه',
+          titleEn: 'Valet shifts',
+          icon: Icons.schedule,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetShiftsScreen(),
+        ),
+        AppModule(
+          key: 'valet_reports',
+          titleAr: 'تَقارير الفاليه',
+          titleEn: 'Valet reports',
+          icon: Icons.insert_chart_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetReportsScreen(),
+        ),
+        AppModule(
+          key: 'valet_audit',
+          titleAr: 'سِجِلّ تَغييرات الفاليه',
+          titleEn: 'Valet change log',
+          icon: Icons.history,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetSettingsManage,
+          builder: (_) => const ValetAuditScreen(),
+        ),
 
         // ═══════════════════════════════════════════════════
         // 4️⃣ ROSTER — الرَوسترات

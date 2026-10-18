@@ -118,6 +118,8 @@ class _BulkPermissionsMatrixScreenState
     'pin':            _Domain('security', '🔐 الأَمان', '🔐 Security'),
     'audit':          _Domain('security', '🔐 الأَمان', '🔐 Security'),
     'point_terminal': _Domain('security', '🔐 الأَمان', '🔐 Security'),
+    // 🚗 Valet
+    'valet':          _Domain('valet', '🚗 الفاليه', '🚗 Valet'),
     'gdpr':           _Domain('security', '🔐 الأَمان', '🔐 Security'),
     'backups':        _Domain('security', '🔐 الأَمان', '🔐 Security'),
     // 💰 Finance (جَديد)
