@@ -130,7 +130,13 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(d == null ? widget.title : '${vMap(d['point'])['code']} · ${vMap(d['point'])['name']}'),
-          bottom: TabBar(isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
+          bottom: TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: VC.gold,
+              tabs: [
             Tab(text: tx(context, 'المَزايا', 'Features')),
             Tab(text: tx(context, 'الأَسعار', 'Prices')),
             Tab(text: tx(context, 'VIP وَالعُضويّات', 'VIP & memberships')),
@@ -272,21 +278,50 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       );
 
   // ---------------------------------------------------------------- prices
+  /// Hourly rows grouped into tables: same client + ticket name + days.
+  static List<List<VJson>> hourlyTables(List<VJson> prices) {
+    final m = <String, List<VJson>>{};
+    for (final p in prices.where((p) => p['ticket_mode'] == 'HOURLY')) {
+      final key = '${p['site_id'] ?? ''}|${vStr(p['ticket_name']).trim()}|${vDays(p['days']).join(',')}';
+      m.putIfAbsent(key, () => []).add(p);
+    }
+    for (final g in m.values) {
+      g.sort((a, b) => vMinutes(vStr(a['start_time'])).compareTo(vMinutes(vStr(b['start_time']))));
+    }
+    final out = m.values.toList()
+      ..sort((a, b) {
+        final c = vStr(a.first['client_name']).compareTo(vStr(b.first['client_name']));
+        if (c != 0) return c;
+        final n = vStr(a.first['ticket_name']).compareTo(vStr(b.first['ticket_name']));
+        if (n != 0) return n;
+        final da = vDays(a.first['days']), db = vDays(b.first['days']);
+        return (da.isEmpty ? 0 : da.first).compareTo(db.isEmpty ? 0 : db.first);
+      });
+    return out;
+  }
+
   Widget _prices(VJson d) {
     final prices = vList(d['prices']);
+    final fixed = prices.where((p) => p['ticket_mode'] != 'HOURLY').toList();
+    final tables = hourlyTables(prices);
+    String forWhom(VJson p) => p['client_name'] == null ? tx(context, 'الكُلّ (سِعر النُقطة)', 'All (point price)') : vStr(p['client_name']);
+    Widget actions(VJson p, VoidCallback onEdit, Future<void> Function() onDelete) => !_edit
+        ? const SizedBox()
+        : Row(mainAxisSize: MainAxisSize.min, children: [
+            IconButton(tooltip: tx(context, 'تَعديل', 'Edit'), icon: const Icon(Icons.edit_outlined), onPressed: onEdit),
+            IconButton(tooltip: tx(context, 'حَذف', 'Delete'), icon: const Icon(Icons.delete_outline, color: VC.bad), onPressed: onDelete),
+          ]);
     return _page([
       VPanel(
-        title: tx(context, 'الأَسعار (${prices.length})', 'Prices (${prices.length})'),
+        title: tx(context, 'أَسعار ثابِتة (${fixed.length})', 'Fixed prices (${fixed.length})'),
         actions: [
-          if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'إضافة سِعر', 'Add price')), onPressed: () => _priceDialog(d, null)),
+          if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'سِعر ثابِت', 'Fixed price')), onPressed: () => _priceDialog(d, null)),
         ],
         child: VTable(
-          empty: tx(context, 'لا تُوجَد أَسعار بَعد.', 'No price yet.'),
+          empty: tx(context, 'لا تُوجَد أَسعار ثابِتة.', 'No fixed price.'),
           columns: [
             DataColumn(label: Text(tx(context, 'لِمَن', 'For'))),
             DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
-            DataColumn(label: Text(tx(context, 'النَوع', 'Mode'))),
-            DataColumn(label: Text(tx(context, 'السّاعات', 'Hours'))),
             DataColumn(label: Text(tx(context, 'السِعر', 'Price')), numeric: true),
             DataColumn(label: Text(tx(context, 'الضَريبة', 'VAT')), numeric: true),
             DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
@@ -294,38 +329,86 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             const DataColumn(label: Text('')),
           ],
           rows: [
-            for (final p in prices)
+            for (final p in fixed)
               DataRow(cells: [
-                DataCell(Text(p['client_name'] == null ? tx(context, 'الكُلّ (سِعر النُقطة)', 'All (point price)') : vStr(p['client_name']))),
+                DataCell(Text(forWhom(p))),
                 DataCell(Text(vStr(p['ticket_name']), style: const TextStyle(fontWeight: FontWeight.w600))),
-                DataCell(Text(p['ticket_mode'] == 'HOURLY' ? tx(context, 'بِالسّاعة', 'Hourly') : tx(context, 'ثابِت', 'Fixed'))),
-                DataCell(Text(p['ticket_mode'] == 'HOURLY' ? '${p['start_time']} → ${p['finish_time']}' : '-')),
                 DataCell(Text(VF.money(vNum(p['price'])))),
                 DataCell(Text(VF.money(vNum(p['tax'])))),
                 DataCell(Text(VF.money(vNum(p['total'])), style: const TextStyle(fontWeight: FontWeight.w700))),
                 DataCell(vBool(p['is_active']) ? VPill(tx(context, 'فَعّال', 'Active'), color: VC.ok) : VPill(tx(context, 'مُتَوَقِّف', 'Off'))),
-                DataCell(!_edit
-                    ? const SizedBox()
-                    : Row(mainAxisSize: MainAxisSize.min, children: [
-                        IconButton(tooltip: tx(context, 'تَعديل', 'Edit'), icon: const Icon(Icons.edit_outlined), onPressed: () => _priceDialog(d, p)),
-                        IconButton(
-                          tooltip: tx(context, 'حَذف', 'Delete'),
-                          icon: const Icon(Icons.delete_outline, color: VC.bad),
-                          onPressed: () async {
-                            if (await vConfirm(context, tx(context, 'حَذف السِعر', 'Delete price'), '${p['ticket_name']}')) {
-                              if (!mounted) return;
-                              _save('vva_row_delete', {'p_kind': 'price', 'p_id': p['id']}, ok: tx(context, 'تَمّ الحَذف.', 'Deleted.'));
-                            }
-                          },
-                        ),
-                      ])),
+                DataCell(actions(p, () => _priceDialog(d, p), () async {
+                  if (await vConfirm(context, tx(context, 'حَذف السِعر', 'Delete price'), '${p['ticket_name']}')) {
+                    if (!mounted) return;
+                    await _save('vva_row_delete', {'p_kind': 'price', 'p_id': p['id']}, ok: tx(context, 'تَمّ الحَذف.', 'Deleted.'));
+                  }
+                })),
               ]),
           ],
         ),
       ),
+      VPanel(
+        title: tx(context, 'جَداوِل بِالسّاعة (${tables.length})', 'Hourly tables (${tables.length})'),
+        actions: [
+          if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'جَدوَل بِالسّاعة', 'Hourly table')), onPressed: () => _hourlyDialog(d, null)),
+        ],
+        child: tables.isEmpty
+            ? Padding(padding: const EdgeInsets.all(16), child: Text(tx(context, 'لا تُوجَد جَداوِل بِالسّاعة.', 'No hourly table.'), style: const TextStyle(color: VC.muted)))
+            : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                for (final g in tables)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        Row(children: [
+                          const Icon(Icons.schedule, color: VC.gold),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                              Text(vStr(g.first['ticket_name']), style: const TextStyle(fontWeight: FontWeight.w700)),
+                              VPill(forWhom(g.first)),
+                              VPill(vDaysLabel(context, g.first['days']), color: vDays(g.first['days']).isEmpty ? VC.info : VC.warn, icon: Icons.calendar_month),
+                              if (!vBool(g.first['is_active'])) VPill(tx(context, 'مُتَوَقِّف', 'Off')),
+                            ]),
+                          ),
+                          actions(g.first, () => _hourlyDialog(d, g), () async {
+                            if (await vConfirm(context, tx(context, 'حَذف الجَدوَل', 'Delete table'),
+                                tx(context, '${g.first['ticket_name']} · ${vDaysLabel(context, g.first['days'])} — ${g.length} فَترة', '${g.first['ticket_name']} · ${vDaysLabel(context, g.first['days'])} — ${g.length} band(s)'))) {
+                              if (!mounted) return;
+                              for (final p in g.skip(1)) {
+                                await ValetAdmin.I.call('vva_row_delete', {'p_kind': 'price', 'p_id': p['id']}).catchError((_) => <String, dynamic>{});
+                              }
+                              if (!mounted) return;
+                              await _save('vva_row_delete', {'p_kind': 'price', 'p_id': g.first['id']}, ok: tx(context, 'تَمّ الحَذف.', 'Deleted.'));
+                            }
+                          }),
+                        ]),
+                        const SizedBox(height: 8),
+                        Wrap(spacing: 8, runSpacing: 8, children: [
+                          for (final p in g)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(border: Border.all(color: VC.muted.withValues(alpha: .35)), borderRadius: BorderRadius.circular(8)),
+                              child: Text(
+                                '${vBand(context, vStr(p['start_time']), vStr(p['finish_time']))}  ·  ${VF.money(vNum(p['total']))} AED',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ),
+                        ]),
+                      ]),
+                    ),
+                  ),
+              ]),
+      ),
       Text(
-        tx(context, 'الأَسعار بِالسّاعة: صَفّ لِكُلّ فَترة، مَثَلاً 0:00 ← 1:00 = 20، 1:00 ← 3:00 = 30، 3:00 ← Infinity = 10 لِكُلّ ساعة إضافيّة.',
-            'Hourly prices: one row per band, e.g. 0:00 → 1:00 = 20, 1:00 → 3:00 = 30, 3:00 → Infinity = 10 for every extra hour.'),
+        tx(context,
+            'سِعر النُقطة ("الكُلّ") هو الذي يَظهَر عِند دُخول السَيّارة، وَبَعد الفاليديشن يَتَحَوَّل السِعر إلى سِعر العَميل (ثابِت أَو جَدوَل بِالسّاعة). '
+                'جَدوَل بِالسّاعة = فَترات: 0:00 ← 1:00 = 20، 1:00 ← 3:00 = 30، 3:00 ← ∞ = 10 لِكُلّ ساعة إضافيّة. '
+                'اختَر أَيّام الأُسبوع لِجَدوَل خاصّ (مَثَلاً السَبت وَالأَحَد)؛ جَدوَل الأَيّام المُحَدَّدة يَغلِب جَدوَل "كُلّ الأَيّام" بِنَفس الاسم، وَاليَوم يُحسَب مِن وَقت دُخول السَيّارة.',
+            'The point price ("All") applies when the car comes in; after a client validation the price becomes that client\'s price (fixed or hourly table). '
+                'Hourly table = bands: 0:00 → 1:00 = 20, 1:00 → 3:00 = 30, 3:00 → ∞ = 10 per extra hour. '
+                'Pick days of the week for a special table (e.g. Saturday and Sunday); a table for given days wins over the "every day" table of the same name, and the day is the entry day of the car.'),
         style: const TextStyle(color: VC.muted),
       ),
     ]);
@@ -335,10 +418,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final vatRate = vNum(vMap(d['settings'])['vat_rate']) == 0 ? 0.05 : vNum(vMap(d['settings'])['vat_rate']);
     final name = TextEditingController(text: vStr(p?['ticket_name']));
     final total = TextEditingController(text: p == null ? '' : vNum(p['total']).toString());
-    final start = TextEditingController(text: vStr(p?['start_time']).isEmpty ? '0:00' : vStr(p?['start_time']));
-    final finish = TextEditingController(text: vStr(p?['finish_time']).isEmpty ? 'Infinity' : vStr(p?['finish_time']));
     final notes = TextEditingController(text: vStr(p?['notes']));
-    String mode = vStr(p?['ticket_mode']).isEmpty ? 'TICKET' : vStr(p?['ticket_mode']);
     String? site = p?['site_id'] as String?;
     bool active = p == null ? true : vBool(p['is_active']);
     final clients = vList(d['clients']);
@@ -348,40 +428,14 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         final t = num.tryParse(total.text) ?? 0;
         final price = t / (1 + vatRate);
         return AlertDialog(
-          title: Text(p == null ? tx(ctx, 'إضافة سِعر', 'Add price') : tx(ctx, 'تَعديل السِعر', 'Edit price')),
+          title: Text(p == null ? tx(ctx, 'سِعر ثابِت جَديد', 'New fixed price') : tx(ctx, 'تَعديل السِعر', 'Edit price')),
           content: SizedBox(
             width: 460,
             child: SingleChildScrollView(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                DropdownButtonFormField<String?>(
-                  value: site,
-                  isExpanded: true,
-                  decoration: InputDecoration(labelText: tx(ctx, 'لِمَن', 'For')),
-                  items: [
-                    DropdownMenuItem(value: null, child: Text(tx(ctx, 'كُلّ العُمَلاء (سِعر النُقطة)', 'All customers (point price)'))),
-                    for (final c in clients) DropdownMenuItem(value: vStr(c['id']), child: Text(vStr(c['name']))),
-                  ],
-                  onChanged: (v) => set(() => site = v),
-                ),
+                _forField(ctx, clients, site, (v) => set(() => site = v)),
                 const SizedBox(height: 12),
                 TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'اسم التَذكَرة *', 'Ticket name *'), hintText: 'VALET 50 AED')),
-                const SizedBox(height: 12),
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(value: 'TICKET', label: Text(tx(ctx, 'سِعر ثابِت', 'Fixed price'))),
-                    ButtonSegment(value: 'HOURLY', label: Text(tx(ctx, 'بِالسّاعة', 'Per hour'))),
-                  ],
-                  selected: {mode},
-                  onSelectionChanged: (v) => set(() => mode = v.first),
-                ),
-                if (mode == 'HOURLY') ...[
-                  const SizedBox(height: 12),
-                  Row(children: [
-                    Expanded(child: TextField(controller: start, decoration: InputDecoration(labelText: tx(ctx, 'مِن ساعة', 'From hour')))),
-                    const SizedBox(width: 12),
-                    Expanded(child: TextField(controller: finish, decoration: InputDecoration(labelText: tx(ctx, 'إلى ساعة', 'To hour')))),
-                  ]),
-                ],
                 const SizedBox(height: 12),
                 TextField(
                   controller: total,
@@ -415,15 +469,173 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                     'point_id': widget.pointId,
                     'site_id': site ?? '',
                     'ticket_name': name.text.trim(),
-                    'ticket_mode': mode,
-                    'start_time': mode == 'HOURLY' ? start.text.trim() : '0:00',
-                    'finish_time': mode == 'HOURLY' ? finish.text.trim() : 'Infinity',
+                    'ticket_mode': 'TICKET',
+                    'start_time': '0:00',
+                    'finish_time': 'Infinity',
                     'payment_mode': vStr(p?['payment_mode']).isEmpty ? 'BASE_ONCE' : vStr(p?['payment_mode']),
                     'price': pr,
                     'tax': double.parse((tt - pr).toStringAsFixed(2)),
                     'total': tt,
                     'is_active': active,
                     'notes': notes.text.trim(),
+                  },
+                });
+              },
+              child: Text(tx(ctx, 'حِفظ', 'Save')),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _forField(BuildContext ctx, List<VJson> clients, String? site, ValueChanged<String?> onChanged) => DropdownButtonFormField<String?>(
+        value: site,
+        isExpanded: true,
+        decoration: InputDecoration(labelText: tx(ctx, 'لِمَن', 'For')),
+        items: [
+          DropdownMenuItem(value: null, child: Text(tx(ctx, 'كُلّ العُمَلاء (سِعر النُقطة)', 'All customers (point price)'))),
+          for (final c in clients) DropdownMenuItem(value: vStr(c['id']), child: Text(vStr(c['name']))),
+        ],
+        onChanged: onChanged,
+      );
+
+  /// Editor of a whole hourly table (all its bands) + its days of the week.
+  Future<void> _hourlyDialog(VJson d, List<VJson>? g) async {
+    final vatRate = vNum(vMap(d['settings'])['vat_rate']) == 0 ? 0.05 : vNum(vMap(d['settings'])['vat_rate']);
+    final first = g?.first;
+    final name = TextEditingController(text: first == null ? 'HOURLY' : vStr(first['ticket_name']));
+    final notes = TextEditingController(text: vStr(first?['notes']));
+    String? site = first?['site_id'] as String?;
+    bool active = first == null ? true : vBool(first['is_active']);
+    final days = {...vDays(first?['days'])};
+    final bands = <(TextEditingController, TextEditingController, TextEditingController)>[
+      for (final p in g ?? const <VJson>[])
+        (TextEditingController(text: vStr(p['start_time'])), TextEditingController(text: vStr(p['finish_time'])),
+            TextEditingController(text: vNum(p['total']).toString())),
+    ];
+    if (bands.isEmpty) {
+      bands.add((TextEditingController(text: '0:00'), TextEditingController(text: '1:00'), TextEditingController()));
+      bands.add((TextEditingController(text: '1:00'), TextEditingController(text: 'Infinity'), TextEditingController()));
+    }
+    final clients = vList(d['clients']);
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
+        return AlertDialog(
+          title: Text(g == null ? tx(ctx, 'جَدوَل بِالسّاعة جَديد', 'New hourly table') : tx(ctx, 'تَعديل جَدوَل بِالسّاعة', 'Edit hourly table')),
+          content: SizedBox(
+            width: 560,
+            child: SingleChildScrollView(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                _forField(ctx, clients, site, (v) => set(() => site = v)),
+                const SizedBox(height: 12),
+                TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'اسم التَذكَرة *', 'Ticket name *'), hintText: 'HOURLY')),
+                const SizedBox(height: 14),
+                Text(tx(ctx, 'أَيّام الأُسبوع', 'Days of the week'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  ChoiceChip(
+                    label: Text(tx(ctx, 'كُلّ الأَيّام', 'Every day')),
+                    selected: days.isEmpty,
+                    onSelected: (_) => set(days.clear),
+                  ),
+                  for (final dd in const [6, 7, 1, 2, 3, 4, 5])
+                    FilterChip(
+                      label: Text(vDayName(ctx, dd)),
+                      selected: days.contains(dd),
+                      onSelected: (v) => set(() {
+                        v ? days.add(dd) : days.remove(dd);
+                        if (days.length == 7) days.clear();
+                      }),
+                    ),
+                ]),
+                const SizedBox(height: 14),
+                Row(children: [
+                  Expanded(child: Text(tx(ctx, 'الفَترات (المُدّة مِن دُخول السَيّارة)', 'Bands (time since the car came in)'), style: const TextStyle(fontWeight: FontWeight.w600))),
+                  TextButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: Text(tx(ctx, 'فَترة', 'Band')),
+                    onPressed: () => set(() {
+                      final last = bands.last;
+                      final from = last.$2.text.trim().toLowerCase().startsWith('inf') ? '' : last.$2.text.trim();
+                      bands.add((TextEditingController(text: from), TextEditingController(text: 'Infinity'), TextEditingController()));
+                    }),
+                  ),
+                ]),
+                for (var i = 0; i < bands.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(children: [
+                      Expanded(child: TextField(controller: bands[i].$1, decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'مِن', 'From'), hintText: '0:00'))),
+                      const SizedBox(width: 8),
+                      Expanded(child: TextField(controller: bands[i].$2, decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'إلى', 'To'), hintText: 'Infinity'))),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: bands[i].$3,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'الإجماليّ AED', 'Total AED')),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: tx(ctx, 'حَذف', 'Remove'),
+                        icon: const Icon(Icons.close, color: VC.bad),
+                        onPressed: bands.length == 1 ? null : () => set(() => bands.removeAt(i)),
+                      ),
+                    ]),
+                  ),
+                const SizedBox(height: 6),
+                Text(
+                  tx(ctx, 'الوَقت بِصيغة ساعات:دَقائِق، وَ Infinity لِلفَترة المَفتوحة (تُحسَب لِكُلّ ساعة إضافيّة). الإجماليّ شامِل الضَريبة.',
+                      'Time as hours:minutes, Infinity for the open band (charged per extra hour). Totals include VAT.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12),
+                ),
+                const SizedBox(height: 8),
+                TextField(controller: notes, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظات', 'Notes'))),
+                SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(tx(ctx, 'فَعّال', 'Active')), value: active, onChanged: (v) => set(() => active = v)),
+              ]),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+            FilledButton(
+              onPressed: () async {
+                final rx = RegExp(r'^\d{1,3}(:\d{1,2})?$');
+                final out = <Map<String, dynamic>>[];
+                for (final b in bands) {
+                  final from = b.$1.text.trim().isEmpty ? '0:00' : b.$1.text.trim();
+                  final to = b.$2.text.trim().isEmpty ? 'Infinity' : b.$2.text.trim();
+                  final tt = num.tryParse(b.$3.text.trim());
+                  final toOk = to.toLowerCase().startsWith('inf') || rx.hasMatch(to);
+                  if (!rx.hasMatch(from) || !toOk || tt == null) {
+                    vToast(ctx, tx(ctx, 'راجِع الفَترات: الوَقت مِثل 1:30 وَالإجماليّ رَقَم.', 'Check the bands: time like 1:30 and a number for the total.'), error: true);
+                    return;
+                  }
+                  final pr = double.parse((tt / (1 + vatRate)).toStringAsFixed(2));
+                  out.add({
+                    'start_time': from,
+                    'finish_time': to.toLowerCase().startsWith('inf') ? 'Infinity' : to,
+                    'price': pr,
+                    'tax': double.parse((tt - pr).toStringAsFixed(2)),
+                    'total': tt,
+                  });
+                }
+                if (name.text.trim().isEmpty) {
+                  vToast(ctx, tx(ctx, 'أَدخِل اسم التَذكَرة.', 'Enter the ticket name.'), error: true);
+                  return;
+                }
+                Navigator.pop(ctx);
+                await _save('vva_price_table_save', {
+                  'p_data': {
+                    'point_id': widget.pointId,
+                    'site_id': site ?? '',
+                    'ticket_name': name.text.trim(),
+                    'days': (days.toList()..sort()),
+                    'is_active': active,
+                    'notes': notes.text.trim(),
+                    'old_ids': [for (final p in g ?? const <VJson>[]) p['id']],
+                    'bands': out,
                   },
                 });
               },

@@ -530,3 +530,39 @@ Future<void> vExport(BuildContext context, String fileName, List<ExcelSheet> she
   final ok = await ExcelExporter.export(fileName: fileName, sheets: sheets);
   if (context.mounted && !ok) vToast(context, tx(context, 'تَعَذَّر التَصدير.', 'Export failed.'), error: true);
 }
+
+
+// ---------------------------------------------------------------- days of the week (hourly tables)
+/// ISO days (1 = Monday … 7 = Sunday) of a `valet_prices.days` value; empty = every day.
+List<int> vDays(dynamic v) =>
+    (v is List ? v : const []).map((e) => int.tryParse('$e') ?? 0).where((d) => d >= 1 && d <= 7).toList()..sort();
+
+String vDayName(BuildContext c, int d) {
+  const ar = ['الإثنَين', 'الثُلاثاء', 'الأَربِعاء', 'الخَميس', 'الجُمُعة', 'السَبت', 'الأَحَد'];
+  const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  return tx(c, ar[d - 1], en[d - 1]);
+}
+
+String vDaysLabel(BuildContext c, dynamic v) {
+  final d = vDays(v);
+  if (d.isEmpty) return tx(c, 'كُلّ الأَيّام', 'Every day');
+  // show Saturday first (UAE week)
+  final order = [6, 7, 1, 2, 3, 4, 5];
+  return order.where(d.contains).map((x) => vDayName(c, x)).join(tx(c, '، ', ', '));
+}
+
+/// Minutes of a `H:MM` duration (Infinity = very large).
+int vMinutes(String s) {
+  final t = s.trim();
+  if (t.isEmpty) return 0;
+  if (t.toLowerCase().startsWith('inf')) return 1 << 30;
+  final p = t.split(':');
+  return (int.tryParse(p[0]) ?? 0) * 60 + (p.length > 1 ? int.tryParse(p[1]) ?? 0 : 0);
+}
+
+String vBand(BuildContext c, String from, String to) {
+  final open = to.trim().isEmpty || to.toLowerCase().startsWith('inf');
+  return open
+      ? tx(c, 'مِن $from فَما فَوق (لِكُلّ ساعة)', '$from+ (per hour)')
+      : tx(c, 'مِن $from إلى $to', '$from → $to');
+}

@@ -424,7 +424,9 @@ class _ValetClientDetailScreenState extends State<ValetClientDetailScreen> {
                     DataRow(cells: [
                       DataCell(Text(vStr(p['point_name']))),
                       DataCell(Text(vStr(p['ticket_name']))),
-                      DataCell(Text(vStr(p['ticket_mode']))),
+                      DataCell(Text(p['ticket_mode'] == 'HOURLY'
+                          ? '${tx(context, 'بِالسّاعة', 'Hourly')} · ${vBand(context, vStr(p['start_time']), vStr(p['finish_time']))} · ${vDaysLabel(context, p['days'])}'
+                          : tx(context, 'ثابِت', 'Fixed'))),
                       DataCell(Text(VF.money(vNum(p['total'])))),
                       DataCell(vBool(p['is_active']) ? VPill(tx(context, 'فَعّال', 'Active'), color: VC.ok) : VPill(tx(context, 'مُتَوَقِّف', 'Off'))),
                     ]),
