@@ -322,6 +322,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           columns: [
             DataColumn(label: Text(tx(context, 'لِمَن', 'For'))),
             DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
+            DataColumn(label: Text(tx(context, 'الأَيّام', 'Days'))),
             DataColumn(label: Text(tx(context, 'السِعر', 'Price')), numeric: true),
             DataColumn(label: Text(tx(context, 'الضَريبة', 'VAT')), numeric: true),
             DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
@@ -333,6 +334,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               DataRow(cells: [
                 DataCell(Text(forWhom(p))),
                 DataCell(Text(vStr(p['ticket_name']), style: const TextStyle(fontWeight: FontWeight.w600))),
+                DataCell(Text(vDaysLabel(context, p['days']), style: TextStyle(color: vDays(p['days']).isEmpty ? VC.muted : VC.warn))),
                 DataCell(Text(VF.money(vNum(p['price'])))),
                 DataCell(Text(VF.money(vNum(p['tax'])))),
                 DataCell(Text(VF.money(vNum(p['total'])), style: const TextStyle(fontWeight: FontWeight.w700))),
@@ -421,6 +423,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final notes = TextEditingController(text: vStr(p?['notes']));
     String? site = p?['site_id'] as String?;
     bool active = p == null ? true : vBool(p['is_active']);
+    final days = {...vDays(p?['days'])};
     final clients = vList(d['clients']);
     await showDialog(
       context: context,
@@ -442,10 +445,12 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
                     labelText: tx(ctx, 'الإجماليّ شامِل الضَريبة (AED) *', 'Total incl. VAT (AED) *'),
-                    helperText: '${VF.money(price)} + VAT ${VF.money(t - price)}',
+                    helperText: tx(ctx, '${VF.money(price)} + VAT ${VF.money(t - price)} — 0 = مَجّاني', '${VF.money(price)} + VAT ${VF.money(t - price)} — 0 = free'),
                   ),
                   onChanged: (_) => set(() {}),
                 ),
+                const SizedBox(height: 12),
+                _daysPicker(ctx, days, set),
                 const SizedBox(height: 12),
                 TextField(controller: notes, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظات', 'Notes'))),
                 SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(tx(ctx, 'فَعّال', 'Active')), value: active, onChanged: (v) => set(() => active = v)),
@@ -470,6 +475,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                     'site_id': site ?? '',
                     'ticket_name': name.text.trim(),
                     'ticket_mode': 'TICKET',
+                    'days': (days.toList()..sort()),
                     'start_time': '0:00',
                     'finish_time': 'Infinity',
                     'payment_mode': vStr(p?['payment_mode']).isEmpty ? 'BASE_ONCE' : vStr(p?['payment_mode']),
@@ -499,6 +505,65 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ],
         onChanged: onChanged,
       );
+
+  Widget _daysPicker(BuildContext ctx, Set<int> days, StateSetter set) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(tx(ctx, 'أَيّام الأُسبوع', 'Days of the week'), style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            ChoiceChip(label: Text(tx(ctx, 'كُلّ الأَيّام', 'Every day')), selected: days.isEmpty, onSelected: (_) => set(days.clear)),
+            for (final dd in const [6, 7, 1, 2, 3, 4, 5])
+              FilterChip(
+                label: Text(vDayName(ctx, dd)),
+                selected: days.contains(dd),
+                onSelected: (v) => set(() {
+                  v ? days.add(dd) : days.remove(dd);
+                  if (days.length == 7) days.clear();
+                }),
+              ),
+          ]),
+        ],
+      );
+
+  /// What the car pays after 1 … 10 hours with the bands being edited (same rule as the valet app).
+  Widget _hourlyPreview(BuildContext ctx, List<(TextEditingController, TextEditingController, TextEditingController)> bands) {
+    final slabs = [
+      for (final b in bands)
+        (vMinutes(b.$1.text.isEmpty ? '0:00' : b.$1.text), b.$2.text.trim().isEmpty || b.$2.text.toLowerCase().startsWith('inf') ? null : vMinutes(b.$2.text),
+            num.tryParse(b.$3.text.trim()) ?? 0),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+    num at(int minutes) {
+      if (slabs.isEmpty) return 0;
+      for (final s in slabs) {
+        if (minutes >= s.$1 && (s.$2 == null || minutes < s.$2!)) {
+          if (s.$2 != null) return s.$3;
+          final finite = slabs.where((x) => x.$2 != null).map((x) => x.$3);
+          final base = finite.isEmpty ? 0 : finite.reduce((a, b) => a > b ? a : b);
+          final extra = ((minutes - s.$1) / 60).ceil().clamp(1, 100000);
+          return base + s.$3 * extra;
+        }
+      }
+      if (minutes < slabs.first.$1) return slabs.first.$3;
+      return slabs.where((x) => x.$2 != null).fold<num>(0, (a, x) => x.$3 > a ? x.$3 : a);
+    }
+
+    final hours = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 24];
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(color: VC.gold.withValues(alpha: .08), borderRadius: BorderRadius.circular(8)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(tx(ctx, 'مُعايَنة: ما يَدفَعه العَميل (شامِل الضَريبة)', 'Preview: what the customer pays (incl. VAT)'),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 10, runSpacing: 4, children: [
+          for (final h in hours)
+            Text('${tx(ctx, '$h س', '${h}h')} = ${VF.money(at(h * 60 - 1))}', style: const TextStyle(fontSize: 12)),
+        ]),
+      ]),
+    );
+  }
 
   /// Editor of a whole hourly table (all its bands) + its days of the week.
   Future<void> _hourlyDialog(VJson d, List<VJson>? g) async {
@@ -532,24 +597,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 const SizedBox(height: 12),
                 TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'اسم التَذكَرة *', 'Ticket name *'), hintText: 'HOURLY')),
                 const SizedBox(height: 14),
-                Text(tx(ctx, 'أَيّام الأُسبوع', 'Days of the week'), style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                Wrap(spacing: 6, runSpacing: 6, children: [
-                  ChoiceChip(
-                    label: Text(tx(ctx, 'كُلّ الأَيّام', 'Every day')),
-                    selected: days.isEmpty,
-                    onSelected: (_) => set(days.clear),
-                  ),
-                  for (final dd in const [6, 7, 1, 2, 3, 4, 5])
-                    FilterChip(
-                      label: Text(vDayName(ctx, dd)),
-                      selected: days.contains(dd),
-                      onSelected: (v) => set(() {
-                        v ? days.add(dd) : days.remove(dd);
-                        if (days.length == 7) days.clear();
-                      }),
-                    ),
-                ]),
+                _daysPicker(ctx, days, set),
                 const SizedBox(height: 14),
                 Row(children: [
                   Expanded(child: Text(tx(ctx, 'الفَترات (المُدّة مِن دُخول السَيّارة)', 'Bands (time since the car came in)'), style: const TextStyle(fontWeight: FontWeight.w600))),
@@ -567,13 +615,14 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Row(children: [
-                      Expanded(child: TextField(controller: bands[i].$1, decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'مِن', 'From'), hintText: '0:00'))),
+                      Expanded(child: TextField(controller: bands[i].$1, onChanged: (_) => set(() {}), decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'مِن', 'From'), hintText: '0:00'))),
                       const SizedBox(width: 8),
-                      Expanded(child: TextField(controller: bands[i].$2, decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'إلى', 'To'), hintText: 'Infinity'))),
+                      Expanded(child: TextField(controller: bands[i].$2, onChanged: (_) => set(() {}), decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'إلى', 'To'), hintText: 'Infinity'))),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           controller: bands[i].$3,
+                          onChanged: (_) => set(() {}),
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'الإجماليّ AED', 'Total AED')),
                         ),
@@ -587,10 +636,15 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                   ),
                 const SizedBox(height: 6),
                 Text(
-                  tx(ctx, 'الوَقت بِصيغة ساعات:دَقائِق، وَ Infinity لِلفَترة المَفتوحة (تُحسَب لِكُلّ ساعة إضافيّة). الإجماليّ شامِل الضَريبة.',
-                      'Time as hours:minutes, Infinity for the open band (charged per extra hour). Totals include VAT.'),
+                  tx(ctx,
+                      'الإجماليّ = ما يَدفَعه العَميل إذا خَرَج داخِل هذه الفَترة (مَبلَغ تَراكُميّ شامِل الضَريبة). '
+                          'مِثال: 0:00←4:00 = 10، 4:00←5:00 = 30 (10+20)، 5:00←6:00 = 35 (30+5)، 6:00←Infinity = 10 لِكُلّ ساعة إضافيّة. الوَقت ساعات:دَقائِق.',
+                      'Total = what the customer pays when leaving within this band (cumulative, incl. VAT). '
+                          'E.g. 0:00→4:00 = 10, 4:00→5:00 = 30 (10+20), 5:00→6:00 = 35 (30+5), 6:00→Infinity = 10 per extra hour. Time as hours:minutes.'),
                   style: const TextStyle(color: VC.muted, fontSize: 12),
                 ),
+                const SizedBox(height: 8),
+                _hourlyPreview(ctx, bands),
                 const SizedBox(height: 8),
                 TextField(controller: notes, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظات', 'Notes'))),
                 SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(tx(ctx, 'فَعّال', 'Active')), value: active, onChanged: (v) => set(() => active = v)),
