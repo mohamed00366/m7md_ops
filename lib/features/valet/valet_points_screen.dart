@@ -436,7 +436,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
   Future<void> _priceDialog(VJson d, VJson? p) async {
     final vatRate = vNum(vMap(d['settings'])['vat_rate']) == 0 ? 0.05 : vNum(vMap(d['settings'])['vat_rate']);
     final name = TextEditingController(text: vStr(p?['ticket_name']));
-    final total = TextEditingController(text: p == null ? '' : vNum(p['total']).toString());
+    bool incl = p == null ? true : (p['vat_included'] as bool? ?? true);
+    final total = TextEditingController(text: p == null ? '' : vNum(incl ? p['total'] : p['price']).toString());
     final notes = TextEditingController(text: vStr(p?['notes']));
     String? site = p?['site_id'] as String?;
     bool active = p == null ? true : vBool(p['is_active']);
@@ -445,8 +446,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     await showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
-        final t = num.tryParse(total.text) ?? 0;
-        final price = t / (1 + vatRate);
+        final a = num.tryParse(total.text) ?? 0;
+        final (price, t) = vSplitVat(a, vatRate, incl);
         return AlertDialog(
           title: Text(p == null ? tx(ctx, 'سِعر ثابِت جَديد', 'New fixed price') : tx(ctx, 'تَعديل السِعر', 'Edit price')),
           content: SizedBox(
@@ -457,12 +458,15 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 const SizedBox(height: 12),
                 TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'اسم التَذكَرة *', 'Ticket name *'), hintText: 'VALET 50 AED')),
                 const SizedBox(height: 12),
+                vVatToggle(ctx, incl, vatRate, (v) => set(() => incl = v)),
+                const SizedBox(height: 10),
                 TextField(
                   controller: total,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
-                    labelText: tx(ctx, 'الإجماليّ شامِل الضَريبة (AED) *', 'Total incl. VAT (AED) *'),
-                    helperText: tx(ctx, '${VF.money(price)} + VAT ${VF.money(t - price)} — 0 = مَجّاني', '${VF.money(price)} + VAT ${VF.money(t - price)} — 0 = free'),
+                    labelText: incl ? tx(ctx, 'المَبلَغ شامِل الضَريبة (AED) *', 'Amount incl. VAT (AED) *') : tx(ctx, 'المَبلَغ بِدون ضَريبة (AED) *', 'Net amount (AED) *'),
+                    helperText: tx(ctx, '${VF.money(price)} + ضَريبة ${VF.money(t - price)} = ${VF.money(t)} — 0 = مَجّاني',
+                        '${VF.money(price)} + VAT ${VF.money(t - price)} = ${VF.money(t)} — 0 = free'),
                   ),
                   onChanged: (_) => set(() {}),
                 ),
@@ -478,12 +482,12 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
             FilledButton(
               onPressed: () async {
-                final tt = num.tryParse(total.text);
-                if (name.text.trim().isEmpty || tt == null) {
-                  vToast(ctx, tx(ctx, 'أَدخِل الاسم وَالإجماليّ.', 'Enter the name and the total.'), error: true);
+                final amount = num.tryParse(total.text);
+                if (name.text.trim().isEmpty || amount == null) {
+                  vToast(ctx, tx(ctx, 'أَدخِل الاسم وَالمَبلَغ.', 'Enter the name and the amount.'), error: true);
                   return;
                 }
-                final pr = double.parse((tt / (1 + vatRate)).toStringAsFixed(2));
+                final (pr, tt) = vSplitVat(amount, vatRate, incl);
                 Navigator.pop(ctx);
                 await _save('vva_price_save', {
                   'p_data': {
@@ -499,6 +503,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                     'price': pr,
                     'tax': double.parse((tt - pr).toStringAsFixed(2)),
                     'total': tt,
+                    'vat_included': incl,
                     'is_active': active,
                     'notes': notes.text.trim(),
                   },
@@ -571,12 +576,13 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     String? site = first?['site_id'] as String?;
     bool active = first == null ? true : vBool(first['is_active']);
     final days = {...vDays(first?['days'])};
+    bool incl = first == null ? true : (first['vat_included'] as bool? ?? true);
     final loaded = slabsToBands([
       for (final p in g ?? const <VJson>[])
         PriceSlab(
           vMinutes(vStr(p['start_time'])),
           vStr(p['finish_time']).isEmpty || vStr(p['finish_time']).toLowerCase().startsWith('inf') ? null : vMinutes(vStr(p['finish_time'])),
-          vNum(p['total']),
+          vNum(incl ? p['total'] : p['price']),
         ),
     ]);
     // one editable row per band: (to, amount, per hour?)
@@ -634,6 +640,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 const SizedBox(height: 14),
                 _daysPicker(ctx, days, set),
                 const SizedBox(height: 14),
+                vVatToggle(ctx, incl, vatRate, (v) => set(() => incl = v)),
+                const SizedBox(height: 14),
                 Row(children: [
                   Expanded(
                     child: Text(tx(ctx, 'الفَترات — بِالسّاعات مِن دُخول السَيّارة', 'Bands — hours since the car came in'),
@@ -687,7 +695,9 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                             controller: rows[i].$2,
                             onChanged: (_) => set(() {}),
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'المَبلَغ AED', 'Amount AED')),
+                            decoration: InputDecoration(
+                                isDense: true,
+                                labelText: incl ? tx(ctx, 'المَبلَغ شامِل', 'Amount incl.') : tx(ctx, 'المَبلَغ بِدون ضَريبة', 'Net amount')),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -736,7 +746,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 ),
                 if (err != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(err, style: const TextStyle(color: VC.bad))),
                 const SizedBox(height: 8),
-                _hourlyPreview(ctx, slabs),
+                _hourlyPreview(ctx, incl ? slabs : [for (final x in slabs) PriceSlab(x.from, x.to, vSplitVat(x.total, vatRate, false).$2)]),
                 const SizedBox(height: 8),
                 TextField(controller: notes, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظات', 'Notes'))),
                 SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(tx(ctx, 'فَعّال', 'Active')), value: active, onChanged: (v) => set(() => active = v)),
@@ -759,13 +769,13 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 final out = [
                   for (final s in bandsToSlabs(bands))
                     () {
-                      final pr = double.parse((s.total / (1 + vatRate)).toStringAsFixed(2));
+                      final (pr, tt) = vSplitVat(s.total, vatRate, incl);
                       return {
                         'start_time': slabTime(s.from),
                         'finish_time': s.to == null ? 'Infinity' : slabTime(s.to!),
                         'price': pr,
-                        'tax': double.parse((s.total - pr).toStringAsFixed(2)),
-                        'total': s.total,
+                        'tax': double.parse((tt - pr).toStringAsFixed(2)),
+                        'total': tt,
                       };
                     }(),
                 ];
@@ -776,6 +786,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                     'site_id': site ?? '',
                     'ticket_name': name.text.trim(),
                     'days': (days.toList()..sort()),
+                    'vat_included': incl,
                     'is_active': active,
                     'notes': notes.text.trim(),
                     'old_ids': [for (final p in g ?? const <VJson>[]) p['id']],

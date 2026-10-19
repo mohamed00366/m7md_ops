@@ -566,3 +566,28 @@ String vBand(BuildContext c, String from, String to) {
       ? tx(c, 'مِن $from فَما فَوق (لِكُلّ ساعة)', '$from+ (per hour)')
       : tx(c, 'مِن $from إلى $to', '$from → $to');
 }
+
+
+// ---------------------------------------------------------------- VAT entry mode
+/// (net, total) of an [amount] typed with VAT included ([included]) or without (VAT added).
+(double, double) vSplitVat(num amount, num vatRate, bool included) {
+  double r2(num v) => double.parse(v.toStringAsFixed(2));
+  return included ? (r2(amount / (1 + vatRate)), r2(amount)) : (r2(amount), r2(amount * (1 + vatRate)));
+}
+
+/// "Amount includes VAT" / "VAT is added to the amount".
+Widget vVatToggle(BuildContext c, bool included, num vatRate, ValueChanged<bool> onChanged) {
+  final pct = (vatRate * 100).toStringAsFixed(vatRate * 100 % 1 == 0 ? 0 : 1);
+  return Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+    Text(tx(c, 'الضَريبة ($pct%)', 'VAT ($pct%)'), style: const TextStyle(fontWeight: FontWeight.w600)),
+    const SizedBox(height: 6),
+    SegmentedButton<bool>(
+      segments: [
+        ButtonSegment(value: true, label: Text(tx(c, 'المَبلَغ شامِل الضَريبة', 'Amount includes VAT'))),
+        ButtonSegment(value: false, label: Text(tx(c, 'بِدون ضَريبة (تُضاف)', 'Net (VAT added)'))),
+      ],
+      selected: {included},
+      onSelectionChanged: (v) => onChanged(v.first),
+    ),
+  ]);
+}
