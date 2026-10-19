@@ -814,6 +814,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           columns: [
             DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
             DataColumn(label: Text(tx(context, 'السِعر', 'Price')), numeric: true),
+            DataColumn(label: Text(tx(context, 'الضَريبة', 'VAT')), numeric: true),
+            DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
             DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
             const DataColumn(label: Text('')),
           ],
@@ -822,6 +824,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               DataRow(cells: [
                 DataCell(Text(vStr(v['ticket_name']))),
                 DataCell(Text(VF.money(vNum(v['ticket_price'])))),
+                DataCell(Text(VF.money(vSplitVat(vNum(v['ticket_price']), _vat(d), false).$2 - vNum(v['ticket_price'])))),
+                DataCell(Text(VF.money(vSplitVat(vNum(v['ticket_price']), _vat(d), false).$2), style: const TextStyle(fontWeight: FontWeight.w700))),
                 DataCell(vBool(v['is_active']) ? VPill(tx(context, 'فَعّال', 'Active'), color: VC.ok) : VPill(tx(context, 'مُتَوَقِّف', 'Off'))),
                 DataCell(_rowActions('vip_price', v, vipFields)),
               ]),
@@ -835,6 +839,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           columns: [
             DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
             DataColumn(label: Text(tx(context, 'السِعر', 'Price')), numeric: true),
+            DataColumn(label: Text(tx(context, 'الضَريبة', 'VAT')), numeric: true),
+            DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
             const DataColumn(label: Text('')),
           ],
           rows: [
@@ -842,6 +848,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               DataRow(cells: [
                 DataCell(Text(vStr(m['name']))),
                 DataCell(Text(VF.money(vNum(m['price'])))),
+                DataCell(Text(VF.money(vSplitVat(vNum(m['price']), _vat(d), false).$2 - vNum(m['price'])))),
+                DataCell(Text(VF.money(vSplitVat(vNum(m['price']), _vat(d), false).$2), style: const TextStyle(fontWeight: FontWeight.w700))),
                 DataCell(_rowActions('member_plan', m, planFields)),
               ]),
           ],
@@ -1001,7 +1009,77 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     ]);
   }
 
+  num _vat(VJson d) => vNum(vMap(d['settings'])['vat_rate']) == 0 ? 0.05 : vNum(vMap(d['settings'])['vat_rate']);
+
+  /// VIP price / membership plan: name + amount typed with VAT included or added (stored NET).
+  Future<void> _netPriceDialog(String kind, VJson? row) async {
+    final d = _d;
+    if (d == null) return;
+    final vatRate = _vat(d);
+    final nameKey = kind == 'vip_price' ? 'ticket_name' : 'name';
+    final priceKey = kind == 'vip_price' ? 'ticket_price' : 'price';
+    bool incl = row == null ? true : (row['vat_included'] as bool? ?? false);
+    final net = vNum(row?[priceKey]);
+    final name = TextEditingController(text: vStr(row?[nameKey]));
+    final amount = TextEditingController(text: row == null ? '' : (incl ? vSplitVat(net, vatRate, false).$2 : net).toString());
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
+        final a = num.tryParse(amount.text) ?? 0;
+        final (pr, tt) = vSplitVat(a, vatRate, incl);
+        return AlertDialog(
+          title: Text(row == null
+              ? (kind == 'vip_price' ? tx(ctx, 'سِعر VIP جَديد', 'New VIP price') : tx(ctx, 'باقة عُضويّة جَديدة', 'New membership plan'))
+              : tx(ctx, 'تَعديل', 'Edit')),
+          content: SizedBox(
+            width: 440,
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'الاسم *', 'Name *'))),
+              const SizedBox(height: 12),
+              vVatToggle(ctx, incl, vatRate, (v) => set(() => incl = v)),
+              const SizedBox(height: 10),
+              TextField(
+                controller: amount,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (_) => set(() {}),
+                decoration: InputDecoration(
+                  labelText: incl ? tx(ctx, 'المَبلَغ شامِل الضَريبة (AED) *', 'Amount incl. VAT (AED) *') : tx(ctx, 'المَبلَغ بِدون ضَريبة (AED) *', 'Net amount (AED) *'),
+                  helperText: tx(ctx, '${VF.money(pr)} + ضَريبة ${VF.money(tt - pr)} = ${VF.money(tt)}${kind == 'member_plan' ? ' شَهريّاً' : ''}',
+                      '${VF.money(pr)} + VAT ${VF.money(tt - pr)} = ${VF.money(tt)}${kind == 'member_plan' ? ' per month' : ''}'),
+                ),
+              ),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+            FilledButton(
+              onPressed: () {
+                if (name.text.trim().isEmpty || num.tryParse(amount.text) == null) {
+                  vToast(ctx, tx(ctx, 'أَدخِل الاسم وَالمَبلَغ.', 'Enter the name and the amount.'), error: true);
+                  return;
+                }
+                Navigator.pop(ctx);
+                _save('vva_item_save', {
+                  'p_kind': kind,
+                  'p_data': {
+                    if (row != null) 'id': row['id'],
+                    'point_id': widget.pointId,
+                    nameKey: name.text.trim(),
+                    priceKey: pr,
+                    'vat_included': incl,
+                  },
+                });
+              },
+              child: Text(tx(ctx, 'حِفظ', 'Save')),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
   Future<void> _simple(String kind, VJson? row, List<(String, String, bool)> fields) async {
+    if (kind == 'vip_price' || kind == 'member_plan') return _netPriceDialog(kind, row);
     final ctrls = {for (final f in fields) f.$1: TextEditingController(text: row == null ? '' : vStr(row[f.$1]))};
     await showDialog(
       context: context,
