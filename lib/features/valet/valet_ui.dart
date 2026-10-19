@@ -591,3 +591,67 @@ Widget vVatToggle(BuildContext c, bool included, num vatRate, ValueChanged<bool>
     ),
   ]);
 }
+
+
+/// Amount field with its own VAT button: "incl. VAT" / "+ VAT"; shows the split under it.
+class VatAmountField extends StatelessWidget {
+  const VatAmountField({
+    super.key,
+    required this.controller,
+    required this.included,
+    required this.vatRate,
+    required this.onToggle,
+    this.onChanged,
+    this.label,
+    this.extra = '',
+    this.dense = false,
+  });
+  final TextEditingController controller;
+  final bool included;
+  final num vatRate;
+  final VoidCallback onToggle;
+  final VoidCallback? onChanged;
+  final String? label;
+  final String extra;
+  final bool dense;
+
+  @override
+  Widget build(BuildContext context) {
+    final a = num.tryParse(controller.text.trim()) ?? 0;
+    final (net, total) = vSplitVat(a, vatRate, included);
+    final pct = (vatRate * 100).toStringAsFixed(vatRate * 100 % 1 == 0 ? 0 : 1);
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      onChanged: (_) => onChanged?.call(),
+      decoration: InputDecoration(
+        isDense: dense,
+        labelText: label,
+        helperText: dense
+            ? tx(context, '= ${VF.money(total)} شامِل', '= ${VF.money(total)} incl.')
+            : tx(context, '${VF.money(net)} + ضَريبة $pct% ${VF.money(total - net)} = ${VF.money(total)}$extra',
+                '${VF.money(net)} + VAT $pct% ${VF.money(total - net)} = ${VF.money(total)}$extra'),
+        suffixIcon: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 6),
+          child: Tooltip(
+            message: tx(context, 'اضغَط لِلتَبديل بَين: المَبلَغ شامِل الضَريبة / الضَريبة تُضاف عَلَيه',
+                'Tap to switch: amount includes VAT / VAT is added on top'),
+            child: ActionChip(
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              avatar: Icon(included ? Icons.check_circle_outline : Icons.add_circle_outline, size: 16,
+                  color: included ? VC.ok : VC.warn),
+              label: Text(
+                  dense
+                      ? (included ? tx(context, 'شامِل', 'incl.') : '+$pct%')
+                      : (included ? tx(context, 'شامِل الضَريبة', 'incl. VAT') : tx(context, '+ ضَريبة $pct%', '+ VAT $pct%')),
+                  style: const TextStyle(fontSize: 12)),
+              onPressed: onToggle,
+            ),
+          ),
+        ),
+        suffixIconConstraints: const BoxConstraints(minHeight: 32),
+      ),
+    );
+  }
+}

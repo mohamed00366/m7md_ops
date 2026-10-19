@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/services/supabase_data_service.dart';
@@ -307,8 +308,33 @@ class _CountryEditorState extends State<_CountryEditor> {
   final _phoneCode = TextEditingController();
   final _currency = TextEditingController();
   final _flag = TextEditingController();
+  /// ضَريبة القيمة المُضافة % (countries.vat_rate) — تُطَبَّق عَلى كُلّ نِقاط الفاليه في الدَولة
+  final _vat = TextEditingController();
 
   bool get isEdit => widget.existing != null;
+
+  Future<void> _loadVat() async {
+    final c = widget.existing;
+    if (c == null || !SupabaseService().isReady) return;
+    try {
+      final r = await Supabase.instance.client.from('countries').select('vat_rate').eq('id', c.id).maybeSingle();
+      final v = r?['vat_rate'];
+      if (v != null && mounted) {
+        final pct = (num.parse('$v') * 100);
+        setState(() => _vat.text = pct % 1 == 0 ? pct.toInt().toString() : pct.toStringAsFixed(2));
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveVat(String code) async {
+    final t = _vat.text.trim();
+    if (t.isEmpty || !SupabaseService().isReady) return;
+    final v = num.tryParse(t);
+    if (v == null) return;
+    try {
+      await Supabase.instance.client.from('countries').update({'vat_rate': v / 100}).eq('code', code);
+    } catch (_) {}
+  }
 
   @override
   void initState() {
@@ -321,6 +347,7 @@ class _CountryEditorState extends State<_CountryEditor> {
       _phoneCode.text = c.phoneCode;
       _currency.text = c.currency;
       _flag.text = c.flagEmoji;
+      _loadVat();
     }
   }
 
@@ -332,6 +359,7 @@ class _CountryEditorState extends State<_CountryEditor> {
     _phoneCode.dispose();
     _currency.dispose();
     _flag.dispose();
+    _vat.dispose();
     super.dispose();
   }
 
@@ -405,6 +433,7 @@ class _CountryEditorState extends State<_CountryEditor> {
         repo.notifyListeners();
       }
     }
+    await _saveVat(code);
     if (!context.mounted) return;
     Navigator.pop(context);
   }
@@ -514,6 +543,13 @@ class _CountryEditorState extends State<_CountryEditor> {
                         ),
                       ),
                     ],
+                  ),
+                  _Field(
+                    label: s.isAr
+                        ? 'ضريبة القيمة المضافة % (لكل نقاط الفاليه في الدولة)'
+                        : 'VAT % (all valet points of the country)',
+                    controller: _vat,
+                    hint: '5',
                   ),
                   _Field(
                     label: s.isAr
