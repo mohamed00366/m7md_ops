@@ -22,6 +22,11 @@ class ValetAuditScreen extends StatelessWidget {
       'client_account': 'حِساب عَميل',
       'ticket_void': 'إلغاء تَذكَرة',
       'shift_force_close': 'إغلاق وَرديّة',
+      'price_table_save': 'جَدوَل أَسعار بِالسّاعة',
+      'parking_save': 'حِفظ مَوقِف',
+      'parking_link': 'رَبط مَوقِف بِنُقطة',
+      'parking_unlink': 'فَكّ رَبط مَوقِف',
+      'parking_delete': 'حَذف مَوقِف',
     };
     return tx(c, ar[a] ?? a.replaceAll('_', ' '), a.replaceAll('_', ' '));
   }

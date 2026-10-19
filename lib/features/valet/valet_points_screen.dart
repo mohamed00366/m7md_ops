@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'valet_admin.dart';
+import 'valet_hourly.dart';
+import 'valet_parking_screen.dart';
 import 'valet_ui.dart';
 
 /// 🏪 تَطبيق الفاليه — إعدادات كُلّ نُقطة: المَزايا، الأَسعار، VIP، العُضويّات،
@@ -388,12 +390,27 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                         ]),
                         const SizedBox(height: 8),
                         Wrap(spacing: 8, runSpacing: 8, children: [
-                          for (final p in g)
+                          for (final b in slabsToBands([
+                            for (final p in g)
+                              PriceSlab(
+                                vMinutes(vStr(p['start_time'])),
+                                vStr(p['finish_time']).isEmpty || vStr(p['finish_time']).toLowerCase().startsWith('inf')
+                                    ? null
+                                    : vMinutes(vStr(p['finish_time'])),
+                                vNum(p['total']),
+                              ),
+                          ]))
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(border: Border.all(color: VC.muted.withValues(alpha: .35)), borderRadius: BorderRadius.circular(8)),
                               child: Text(
-                                '${vBand(context, vStr(p['start_time']), vStr(p['finish_time']))}  ·  ${VF.money(vNum(p['total']))} AED',
+                                b.to == null
+                                    ? tx(context, 'بَعد ${fmtMinutes(b.from)} س: ${VF.money(b.amount)} لِكُلّ ساعة', 'After ${fmtMinutes(b.from)} h: ${VF.money(b.amount)} per hour')
+                                    : b.hourly
+                                        ? tx(context, 'مِن ${fmtMinutes(b.from)} إلى ${fmtMinutes(b.to!)} س: ${VF.money(b.amount)} لِكُلّ ساعة',
+                                            '${fmtMinutes(b.from)}–${fmtMinutes(b.to!)} h: ${VF.money(b.amount)} per hour')
+                                        : tx(context, 'مِن ${fmtMinutes(b.from)} إلى ${fmtMinutes(b.to!)} س: +${VF.money(b.amount)}',
+                                            '${fmtMinutes(b.from)}–${fmtMinutes(b.to!)} h: +${VF.money(b.amount)}'),
                                 style: const TextStyle(fontSize: 13),
                               ),
                             ),
@@ -406,10 +423,10 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       Text(
         tx(context,
             'سِعر النُقطة ("الكُلّ") هو الذي يَظهَر عِند دُخول السَيّارة، وَبَعد الفاليديشن يَتَحَوَّل السِعر إلى سِعر العَميل (ثابِت أَو جَدوَل بِالسّاعة). '
-                'جَدوَل بِالسّاعة = فَترات: 0:00 ← 1:00 = 20، 1:00 ← 3:00 = 30، 3:00 ← ∞ = 10 لِكُلّ ساعة إضافيّة. '
+                'جَدوَل بِالسّاعة = فَترات بِالسّاعات مِن دُخول السَيّارة (مَرّة واحِدة أَو لِكُلّ ساعة)، وَآخِرها مُمكِن "مَفتوح" لِكُلّ ساعة إضافيّة. '
                 'اختَر أَيّام الأُسبوع لِجَدوَل خاصّ (مَثَلاً السَبت وَالأَحَد)؛ جَدوَل الأَيّام المُحَدَّدة يَغلِب جَدوَل "كُلّ الأَيّام" بِنَفس الاسم، وَاليَوم يُحسَب مِن وَقت دُخول السَيّارة.',
             'The point price ("All") applies when the car comes in; after a client validation the price becomes that client\'s price (fixed or hourly table). '
-                'Hourly table = bands: 0:00 → 1:00 = 20, 1:00 → 3:00 = 30, 3:00 → ∞ = 10 per extra hour. '
+                'Hourly table = bands in hours since the car came in (once or every hour), the last one can be "open" for every extra hour. '
                 'Pick days of the week for a special table (e.g. Saturday and Sunday); a table for given days wins over the "every day" table of the same name, and the day is the entry day of the car.'),
         style: const TextStyle(color: VC.muted),
       ),
@@ -527,45 +544,25 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ],
       );
 
-  /// What the car pays after 1 … 10 hours with the bands being edited (same rule as the valet app).
-  Widget _hourlyPreview(BuildContext ctx, List<(TextEditingController, TextEditingController, TextEditingController)> bands) {
-    final slabs = [
-      for (final b in bands)
-        (vMinutes(b.$1.text.isEmpty ? '0:00' : b.$1.text), b.$2.text.trim().isEmpty || b.$2.text.toLowerCase().startsWith('inf') ? null : vMinutes(b.$2.text),
-            num.tryParse(b.$3.text.trim()) ?? 0),
-    ]..sort((a, b) => a.$1.compareTo(b.$1));
-    num at(int minutes) {
-      if (slabs.isEmpty) return 0;
-      for (final s in slabs) {
-        if (minutes >= s.$1 && (s.$2 == null || minutes < s.$2!)) {
-          if (s.$2 != null) return s.$3;
-          final finite = slabs.where((x) => x.$2 != null).map((x) => x.$3);
-          final base = finite.isEmpty ? 0 : finite.reduce((a, b) => a > b ? a : b);
-          final extra = ((minutes - s.$1) / 60).ceil().clamp(1, 100000);
-          return base + s.$3 * extra;
-        }
-      }
-      if (minutes < slabs.first.$1) return slabs.first.$3;
-      return slabs.where((x) => x.$2 != null).fold<num>(0, (a, x) => x.$3 > a ? x.$3 : a);
-    }
-
-    final hours = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 24];
+  Widget _hourlyPreview(BuildContext ctx, List<PriceSlab> slabs) {
+    final hours = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 24, 30];
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(color: VC.gold.withValues(alpha: .08), borderRadius: BorderRadius.circular(8)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(tx(ctx, 'مُعايَنة: ما يَدفَعه العَميل (شامِل الضَريبة)', 'Preview: what the customer pays (incl. VAT)'),
+        Text(tx(ctx, 'مُعايَنة: ما يَدفَعه العَميل إذا بَقِيَت السَيّارة… (شامِل الضَريبة)', 'Preview: what the customer pays if the car stays… (incl. VAT)'),
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
         const SizedBox(height: 6),
-        Wrap(spacing: 10, runSpacing: 4, children: [
+        Wrap(spacing: 12, runSpacing: 4, children: [
           for (final h in hours)
-            Text('${tx(ctx, '$h س', '${h}h')} = ${VF.money(at(h * 60 - 1))}', style: const TextStyle(fontSize: 12)),
+            Text('${tx(ctx, '$h س', '${h}h')} = ${VF.money(priceAt(slabs, h * 60 - 1))}', style: const TextStyle(fontSize: 12)),
         ]),
       ]),
     );
   }
 
-  /// Editor of a whole hourly table (all its bands) + its days of the week.
+  /// Editor of a whole hourly table: bands written as the manager thinks of them
+  /// ("first 4 hours 10", "5th hour +20", "from 6 h: 10 every hour"), saved as the rows the app reads.
   Future<void> _hourlyDialog(VJson d, List<VJson>? g) async {
     final vatRate = vNum(vMap(d['settings'])['vat_rate']) == 0 ? 0.05 : vNum(vMap(d['settings'])['vat_rate']);
     final first = g?.first;
@@ -574,23 +571,61 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     String? site = first?['site_id'] as String?;
     bool active = first == null ? true : vBool(first['is_active']);
     final days = {...vDays(first?['days'])};
-    final bands = <(TextEditingController, TextEditingController, TextEditingController)>[
+    final loaded = slabsToBands([
       for (final p in g ?? const <VJson>[])
-        (TextEditingController(text: vStr(p['start_time'])), TextEditingController(text: vStr(p['finish_time'])),
-            TextEditingController(text: vNum(p['total']).toString())),
+        PriceSlab(
+          vMinutes(vStr(p['start_time'])),
+          vStr(p['finish_time']).isEmpty || vStr(p['finish_time']).toLowerCase().startsWith('inf') ? null : vMinutes(vStr(p['finish_time'])),
+          vNum(p['total']),
+        ),
+    ]);
+    // one editable row per band: (to, amount, per hour?)
+    final rows = <(TextEditingController, TextEditingController, ValueNotifier<bool>)>[
+      for (final b in loaded)
+        (TextEditingController(text: b.to == null ? tx(context, 'مَفتوح', 'Open') : fmtMinutes(b.to!)), TextEditingController(text: '${b.amount}'),
+            ValueNotifier(b.hourly)),
     ];
-    if (bands.isEmpty) {
-      bands.add((TextEditingController(text: '0:00'), TextEditingController(text: '1:00'), TextEditingController()));
-      bands.add((TextEditingController(text: '1:00'), TextEditingController(text: 'Infinity'), TextEditingController()));
+    if (rows.isEmpty) {
+      rows.add((TextEditingController(text: '4'), TextEditingController(), ValueNotifier(false)));
+      rows.add((TextEditingController(text: tx(context, 'مَفتوح', 'Open')), TextEditingController(), ValueNotifier(true)));
     }
     final clients = vList(d['clients']);
+
+    // bands from the rows; error text when something is wrong
+    (List<HourBand>, String?) read() {
+      final out = <HourBand>[];
+      var from = 0;
+      for (var i = 0; i < rows.length; i++) {
+        final last = i == rows.length - 1;
+        final to = parseBandTime(rows[i].$1.text, allowOpen: last);
+        final amount = num.tryParse(rows[i].$2.text.trim());
+        if (to == -1) return (out, tx(context, 'السَطر ${i + 1}: "إلى" غَير صَحيح.', 'Row ${i + 1}: wrong "to".'));
+        if (to != null && to <= from) return (out, tx(context, 'السَطر ${i + 1}: "إلى" يَجِب أَن يَكون بَعد ${fmtMinutes(from)}.', 'Row ${i + 1}: "to" must be after ${fmtMinutes(from)}.'));
+        if (amount == null) return (out, tx(context, 'السَطر ${i + 1}: أَدخِل المَبلَغ (0 = مَجّاني).', 'Row ${i + 1}: enter the amount (0 = free).'));
+        out.add(HourBand(from: from, to: to, amount: amount, hourly: to == null ? true : rows[i].$3.value));
+        if (to == null) break;
+        from = to;
+      }
+      return (out, null);
+    }
+
     await showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
+        final (bands, err) = read();
+        final slabs = bandsToSlabs(bands);
+        // start of every row = end of the row before (computed before building the rows)
+        final froms = <int>[];
+        var f0 = 0;
+        for (var i = 0; i < rows.length; i++) {
+          froms.add(f0);
+          final t = parseBandTime(rows[i].$1.text, allowOpen: i == rows.length - 1);
+          if (t != null && t > f0) f0 = t;
+        }
         return AlertDialog(
           title: Text(g == null ? tx(ctx, 'جَدوَل بِالسّاعة جَديد', 'New hourly table') : tx(ctx, 'تَعديل جَدوَل بِالسّاعة', 'Edit hourly table')),
           content: SizedBox(
-            width: 560,
+            width: 640,
             child: SingleChildScrollView(
               child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 _forField(ctx, clients, site, (v) => set(() => site = v)),
@@ -600,51 +635,108 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 _daysPicker(ctx, days, set),
                 const SizedBox(height: 14),
                 Row(children: [
-                  Expanded(child: Text(tx(ctx, 'الفَترات (المُدّة مِن دُخول السَيّارة)', 'Bands (time since the car came in)'), style: const TextStyle(fontWeight: FontWeight.w600))),
+                  Expanded(
+                    child: Text(tx(ctx, 'الفَترات — بِالسّاعات مِن دُخول السَيّارة', 'Bands — hours since the car came in'),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ),
                   TextButton.icon(
                     icon: const Icon(Icons.add),
                     label: Text(tx(ctx, 'فَترة', 'Band')),
                     onPressed: () => set(() {
-                      final last = bands.last;
-                      final from = last.$2.text.trim().toLowerCase().startsWith('inf') ? '' : last.$2.text.trim();
-                      bands.add((TextEditingController(text: from), TextEditingController(text: 'Infinity'), TextEditingController()));
+                      // the old last row becomes finite, the new row is the last one
+                      final last = rows.last;
+                      if (parseBandTime(last.$1.text, allowOpen: true) == null) {
+                        final f = bands.isEmpty ? 0 : bands.last.from;
+                        last.$1.text = fmtMinutes(f + 60);
+                        last.$3.value = false;
+                      }
+                      rows.add((TextEditingController(text: tx(ctx, 'مَفتوح', 'Open')), TextEditingController(), ValueNotifier(true)));
                     }),
                   ),
                 ]),
-                for (var i = 0; i < bands.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(children: [
-                      Expanded(child: TextField(controller: bands[i].$1, onChanged: (_) => set(() {}), decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'مِن', 'From'), hintText: '0:00'))),
-                      const SizedBox(width: 8),
-                      Expanded(child: TextField(controller: bands[i].$2, onChanged: (_) => set(() {}), decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'إلى', 'To'), hintText: 'Infinity'))),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: bands[i].$3,
-                          onChanged: (_) => set(() {}),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'الإجماليّ AED', 'Total AED')),
+                for (var i = 0; i < rows.length; i++)
+                  Builder(builder: (_) {
+                    final last = i == rows.length - 1;
+                    final rowFrom = froms[i];
+                    final to = parseBandTime(rows[i].$1.text, allowOpen: last);
+                    final open = last && to == null;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        SizedBox(
+                          width: 86,
+                          child: InputDecorator(
+                            decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'مِن', 'From')),
+                            child: Text(rowFrom == 0 ? tx(ctx, 'الدُخول', 'Entry') : tx(ctx, '${fmtMinutes(rowFrom)} س', '${fmtMinutes(rowFrom)} h')),
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        tooltip: tx(ctx, 'حَذف', 'Remove'),
-                        icon: const Icon(Icons.close, color: VC.bad),
-                        onPressed: bands.length == 1 ? null : () => set(() => bands.removeAt(i)),
-                      ),
-                    ]),
-                  ),
-                const SizedBox(height: 6),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: BandTimeField(
+                            controller: rows[i].$1,
+                            label: tx(ctx, 'إلى (ساعات)', 'To (hours)'),
+                            allowOpen: last,
+                            onChanged: () => set(() {}),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: TextField(
+                            controller: rows[i].$2,
+                            onChanged: (_) => set(() {}),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'المَبلَغ AED', 'Amount AED')),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: open
+                              ? InputDecorator(
+                                  decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'الطَريقة', 'How')),
+                                  child: Text(tx(ctx, 'لِكُلّ ساعة إضافيّة', 'Every extra hour')),
+                                )
+                              : DropdownButtonFormField<bool>(
+                                  value: rows[i].$3.value,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(isDense: true, labelText: tx(ctx, 'الطَريقة', 'How')),
+                                  items: [
+                                    DropdownMenuItem(value: false, child: Text(tx(ctx, 'مَرّة واحِدة لِلفَترة', 'Once for the band'))),
+                                    DropdownMenuItem(value: true, child: Text(tx(ctx, 'لِكُلّ ساعة في الفَترة', 'Every hour of the band'))),
+                                  ],
+                                  onChanged: (v) => set(() => rows[i].$3.value = v ?? false),
+                                ),
+                        ),
+                        IconButton(
+                          tooltip: tx(ctx, 'حَذف', 'Remove'),
+                          icon: const Icon(Icons.close, color: VC.bad),
+                          onPressed: rows.length == 1 ? null : () => set(() => rows.removeAt(i)),
+                        ),
+                      ]),
+                    );
+                  }),
+                const SizedBox(height: 8),
                 Text(
                   tx(ctx,
-                      'الإجماليّ = ما يَدفَعه العَميل إذا خَرَج داخِل هذه الفَترة (مَبلَغ تَراكُميّ شامِل الضَريبة). '
-                          'مِثال: 0:00←4:00 = 10، 4:00←5:00 = 30 (10+20)، 5:00←6:00 = 35 (30+5)، 6:00←Infinity = 10 لِكُلّ ساعة إضافيّة. الوَقت ساعات:دَقائِق.',
-                      'Total = what the customer pays when leaving within this band (cumulative, incl. VAT). '
-                          'E.g. 0:00→4:00 = 10, 4:00→5:00 = 30 (10+20), 5:00→6:00 = 35 (30+5), 6:00→Infinity = 10 per extra hour. Time as hours:minutes.'),
-                  style: const TextStyle(color: VC.muted, fontSize: 12),
+                      'اكتُب الساعة أَو اختَرها مِن القائِمة ▾. "مِن" تُؤخَذ تِلقائيّاً مِن نِهاية الفَترة السابِقة.\n'
+                          '• مَرّة واحِدة: يُضاف المَبلَغ مَرّة إذا وَصَلَت السَيّارة لِهذه الفَترة.\n'
+                          '• لِكُلّ ساعة: يُضاف المَبلَغ عَن كُلّ ساعة (أَو جُزء مِنها) داخِل الفَترة.\n'
+                          '• مَفتوح (آخِر سَطر فَقَط): بَعد هذه الساعة يُضاف المَبلَغ عَن كُلّ ساعة بِلا نِهاية.\n'
+                          '• نِهاية اليَوم = 24 ساعة. إذا لَم يَكُن آخِر سَطر مَفتوحاً يَبقى السِعر ثابِتاً بَعدَه.\n'
+                          'مِثالك: إلى 4 = 10 مَرّة · إلى 5 = 20 مَرّة · إلى 6 = 5 مَرّة · مَفتوح = 10 لِكُلّ ساعة.',
+                      'Type the hour or pick it from the list ▾. "From" is taken from the end of the previous band.\n'
+                          '• Once: the amount is added once when the car reaches this band.\n'
+                          '• Every hour: the amount is added for every (started) hour inside the band.\n'
+                          '• Open (last row only): after this hour, the amount for every extra hour, no end.\n'
+                          '• End of day = 24 h. If the last row is not open the price stays the same after it.\n'
+                          'Example: to 4 = 10 once · to 5 = 20 once · to 6 = 5 once · open = 10 every hour.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12, height: 1.5),
                 ),
+                if (err != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(err, style: const TextStyle(color: VC.bad))),
                 const SizedBox(height: 8),
-                _hourlyPreview(ctx, bands),
+                _hourlyPreview(ctx, slabs),
                 const SizedBox(height: 8),
                 TextField(controller: notes, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظات', 'Notes'))),
                 SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(tx(ctx, 'فَعّال', 'Active')), value: active, onChanged: (v) => set(() => active = v)),
@@ -655,30 +747,28 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
             FilledButton(
               onPressed: () async {
-                final rx = RegExp(r'^\d{1,3}(:\d{1,2})?$');
-                final out = <Map<String, dynamic>>[];
-                for (final b in bands) {
-                  final from = b.$1.text.trim().isEmpty ? '0:00' : b.$1.text.trim();
-                  final to = b.$2.text.trim().isEmpty ? 'Infinity' : b.$2.text.trim();
-                  final tt = num.tryParse(b.$3.text.trim());
-                  final toOk = to.toLowerCase().startsWith('inf') || rx.hasMatch(to);
-                  if (!rx.hasMatch(from) || !toOk || tt == null) {
-                    vToast(ctx, tx(ctx, 'راجِع الفَترات: الوَقت مِثل 1:30 وَالإجماليّ رَقَم.', 'Check the bands: time like 1:30 and a number for the total.'), error: true);
-                    return;
-                  }
-                  final pr = double.parse((tt / (1 + vatRate)).toStringAsFixed(2));
-                  out.add({
-                    'start_time': from,
-                    'finish_time': to.toLowerCase().startsWith('inf') ? 'Infinity' : to,
-                    'price': pr,
-                    'tax': double.parse((tt - pr).toStringAsFixed(2)),
-                    'total': tt,
-                  });
+                final (bands, err) = read();
+                if (err != null || bands.isEmpty) {
+                  vToast(ctx, err ?? tx(ctx, 'أَضِف فَترة.', 'Add a band.'), error: true);
+                  return;
                 }
                 if (name.text.trim().isEmpty) {
                   vToast(ctx, tx(ctx, 'أَدخِل اسم التَذكَرة.', 'Enter the ticket name.'), error: true);
                   return;
                 }
+                final out = [
+                  for (final s in bandsToSlabs(bands))
+                    () {
+                      final pr = double.parse((s.total / (1 + vatRate)).toStringAsFixed(2));
+                      return {
+                        'start_time': slabTime(s.from),
+                        'finish_time': s.to == null ? 'Infinity' : slabTime(s.to!),
+                        'price': pr,
+                        'tax': double.parse((s.total - pr).toStringAsFixed(2)),
+                        'total': s.total,
+                      };
+                    }(),
+                ];
                 Navigator.pop(ctx);
                 await _save('vva_price_table_save', {
                   'p_data': {
@@ -749,36 +839,129 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     ]);
   }
 
-  // ---------------------------------------------------------------- parking
+  // ---------------------------------------------------------------- parking (linked areas)
+  Future<VJson?> _areaById(String id) async {
+    final all = await vGuard(context, () => ValetAdmin.I.call('vva_parking_areas'));
+    if (all == null) return null;
+    return vList(all['areas']).cast<VJson?>().firstWhere((a) => vStr(a?['id']) == id, orElse: () => null);
+  }
+
+  Future<void> _linkAreaDialog(VJson d) async {
+    final all = await vGuard(context, () => ValetAdmin.I.call('vva_parking_areas'));
+    if (all == null || !mounted) return;
+    final linked = {for (final a in vList(d['parking_areas'])) vStr(a['id'])};
+    final options = vList(all['areas']).where((a) => !linked.contains(vStr(a['id']))).toList();
+    String q = '';
+    final picked = await showDialog<VJson>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
+        final list = options.where((a) => vStr(a['name']).toLowerCase().contains(q.toLowerCase())).toList();
+        return AlertDialog(
+          title: Text(tx(ctx, 'رَبط مَوقِف مَوجود', 'Link an existing area')),
+          content: SizedBox(
+            width: 460,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              TextField(
+                decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: tx(ctx, 'بَحث', 'Search')),
+                onChanged: (v) => set(() => q = v),
+              ),
+              const SizedBox(height: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320),
+                child: list.isEmpty
+                    ? Padding(padding: const EdgeInsets.all(16), child: Text(tx(ctx, 'لا تُوجَد مَواقِف أُخرى.', 'No other area.')))
+                    : ListView(shrinkWrap: true, children: [
+                        for (final a in list)
+                          ListTile(
+                            dense: true,
+                            leading: const Icon(Icons.local_parking),
+                            title: Text(vStr(a['name'])),
+                            subtitle: Text(vList(a['points']).isEmpty
+                                ? tx(ctx, 'غَير مَربوط', 'Not linked')
+                                : vList(a['points']).map((p) => vStr(p['name'])).join('، ')),
+                            onTap: () => Navigator.pop(ctx, a),
+                          ),
+                      ]),
+              ),
+            ]),
+          ),
+          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel')))],
+        );
+      }),
+    );
+    if (picked == null || !mounted) return;
+    await _save('vva_parking_link', {'p_point': widget.pointId, 'p_area': picked['id'], 'p_on': true},
+        ok: tx(context, 'تَمّ الرَبط.', 'Linked.'));
+  }
+
   Widget _parking(VJson d) {
-    final fields = [
-      ('name', tx(context, 'الاسم', 'Name'), false),
-      ('capacity', tx(context, 'السَعة (سَيّارات)', 'Capacity (cars)'), true),
-      ('notes', tx(context, 'مُلاحَظات', 'Notes'), false),
-    ];
+    final areas = vList(d['parking_areas']);
     return _page([
       VPanel(
-        title: tx(context, 'المَواقِف', 'Parking areas'),
-        actions: [if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'إضافة', 'Add')), onPressed: () => _simple('parking_area', null, fields))],
+        title: tx(context, 'المَواقِف المَربوطة بِهذه النُقطة (${areas.length})', 'Parking areas of this point (${areas.length})'),
+        actions: [
+          if (_edit)
+            OutlinedButton.icon(icon: const Icon(Icons.link), label: Text(tx(context, 'رَبط مَوقِف', 'Link area')), onPressed: () => _linkAreaDialog(d)),
+          if (_edit)
+            FilledButton.icon(
+              icon: const Icon(Icons.add),
+              label: Text(tx(context, 'مَوقِف جَديد', 'New area')),
+              onPressed: () async {
+                final r = await showParkingAreaDialog(context, null, withPoint: widget.pointId);
+                if (r != null) _load();
+              },
+            ),
+        ],
         child: VTable(
+          empty: tx(context, 'لا يوجد مَوقِف مَربوط. اربِط مَوقِفاً مَوجوداً أَو أَنشِئ جَديداً.', 'No linked area. Link an existing one or create a new one.'),
           columns: [
-            DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
+            DataColumn(label: Text(tx(context, 'المَوقِف', 'Area'))),
             DataColumn(label: Text(tx(context, 'السَعة', 'Capacity')), numeric: true),
             DataColumn(label: Text(tx(context, 'مُلاحَظات', 'Notes'))),
             DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
             const DataColumn(label: Text('')),
           ],
           rows: [
-            for (final a in vList(d['parking_areas']))
+            for (final a in areas)
               DataRow(cells: [
-                DataCell(Text(vStr(a['name']))),
-                DataCell(Text(vStr(a['capacity']))),
+                DataCell(Text(vStr(a['name']), style: const TextStyle(fontWeight: FontWeight.w600))),
+                DataCell(Text(vNum(a['capacity']).toInt() == 0 ? '∞' : '${vNum(a['capacity']).toInt()}')),
                 DataCell(Text(vStr(a['notes']))),
                 DataCell(vBool(a['approved']) ? VPill(tx(context, 'مُستَخدَم', 'In use'), color: VC.ok) : VPill(tx(context, 'مُتَوَقِّف', 'Off'))),
-                DataCell(_rowActions('parking_area', a, fields, activeKey: 'approved')),
+                DataCell(!_edit
+                    ? const SizedBox()
+                    : Row(mainAxisSize: MainAxisSize.min, children: [
+                        IconButton(
+                          tooltip: tx(context, 'تَعديل وَرَبط بِنِقاط أُخرى', 'Edit & link to other points'),
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () async {
+                            final full = await _areaById(vStr(a['id']));
+                            if (full == null || !mounted) return;
+                            final r = await showParkingAreaDialog(context, full);
+                            if (r != null) _load();
+                          },
+                        ),
+                        IconButton(
+                          tooltip: tx(context, 'فَكّ الرَبط', 'Unlink'),
+                          icon: const Icon(Icons.link_off, color: VC.bad),
+                          onPressed: () async {
+                            if (!await vConfirm(context, tx(context, 'فَكّ رَبط المَوقِف', 'Unlink area'),
+                                tx(context, '${a['name']} — يَبقى المَوقِف لِلنِقاط الأُخرى.', '${a['name']} — the area stays for the other points.'))) {
+                              return;
+                            }
+                            if (!mounted) return;
+                            await _save('vva_parking_link', {'p_point': widget.pointId, 'p_area': a['id'], 'p_on': false},
+                                ok: tx(context, 'تَمّ فَكّ الرَبط.', 'Unlinked.'));
+                          },
+                        ),
+                      ])),
               ]),
           ],
         ),
+      ),
+      Text(
+        tx(context, 'كُلّ المَواقِف وَرَبطها بِعِدّة نِقاط: قِسم الفاليه ← المَواقِف.', 'All areas and linking to several points: Valet → Parking areas.'),
+        style: const TextStyle(color: VC.muted),
       ),
     ]);
   }

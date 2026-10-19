@@ -78,6 +78,7 @@ import '../supervisor/supervisor_roster_creator.dart';
 import '../valet/valet_audit_screen.dart';
 import '../valet/valet_clients_screen.dart';
 import '../valet/valet_keyrack_screen.dart';
+import '../valet/valet_parking_screen.dart';
 import '../valet/valet_live_screen.dart';
 import '../valet/valet_points_screen.dart';
 import '../valet/valet_reports_screen.dart';
@@ -302,6 +303,16 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetPointsScreen(),
+        ),
+        AppModule(
+          key: 'valet_parking',
+          titleAr: 'المَواقِف',
+          titleEn: 'Parking areas',
+          icon: Icons.garage_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetDashboardView,
+          builder: (_) => const ValetParkingScreen(),
         ),
         AppModule(
           key: 'valet_keyrack',
