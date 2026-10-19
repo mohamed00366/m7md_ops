@@ -27,6 +27,7 @@ class ValetAdmin extends ChangeNotifier {
   Future<void>? _restoring;
 
   bool get hasSession => _token.isNotEmpty;
+  String get token => _token;
   bool get restored => _restored;
   bool can(String p) => perms.contains(p);
 
