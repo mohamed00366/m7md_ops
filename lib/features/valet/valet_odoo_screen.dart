@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'valet_admin.dart';
+import 'valet_odoo_analytic.dart';
 import 'valet_ui.dart';
 
 /// 🔗 رَبط Odoo — كُلّ تِكِت يُدفَع (Check-out) يَصِل إلى Odoo فاتورة عَميل تِلقائيّاً خِلال دَقيقة.
@@ -354,6 +355,10 @@ class _OdooBodyState extends State<_OdooBody> {
           ]),
         ),
         const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: OdooAnalyticPanel(enabled: _hasKey && base.isNotEmpty),
+        ),        const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: VPanel(
