@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F2933">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Request my car · VIP Valet</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F2933'/%3E%3Cpath d='M16 20l16 26 16-26' fill='none' stroke='%23C9A227' stroke-width='6' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --graphite: #1F2933;
+    --graphite-2: #2B3743;
+    --graphite-3: #3E4C59;
+    --gold: #C9A227;
+    --gold-dark: #8A6D12;      /* gold text on light backgrounds (contrast >= 4.5:1) */
+    --gold-soft: #F4EBCB;
+    --bg: #F4F2ED;
+    --card: #FFFFFF;
+    --text: #1F2933;
+    --muted: #52606D;
+    --line: #E1DDD2;
+    --ok: #1E7B4F;
+    --ok-soft: #E3F3EA;
+    --err: #A61B1B;
+    --err-soft: #FBE9E9;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Cairo", "Segoe UI", Tahoma, Roboto, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  button, textarea { font: inherit; color: inherit; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  [tabindex="-1"]:focus, [tabindex="-1"]:focus-visible { outline: none; }
+
+  /* ---------- header ---------- */
+  .top {
+    background: var(--graphite);
+    color: #fff;
+    padding: 14px 16px 64px;
+    padding-top: calc(14px + env(safe-area-inset-top));
+  }
+  .top-inner {
+    max-width: 520px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand-mark {
+    width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px;
+    background: var(--graphite-2); border: 1px solid var(--graphite-3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-text { line-height: 1.15; min-width: 0; }
+  .brand-name { font-weight: 800; font-size: 17px; letter-spacing: .3px; }
+  .brand-name b { color: var(--gold); font-weight: 800; }
+  .brand-sub { font-size: 12.5px; color: #CBD2D9; }
+  .lang-btn {
+    flex: 0 0 auto;
+    min-height: 44px; min-width: 64px; padding: 0 14px;
+    border-radius: 999px; border: 1.5px solid var(--gold);
+    background: transparent; color: var(--gold);
+    font-weight: 700; font-size: 15px; cursor: pointer;
+  }
+  .lang-btn:active { background: rgba(201,162,39,.15); }
+
+  /* ---------- layout ---------- */
+  main {
+    max-width: 520px; margin: -48px auto 0; padding: 0 16px 32px;
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(31,41,51,.10), 0 1px 3px rgba(31,41,51,.08);
+    overflow: hidden;
+  }
+  .card + .card, .card + .block, .block + .card { margin-top: 16px; }
+  .pad { padding: 20px; }
+  [hidden] { display: none !important; }
+
+  /* ---------- ticket ---------- */
+  .ticket-head {
+    background: var(--graphite-2); color: #fff; text-align: center;
+    padding: 18px 20px 20px; position: relative;
+  }
+  .ticket-label { font-size: 13px; color: #CBD2D9; text-transform: uppercase; letter-spacing: 1.5px; }
+  html[lang="ar"] .ticket-label { letter-spacing: 0; text-transform: none; font-size: 14px; }
+  .ticket-no {
+    font-size: 56px; font-weight: 800; line-height: 1.1; color: var(--gold);
+    letter-spacing: 2px; direction: ltr; unicode-bidi: isolate; word-break: break-all;
+  }
+  .ticket-head::after {
+    /* perforation */
+    content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px;
+    background-image: linear-gradient(90deg, var(--graphite-2) 50%, transparent 50%);
+    background-size: 12px 2px;
+  }
+  .rows { margin: 0; padding: 6px 20px 4px; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--line);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row dt { color: var(--muted); font-size: 15px; margin: 0; flex: 0 0 auto; }
+  .row dd { margin: 0; font-weight: 700; text-align: end; min-width: 0; overflow-wrap: anywhere; }
+  .plate {
+    display: inline-block; direction: ltr; unicode-bidi: isolate;
+    border: 2px solid var(--graphite); border-radius: 8px; padding: 0 10px;
+    font-weight: 800; letter-spacing: 2px; font-size: 18px; background: #fff;
+    font-family: "Cairo", "Segoe UI", Arial, sans-serif;
+  }
+  .color-wrap { display: inline-flex; align-items: center; gap: 8px; }
+  .dot {
+    width: 20px; height: 20px; border-radius: 50%; flex: 0 0 20px;
+    border: 2px solid rgba(31,41,51,.25); background: #ccc;
+  }
+  .duration { display: block; font-weight: 600; color: var(--muted); font-size: 14px; }
+  .ltr { direction: ltr; unicode-bidi: isolate; }
+
+  /* ---------- request form ---------- */
+  .block { }
+  .field-label { display: block; font-weight: 700; margin-bottom: 6px; }
+  .field-label small { font-weight: 400; color: var(--muted); }
+  textarea {
+    width: 100%; min-height: 76px; resize: vertical;
+    border: 1.5px solid #9AA5B1; border-radius: 12px; padding: 10px 12px;
+    background: #fff; font-size: 16px; line-height: 1.4;
+  }
+  textarea:focus { border-color: var(--gold-dark); outline: 3px solid rgba(201,162,39,.35); outline-offset: 0; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 4px; text-align: end; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; min-height: 64px; padding: 12px 20px; margin-top: 16px;
+    border: 0; border-radius: 16px; cursor: pointer;
+    background: var(--gold); color: var(--graphite);
+    font-size: 21px; font-weight: 800;
+    box-shadow: 0 4px 0 #A6851C, 0 8px 18px rgba(201,162,39,.35);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #A6851C, 0 4px 10px rgba(201,162,39,.3); }
+  .btn[disabled] { opacity: .8; cursor: progress; transform: none; }
+  .btn[aria-busy="true"] svg { display: none; }
+  .btn-secondary {
+    background: var(--graphite); color: #fff; box-shadow: none; font-size: 18px; min-height: 56px;
+  }
+  .btn-secondary:active { box-shadow: none; }
+  .spinner {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 3px solid rgba(31,41,51,.25); border-top-color: var(--graphite);
+    animation: spin .8s linear infinite;
+  }
+  .btn-secondary .spinner { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .alert {
+    border-radius: 12px; padding: 12px 14px; margin-top: 14px; font-weight: 600;
+    background: var(--err-soft); color: var(--err); border: 1px solid #F0C4C4;
+  }
+  .alert-soft { background: var(--gold-soft); color: #5C4A0E; border-color: #E8D9A0; font-weight: 600; }
+
+  /* ---------- progress ---------- */
+  .status-title { font-size: 22px; font-weight: 800; margin: 0 0 4px; }
+  .status-sub { color: var(--muted); margin: 0; }
+  .eta {
+    margin-top: 14px; display: flex; align-items: center; gap: 12px;
+    background: var(--gold-soft); border-radius: 14px; padding: 12px 14px;
+  }
+  .eta-val { font-size: 24px; font-weight: 800; color: var(--graphite); }
+  .eta-lbl { font-size: 14px; color: #5C4A0E; }
+  .steps { list-style: none; margin: 18px 0 0; padding: 0; }
+  .step { position: relative; display: flex; gap: 14px; padding-bottom: 22px; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: ""; position: absolute; top: 34px; bottom: 2px;
+    inset-inline-start: 15px; width: 2px; background: var(--line);
+  }
+  .step:last-child::before { display: none; }
+  .step.done::before { background: var(--gold); }
+  .bullet {
+    position: relative; z-index: 1;
+    width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%;
+    border: 2px solid #9AA5B1; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; color: var(--muted);
+  }
+  .step.done .bullet { background: var(--gold); border-color: var(--gold); color: var(--graphite); }
+  .step.current .bullet { border-color: var(--gold); color: var(--graphite); background: var(--gold-soft); }
+  .step.current .bullet::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--gold); opacity: .6; animation: pulse 2s ease-out infinite;
+  }
+  .step.ready .bullet { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .step-text { padding-top: 3px; }
+  .step-name { font-weight: 700; }
+  .step:not(.done):not(.current):not(.ready) .step-name { color: var(--muted); font-weight: 600; }
+  .step-desc { font-size: 14px; color: var(--muted); }
+  @keyframes pulse { 0% { transform: scale(.85); opacity: .7; } 100% { transform: scale(1.35); opacity: 0; } }
+  .ready-banner {
+    background: var(--ok-soft); border: 1.5px solid #A9D8BE; color: var(--ok);
+    border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center; margin-top: 14px;
+  }
+  .ready-banner strong { display: block; font-size: 20px; }
+  .ready-banner span { color: #24543C; font-size: 15px; }
+  .poll-note { font-size: 13px; color: var(--muted); margin-top: 14px; text-align: center; }
+
+  /* ---------- message states ---------- */
+  .msg { text-align: center; padding: 30px 22px 26px; }
+  .msg-icon {
+    width: 72px; height: 72px; margin: 0 auto 12px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; background: var(--gold-soft);
+  }
+  .msg-icon.err { background: var(--err-soft); }
+  .msg-icon.ok { background: var(--ok-soft); }
+  .msg h1 { font-size: 23px; margin: 0 0 6px; line-height: 1.3; }
+  .msg p { margin: 0; color: var(--muted); }
+  .msg .detail { margin-top: 10px; font-size: 13px; color: var(--muted); direction: ltr; unicode-bidi: isolate; }
+
+  /* ---------- skeleton ---------- */
+  .sk { background: linear-gradient(90deg, #ECE9E1 25%, #F6F4EF 50%, #ECE9E1 75%); background-size: 200% 100%;
+        animation: shimmer 1.3s linear infinite; border-radius: 8px; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  .foot { text-align: center; font-size: 13px; color: var(--muted); margin-top: 22px; }
+  .foot a { color: var(--gold-dark); font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .spinner { border-top-color: var(--graphite); }
+  }
+  @media (max-width: 340px) {
+    .ticket-no { font-size: 46px; }
+    .brand-sub { display: none; }
+    .btn { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 64 64"><path d="M14 18l18 30 18-30" fill="none" stroke="#C9A227" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name"><b>VIP</b> <span data-i18n="brand">Valet &amp; Parking</span></div>
+        <div class="brand-sub" data-i18n="brandSub">Request your car</div>
+      </div>
+    </div>
+    <button type="button" class="lang-btn" id="langBtn" lang="ar" aria-label="عرض الصفحة بالعربية">عربي</button>
+  </div>
+</header>
+
+<main id="main">
+  <!-- live region for screen readers -->
+  <div class="sr-only" aria-live="polite" aria-atomic="true" id="live"></div>
+
+  <!-- LOADING -->
+  <section id="vLoading" class="card" aria-busy="true">
+    <div class="ticket-head">
+      <div class="ticket-label" data-i18n="loading">Loading your ticket…</div>
+      <div class="sk" style="height:58px;width:160px;margin:8px auto 0;opacity:.25"></div>
+    </div>
+    <div class="pad">
+      <div class="sk" style="height:20px;margin-bottom:16px"></div>
+      <div class="sk" style="height:20px;margin-bottom:16px;width:80%"></div>
+      <div class="sk" style="height:20px;width:60%"></div>
+    </div>
+  </section>
+
+  <!-- MESSAGE (invalid / closed / network error) -->
+  <section id="vMsg" class="card" hidden>
+    <div class="msg">
+      <div class="msg-icon" id="msgIcon" aria-hidden="true"></div>
+      <h1 id="msgTitle" tabindex="-1"></h1>
+      <p id="msgText"></p>
+      <p class="detail" id="msgDetail" hidden></p>
+      <button type="button" class="btn btn-secondary" id="retryBtn" hidden></button>
+    </div>
+  </section>
+
+  <!-- TICKET -->
+  <section id="vTicket" class="card" hidden aria-labelledby="ticketLabel">
+    <div class="ticket-head">
+      <div class="ticket-label" id="ticketLabel" data-i18n="ticketNo">Ticket number</div>
+      <div class="ticket-no" id="tNo">—</div>
+    </div>
+    <dl class="rows">
+      <div class="row"><dt data-i18n="plate">Plate</dt><dd><span class="plate" id="tPlate">—</span></dd></div>
+      <div class="row"><dt data-i18n="color">Colour</dt><dd><span class="color-wrap"><span class="dot" id="tDot" aria-hidden="true"></span><span id="tColor">—</span></span></dd></div>
+      <div class="row"><dt data-i18n="location">Location</dt><dd id="tPoint">—</dd></div>
+      <div class="row"><dt data-i18n="parkedAt">Parked at</dt><dd><span id="tEntry">—</span><span class="duration" id="tDuration"></span></dd></div>
+    </dl>
+  </section>
+
+  <!-- REQUEST FORM -->
+  <section id="vRequest" class="card pad" hidden>
+    <form id="reqForm" novalidate>
+      <label class="field-label" for="note"><span data-i18n="noteLabel">Note for the valet</span> <small data-i18n="optional">(optional)</small></label>
+      <textarea id="note" name="note" dir="auto" maxlength="200" rows="2" autocomplete="off" aria-describedby="noteHint"></textarea>
+      <div class="hint" id="noteHint" data-i18n="noteHint">e.g. “I’m at the main entrance”</div>
+      <button type="submit" class="btn" id="reqBtn">
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        <span id="reqBtnText" data-i18n="requestBtn">Request my car</span>
+      </button>
+      <div class="alert" id="reqErr" role="alert" hidden></div>
+    </form>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="vProgress" class="card pad" hidden aria-labelledby="pTitle">
+    <h2 class="status-title" id="pTitle" tabindex="-1"></h2>
+    <p class="status-sub" id="pSub"></p>
+    <div class="eta" id="pEta" hidden>
+      <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#8A6D12" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <div><div class="eta-lbl" data-i18n="eta">Estimated time</div><div class="eta-val" id="pEtaVal"></div></div>
+    </div>
+    <div class="ready-banner" id="pReady" hidden style="margin-top:0">
+      <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#1E7B4F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>
+      <div><strong data-i18n="readyTitle">Your car is ready</strong><span data-i18n="readySub">Please proceed to the valet desk.</span></div>
+    </div>
+    <ol class="steps" id="pSteps">
+      <li class="step" id="s1"><div class="bullet">1</div><div class="step-text"><div class="step-name" data-i18n="st1">Requested</div><div class="step-desc" data-i18n="st1d">The valet team received your request</div></div></li>
+      <li class="step" id="s2"><div class="bullet">2</div><div class="step-text"><div class="step-name" data-i18n="st2">Being brought</div><div class="step-desc" data-i18n="st2d">A driver is bringing your car</div></div></li>
+      <li class="step" id="s3"><div class="bullet">3</div><div class="step-text"><div class="step-name" data-i18n="st3">Ready</div><div class="step-desc" data-i18n="st3d">Your car is waiting at the pick-up point</div></div></li>
+    </ol>
+    <div class="alert alert-soft" id="pConn" role="status" hidden></div>
+    <p class="poll-note" id="pPoll"></p>
+  </section>
+
+  <p class="foot"><span data-i18n="foot">VIP Valet &amp; Parking · Dubai</span></p>
+</main>
+
+<script>
+/* =====================================================================
+   CONFIG — paste the Supabase project values here before deploying.
+   SUPABASE_ANON_KEY: Supabase dashboard → Project Settings → API →
+   "anon public" key of project B (weftpekmmesgfhdawutj).
+   The anon key is public by design; the RPCs are security definer and
+   only accept the ticket's public token.
+   ===================================================================== */
+var SUPABASE_URL = 'https://weftpekmmesgfhdawutj.supabase.co';
+var SUPABASE_ANON_KEY = 'sb_publishable_mpGl1t33_k36OPXVYeflHA_HVTonx_V'; // publishable (public) key of the unified project
+var POLL_MS = 15000;          // refresh interval while waiting for the car
+var REQUEST_TIMEOUT_MS = 15000;
+var TIME_ZONE = 'Asia/Dubai';
+
+(function () {
+  'use strict';
+
+  /* ------------------------------ i18n ------------------------------ */
+  var T = {
+    en: {
+      title: 'Request my car · VIP Valet',
+      brand: 'Valet & Parking', brandSub: 'Request your car',
+      loading: 'Loading your ticket…', ticketNo: 'Ticket number',
+      plate: 'Plate', color: 'Colour', location: 'Location', parkedAt: 'Parked at',
+      parkedFor: 'Parked for {d}', noteLabel: 'Note for the valet', optional: '(optional)',
+      noteHint: 'e.g. “I’m at the main entrance”',
+      requestBtn: 'Request my car', sending: 'Sending request…',
+      eta: 'Estimated time', st1: 'Requested', st1d: 'The valet team received your request',
+      st2: 'Being brought', st2d: 'A driver is bringing your car',
+      st3: 'Ready', st3d: 'Your car is waiting at the pick-up point',
+      readyTitle: 'Your car is ready', readySub: 'Please proceed to the valet desk.',
+      pTitle1: 'Request received', pSub1: 'Sit back and relax — we will bring your car shortly.',
+      pTitle2: 'Your car is on its way', pSub2: 'A driver is bringing your car to the pick-up point.',
+      pTitle3: 'Your car is ready', pSub3: 'Thank you for waiting. Please collect your car at the valet desk.',
+      pollOn: 'This page updates automatically.',
+      pollPaused: 'Updates paused — they resume when you return to this page.',
+      connLost: 'Connection lost. Trying again…',
+      invalidTitle: 'Link not valid', invalidText: 'This link is invalid or has expired. Please contact the valet desk with your ticket.',
+      noTokenText: 'No ticket was found in this link. Please scan the QR code on your valet ticket again.',
+      closedTitle: 'Thank you!', closedText: 'This ticket is closed. We hope to see you again soon.',
+      noCardTitle: 'No car on this card', noCardText: 'No car is parked with this card right now. If you just handed over your car, please try again in a minute or ask the valet desk.',
+      netTitle: 'No connection', netText: 'We could not reach the server. Check your internet connection and try again.',
+      retry: 'Try again', foot: 'VIP Valet & Parking · Dubai',
+      reqFailed: 'Could not send the request: {e}', netShort: 'No connection. Please try again.',
+      minutes: '{n} min', hm: '{h} h {m} min', justNow: 'less than a minute',
+      today: 'Today', yesterday: 'Yesterday',
+      liveReq: 'Your car has been requested.', liveBrought: 'Your car is on its way.', liveReady: 'Your car is ready.',
+      switchTo: 'عرض الصفحة بالعربية', switchLabel: 'عربي', switchLang: 'ar'
+    },
+    ar: {
+      title: 'اطلب سيارتي · VIP Valet',
+      brand: 'لخدمة صف السيارات', brandSub: 'اطلب سيارتك',
+      loading: 'جارٍ تحميل التذكرة…', ticketNo: 'رقم التذكرة',
+      plate: 'اللوحة', color: 'اللون', location: 'الموقع', parkedAt: 'وقت الإيقاف',
+      parkedFor: 'منذ {d}', noteLabel: 'ملاحظة لموظف الخدمة', optional: '(اختياري)',
+      noteHint: 'مثال: «أنا عند المدخل الرئيسي»',
+      requestBtn: 'اطلب سيارتي', sending: 'جارٍ إرسال الطلب…',
+      eta: 'الوقت المتوقع', st1: 'تم الطلب', st1d: 'استلم فريق الخدمة طلبك',
+      st2: 'جارٍ إحضار السيارة', st2d: 'السائق في الطريق بسيارتك',
+      st3: 'جاهزة', st3d: 'سيارتك بانتظارك عند نقطة الاستلام',
+      readyTitle: 'سيارتك جاهزة', readySub: 'يرجى التوجه إلى مكتب خدمة صف السيارات.',
+      pTitle1: 'تم استلام طلبك', pSub1: 'استرخِ قليلاً — سنحضر سيارتك خلال وقت قصير.',
+      pTitle2: 'سيارتك في الطريق', pSub2: 'السائق يحضر سيارتك إلى نقطة الاستلام.',
+      pTitle3: 'سيارتك جاهزة', pSub3: 'شكراً لانتظارك. يرجى استلام سيارتك من مكتب الخدمة.',
+      pollOn: 'يتم تحديث هذه الصفحة تلقائياً.',
+      pollPaused: 'التحديث متوقف مؤقتاً — يستأنف عند عودتك إلى الصفحة.',
+      connLost: 'انقطع الاتصال. نحاول مجدداً…',
+      invalidTitle: 'الرابط غير صالح', invalidText: 'هذا الرابط غير صالح أو منتهي الصلاحية. يرجى مراجعة مكتب الخدمة ومعك التذكرة.',
+      noTokenText: 'لم يتم العثور على تذكرة في هذا الرابط. يرجى مسح رمز QR الموجود على التذكرة مرة أخرى.',
+      closedTitle: 'شكراً لك!', closedText: 'تم إغلاق هذه التذكرة. نتطلع لرؤيتك مجدداً.',
+      noCardTitle: 'لا توجد سيارة على هذا الكرت', noCardText: 'لا توجد سيارة مسجّلة على هذا الكرت حالياً. إذا سلّمت سيارتك للتو فحاول مرة أخرى بعد دقيقة أو راجع مكتب الفاليه.',
+      netTitle: 'لا يوجد اتصال', netText: 'تعذّر الوصول إلى الخادم. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.',
+      retry: 'حاول مرة أخرى', foot: 'VIP لخدمة صف السيارات · دبي',
+      reqFailed: 'تعذّر إرسال الطلب: {e}', netShort: 'لا يوجد اتصال. يرجى المحاولة مرة أخرى.',
+      minutes: '{n} دقيقة', hm: '{h} ساعة و{m} دقيقة', justNow: 'أقل من دقيقة',
+      today: 'اليوم', yesterday: 'أمس',
+      liveReq: 'تم طلب سيارتك.', liveBrought: 'سيارتك في الطريق.', liveReady: 'سيارتك جاهزة.',
+      switchTo: 'View this page in English', switchLabel: 'English', switchLang: 'en'
+    }
+  };
+
+  // Colour names (as stored by the valet app) → swatch + Arabic label
+  var COLORS = {
+    white: ['#FFFFFF', 'أبيض'], black: ['#111111', 'أسود'], silver: ['#C0C4C8', 'فضي'],
+    grey: ['#808890', 'رمادي'], gray: ['#808890', 'رمادي'], red: ['#C62828', 'أحمر'],
+    blue: ['#1E4FA8', 'أزرق'], 'dark blue': ['#152C5B', 'أزرق داكن'], navy: ['#1B2A4A', 'كحلي'],
+    green: ['#2E7D32', 'أخضر'], yellow: ['#F2C500', 'أصفر'], orange: ['#EF6C00', 'برتقالي'],
+    brown: ['#6D4C41', 'بني'], beige: ['#D9C7A3', 'بيج'], gold: ['#C9A227', 'ذهبي'],
+    golden: ['#C9A227', 'ذهبي'], maroon: ['#6A1B2A', 'عنابي'], burgundy: ['#6A1B2A', 'عنابي'],
+    purple: ['#6A3FA0', 'بنفسجي'], pink: ['#E57FA7', 'وردي'], bronze: ['#8C6239', 'برونزي'],
+    champagne: ['#E6D3A3', 'شامبين'], pearl: ['#F2EFE6', 'لؤلؤي'], 'pearl white': ['#F2EFE6', 'أبيض لؤلؤي'],
+    'light blue': ['#7FB2E5', 'أزرق فاتح'], 'dark grey': ['#4A5056', 'رمادي داكن'], 'dark gray': ['#4A5056', 'رمادي داكن'],
+    turquoise: ['#1FA2A0', 'فيروزي'], 'أبيض': ['#FFFFFF', 'أبيض'], 'أسود': ['#111111', 'أسود'],
+    'فضي': ['#C0C4C8', 'فضي'], 'رمادي': ['#808890', 'رمادي'], 'أحمر': ['#C62828', 'أحمر'], 'أزرق': ['#1E4FA8', 'أزرق']
+  };
+
+  /* ------------------------------ state ------------------------------ */
+  var lang = pickLang();
+  var token = readToken();
+  var card = readCard();        // tapped NFC card: /RequestCar?ticket=<card>
+  var ticket = null;            // last ticket payload
+  var view = 'loading';         // loading | msg | active | progress
+  var msgKind = null;           // invalid | notoken | closed | net
+  var msgDetail = '';
+  var submitting = false;
+  var pollTimer = null;
+  var durTimer = null;
+  var pollInFlight = false;
+  var lastStage = 0;
+  var connLost = false;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function pickLang() {
+    var saved = null;
+    try { saved = window.localStorage.getItem('vv_req_lang'); } catch (e) {}
+    if (saved === 'ar' || saved === 'en') return saved;
+    var nav = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || 'en';
+    return String(nav).toLowerCase().indexOf('ar') === 0 ? 'ar' : 'en';
+  }
+  function readCard() {
+    var m = /[?&](?:ticket|card)=([^&#]*)/i.exec(window.location.search || '');
+    if (!m) return '';
+    try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (e) { return ''; }
+  }
+  function readToken() {
+    var m = /[?&]t=([^&#]*)/.exec(window.location.search || '');
+    if (!m) return '';
+    try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (e) { return ''; }
+  }
+  function tr(key, vars) {
+    var s = (T[lang] && T[lang][key]) || T.en[key] || key;
+    if (vars) for (var k in vars) if (vars.hasOwnProperty(k)) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  }
+  function setText(id, s) { var el = $(id); if (el) el.textContent = s == null ? '' : s; }
+  function show(id, on) { var el = $(id); if (el) { if (on) el.removeAttribute('hidden'); else el.setAttribute('hidden', ''); } }
+  function announce(s) { var el = $('live'); el.textContent = ''; setTimeout(function () { el.textContent = s; }, 60); }
+
+  /* ------------------------------ API ------------------------------ */
+  function rpc(name, body) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, REQUEST_TIMEOUT_MS) : null;
+    var opts = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify(body),
+      cache: 'no-store'
+    };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, opts).then(function (res) {
+      if (timer) clearTimeout(timer);
+      return res.text().then(function (txt) {
+        var data = null;
+        try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = null; }
+        if (!res.ok) {
+          // PostgREST error: {message, code, hint}. Treat 5xx / 401 / 404-of-function as server problems.
+          var msg = (data && (data.message || data.error || data.hint)) || ('HTTP ' + res.status);
+          var err = new Error(msg); err.http = res.status; err.server = true;
+          throw err;
+        }
+        if (!data || typeof data !== 'object') { var e2 = new Error('Empty response'); e2.server = true; throw e2; }
+        return data;
+      });
+    }, function (e) {
+      if (timer) clearTimeout(timer);
+      var err = new Error(e && e.name === 'AbortError' ? 'Timeout' : 'Network');
+      err.network = true;
+      throw err;
+    });
+  }
+  function errText(data) {
+    if (!data) return '';
+    var e = data.error;
+    if (e && typeof e === 'object') e = e.message || e.code || JSON.stringify(e);
+    return String(e || data.message || '');
+  }
+
+  /* ------------------------------ helpers ------------------------------ */
+  function locale() { return lang === 'ar' ? 'ar-AE-u-nu-latn' : 'en-GB'; }
+  function parseDate(v) {
+    if (!v) return null;
+    var d = new Date(v);
+    if (isNaN(d.getTime())) d = new Date(String(v).replace(' ', 'T'));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function fmtTime(d) {
+    var o = { hour: 'numeric', minute: '2-digit', hour12: true };
+    try { o.timeZone = TIME_ZONE; return d.toLocaleTimeString(locale(), o); }
+    catch (e) { try { delete o.timeZone; return d.toLocaleTimeString(locale(), o); } catch (e2) { return d.toTimeString().slice(0, 5); } }
+  }
+  function dayKey(d) {
+    try { return d.toLocaleDateString('en-CA', { timeZone: TIME_ZONE }); } catch (e) { return d.toDateString(); }
+  }
+  function fmtEntry(d) {
+    var now = new Date(), y = new Date(now.getTime() - 864e5), prefix;
+    if (dayKey(d) === dayKey(now)) prefix = tr('today');
+    else if (dayKey(d) === dayKey(y)) prefix = tr('yesterday');
+    else {
+      try { prefix = d.toLocaleDateString(locale(), { day: 'numeric', month: 'short', timeZone: TIME_ZONE }); }
+      catch (e) { prefix = d.toLocaleDateString(); }
+    }
+    return prefix + ' · ' + fmtTime(d);
+  }
+  function fmtDuration(ms) {
+    var mins = Math.max(0, Math.floor(ms / 60000));
+    if (mins < 1) return tr('justNow');
+    if (mins < 60) return tr('minutes', { n: mins });
+    return tr('hm', { h: Math.floor(mins / 60), m: mins % 60 });
+  }
+  function fmtEta(v) {
+    var s = String(v).trim();
+    if (/^\d+(\.\d+)?$/.test(s)) return tr('minutes', { n: Math.round(parseFloat(s)) });
+    var d = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(s) ? parseDate(s) : null;
+    if (d) return fmtTime(d);
+    return s;
+  }
+  function colorInfo(raw) {
+    if (!raw) return null;
+    var s = String(raw).trim();
+    if (/^#?[0-9a-f]{6}$/i.test(s)) return { hex: s.charAt(0) === '#' ? s : '#' + s, label: '' };
+    var k = s.toLowerCase();
+    var hit = COLORS[k];
+    if (!hit) for (var key in COLORS) if (COLORS.hasOwnProperty(key) && k.indexOf(key) !== -1) { hit = COLORS[key]; break; }
+    return { hex: hit ? hit[0] : null, label: lang === 'ar' && hit ? hit[1] : s };
+  }
+
+  /* ---------------------- ticket state derivation ---------------------- */
+  function isClosed(t) {
+    var st = String(t.status || '').toLowerCase();
+    if (st === 'finish' || st === 'finished' || st === 'closed' || st === 'void') return true;
+    // Checked-out without an app request: nothing to wait for → thank you.
+    if (st === 'check-out' && !isRequested(t)) return true;
+    return false;
+  }
+  function isRequested(t) { return String(t.car_request_status || '').toLowerCase() === 'ordered'; }
+  function isReady(t) { return String(t.estimated_ready || '').toLowerCase() === 'ready' || !!t.car_arrival; }
+  function stage(t) {               // 1 requested, 2 being brought, 3 ready
+    if (isReady(t)) return 3;
+    if (t.estimated_time != null && String(t.estimated_time).trim() !== '') return 2;
+    if (String(t.status || '').toLowerCase() === 'check-out') return 2;
+    return 1;
+  }
+
+  /* ------------------------------ render ------------------------------ */
+  function applyLang() {
+    var html = document.documentElement;
+    html.setAttribute('lang', lang);
+    html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.title = tr('title');
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) nodes[i].textContent = tr(nodes[i].getAttribute('data-i18n'));
+    var b = $('langBtn');
+    b.textContent = tr('switchLabel');
+    b.setAttribute('lang', tr('switchLang'));
+    b.setAttribute('aria-label', tr('switchTo'));
+    $('note').setAttribute('placeholder', '');
+    render();
+  }
+
+  function render() {
+    show('vLoading', view === 'loading');
+    show('vMsg', view === 'msg');
+    show('vTicket', view === 'active' || view === 'progress' || (view === 'msg' && msgKind === 'closed' && !!ticket));
+    show('vRequest', view === 'active');
+    show('vProgress', view === 'progress');
+    if (ticket) renderTicket();
+    if (view === 'msg') renderMsg();
+    if (view === 'progress') renderProgress();
+    if (view === 'active') setText('reqBtnText', submitting ? tr('sending') : tr('requestBtn'));
+  }
+
+  function renderTicket() {
+    var t = ticket;
+    setText('tNo', t.short_no != null && t.short_no !== '' ? t.short_no : '—');
+    setText('tPlate', t.plate || '—');
+    var c = colorInfo(t.color);
+    var dot = $('tDot');
+    if (c && c.hex) { dot.style.background = c.hex; dot.style.display = ''; } else { dot.style.display = 'none'; }
+    setText('tColor', c ? (c.label || t.color) : '—');
+    setText('tPoint', t.point_name || '—');
+    renderDuration();
+  }
+  function renderDuration() {
+    if (!ticket) return;
+    var d = parseDate(ticket.entry_time);
+    setText('tEntry', d ? fmtEntry(d) : '—');
+    var closed = isClosed(ticket);
+    setText('tDuration', d && !closed ? tr('parkedFor', { d: fmtDuration(Date.now() - d.getTime()) }) : '');
+  }
+
+  function renderMsg() {
+    var icon = $('msgIcon'), ok = '', title = '', text = '';
+    var svgErr = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A61B1B" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>';
+    var svgNet = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8A6D12" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><path d="M12 19.5v.01"/><path d="M3 3l18 18"/></svg>';
+    var svgOk = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1E7B4F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    icon.className = 'msg-icon';
+    if (msgKind === 'closed') { icon.className += ' ok'; icon.innerHTML = svgOk; title = tr('closedTitle'); text = tr('closedText'); }
+    else if (msgKind === 'net') { icon.innerHTML = svgNet; title = tr('netTitle'); text = tr('netText'); }
+    else if (msgKind === 'nocard') { icon.className += ' err'; icon.innerHTML = svgErr; title = tr('noCardTitle'); text = tr('noCardText'); }
+    else { icon.className += ' err'; icon.innerHTML = svgErr; title = tr('invalidTitle'); text = msgKind === 'notoken' ? tr('noTokenText') : tr('invalidText'); }
+    setText('msgTitle', title);
+    setText('msgText', text);
+    setText('msgDetail', msgDetail);
+    show('msgDetail', !!msgDetail && msgKind !== 'closed');
+    var rb = $('retryBtn');
+    show('retryBtn', msgKind === 'net');
+    rb.disabled = view === 'loading';
+    rb.textContent = tr('retry');
+  }
+
+  function renderProgress() {
+    var s = stage(ticket);
+    var ids = ['s1', 's2', 's3'];
+    for (var i = 0; i < 3; i++) {
+      var li = $(ids[i]), n = i + 1, cls = 'step';
+      if (n < s) cls += ' done';
+      else if (n === s) cls += (s === 3 ? ' ready done' : ' current');
+      li.className = cls;
+      li.querySelector('.bullet').innerHTML = n < s || (n === 3 && s === 3)
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
+        : String(n);
+      if (n === s) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    }
+    setText('pTitle', tr('pTitle' + s));
+    setText('pSub', tr('pSub' + s));
+    // When ready, the green banner carries the message; keep the heading for screen readers only.
+    $('pTitle').className = s === 3 ? 'status-title sr-only' : 'status-title';
+    show('pSub', s < 3);
+    var eta = ticket.estimated_time;
+    var hasEta = s < 3 && eta != null && String(eta).trim() !== '';
+    show('pEta', hasEta);
+    if (hasEta) setText('pEtaVal', fmtEta(eta));
+    show('pReady', s === 3);
+    show('pConn', connLost && s < 3);
+    setText('pConn', tr('connLost'));
+    setText('pPoll', s === 3 ? '' : (document.hidden ? tr('pollPaused') : tr('pollOn')));
+  }
+
+  /* ------------------------------ flow ------------------------------ */
+  function applyTicket(t, fromPoll) {
+    ticket = t || {};
+    if (isClosed(ticket)) { view = 'msg'; msgKind = 'closed'; msgDetail = ''; stopPolling(); }
+    else if (isRequested(ticket)) {
+      view = 'progress';
+      var s = stage(ticket);
+      if (s !== lastStage) {
+        if (lastStage || !fromPoll) announce(s === 3 ? tr('liveReady') : s === 2 ? tr('liveBrought') : tr('liveReq'));
+        lastStage = s;
+      }
+      if (s === 3) stopPolling(); else startPolling();
+    } else { view = 'active'; stopPolling(); }
+    startDurationTimer();
+    render();
+  }
+
+  function load() {
+    if (!token && card) {
+      // card link: find the open ticket of this card, then continue with its public token
+      view = 'loading'; render();
+      rpc('vv_public_card_ticket', { p_card: card }).then(function (data) {
+        if (data.ok && data.public_token) { token = data.public_token; load(); }
+        else { view = 'msg'; msgKind = 'nocard'; msgDetail = ''; render(); focusMain(); }
+      }, function (err) {
+        view = 'msg'; msgKind = err.network ? 'net' : 'nocard'; msgDetail = ''; render(); focusMain();
+      });
+      return;
+    }
+    if (!token) { view = 'msg'; msgKind = 'notoken'; msgDetail = ''; render(); return; }
+    view = 'loading'; render();
+    rpc('vv_public_ticket', { p_public_token: token }).then(function (data) {
+      if (data.ok && data.ticket) { applyTicket(data.ticket, false); focusMain(); }
+      else { ticket = null; view = 'msg'; msgKind = 'invalid'; msgDetail = errText(data); render(); focusMain(); }
+    }, function (err) {
+      view = 'msg';
+      if (err.network) { msgKind = 'net'; msgDetail = ''; }
+      else if (err.http === 400 || err.http === 404) { msgKind = 'invalid'; msgDetail = err.message; }
+      else { msgKind = 'net'; msgDetail = err.message; }
+      render(); focusMain();
+    });
+  }
+  function focusMain() {
+    var el = view === 'msg' ? $('msgTitle') : view === 'progress' ? $('pTitle') : null;
+    if (el && el.focus) try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+  }
+
+  function submitRequest(ev) {
+    if (ev) ev.preventDefault();
+    if (submitting || !ticket) return;
+    submitting = true;
+    var btn = $('reqBtn');
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.insertAdjacentHTML('afterbegin', '<span class="spinner" id="reqSpin" aria-hidden="true"></span>');
+    show('reqErr', false);
+    render();
+    var note = $('note').value.replace(/^\s+|\s+$/g, '');
+    rpc('vv_public_request_car', { p_public_token: token, p_notes: note || null }).then(function (data) {
+      if (data.ok) {
+        // Use returned ticket if present, otherwise mark locally and refresh from server.
+        var t = data.ticket || ticket;
+        if (!data.ticket) t.car_request_status = 'ordered';
+        if (!t.car_request_status || String(t.car_request_status).toLowerCase() !== 'ordered') t.car_request_status = 'ordered';
+        finishSubmit();
+        applyTicket(t, false);
+        focusMain();
+        if (!data.ticket) setTimeout(poll, 1500);
+      } else {
+        finishSubmit();
+        setErr(errText(data) || '—');
+        show('reqErr', true);
+        render();
+      }
+    }, function (err) {
+      finishSubmit();
+      if (err.network) setText('reqErr', tr('netShort')); else setErr(err.message);
+      show('reqErr', true);
+      render();
+    });
+  }
+  function setErr(serverText) {
+    // Server text is usually English: isolate it so it does not scramble the Arabic sentence.
+    var el = $('reqErr'), parts = tr('reqFailed').split('{e}');
+    el.textContent = '';
+    el.appendChild(document.createTextNode(parts[0]));
+    var b = document.createElement('bdi'); b.textContent = serverText; el.appendChild(b);
+    el.appendChild(document.createTextNode(parts[1] || ''));
+  }
+  function finishSubmit() {
+    submitting = false;
+    var btn = $('reqBtn');
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+    var sp = $('reqSpin'); if (sp && sp.parentNode) sp.parentNode.removeChild(sp);
+  }
+
+  /* ------------------------------ polling ------------------------------ */
+  function poll() {
+    if (pollInFlight || document.hidden || !token) return;
+    pollInFlight = true;
+    rpc('vv_public_ticket', { p_public_token: token }).then(function (data) {
+      pollInFlight = false;
+      if (data.ok && data.ticket) { connLost = false; applyTicket(data.ticket, true); }
+      else { connLost = false; ticket = null; view = 'msg'; msgKind = 'invalid'; msgDetail = errText(data); stopPolling(); render(); }
+    }, function () {
+      pollInFlight = false;
+      connLost = true;
+      if (view === 'progress') render();
+    });
+  }
+  function startPolling() {
+    if (pollTimer || document.hidden) return;
+    pollTimer = setInterval(poll, POLL_MS);
+  }
+  function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+  function wantsPolling() { return view === 'progress' && ticket && stage(ticket) < 3; }
+
+  function startDurationTimer() {
+    if (durTimer || document.hidden) return;
+    durTimer = setInterval(renderDuration, 30000);
+  }
+  function stopDurationTimer() { if (durTimer) { clearInterval(durTimer); durTimer = null; } }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { stopPolling(); stopDurationTimer(); if (view === 'progress') render(); }
+    else {
+      if (ticket) { renderDuration(); startDurationTimer(); }
+      if (wantsPolling()) { poll(); startPolling(); render(); }
+    }
+  });
+  window.addEventListener('online', function () {
+    if (view === 'msg' && msgKind === 'net') load();
+    else if (wantsPolling()) poll();
+  });
+
+  /* ------------------------------ wiring ------------------------------ */
+  $('reqForm').addEventListener('submit', submitRequest);
+  $('retryBtn').addEventListener('click', function () { load(); });
+  $('langBtn').addEventListener('click', function () {
+    lang = lang === 'ar' ? 'en' : 'ar';
+    try { window.localStorage.setItem('vv_req_lang', lang); } catch (e) {}
+    applyLang();
+  });
+
+  applyLang();
+  load();
+})();
+</script>
+</body>
+</html>
