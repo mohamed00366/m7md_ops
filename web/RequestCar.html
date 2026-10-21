@@ -62,9 +62,16 @@
   }
   .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .brand-mark {
-    width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px;
-    background: var(--graphite-2); border: 1px solid var(--graphite-3);
-    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px;
+    background: #fff; border: 1px solid var(--graphite-3);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .brand-mark img { width: 38px; height: 38px; object-fit: contain; display: block; }
+  /* M7 Nexus lion as a faded watermark behind the page */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url("/request/m7_mark.png") no-repeat center 58% / min(78vw, 420px) auto;
+    opacity: .06;
   }
   .brand-text { line-height: 1.15; min-width: 0; }
   .brand-name { font-weight: 800; font-size: 17px; letter-spacing: .3px; }
@@ -254,7 +261,7 @@
   <div class="top-inner">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 64 64"><path d="M14 18l18 30 18-30" fill="none" stroke="#C9A227" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <img src="/request/m7_logo.png" alt="" width="36" height="36">
       </div>
       <div class="brand-text">
         <div class="brand-name"><b>VIP</b> <span data-i18n="brand">Valet &amp; Parking</span></div>
