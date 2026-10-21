@@ -172,7 +172,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('sinin_w_card', 'دُخول المُوَظَّفين بِاسم المُستَخدِم وَكَلِمة المُرور', 'Staff sign in with user name + password', 'إيقاف = الدُخول بِكَرت NFC / QR فَقَط', 'Off = NFC / QR card only'),
         ('paid_first_or_paid_after', 'السَماح بِوَرديّة "الدَفع أَوَّلاً"', 'Allow "Pay first" shifts', 'وَإلّا يَدفَع العَميل عِند الخُروج دائِماً', 'Otherwise customers pay at check-out'),
         ('price_group_customer', 'أَسعار النُقطة لِكُلّ العُمَلاء', 'Point prices for every client', 'إيقاف = كُلّ عَميل بِأَسعاره', 'Off = each client uses its own prices'),
-        ('stamp_ticket', 'تَذاكِر الخَتم', 'Stamp tickets', 'تَذكَرة مَجّانيّة بِصورة خَتم العَميل', 'Free ticket with a stamp photo'),
+        ('stamp_ticket', 'تَذاكِر الخَتم', 'Stamp tickets', 'زِرّ في شاشة الدَفع: تَذكَرة مَجّانيّة بِصورة خَتم العَميل', 'Check-out button: free ticket with a stamp photo'),
+        ('valet_validate', 'زِرّ "Validate for a client"', '"Validate for a client" button', 'في شاشة الدَفع: المُوَظَّف يَعمَل فاليديشن لِعَميل', 'On the check-out screen: the staff validates for a client'),
         ('photo_in_out', 'صورة السَيّارة عَلى التَذكَرة', 'Car photo on the ticket', '', ''),
         ('nfc_qr_in_out', 'كَرت التَذكَرة (NFC / QR) عِند الدُخول', 'Ticket card (NFC / QR) on entry', '', ''),
         ('used_card_manual', 'الجِهاز يَختار NFC أَو QR', 'Device may choose NFC or QR', '', ''),
@@ -187,6 +188,29 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('member_card_gold', 'الكَرت الذَهَبيّ عَلى التَذكَرة', 'Gold card on tickets', '', ''),
         ('paid_with_app_or_keyrack', 'الدَفع في تَطبيق المَفاتيح', 'Payment at the key rack', '', ''),
       ];
+
+  static const _flagIcons = <String, IconData>{
+    'car_request': Icons.directions_car_filled_outlined,
+    'key_rack_w_sites_or_allow': Icons.key_outlined,
+    'sinin_w_card': Icons.password_rounded,
+    'paid_first_or_paid_after': Icons.payments_outlined,
+    'price_group_customer': Icons.sell_outlined,
+    'stamp_ticket': Icons.approval_outlined,
+    'valet_validate': Icons.verified_outlined,
+    'photo_in_out': Icons.photo_camera_outlined,
+    'nfc_qr_in_out': Icons.nfc_rounded,
+    'used_card_manual': Icons.qr_code_scanner_rounded,
+    'drivers_in': Icons.login_rounded,
+    'drivers_out': Icons.logout_rounded,
+    'parking_in_out': Icons.local_parking_rounded,
+    'dropdown_parkingcar': Icons.format_list_bulleted_rounded,
+    'dropdown_time_in_out': Icons.schedule_rounded,
+    'drivers_nfc_qr': Icons.badge_outlined,
+    'show_membership': Icons.card_membership_outlined,
+    'member_card_normal': Icons.credit_card_outlined,
+    'member_card_gold': Icons.workspace_premium_outlined,
+    'paid_with_app_or_keyrack': Icons.point_of_sale_outlined,
+  };
 
   Widget _features(VJson d) {
     final s = vMap(d['settings']);
@@ -206,6 +230,15 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               child: SwitchListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
+                secondary: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: (vBool(s[f.$1]) ? VC.gold : VC.muted).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(_flagIcons[f.$1] ?? Icons.tune_rounded, size: 20, color: vBool(s[f.$1]) ? VC.gold : VC.muted),
+                ),
                 title: Text(tx(context, f.$2, f.$3), style: const TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: f.$4.isEmpty ? null : Text(tx(context, f.$4, f.$5)),
                 value: vBool(s[f.$1]),
