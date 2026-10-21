@@ -265,17 +265,86 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         ]),
       ),
-      VPanel(
-        title: tx(context, 'عُمَلاء هذه النُقطة', 'Clients at this point'),
-        child: vList(d['clients']).isEmpty
-            ? Text(tx(context, 'لا يُوجَد عَميل مَربوط. اربُط العُمَلاء مِن صَفحة "تَطبيق العُمَلاء".', 'No client is linked. Link clients from "Customer app".'),
-                style: const TextStyle(color: VC.muted))
-            : Wrap(spacing: 8, runSpacing: 8, children: [
-                for (final c in vList(d['clients']))
-                  VPill(vStr(c['name']), color: vBool(c['approved']) ? VC.ok : VC.muted, icon: vBool(c['approved']) ? Icons.verified_outlined : Icons.hourglass_empty),
-              ]),
-      ),
+      _branchesPanel(d),
     ]);
+  }
+
+  static String? _visitorId(VJson d) {
+    for (final c in vList(d['clients'])) {
+      if (c['system_kind'] == 'visitor') return vStr(c['id']);
+    }
+    return null;
+  }
+
+  static String _branchLabel(BuildContext ctx, VJson c) => switch (c['system_kind']) {
+        'visitor' => '${vStr(c['name'])}  ·  ${tx(ctx, 'افتِراضيّ', 'default')}',
+        'vip' => '${vStr(c['name'])}  ·  ${tx(ctx, 'زِرّ VIP', 'VIP switch')}',
+        _ => vStr(c['name']),
+      };
+
+  /// Branches of the point in display order (Visitor / VIP are system branches linked to every point).
+  Widget _branchesPanel(VJson d) {
+    final list = vList(d['clients']);
+    Future<void> move(int i, int by) async {
+      final ids = [for (final c in list) vStr(c['id'])];
+      final j = i + by;
+      if (j < 0 || j >= ids.length) return;
+      final t = ids[i];
+      ids[i] = ids[j];
+      ids[j] = t;
+      await _save('vva_client_sort_save', {'p_point': widget.pointId, 'p_order': ids});
+    }
+
+    return VPanel(
+      title: tx(context, 'فُروع هذه النُقطة · تَرتيب الظُهور', 'Branches at this point · display order'),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(
+          tx(context,
+              'التَذكَرة الجَديدة تَبدأ على Visitor ولا يُغَيِّرها المُوَظَّف؛ عِند عَمَل فاليديشن مِن تَطبيق العُمَلاء تَتَحَوَّل إلى الفَرع الّذي قام بها وبِسِعره. VIP يَظهَر في التَطبيق فَقَط إذا كان له سِعر في هذه النُقطة. ضَع أَسعار Visitor وVIP لِكُلّ نُقطة مِن تَبويب "الأَسعار".',
+              'A new ticket starts on Visitor and the staff cannot change it; a validation from the customer app moves it to that branch and its price. VIP shows in the app only when it has a price at this point. Set the Visitor and VIP prices of each point in the "Prices" tab.'),
+          style: const TextStyle(color: VC.muted, fontSize: 12.5),
+        ),
+        const SizedBox(height: 10),
+        if (list.isEmpty)
+          Text(tx(context, 'لا يُوجَد فَرع مَربوط.', 'No branch is linked.'), style: const TextStyle(color: VC.muted))
+        else
+          for (var i = 0; i < list.length; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(children: [
+                SizedBox(width: 28, child: Text('${i + 1}', style: const TextStyle(fontWeight: FontWeight.w700, color: VC.muted))),
+                Icon(
+                    switch (list[i]['system_kind']) {
+                      'visitor' => Icons.directions_walk,
+                      'vip' => Icons.workspace_premium_outlined,
+                      _ => Icons.storefront_outlined,
+                    },
+                    size: 18,
+                    color: list[i]['system_kind'] == null ? VC.muted : VC.gold),
+                const SizedBox(width: 8),
+                Expanded(child: Text(vStr(list[i]['name']), style: const TextStyle(fontWeight: FontWeight.w600))),
+                if (list[i]['system_kind'] == 'visitor') VPill(tx(context, 'افتِراضيّ', 'Default'), color: VC.ok),
+                if (list[i]['system_kind'] == 'vip') const VPill('VIP', color: VC.gold),
+                if (list[i]['system_kind'] == null)
+                  VPill(vBool(list[i]['approved']) ? tx(context, 'مُعتَمَد', 'Approved') : tx(context, 'غَير مُعتَمَد', 'Not approved'),
+                      color: vBool(list[i]['approved']) ? VC.ok : VC.muted),
+                if (_edit) ...[
+                  const SizedBox(width: 6),
+                  IconButton(
+                      tooltip: tx(context, 'أَعلى', 'Up'),
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.arrow_upward, size: 18),
+                      onPressed: i == 0 ? null : () => move(i, -1)),
+                  IconButton(
+                      tooltip: tx(context, 'أَسفَل', 'Down'),
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.arrow_downward, size: 18),
+                      onPressed: i == list.length - 1 ? null : () => move(i, 1)),
+                ],
+              ]),
+            ),
+      ]),
+    );
   }
 
   Widget _field(TextEditingController c, String label, {String? help, double width = 280, bool number = false}) => SizedBox(
@@ -449,7 +518,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     bool incl = p == null ? true : (p['vat_included'] as bool? ?? true);
     final total = TextEditingController(text: p == null ? '' : vNum(incl ? p['total'] : p['price']).toString());
     final notes = TextEditingController(text: vStr(p?['notes']));
-    String? site = p?['site_id'] as String?;
+    String? site = (p?['site_id'] as String?) ?? _visitorId(d);
     bool active = p == null ? true : vBool(p['is_active']);
     final days = {...vDays(p?['days'])};
     final clients = vList(d['clients']);
@@ -527,8 +596,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         isExpanded: true,
         decoration: InputDecoration(labelText: tx(ctx, 'لِمَن', 'For')),
         items: [
-          DropdownMenuItem(value: null, child: Text(tx(ctx, 'كُلّ العُمَلاء (سِعر النُقطة)', 'All customers (point price)'))),
-          for (final c in clients) DropdownMenuItem(value: vStr(c['id']), child: Text(vStr(c['name']))),
+          if (site == null) DropdownMenuItem(value: null, child: Text(tx(ctx, 'كُلّ العُمَلاء (سِعر النُقطة)', 'All customers (point price)'))),
+          for (final c in clients) DropdownMenuItem(value: vStr(c['id']), child: Text(_branchLabel(ctx, c))),
         ],
         onChanged: onChanged,
       );
@@ -578,7 +647,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final first = g?.first;
     final name = TextEditingController(text: first == null ? 'HOURLY' : vStr(first['ticket_name']));
     final notes = TextEditingController(text: vStr(first?['notes']));
-    String? site = first?['site_id'] as String?;
+    String? site = (first?['site_id'] as String?) ?? _visitorId(d);
     bool active = first == null ? true : vBool(first['is_active']);
     final days = {...vDays(first?['days'])};
     // saved rows -> bands (amounts incl. VAT), then each band shown the way it was typed
@@ -838,8 +907,17 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final vipFields = [('ticket_name', tx(context, 'الاسم', 'Name'), false), ('ticket_price', tx(context, 'السِعر (AED)', 'Price (AED)'), true)];
     final planFields = [('name', tx(context, 'الاسم', 'Name'), false), ('price', tx(context, 'السِعر (AED)', 'Price (AED)'), true)];
     return _page([
+      if (vList(d['vip_prices']).isEmpty)
+        VPanel(
+          title: tx(context, 'أَسعار VIP', 'VIP prices'),
+          child: Text(
+              tx(context, 'أَسعار VIP أَصبَحَت أَسعار فَرع VIP في تَبويب "الأَسعار" (ثابِت أَو بِالساعة، لِكُلّ نُقطة).',
+                  'VIP prices are now the prices of the VIP branch in the "Prices" tab (fixed or hourly, per point).'),
+              style: const TextStyle(color: VC.muted)),
+        )
+      else
       VPanel(
-        title: tx(context, 'أَسعار VIP', 'VIP prices'),
+        title: tx(context, 'أَسعار VIP (قَديمة)', 'VIP prices (old)'),
         actions: [if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'إضافة', 'Add')), onPressed: () => _simple('vip_price', null, vipFields))],
         child: VTable(
           columns: [
