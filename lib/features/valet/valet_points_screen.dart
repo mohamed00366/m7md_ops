@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'valet_admin.dart';
 import 'valet_hourly.dart';
 import 'valet_parking_screen.dart';
+import 'valet_ticket_parts.dart';
 import 'valet_ui.dart';
 
 /// 🏪 تَطبيق الفاليه — إعدادات كُلّ نُقطة: المَزايا، الأَسعار، VIP، العُضويّات،
@@ -299,6 +300,14 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ]),
       ),
       _branchesPanel(d),
+      TicketPartsPanel(
+        value: s['ticket_parts'],
+        edit: _edit,
+        onSave: (parts) => _save('vva_point_settings_save', {
+          'p_point': widget.pointId,
+          'p_data': {'ticket_parts': parts},
+        }),
+      ),
     ]);
   }
 
