@@ -226,8 +226,19 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final lost = TextEditingController(text: vNum(s['lost_ticket_price']).toString());
     final night = TextEditingController(text: vNum(s['over_night_price']).toString());
     final freeMin = TextEditingController(text: vNum(s['free_minutes']).toInt().toString());
+    String hm(dynamic v, String d) {
+      final x = vStr(v);
+      return RegExp(r'^\d{1,2}:\d{2}').hasMatch(x) ? x.substring(0, x.indexOf(':') + 3) : d;
+    }
+    final onAt = TextEditingController(text: hm(s['over_night_at'], '00:00'));
+    final onFrom = TextEditingController(text: hm(s['over_night_from'], '00:00'));
+    final onTo = TextEditingController(text: hm(s['over_night_to'], '06:00'));
+    final onHours = TextEditingController(text: vNum(s['over_night_hours']) > 0 ? '${vNum(s['over_night_hours'])}' : '12');
+    final onRule = const {'cutoff', 'window', 'hours'}.contains(vStr(s['over_night_rule'])) ? vStr(s['over_night_rule']) : 'cutoff';
+    String? okTime(String v) => RegExp(r'^([01]?\d|2[0-3]):[0-5]\d$').hasMatch(v.trim()) ? v.trim() : null;
     final vat = TextEditingController(text: (vNum(s['vat_rate']) * 100).toStringAsFixed(2));
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
+    void toggleValue(String k, Object v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     final flags = {for (final f in _flags(context)) f.$1: f};
     Widget sw(String k) {
       final f = flags[k]!;
@@ -400,6 +411,10 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                   'lost_ticket_price': num.tryParse(lost.text) ?? 0,
                   'over_night_price': num.tryParse(night.text) ?? 0,
                   'free_minutes': (int.tryParse(freeMin.text.trim()) ?? 0).clamp(0, 600),
+                  if (okTime(onAt.text) != null) 'over_night_at': okTime(onAt.text),
+                  if (okTime(onFrom.text) != null) 'over_night_from': okTime(onFrom.text),
+                  if (okTime(onTo.text) != null) 'over_night_to': okTime(onTo.text),
+                  if ((num.tryParse(onHours.text.trim()) ?? 0) > 0) 'over_night_hours': num.parse(onHours.text.trim()),
                 },
               }),
             ),
@@ -435,6 +450,42 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               Expanded(child: _field(night, tx(context, 'رَسم المَبيت (AED)', 'Overnight fee (AED)'), number: true)),
             ]),
           ),
+          if (vBool(s['over_night_enabled']))
+            SizedBox(
+              width: 560,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tx(context, 'مَتى تَكون التَذكَرة مَبيت؟ (تَوقيت دُبَي)', 'When is a ticket overnight? (Dubai time)'),
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(value: 'cutoff', icon: const Icon(Icons.schedule), label: Text(tx(context, 'بَعد ساعة مُعَيَّنة', 'After a set hour'))),
+                    ButtonSegment(value: 'window', icon: const Icon(Icons.date_range), label: Text(tx(context, 'فَترة بَين وَقتَين', 'Between two times'))),
+                    ButtonSegment(value: 'hours', icon: const Icon(Icons.timelapse), label: Text(tx(context, 'عَدد ساعات', 'Total hours'))),
+                  ],
+                  selected: {onRule},
+                  onSelectionChanged: !_edit ? null : (v) => toggleValue('over_night_rule', v.first),
+                ),
+                const SizedBox(height: 10),
+                Wrap(spacing: 12, runSpacing: 10, children: [
+                  if (onRule == 'cutoff')
+                    _field(onAt, tx(context, 'السَيّارة ما زالَت داخِل السّاعة', 'Still parked at (HH:MM)'),
+                        help: tx(context, 'مَثَلاً 02:00 – رَسم لِكُلّ لَيلة', 'e.g. 02:00 – one fee per night'), width: 260),
+                  if (onRule == 'window') ...[
+                    _field(onFrom, tx(context, 'مِن (HH:MM)', 'From (HH:MM)'), width: 160),
+                    _field(onTo, tx(context, 'إلى (HH:MM)', 'To (HH:MM)'),
+                        help: tx(context, 'قَد تَتَخَطّى مُنتَصَف اللَيل، مَثَلاً 22:00 – 05:00', 'May cross midnight, e.g. 22:00 – 05:00'), width: 300),
+                  ],
+                  if (onRule == 'hours')
+                    _field(onHours, tx(context, 'عَدد الساعات', 'Hours parked'),
+                        help: tx(context, 'رَسم لِكُلّ عَدد ساعات كامِل، مَثَلاً 12', 'One fee for every full N hours, e.g. 12'), width: 260, number: true),
+                ]),
+                const SizedBox(height: 4),
+                Text(tx(context, 'يُضاف الرَسم في شاشة الدَفع كَبَند مُستَقِلّ (مِثل الكَرت المَفقود). اِضغَط حِفظ بَعد تَعديل الأَوقات.',
+                        'The fee is added on the payment screen as its own line (like the lost card). Press Save after changing the times.'),
+                    style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+              ]),
+            ),
           SizedBox(
             width: 360,
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
