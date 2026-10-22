@@ -20,6 +20,7 @@ class ValetAdmin extends ChangeNotifier {
   static const permTickets = 'valet.tickets.manage';
   static const permCreditRequest = 'valet.credit.request';
   static const permCreditApprove = 'valet.credit.approve';
+  static const permManualApprove = 'valet.manual.approve';
 
   static const _k = 'valet_admin_token';
 

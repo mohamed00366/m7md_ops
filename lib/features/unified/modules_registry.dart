@@ -85,6 +85,7 @@ import '../valet/valet_points_screen.dart';
 import '../valet/valet_reports_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_credits_screen.dart';
+import '../valet/valet_manual_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
@@ -335,6 +336,16 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetCreditsScreen(),
+        ),
+        AppModule(
+          key: 'valet_manual',
+          titleAr: 'التذاكر الورقية',
+          titleEn: 'Paper tickets',
+          icon: Icons.receipt_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetManualApprove,
+          builder: (_) => const ValetManualScreen(),
         ),
         AppModule(
           key: 'valet_keyrack',

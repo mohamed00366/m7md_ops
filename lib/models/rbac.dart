@@ -749,6 +749,8 @@ class P {
   static const valetCreditRequest = 'valet.credit.request';
   /// المُوافَقة عَلى الإشعارات الدائِنة (لَيس عَلى طَلَبك)
   static const valetCreditApprove = 'valet.credit.approve';
+  /// اعتِماد التَذاكِر الوَرَقيّة (لَيس ما أَدخَلتَه أَنت)
+  static const valetManualApprove = 'valet.manual.approve';
 
   // ===== 🆕 Point Terminal (جِهاز نُقطة الدَوام) =====
   /// عَرض حِسابات Point Terminal في شاشة Points

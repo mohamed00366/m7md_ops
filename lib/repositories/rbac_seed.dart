@@ -775,6 +775,7 @@ RbacSeedResult seedRbac(String Function() generateId,
     perm(P.valetTicketsManage, 'valet', 'إلغاء التذاكر وإغلاق الورديات', 'Void tickets & force-close shifts'),
     perm(P.valetCreditRequest, 'valet', 'طلب إشعار دائن لتذكرة', 'Request ticket credit notes'),
     perm(P.valetCreditApprove, 'valet', 'الموافقة على الإشعارات الدائنة', 'Approve credit notes'),
+    perm(P.valetManualApprove, 'valet', 'اعتماد التذاكر الورقية', 'Approve manual tickets'),
 
     // 🆕 جِهاز نُقطة الدَوام (Point Terminal)
     perm(P.pointTerminalView, 'point_terminal',
