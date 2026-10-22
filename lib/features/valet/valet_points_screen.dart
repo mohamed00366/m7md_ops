@@ -187,6 +187,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('show_membership', 'العُضويّات', 'Memberships', 'بَيع وَمُتابَعة العُضويّات الشَهريّة', 'Sell and check monthly members'),
         ('member_card_normal', 'كَرت العُضويّة عَلى التَذكَرة', 'Member card on tickets', 'خانة كَرت العُضو في إضافة تَذكَرة', 'Member card field on Add ticket'),
         ('member_card_gold', 'الكَرت الذَهَبيّ عَلى التَذكَرة', 'Gold card on tickets', 'خانة الكَرت الذَهَبيّ في إضافة تَذكَرة', 'Gold card field on Add ticket'),
+        ('staff_eval', 'تَقييم المُوَظَّفين', 'Staff ratings', 'المُشرِف الذي يَفتَح الوَرديّة يُقَيِّم مُوَظَّفي النُقطة (نَفس تَقييمات الداشبورد)', 'The supervisor who opens the shift rates the point staff (same ratings as the dashboard)'),
         ('paid_with_app_or_keyrack', 'الدَفع في تَطبيق المَفاتيح', 'Payment at the key rack', 'العَميل يَدفَع عِند مُتَحَكِّم المَفاتيح', 'The customer pays at the key controller'),
       ];
 
@@ -198,6 +199,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     'price_group_customer': Icons.sell_outlined,
     'stamp_ticket': Icons.approval_outlined,
     'valet_validate': Icons.verified_outlined,
+    'staff_eval': Icons.star_rate_rounded,
     'photo_in_out': Icons.photo_camera_outlined,
     'nfc_qr_in_out': Icons.nfc_rounded,
     'used_card_manual': Icons.qr_code_scanner_rounded,
@@ -320,6 +322,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           'دُخول المُوَظَّفين لِلتَطبيق وَتَسجيل الحُضور.', 'How staff sign in and check in / out.', [
         sw('sinin_w_card'),
         sw('dropdown_time_in_out'),
+        sw('staff_eval'),
       ]),
       section(Icons.key_outlined, 'تَطبيق المَفاتيح', 'Key rack',
           'مُتَحَكِّم المَفاتيح وَالدَفع عِنده.', 'The key controller and paying at the key rack.', [
