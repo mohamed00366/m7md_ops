@@ -175,19 +175,19 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('price_group_customer', 'أَسعار النُقطة لِكُلّ العُمَلاء', 'Point prices for every client', 'إيقاف = كُلّ عَميل بِأَسعاره', 'Off = each client uses its own prices'),
         ('stamp_ticket', 'تَذاكِر الخَتم', 'Stamp tickets', 'زِرّ في شاشة الدَفع: تَذكَرة مَجّانيّة بِصورة خَتم العَميل', 'Check-out button: free ticket with a stamp photo'),
         ('valet_validate', 'زِرّ "Validate for a client"', '"Validate for a client" button', 'في شاشة الدَفع: المُوَظَّف يَعمَل فاليديشن لِعَميل', 'On the check-out screen: the staff validates for a client'),
-        ('photo_in_out', 'صورة السَيّارة عَلى التَذكَرة', 'Car photo on the ticket', '', ''),
-        ('nfc_qr_in_out', 'كَرت التَذكَرة (NFC / QR) عِند الدُخول', 'Ticket card (NFC / QR) on entry', '', ''),
+        ('photo_in_out', 'صورة السَيّارة عَلى التَذكَرة', 'Car photo on the ticket', 'زِرّ الكاميرا في إضافة تَذكَرة: يَقرَأ اللَوحة وَالنَوع وَاللَون', 'Camera button on Add ticket: reads plate, type and colour'),
+        ('nfc_qr_in_out', 'كَرت التَذكَرة (NFC / QR) عِند الدُخول', 'Ticket card (NFC / QR) on entry', 'يُربَط كَرت بِكُلّ تَذكَرة؛ العَميل يُمَرِّره عَلى هاتِفه لِطَلَب سَيّارَته', 'A card is linked to each ticket; the customer taps it on a phone to request the car'),
         ('used_card_manual', 'الجِهاز يَختار NFC أَو QR', 'Device may choose NFC or QR', '', ''),
-        ('drivers_in', 'تَسجيل السائِق الذي يَصُفّ السَيّارة', 'Record the parking driver', '', ''),
-        ('drivers_out', 'تَسجيل السائِق الذي يُحضِر السَيّارة', 'Record the delivering driver', '', ''),
-        ('parking_in_out', 'المَوقِف وَرَقمه', 'Parking area and number', '', ''),
+        ('drivers_in', 'تَسجيل السائِق الذي يَصُفّ السَيّارة', 'Record the parking driver', 'مَطلوب عِند إضافة التَذكَرة', 'Required when adding the ticket'),
+        ('drivers_out', 'تَسجيل السائِق الذي يُحضِر السَيّارة', 'Record the delivering driver', 'مَطلوب قَبل تَسليم السَيّارة', 'Required before the car is handed back'),
+        ('parking_in_out', 'المَوقِف وَرَقمه', 'Parking area and number', 'المُوَظَّف يَختار مَكان الصَفّ وَرَقمه', 'The staff picks where the car is parked'),
         ('dropdown_parkingcar', 'اختيار سائِق الصَفّ مِن قائِمة', 'Pick the parking driver from a list', 'إيقاف = مَسح كَرت السائِق', 'Off = scan the driver card'),
         ('dropdown_time_in_out', 'اختيار السائِقين مِن قائِمة لِلحُضور', 'Pick drivers from a list for check-in / out', 'إيقاف = مَسح كَرت السائِق', 'Off = scan the driver card'),
-        ('drivers_nfc_qr', 'كُروت السائِقين (NFC / QR)', 'Driver cards (NFC / QR)', '', ''),
+        ('drivers_nfc_qr', 'كُروت السائِقين (NFC / QR)', 'Driver cards (NFC / QR)', 'السائِق يُعَرِّف نَفسه بِكَرته', 'Drivers identify themselves with their card'),
         ('show_membership', 'العُضويّات', 'Memberships', 'بَيع وَمُتابَعة العُضويّات الشَهريّة', 'Sell and check monthly members'),
-        ('member_card_normal', 'كَرت العُضويّة عَلى التَذكَرة', 'Member card on tickets', '', ''),
-        ('member_card_gold', 'الكَرت الذَهَبيّ عَلى التَذكَرة', 'Gold card on tickets', '', ''),
-        ('paid_with_app_or_keyrack', 'الدَفع في تَطبيق المَفاتيح', 'Payment at the key rack', '', ''),
+        ('member_card_normal', 'كَرت العُضويّة عَلى التَذكَرة', 'Member card on tickets', 'خانة كَرت العُضو في إضافة تَذكَرة', 'Member card field on Add ticket'),
+        ('member_card_gold', 'الكَرت الذَهَبيّ عَلى التَذكَرة', 'Gold card on tickets', 'خانة الكَرت الذَهَبيّ في إضافة تَذكَرة', 'Gold card field on Add ticket'),
+        ('paid_with_app_or_keyrack', 'الدَفع في تَطبيق المَفاتيح', 'Payment at the key rack', 'العَميل يَدفَع عِند مُتَحَكِّم المَفاتيح', 'The customer pays at the key controller'),
       ];
 
   static const _flagIcons = <String, IconData>{
@@ -221,33 +221,117 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final night = TextEditingController(text: vNum(s['over_night_price']).toString());
     final vat = TextEditingController(text: (vNum(s['vat_rate']) * 100).toStringAsFixed(2));
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
-    return _page([
-      VPanel(
-        title: tx(context, 'مَزايا التَطبيقات في هذه النُقطة', 'Features of the apps at this point'),
-        child: Wrap(spacing: 16, runSpacing: 2, children: [
-          for (final f in _flags(context))
-            SizedBox(
-              width: 500,
-              child: SwitchListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                secondary: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: (vBool(s[f.$1]) ? VC.gold : VC.muted).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(_flagIcons[f.$1] ?? Icons.tune_rounded, size: 20, color: vBool(s[f.$1]) ? VC.gold : VC.muted),
-                ),
-                title: Text(tx(context, f.$2, f.$3), style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: f.$4.isEmpty ? null : Text(tx(context, f.$4, f.$5)),
-                value: vBool(s[f.$1]),
-                onChanged: !_edit ? null : (v) => toggle(f.$1, v),
-              ),
+    final flags = {for (final f in _flags(context)) f.$1: f};
+    Widget sw(String k) {
+      final f = flags[k]!;
+      return SizedBox(
+        width: 470,
+        child: SwitchListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          secondary: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: (vBool(s[k]) ? VC.gold : VC.muted).withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
             ),
-        ]),
-      ),
+            child: Icon(_flagIcons[k] ?? Icons.tune_rounded, size: 20, color: vBool(s[k]) ? VC.gold : VC.muted),
+          ),
+          title: Text(tx(context, f.$2, f.$3), style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: f.$4.isEmpty ? null : Text(tx(context, f.$4, f.$5)),
+          value: vBool(s[k]),
+          onChanged: !_edit ? null : (v) => toggle(k, v),
+        ),
+      );
+    }
+
+    Widget section(IconData icon, String ar, String en, String noteAr, String noteEn, List<Widget> children) => VPanel(
+          title: tx(context, ar, en),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(icon, size: 18, color: VC.gold),
+              const SizedBox(width: 8),
+              Expanded(child: Text(tx(context, noteAr, noteEn), style: const TextStyle(color: VC.muted, fontSize: 12.5))),
+            ]),
+            const SizedBox(height: 6),
+            Wrap(spacing: 16, runSpacing: 2, children: children),
+          ]),
+        );
+
+    // NFC / QR for the whole point (replaces the device switch)
+    final reader = vStr(s['card_reader']).isNotEmpty ? vStr(s['card_reader']) : (vBool(s['used_card_manual']) ? 'device' : 'nfc');
+    Widget readerPicker() => SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tx(context, 'قِراءة كُروت التَذاكِر', 'Ticket cards are read with'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 6),
+              SegmentedButton<String>(
+                segments: [
+                  const ButtonSegment(value: 'nfc', icon: Icon(Icons.nfc_rounded), label: Text('NFC')),
+                  const ButtonSegment(value: 'qr', icon: Icon(Icons.qr_code_scanner_rounded), label: Text('QR')),
+                  ButtonSegment(value: 'device', icon: const Icon(Icons.phone_android), label: Text(tx(context, 'كُلّ جِهاز يَختار', 'Each device'))),
+                ],
+                selected: {reader},
+                onSelectionChanged: !_edit
+                    ? null
+                    : (v) => _save('vva_point_settings_save', {
+                          'p_point': widget.pointId,
+                          'p_data': v.first == 'device'
+                              ? {'card_reader': null, 'used_card_manual': true}
+                              : {'card_reader': v.first, 'used_card_manual': false},
+                        }),
+              ),
+            ]),
+          ),
+        );
+
+    return _page([
+      section(Icons.add_box_outlined, 'صَفحة إضافة تَذكَرة', 'Add ticket page',
+          'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة. صورة السَيّارة تَقرَأ اللَوحة وَنَوع السَيّارة وَلَونها تِلقائيّاً.',
+          'What the staff fill in when receiving a car. The car photo reads the plate, type and colour automatically.', [
+        sw('photo_in_out'),
+        sw('nfc_qr_in_out'),
+        sw('price_group_customer'),
+        sw('drivers_in'),
+        sw('dropdown_parkingcar'),
+        sw('parking_in_out'),
+      ]),
+      section(Icons.contactless_outlined, 'الكُروت (NFC / QR)', 'Cards (NFC / QR)',
+          'طَريقة قِراءة كُروت التَذاكِر وَكُروت السائِقين في كُلّ أَجهِزة هذه النُقطة — لا يوجَد زِرّ لِذلك في التَطبيق.',
+          'How ticket cards and driver cards are read on every device of this point — there is no switch for it in the app.', [
+        readerPicker(),
+        sw('drivers_nfc_qr'),
+      ]),
+      section(Icons.point_of_sale_outlined, 'الدَفع وَالخُروج', 'Payment and check-out',
+          'أَزرار شاشة الدَفع وَطَريقة الدَفع في الوَرديّة.', 'Buttons of the payment screen and how the shift collects money.', [
+        sw('paid_first_or_paid_after'),
+        sw('valet_validate'),
+        sw('stamp_ticket'),
+        sw('drivers_out'),
+      ]),
+      section(Icons.person_pin_circle_outlined, 'العُمَلاء', 'Customers',
+          'ما يَستَطيع عَميل السَيّارة فِعله مِن هاتِفه.', 'What the car owner can do from their phone.', [
+        sw('car_request'),
+      ]),
+      section(Icons.badge_outlined, 'المُوَظَّفون وَالحُضور', 'Staff and attendance',
+          'دُخول المُوَظَّفين لِلتَطبيق وَتَسجيل الحُضور.', 'How staff sign in and check in / out.', [
+        sw('sinin_w_card'),
+        sw('dropdown_time_in_out'),
+      ]),
+      section(Icons.key_outlined, 'تَطبيق المَفاتيح', 'Key rack',
+          'مُتَحَكِّم المَفاتيح وَالدَفع عِنده.', 'The key controller and paying at the key rack.', [
+        sw('key_rack_w_sites_or_allow'),
+        sw('paid_with_app_or_keyrack'),
+      ]),
+      section(Icons.card_membership_outlined, 'العُضويّات', 'Memberships',
+          'بَيع العُضويّات وَكُروتها عَلى التَذاكِر.', 'Selling memberships and member cards on tickets.', [
+        sw('show_membership'),
+        sw('member_card_normal'),
+        sw('member_card_gold'),
+      ]),
       VPanel(
         title: tx(context, 'التَذاكِر وَالرُسوم', 'Tickets and charges'),
         actions: [
