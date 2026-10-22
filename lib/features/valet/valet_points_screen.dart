@@ -225,6 +225,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final desc = TextEditingController(text: vStr(s['description']));
     final lost = TextEditingController(text: vNum(s['lost_ticket_price']).toString());
     final night = TextEditingController(text: vNum(s['over_night_price']).toString());
+    final freeMin = TextEditingController(text: vNum(s['free_minutes']).toInt().toString());
     final vat = TextEditingController(text: (vNum(s['vat_rate']) * 100).toStringAsFixed(2));
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     final flags = {for (final f in _flags(context)) f.$1: f};
@@ -398,6 +399,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                   'description': desc.text,
                   'lost_ticket_price': num.tryParse(lost.text) ?? 0,
                   'over_night_price': num.tryParse(night.text) ?? 0,
+                  'free_minutes': (int.tryParse(freeMin.text.trim()) ?? 0).clamp(0, 600),
                 },
               }),
             ),
@@ -431,6 +433,21 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               Switch(value: vBool(s['over_night_enabled']), onChanged: !_edit ? null : (v) => toggle('over_night_enabled', v)),
               const SizedBox(width: 8),
               Expanded(child: _field(night, tx(context, 'رَسم المَبيت (AED)', 'Overnight fee (AED)'), number: true)),
+            ]),
+          ),
+          SizedBox(
+            width: 360,
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10, right: 8),
+                child: Icon(Icons.timer_outlined, color: vNum(s['free_minutes']) > 0 ? VC.gold : VC.muted),
+              ),
+              Expanded(
+                child: _field(freeMin, tx(context, 'مَجّانيّة إذا خَرَجَت خِلال (دَقيقة)', 'Free if the car leaves within (minutes)'),
+                    number: true,
+                    help: tx(context, '0 = إيقاف · مِثال 10: التَذكَرة مَجّانيّة لَو خَرَجَت السَيّارة خِلال 10 دَقائِق',
+                        '0 = off · e.g. 10: the ticket is free when the car leaves within 10 minutes')),
+              ),
             ]),
           ),
         ]),
