@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/enums.dart';
 import '../../models/lookups.dart';
 import '../../models/models.dart';
+import '../../models/policies.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
 import '../../repositories/rbac_seed.dart';
@@ -161,6 +162,7 @@ class SupabaseDataService {
         syncRoomEvaluations(),
         syncEmployeeEvaluations(),
         syncDriverEvaluations(),
+        syncPolicies(),
       ]);
 
       M7Log.info('DataService', 'Phase 3 (operational data) done — fully synced');
@@ -6418,6 +6420,55 @@ class SupabaseDataService {
       lastError = ex.toString();
       M7Log.error('DataService', 'createRoomEvaluation', error: ex);
       return null;
+    }
+  }
+
+  // ==========================================================
+  // 🆕 Company policies (company_policies) — shared with the valet app
+  // ==========================================================
+  Future<void> syncPolicies() async {
+    if (!_supabase.isReady) return;
+    try {
+      final rows = await _c.from('company_policies').select().eq('is_active', true).order('sort');
+      final list = (rows as List).cast<Map<String, dynamic>>();
+      if (list.isEmpty) return; // table not installed / empty → keep the built-in policies
+      _repo.policies
+        ..clear()
+        ..addAll(list.map(PolicyDb.fromRow));
+      _repo.notifyListeners();
+    } catch (e) {
+      M7Log.error('DataService', 'syncPolicies', error: e);
+    }
+  }
+
+  Future<bool> savePolicy(Policy p) async {
+    if (!_supabase.isReady) return false;
+    try {
+      var sort = _repo.policies.indexWhere((x) => x.id == p.id);
+      if (sort < 0) sort = _repo.policies.length;
+      await _c.from('company_policies').upsert(p.toRow(sort + 1));
+      lastError = null;
+      await AuditLogger.instance.log(
+        entityType: 'policy', entityId: p.id, entityLabel: p.titleEn, action: AuditAction.update);
+      return true;
+    } catch (e) {
+      lastError = e.toString();
+      M7Log.error('DataService', 'savePolicy', error: e);
+      return false;
+    }
+  }
+
+  Future<bool> deletePolicyRemote(String id) async {
+    if (!_supabase.isReady) return false;
+    try {
+      await _c.from('company_policies').delete().eq('id', id);
+      lastError = null;
+      await AuditLogger.instance.log(entityType: 'policy', entityId: id, action: AuditAction.delete);
+      return true;
+    } catch (e) {
+      lastError = e.toString();
+      M7Log.error('DataService', 'deletePolicyRemote', error: e);
+      return false;
     }
   }
 

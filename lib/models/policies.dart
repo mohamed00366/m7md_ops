@@ -148,3 +148,80 @@ class Policy {
     return false;
   }
 }
+
+
+// ============================================================
+// 🆕 DB (company_policies) — shared with the valet app
+// ============================================================
+const Map<String, IconData> policyIconKeys = {
+  'access_time': Icons.access_time,
+  'checklist': Icons.checklist,
+  'warning': Icons.warning_amber,
+  'event': Icons.event_available,
+  'assignment': Icons.assignment_turned_in_outlined,
+  'timer': Icons.timer_outlined,
+  'home': Icons.home_outlined,
+  'laundry': Icons.local_laundry_service_outlined,
+  'checkroom': Icons.checkroom_outlined,
+  'handshake': Icons.handshake_outlined,
+  'fire': Icons.local_fire_department_outlined,
+  'phone': Icons.phone_in_talk_outlined,
+  'article': Icons.article_outlined,
+};
+
+String policyIconKey(IconData i) {
+  for (final e in policyIconKeys.entries) {
+    if (e.value.codePoint == i.codePoint) return e.key;
+  }
+  return 'article';
+}
+
+extension PolicyDb on Policy {
+  Map<String, dynamic> toRow(int sort) => {
+        'id': id,
+        'category': category.name,
+        'title_ar': titleAr,
+        'title_en': titleEn,
+        'summary_ar': summaryAr,
+        'summary_en': summaryEn,
+        'sort': sort,
+        'sections': [
+          for (final s in sections)
+            {
+              'title_ar': s.titleAr,
+              'title_en': s.titleEn,
+              'icon': policyIconKey(s.icon),
+              'body_ar': s.bodyAr,
+              'body_en': s.bodyEn,
+              'steps_ar': s.stepsAr,
+              'steps_en': s.stepsEn,
+            },
+        ],
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      };
+
+  static Policy fromRow(Map<String, dynamic> r) {
+    List<String> l(dynamic v) => (v as List? ?? const []).map((e) => '$e').toList();
+    return Policy(
+      id: r['id'] as String,
+      titleAr: (r['title_ar'] as String?) ?? '',
+      titleEn: (r['title_en'] as String?) ?? '',
+      summaryAr: (r['summary_ar'] as String?) ?? '',
+      summaryEn: (r['summary_en'] as String?) ?? '',
+      category: PolicyCategory.values.firstWhere((c) => c.name == r['category'], orElse: () => PolicyCategory.other),
+      updatedAt: DateTime.tryParse('${r['updated_at']}')?.toLocal() ?? DateTime.now(),
+      sections: [
+        for (final s in (r['sections'] as List? ?? const []).whereType<Map>())
+          PolicySection(
+            titleAr: (s['title_ar'] as String?) ?? '',
+            titleEn: (s['title_en'] as String?) ?? '',
+            icon: policyIconKeys[s['icon']] ?? Icons.article_outlined,
+            bodyAr: s['body_ar'] as String?,
+            bodyEn: s['body_en'] as String?,
+            stepsAr: l(s['steps_ar']),
+            stepsEn: l(s['steps_en']),
+          ),
+      ],
+    );
+  }
+}

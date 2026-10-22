@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/policies.dart';
 import '../../models/rbac.dart';
 import '../../repositories/mock_repository.dart';
+import '../../core/services/supabase_data_service.dart';
 import 'policy_editor_sheet.dart';
 
 /// شاشة السياسات المشتركة - تُستخدم في كل تطبيقات الأدوار
@@ -23,6 +24,13 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   PolicyCategory? _selectedCategory; // null = الكل
   String _query = '';
   final _expandedIds = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    // 🆕 latest policies from the DB
+    SupabaseDataService().syncPolicies();
+  }
 
   @override
   void dispose() {
@@ -43,6 +51,15 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
     );
     if (result == null) return;
     final repo = MockRepository();
+    // 🆕 saved in the DB (company_policies) — the valet app shows the same policies
+    final ds = SupabaseDataService();
+    if (!await ds.savePolicy(result) && ds.lastError != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: AppColors.danger,
+        content: Text(ds.lastError!),
+      ));
+      return;
+    }
     if (policy == null) {
       repo.addPolicy(result);
       M7Log.info('Policies', 'created policy ${result.id}');
@@ -99,6 +116,16 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       ),
     );
     if (confirmed == true) {
+      final ds = SupabaseDataService();
+      if (!await ds.deletePolicyRemote(policy.id) && ds.lastError != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: AppColors.danger,
+            content: Text(ds.lastError!),
+          ));
+        }
+        return;
+      }
       MockRepository().deletePolicy(policy.id);
       M7Log.info('Policies', 'deleted policy ${policy.id}');
       if (mounted) {
