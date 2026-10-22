@@ -27,10 +27,13 @@ class _ContractsBody extends StatefulWidget {
 }
 
 class _ContractsBodyState extends State<_ContractsBody> {
-  static const _tabs = ['active', 'due', 'draft', 'new_sites', 'ended', 'all'];
+  static const _tabs = ['active', 'due', 'staffing', 'draft', 'new_sites', 'ended', 'all'];
   String _tab = 'active';
   final _q = TextEditingController();
   VJson? _d;
+  VJson? _s; // staffing check
+  int _days = 14;
+  bool _onlyShort = false;
   Object? _err;
   bool _busy = false;
 
@@ -43,6 +46,14 @@ class _ContractsBodyState extends State<_ContractsBody> {
   Future<void> _load() async {
     setState(() => _busy = true);
     try {
+      if (_tab == 'staffing') {
+        final now = DateTime.now();
+        final s = await ValetAdmin.I.call('vva_contract_staffing',
+            {'p_from': VF.iso(now.subtract(Duration(days: _days - 1))), 'p_to': VF.iso(now)});
+        _d ??= await ValetAdmin.I.call('vva_contracts', {'p_tab': 'active', 'p_q': ''});
+        if (mounted) setState(() { _s = s; _err = null; });
+        return;
+      }
       final d = await ValetAdmin.I.call('vva_contracts', {'p_tab': _tab, 'p_q': _q.text.trim()});
       if (mounted) {
         setState(() {
@@ -60,6 +71,7 @@ class _ContractsBodyState extends State<_ContractsBody> {
   String _tabLabel(BuildContext c, String t) => switch (t) {
         'active' => tx(c, 'الشَغّالة', 'Active'),
         'due' => tx(c, 'تَجديد مُستَحَقّ', 'Renewal due'),
+        'staffing' => tx(c, 'السَوّاقين مُقابِل العَقد', 'Drivers vs contract'),
         'draft' => tx(c, 'جَديدة / مُسوَدّة', 'New / draft'),
         'new_sites' => tx(c, 'مَواقِع جَديدة', 'New sites'),
         'ended' => tx(c, 'مُنتَهية', 'Ended'),
@@ -106,7 +118,12 @@ class _ContractsBodyState extends State<_ContractsBody> {
               ),
             ),
             IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
-            OutlinedButton.icon(onPressed: rows.isEmpty ? null : () => _export(rows), icon: const Icon(Icons.download), label: const Text('Excel')),
+            OutlinedButton.icon(
+                onPressed: _tab == 'staffing'
+                    ? (vList(_s?['rows']).isEmpty ? null : () => _exportStaffing(vList(_s?['rows'])))
+                    : (rows.isEmpty ? null : () => _export(rows)),
+                icon: const Icon(Icons.download),
+                label: const Text('Excel')),
           ]),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -131,8 +148,9 @@ class _ContractsBodyState extends State<_ContractsBody> {
         ),
       if (_busy) const Padding(padding: EdgeInsets.fromLTRB(16, 10, 16, 0), child: LinearProgressIndicator(minHeight: 2)),
       if (_err != null) Padding(padding: const EdgeInsets.all(16), child: Text(vErr(context, _err!), style: const TextStyle(color: VC.bad))),
+      if (_tab == 'staffing' && _s != null) ..._staffing(context, _s!),
       if (d != null && _tab == 'new_sites') _newSites(context, vList(d['new_sites'])),
-      if (d != null && _tab != 'new_sites')
+      if (d != null && _tab != 'new_sites' && _tab != 'staffing')
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: VPanel(
@@ -182,6 +200,114 @@ class _ContractsBodyState extends State<_ContractsBody> {
           ),
         ),
     ]);
+  }
+
+  Future<void> _exportStaffing(List<VJson> rows) async {
+    await vExport(context, 'contract_drivers.xlsx', [
+      ExcelSheet(
+        name: 'Drivers vs contract',
+        headers: ['Day', 'Weekend', 'Contract', 'Client', 'Point', 'Required', 'Clocked in', 'Missing', 'Penalty risk (AED)', 'Status', 'Who clocked in'],
+        rows: [
+          for (final r in rows)
+            [r['day'], vBool(r['weekend']) ? 'Yes' : '', r['contract'], r['client'], r['point'], r['required'], r['present'], r['missing'],
+              r['penalty'], r['status'], r['who']],
+        ],
+      ),
+    ]);
+  }
+
+  List<Widget> _staffing(BuildContext context, VJson s) {
+    final t = vMap(s['totals']);
+    final all = vList(s['rows']);
+    final rows = _onlyShort ? all.where((r) => r['status'] == 'short').toList() : all;
+    Widget statusPill(VJson r) => switch (vStr(r['status'])) {
+          'short' => VPill(tx(context, 'ناقِص ${VF.n(vNum(r['missing']))}', '${VF.n(vNum(r['missing']))} missing'), color: VC.bad, icon: Icons.warning_amber),
+          'ok' => VPill(tx(context, 'مُكتَمِل', 'Complete'), color: VC.ok, icon: Icons.check),
+          _ => VPill(tx(context, 'لا يوجَد حُضور مُسَجَّل', 'No attendance recorded'), color: VC.muted),
+        };
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        child: Text(
+            tx(context,
+                'عَدَد السَوّاقين المَطلوب في العَقد (أيّام الأُسبوع / الجُمعة–الأحَد) مُقابِل اللي سَجِّلوا حُضور في النُقطة كُلّ يَوم. الغَرامة المُتَوَقَّعة = غَرامة الغِياب الشَهريّة ÷ أيّام الشَهر × السَوّاقين النّاقصين.',
+                'Drivers the contract requires (weekdays / Fri–Sun) vs drivers who clocked in at the point each day. Penalty risk = monthly absence penalty ÷ days of the month × missing drivers.'),
+            style: const TextStyle(color: VC.muted, fontSize: 12)),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+        child: Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          VKpi(tx(context, 'عُقود لَيها عَدَد سَوّاقين', 'Contracts with drivers'), VF.n(vNum(t['contracts'])), icon: Icons.description_outlined, color: VC.info),
+          VKpi(tx(context, 'أيّام فيها نَقص', 'Days short'), VF.n(vNum(t['short_days'])), icon: Icons.event_busy,
+              color: vNum(t['short_days']) > 0 ? VC.bad : VC.ok),
+          VKpi(tx(context, 'سَوّاق × يَوم ناقِص', 'Missing driver-days'), VF.n(vNum(t['missing_driver_days'])), icon: Icons.person_off_outlined,
+              color: vNum(t['missing_driver_days']) > 0 ? VC.bad : VC.ok),
+          VKpi(tx(context, 'غَرامة مُتَوَقَّعة (AED)', 'Penalty risk (AED)'), VF.money(vNum(t['penalty_risk'])), icon: Icons.gavel,
+              color: vNum(t['penalty_risk']) > 0 ? VC.bad : VC.ok),
+          if (vNum(t['no_data_points']) > 0)
+            VKpi(tx(context, 'نِقاط بِدون حُضور مُسَجَّل', 'Points without attendance'), VF.n(vNum(t['no_data_points'])), icon: Icons.help_outline, color: VC.warn),
+          DropdownButton<int>(
+            value: _days,
+            items: [for (final n in [7, 14, 30, 60, 90]) DropdownMenuItem(value: n, child: Text(tx(context, 'آخِر $n يَوم', 'Last $n days')))],
+            onChanged: (v) {
+              if (v == null) return;
+              setState(() => _days = v);
+              _load();
+            },
+          ),
+          FilterChip(
+              selected: _onlyShort,
+              label: Text(tx(context, 'أيّام النَقص بَسّ', 'Short days only')),
+              onSelected: (v) => setState(() => _onlyShort = v)),
+        ]),
+      ),
+      if (vNum(t['no_data_points']) > 0 || vNum(t['unlinked_points']) > 0)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Text(
+              tx(context,
+                  'النِقاط اللي ما فيهاش أيّ حُضور مُسَجَّل لِسّه مَش بتِتحِسِب نَقص – لازِم السَوّاقين يِسَجِّلوا حُضور مِن جِهاز النُقطة.${vNum(t['unlinked_points']) > 0 ? ' فيه فُروع في العُقود مَش مَربوطة بِنُقطة بِنَفس الاسم.' : ''}',
+                  'Points with no attendance recorded yet are not counted as short – drivers must clock in on the point terminal.${vNum(t['unlinked_points']) > 0 ? ' Some contract branches are not matched to a point with the same name.' : ''}'),
+              style: const TextStyle(color: VC.warn, fontSize: 12)),
+        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        child: VPanel(
+          child: VTable(
+            empty: tx(context, 'لا تُوجَد عُقود شَغّالة فيها عَدَد سَوّاقين – املاه في Odoo ▸ Contracts.',
+                'No active contract with a driver count – fill it in Odoo ▸ Contracts.'),
+            columns: [
+              DataColumn(label: Text(tx(context, 'اليَوم', 'Day'))),
+              DataColumn(label: Text(tx(context, 'العَقد', 'Contract'))),
+              DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
+              DataColumn(label: Text(tx(context, 'المَطلوب', 'Required')), numeric: true),
+              DataColumn(label: Text(tx(context, 'حَضَروا', 'Clocked in')), numeric: true),
+              DataColumn(label: Text(tx(context, 'غَرامة مُتَوَقَّعة', 'Penalty risk')), numeric: true),
+              DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
+            ],
+            rows: [
+              for (final r in rows)
+                DataRow(
+                  color: r['status'] == 'short' ? WidgetStatePropertyAll(VC.bad.withValues(alpha: 0.06)) : null,
+                  cells: [
+                    DataCell(Text('${vStr(r['day'])}${vBool(r['weekend']) ? '  •' : ''}')),
+                    DataCell(Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Text(vStr(r['contract']), style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(vStr(r['client']), style: const TextStyle(color: VC.muted, fontSize: 12), overflow: TextOverflow.ellipsis),
+                    ])),
+                    DataCell(Text(vStr(r['point']))),
+                    DataCell(Text(VF.n(vNum(r['required'])))),
+                    DataCell(Tooltip(message: vStr(r['who']), child: Text(VF.n(vNum(r['present']))))),
+                    DataCell(Text(vNum(r['penalty']) > 0 ? VF.money(vNum(r['penalty'])) : '-',
+                        style: TextStyle(color: vNum(r['penalty']) > 0 ? VC.bad : null))),
+                    DataCell(statusPill(r)),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    ];
   }
 
   Widget _newSites(BuildContext context, List<VJson> sites) => Padding(
