@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'valet_admin.dart';
+import 'valet_credits_screen.dart';
 import 'valet_odoo_analytic.dart';
 import 'valet_ui.dart';
 
@@ -325,6 +326,8 @@ class _OdooBodyState extends State<_OdooBody> {
               OutlinedButton.icon(onPressed: _test, icon: const Icon(Icons.wifi_tethering), label: Text(tx(context, 'اختِبار الاتِّصال', 'Test connection'))),
           ],
         ),
+        const ValetOdooAlerts(),
+        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: VPanel(

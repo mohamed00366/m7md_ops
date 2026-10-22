@@ -745,6 +745,10 @@ class P {
   static const valetReportsView = 'valet.reports.view';
   /// إلغاء تَذكَرة + إغلاق وَرديّة عالِقة
   static const valetTicketsManage = 'valet.tickets.manage';
+  /// طَلَب إشعار دائِن لِتَذكَرة وَصَلَت Odoo
+  static const valetCreditRequest = 'valet.credit.request';
+  /// المُوافَقة عَلى الإشعارات الدائِنة (لَيس عَلى طَلَبك)
+  static const valetCreditApprove = 'valet.credit.approve';
 
   // ===== 🆕 Point Terminal (جِهاز نُقطة الدَوام) =====
   /// عَرض حِسابات Point Terminal في شاشة Points

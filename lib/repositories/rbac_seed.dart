@@ -773,6 +773,8 @@ RbacSeedResult seedRbac(String Function() generateId,
     perm(P.valetClientsManage, 'valet', 'إدارة عملاء الفاليه', 'Manage valet clients'),
     perm(P.valetReportsView, 'valet', 'تقارير الفاليه', 'View valet reports'),
     perm(P.valetTicketsManage, 'valet', 'إلغاء التذاكر وإغلاق الورديات', 'Void tickets & force-close shifts'),
+    perm(P.valetCreditRequest, 'valet', 'طلب إشعار دائن لتذكرة', 'Request ticket credit notes'),
+    perm(P.valetCreditApprove, 'valet', 'الموافقة على الإشعارات الدائنة', 'Approve credit notes'),
 
     // 🆕 جِهاز نُقطة الدَوام (Point Terminal)
     perm(P.pointTerminalView, 'point_terminal',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
+import 'valet_credits_screen.dart';
 import 'valet_ui.dart';
 
 /// 🎫 تَذاكِر الفاليه — بَحث، تَفاصيل، وَإلغاء (بِسَبَب مَكتوب).
@@ -182,11 +183,22 @@ Future<bool> showValetTicket(BuildContext context, String id) async {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 700, maxHeight: 760),
         child: VLoader<VJson>(
-          load: () => ValetAdmin.I.call('vva_ticket', {'p_id': id}),
+          load: () async {
+            final r = await Future.wait([
+              ValetAdmin.I.call('vva_ticket', {'p_id': id}),
+              ValetAdmin.I.call('vva_ticket_credit_info', {'p_id': id}),
+            ]);
+            return {...r[0], 'credit_info': r[1]};
+          },
           builder: (ctx, d, reload) {
             final t = vMap(d['ticket']);
             final log = vList(d['log']);
             final isVoid = t['void_reason'] != null;
+            final ci = vMap(d['credit_info']);
+            final inOdoo = vBool(ci['in_odoo']);
+            final credits = vList(ci['credits']);
+            final creditable = vNum(ci['creditable']);
+            final total = vNum(t['total_price']) + vNum(t['lost_card']);
             Widget row(String ar, String en, Object? v) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 3),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -232,7 +244,39 @@ Future<bool> showValetTicket(BuildContext context, String id) async {
                 Text(tx(ctx, 'إجراءات مِن الداشبورد', 'Dashboard actions'), style: const TextStyle(fontWeight: FontWeight.w700)),
                 for (final l in log) Text('${VF.dt(vTime(l['at']))} · ${l['by']} · ${l['action']} ${vMap(l['details'])['reason'] ?? ''}'),
               ],
-              if (!isVoid && ValetAdmin.I.can(ValetAdmin.permTickets)) ...[
+              row('Odoo', 'Odoo', inOdoo ? tx(ctx, 'وَصَلَت (فاتورة)', 'In Odoo (invoice)') : (ci['odoo_status'] ?? tx(ctx, 'لَم تُرسَل', 'Not sent'))),
+              if (credits.isNotEmpty) ...[
+                const Divider(height: 22),
+                Text(tx(ctx, 'الإشعارات الدائِنة', 'Credit notes'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                for (final c in credits)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                      Text('${VF.money(vNum(c['amount']))} AED · ${c['reason']} · ${c['requested_by_name'] ?? '-'} · ${VF.dt(vTime(c['created_at']))}'),
+                      creditApprovalPill(ctx, c),
+                      creditOdooPill(ctx, c),
+                    ]),
+                  ),
+              ],
+              if (!isVoid && inOdoo && creditable > 0 && ValetAdmin.I.can(ValetAdmin.permCreditRequest)) ...[
+                const SizedBox(height: 14),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(foregroundColor: VC.warn),
+                    icon: const Icon(Icons.receipt_long),
+                    label: Text(tx(ctx, 'إشعار دائِن', 'Credit note')),
+                    onPressed: () async {
+                      if (await askTicketCredit(ctx, ticketId: id, code: vStr(t['ticket_code']), creditable: creditable, total: total)) {
+                        changed = true;
+                        reload();
+                      }
+                    },
+                  ),
+                ),
+              ],
+              if (!isVoid && !inOdoo && ValetAdmin.I.can(ValetAdmin.permTickets)) ...[
                 const SizedBox(height: 14),
                 Align(
                   alignment: AlignmentDirectional.centerEnd,
