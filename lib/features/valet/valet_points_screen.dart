@@ -294,6 +294,48 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         );
 
+    // "Pay several tickets" → Add a ticket: how the staff find the ticket (typing / QR / NFC)
+    final findRaw = s['ticket_find'];
+    final find = findRaw is List && findRaw.isNotEmpty ? findRaw.map((e) => '$e').toSet() : {'text', 'qr', 'nfc'};
+    Widget findPicker() {
+      Widget chip(String k, IconData icon, String ar, String en) => FilterChip(
+            avatar: Icon(icon, size: 18, color: find.contains(k) ? VC.gold : VC.muted),
+            label: Text(tx(context, ar, en)),
+            selected: find.contains(k),
+            onSelected: !_edit
+                ? null
+                : (on) {
+                    final next = {...find};
+                    on ? next.add(k) : next.remove(k);
+                    if (next.isEmpty) return; // at least one way
+                    _save('vva_point_settings_save', {
+                      'p_point': widget.pointId,
+                      'p_data': {'ticket_find': next.length == 3 ? null : next.toList()},
+                    });
+                  },
+          );
+      return SizedBox(
+        width: 470,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(tx(context, 'البَحث عَن تَذكَرة في "دَفع عِدّة تَذاكِر"', 'Finding a ticket in "Pay several tickets"'),
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 2),
+            Text(tx(context, 'اختَر طَريقة أَو أَكثَر. إيقاف الكِتابة يُخفي خانة البَحث وَيَكتَفي بِالمَسح.',
+                    'Pick one or more. Turning typing off hides the search box – scanning only.'),
+                style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, children: [
+              chip('text', Icons.keyboard_outlined, 'كِتابة رَقم / لَوحة', 'Type number / plate'),
+              chip('qr', Icons.qr_code_scanner_rounded, 'مَسح QR', 'Scan QR'),
+              chip('nfc', Icons.nfc_rounded, 'كَرت NFC', 'NFC card'),
+            ]),
+          ]),
+        ),
+      );
+    }
+
     return _page([
       section(Icons.add_box_outlined, 'صَفحة إضافة تَذكَرة', 'Add ticket page',
           'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة. صورة السَيّارة تَقرَأ اللَوحة وَنَوع السَيّارة وَلَونها تِلقائيّاً.',
@@ -317,6 +359,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         sw('valet_validate'),
         sw('stamp_ticket'),
         sw('drivers_out'),
+        findPicker(),
       ]),
       section(Icons.person_pin_circle_outlined, 'العُمَلاء', 'Customers',
           'ما يَستَطيع عَميل السَيّارة فِعله مِن هاتِفه.', 'What the car owner can do from their phone.', [
