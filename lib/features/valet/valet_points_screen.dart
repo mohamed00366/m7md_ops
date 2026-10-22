@@ -145,7 +145,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             Tab(text: tx(context, 'VIP وَالعُضويّات', 'VIP & memberships')),
             Tab(text: tx(context, 'المَواقِف', 'Parking')),
             Tab(text: tx(context, 'حِساب الجِهاز', 'Device account')),
-            Tab(text: tx(context, 'المُعِدّات وَالدَفاتِر', 'Equipment & books')),
+            Tab(text: tx(context, 'المُعِدّات وَالمَكَن وَالدَفاتِر', 'Equipment, machines & books')),
           ]),
         ),
         body: d == null
@@ -1488,6 +1488,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           SizedBox(width: 200, child: TextField(controller: ctrls['phone_number'], enabled: _edit, decoration: InputDecoration(labelText: tx(context, 'هاتِف المَوقِع', 'Site phone')))),
         ]),
       ),
+      _CardMachines(pointId: widget.pointId, edit: _edit),
       VPanel(
         title: tx(context, 'دَفاتِر التَذاكِر اليَدَويّة', 'Manual ticket books'),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1535,5 +1536,140 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ]),
       ),
     ]);
+  }
+}
+
+/// 💳 مَكَن الكُروت (Paymob) لِلنُقطة — يَختارها المُوَظَّف عِند فَتح الوَرديّة في تَطبيق الفاليه (أَو يُضيف رَقماً جَديداً)،
+/// وَتُعَدَّل هُنا. الرَقم الجَديد مِن التَطبيق يُسَجَّل عَلى النُقطة تِلقائيّاً.
+class _CardMachines extends StatefulWidget {
+  const _CardMachines({required this.pointId, required this.edit});
+  final String pointId;
+  final bool edit;
+
+  @override
+  State<_CardMachines> createState() => _CardMachinesState();
+}
+
+class _CardMachinesState extends State<_CardMachines> {
+  final _code = TextEditingController();
+  final _label = TextEditingController();
+  List<VJson>? _rows;
+  Object? _err;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final d = await ValetAdmin.I.call('vva_card_terminals', {'p_point': widget.pointId});
+      if (mounted) {
+        setState(() {
+          _rows = vList(d['terminals']);
+          _err = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _err = e);
+    }
+  }
+
+  Future<void> _save({String? id, required String code, String? label, bool active = true}) async {
+    final r = await vGuard(
+        context,
+        () => ValetAdmin.I.call('vva_card_terminal_save',
+            {'p_id': id, 'p_point': widget.pointId, 'p_code': code, 'p_label': label, 'p_active': active}),
+        ok: tx(context, 'تَمّ الحِفظ.', 'Saved.'));
+    if (r != null) {
+      if (id == null) {
+        _code.clear();
+        _label.clear();
+      }
+      _load();
+    }
+  }
+
+  Future<void> _editRow(VJson t) async {
+    final code = TextEditingController(text: vStr(t['code']));
+    final label = TextEditingController(text: vStr(t['label']));
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tx(ctx, 'تَعديل الماكينة', 'Edit machine')),
+        content: SizedBox(
+          width: 380,
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(controller: code, decoration: InputDecoration(labelText: tx(ctx, 'رَقم الماكينة *', 'Machine number *'))),
+            const SizedBox(height: 10),
+            TextField(controller: label, decoration: InputDecoration(labelText: tx(ctx, 'وَصف (اختِياريّ)', 'Label (optional)'))),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'حِفظ', 'Save'))),
+        ],
+      ),
+    );
+    if (ok == true) await _save(id: vStr(t['id']), code: code.text, label: label.text, active: vBool(t['active']));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = _rows;
+    return VPanel(
+      title: tx(context, 'مَكَن الكُروت (Paymob)', 'Card machines (Paymob)'),
+      actions: [IconButton(onPressed: _load, icon: const Icon(Icons.refresh))],
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+            tx(context, 'المُوَظَّف يَختار الماكينة (أَو أَكتَر) عِند فَتح الوَرديّة في تَطبيق الفاليه، وَيِقدَر يُضيف رَقم جَديد. المَكَن هِنا هي الاختِيارات اللي بِتِظهَر لُه.',
+                'Staff choose the machine(s) when opening the shift in the valet app and can add a new number. The machines here are the choices they see.'),
+            style: const TextStyle(color: VC.muted, fontSize: 13)),
+        const SizedBox(height: 10),
+        if (widget.edit)
+          Wrap(spacing: 12, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            SizedBox(width: 200, child: TextField(controller: _code, decoration: InputDecoration(labelText: tx(context, 'رَقم الماكينة', 'Machine number')))),
+            SizedBox(width: 220, child: TextField(controller: _label, decoration: InputDecoration(labelText: tx(context, 'وَصف (اختِياريّ)', 'Label (optional)')))),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.add),
+              label: Text(tx(context, 'إضافة ماكينة', 'Add machine')),
+              onPressed: () {
+                if (_code.text.trim().isEmpty) return;
+                _save(code: _code.text, label: _label.text);
+              },
+            ),
+          ]),
+        const SizedBox(height: 10),
+        if (_err != null) Text(vErr(context, _err!), style: const TextStyle(color: VC.bad)),
+        if (rows == null && _err == null) const LinearProgressIndicator(minHeight: 2),
+        if (rows != null)
+          VTable(
+            empty: tx(context, 'لا تُوجَد مَكَن لِهذه النُقطة.', 'No machine for this point.'),
+            columns: [
+              DataColumn(label: Text(tx(context, 'رَقم الماكينة', 'Machine'))),
+              DataColumn(label: Text(tx(context, 'الوَصف', 'Label'))),
+              DataColumn(label: Text(tx(context, 'أُضيفَت مِن', 'Added from'))),
+              DataColumn(label: Text(tx(context, 'آخِر استِخدام', 'Last used'))),
+              DataColumn(label: Text(tx(context, 'فَعّالة', 'Active'))),
+              const DataColumn(label: Text('')),
+            ],
+            rows: [
+              for (final t in rows)
+                DataRow(cells: [
+                  DataCell(Text(vStr(t['code']), style: const TextStyle(fontWeight: FontWeight.w700))),
+                  DataCell(Text(vStr(t['label']).isEmpty ? '-' : vStr(t['label']))),
+                  DataCell(Text(vStr(t['created_by']) == 'valet app' ? tx(context, 'تَطبيق الفاليه', 'Valet app') : tx(context, 'الداشبورد', 'Dashboard'))),
+                  DataCell(Text(VF.dt(vTime(t['last_used'])))),
+                  DataCell(Switch(
+                    value: vBool(t['active']),
+                    onChanged: !widget.edit ? null : (v) => _save(id: vStr(t['id']), code: vStr(t['code']), label: vStr(t['label']), active: v),
+                  )),
+                  DataCell(!widget.edit ? const SizedBox() : IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () => _editRow(t))),
+                ]),
+            ],
+          ),
+      ]),
+    );
   }
 }
