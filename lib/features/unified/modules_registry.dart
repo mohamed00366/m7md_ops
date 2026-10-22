@@ -84,6 +84,7 @@ import '../valet/valet_live_screen.dart';
 import '../valet/valet_points_screen.dart';
 import '../valet/valet_reports_screen.dart';
 import '../valet/valet_shifts_screen.dart';
+import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_credits_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_tickets_screen.dart';
@@ -296,6 +297,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetLiveScreen(),
+          groupKey: 'valet_live',
+          groupTitleAr: 'المُتابَعة الحَيّة',
+          groupTitleEn: 'Live',
         ),
         AppModule(
           key: 'valet_points',
@@ -306,6 +310,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetPointsScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
         ),
         AppModule(
           key: 'valet_parking',
@@ -316,6 +323,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetParkingScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
         ),
         AppModule(
           key: 'valet_odoo',
@@ -326,6 +336,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetOdooScreen(),
+          groupKey: 'valet_money',
+          groupTitleAr: 'Odoo وَالعُقود',
+          groupTitleEn: 'Odoo & contracts',
         ),
         AppModule(
           key: 'valet_credits',
@@ -336,6 +349,22 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetCreditsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
+        ),
+        AppModule(
+          key: 'valet_contracts',
+          titleAr: 'العُقود',
+          titleEn: 'Contracts',
+          icon: Icons.description_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetContractsView,
+          builder: (_) => const ValetContractsScreen(),
+          groupKey: 'valet_money',
+          groupTitleAr: 'Odoo وَالعُقود',
+          groupTitleEn: 'Odoo & contracts',
         ),
         AppModule(
           key: 'valet_manual',
@@ -346,6 +375,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetManualApprove,
           builder: (_) => const ValetManualScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
         ),
         AppModule(
           key: 'valet_keyrack',
@@ -356,6 +388,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetKeyRackScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
         ),
         AppModule(
           key: 'valet_clients',
@@ -366,6 +401,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetClientsScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
         ),
         AppModule(
           key: 'valet_tickets',
@@ -376,6 +414,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetTicketsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
         ),
         AppModule(
           key: 'valet_shifts',
@@ -386,6 +427,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetShiftsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
         ),
         AppModule(
           key: 'valet_reports',
@@ -396,6 +440,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetReportsScreen(),
+          groupKey: 'valet_rep',
+          groupTitleAr: 'التَقارير',
+          groupTitleEn: 'Reports',
         ),
         AppModule(
           key: 'valet_audit',
@@ -406,6 +453,9 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetSettingsManage,
           builder: (_) => const ValetAuditScreen(),
+          groupKey: 'valet_rep',
+          groupTitleAr: 'التَقارير',
+          groupTitleEn: 'Reports',
         ),
 
         // ═══════════════════════════════════════════════════

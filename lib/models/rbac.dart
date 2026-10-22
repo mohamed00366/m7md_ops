@@ -749,6 +749,8 @@ class P {
   static const valetCreditRequest = 'valet.credit.request';
   /// المُوافَقة عَلى الإشعارات الدائِنة (لَيس عَلى طَلَبك)
   static const valetCreditApprove = 'valet.credit.approve';
+  /// عَرض العُقود (نُسخة مِن Odoo) وَمِلَفّاتها
+  static const valetContractsView = 'valet.contracts.view';
   /// اعتِماد التَذاكِر الوَرَقيّة (لَيس ما أَدخَلتَه أَنت)
   static const valetManualApprove = 'valet.manual.approve';
 

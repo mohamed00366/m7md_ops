@@ -214,6 +214,7 @@ class ValetOdooAlerts extends StatelessWidget {
             if (vNum(d['tickets_failed']) > 0) (tx(ctx, '${vNum(d['tickets_failed'])} تَذكَرة فَشَلَت في Odoo بَعد 10 مُحاوَلات', '${vNum(d['tickets_failed'])} ticket(s) failed in Odoo after 10 tries'), VC.bad),
             if (vNum(d['tickets_stuck']) > 0) (tx(ctx, '${vNum(d['tickets_stuck'])} تَذكَرة لَم تَصِل Odoo مِن أَكثَر مِن 30 دَقيقة', '${vNum(d['tickets_stuck'])} ticket(s) not in Odoo for over 30 minutes'), VC.warn),
             if (vNum(d['credits_stuck']) > 0) (tx(ctx, '${vNum(d['credits_stuck'])} إشعار دائِن عالِق', '${vNum(d['credits_stuck'])} credit note(s) stuck'), VC.warn),
+            if (vNum(d['contracts_due']) > 0) (tx(ctx, '${vNum(d['contracts_due'])} عَقد مُحتاج قَرار تَجديد', '${vNum(d['contracts_due'])} contract(s) need a renewal decision'), VC.bad),
             if (vNum(d['shifts_stuck']) > 0) (tx(ctx, '${vNum(d['shifts_stuck'])} وَرديّة لَم تَصِل Odoo', '${vNum(d['shifts_stuck'])} shift(s) not in Odoo'), VC.warn),
             if (vNum(d['credits_waiting_approval']) > 0) (tx(ctx, '${vNum(d['credits_waiting_approval'])} إشعار دائِن مُنتَظِر مُوافَقة', '${vNum(d['credits_waiting_approval'])} credit note(s) waiting approval'), VC.info),
           ];
