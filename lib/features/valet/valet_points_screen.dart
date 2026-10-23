@@ -507,6 +507,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       TicketPartsPanel(
         value: s['ticket_parts'],
         edit: _edit,
+        pointId: widget.pointId,
+        pointName: '${vMap(d['point'])['name'] ?? ''}',
         onSave: (parts) => _save('vva_point_settings_save', {
           'p_point': widget.pointId,
           'p_data': {'ticket_parts': parts},
