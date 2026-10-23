@@ -239,7 +239,6 @@ const kDocShift = PrintDoc(
       'divider',
       'tips',
       'totals',
-      'machines',
       'cash'
     ],
     'CLOSING SHIFT REPORT',
