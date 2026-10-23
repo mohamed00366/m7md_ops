@@ -103,6 +103,7 @@ Map<String, dynamic> _part(Map e) => {
       'enabled': e['enabled'] != false,
       'footer': '${e['footer'] ?? ''}',
       'header': e['header'] != false,
+      'header_logo': '${e['header_logo'] ?? 'auto'}',
       'items': [for (final i in (e['items'] is List ? e['items'] as List : const [])) '$i'],
       'labels': {
         for (final x in ((e['labels'] is Map) ? (e['labels'] as Map) : const {}).entries)
@@ -165,7 +166,8 @@ String? printerLogoBase64(Uint8List bytes, {int maxWidth = 384, int maxHeight = 
   }
   im = img.grayscale(im);
   // thermal printers print black or nothing: dithering keeps grey parts readable
-  im = img.ditherImage(im, quantizer: img.BinaryQuantizer(threshold: 0.6), kernel: img.DitherKernel.floydSteinberg);
+  // plain black / white (sharp edges, no dots)
+  im = img.ditherImage(im, quantizer: img.BinaryQuantizer(threshold: 0.55), kernel: img.DitherKernel.none);
   return base64Encode(img.encodePng(im));
 }
 
@@ -456,12 +458,14 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
     for (final e in ((part['texts'] as Map?) ?? const {}).entries) '${e.key}': Map<String, dynamic>.from(e.value as Map),
   };
   var header = part['header'] != false;
+  var headerLogo = '${part['header_logo'] ?? 'auto'}';
 
   Map<String, dynamic> current() => {
         ...part,
         'title': title.text.trim().toUpperCase(),
         'footer': footer.text.trim(),
         'header': header,
+        'header_logo': headerLogo,
         'items': [...items],
         'labels': {
           for (final e in labels.entries)
@@ -580,6 +584,24 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
           subtitle: Text(tx(ctx, 'أَطفِئه لِتَضَع اللوجو أَو الأَسماء بِتَرتيبك', 'Switch off to place the logo / names in your own order'),
               style: const TextStyle(fontSize: 12)),
         ),
+        if (header) ...[
+          Text(tx(ctx, 'اللوجو أَعلى الجُزء', 'Logo on top of the part'), style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+          const SizedBox(height: 4),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            for (final o in const [
+              ('auto', 'المَرفوع تِلقائيّاً', 'Uploaded logos'),
+              ('company', 'الشَرِكة', 'Company'),
+              ('point', 'النُقطة', 'Point'),
+              ('both', 'الاِتنين', 'Both'),
+              ('none', 'بِدون', 'None'),
+            ])
+              ChoiceChip(
+                label: Text(tx(ctx, o.$2, o.$3)),
+                selected: headerLogo == o.$1,
+                onSelected: (_) => set(() => headerLogo = o.$1),
+              ),
+          ]),
+        ],
         const SizedBox(height: 6),
         Text(tx(ctx, 'السُطور المَطبوعة (بِالتَرتيب)', 'Printed lines (in order)'), style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
@@ -762,8 +784,17 @@ class TicketPreview extends StatelessWidget {
           );
 
     if (part['header'] != false) {
+      // logo on top: 'auto' = the uploaded ones (both side by side); the company name is printed when there is no company logo
+      final hl = '${part['header_logo'] ?? 'auto'}';
+      final co = hl == 'auto' || hl == 'company' || hl == 'both' ? logos.company : null;
+      final pt = hl == 'auto' || hl == 'point' || hl == 'both' ? logos.point : null;
+      if (co != null && pt != null) {
+        out.add(Row(children: [Expanded(child: logo(co, h: 56)), const SizedBox(width: 8), Expanded(child: logo(pt, h: 56))]));
+      } else if (co != null || pt != null) {
+        out.add(logo(co ?? pt));
+      }
+      if (co == null) out.add(c('VIP Valet', s: bold));
       out
-        ..add(c('VIP Valet', s: bold))
         ..add(c(pointName.isEmpty ? 'POINT NAME' : pointName, s: bold))
         ..add(c('${part['title']}'.isEmpty ? 'TICKET' : '${part['title']}'))
         ..add(dash());
