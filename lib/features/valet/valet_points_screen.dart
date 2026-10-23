@@ -509,6 +509,12 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         edit: _edit,
         pointId: widget.pointId,
         pointName: '${vMap(d['point'])['name'] ?? ''}',
+        receiptLayout: s['receipt_layout'],
+        shiftLayout: s['shift_layout'],
+        onSaveLayout: (column, layout) => _save('vva_point_settings_save', {
+          'p_point': widget.pointId,
+          'p_data': {column: layout},
+        }),
         onSave: (parts) => _save('vva_point_settings_save', {
           'p_point': widget.pointId,
           'p_data': {'ticket_parts': parts},
