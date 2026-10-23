@@ -753,6 +753,8 @@ class P {
   static const valetContractsView = 'valet.contracts.view';
   /// اعتِماد التَذاكِر الوَرَقيّة (لَيس ما أَدخَلتَه أَنت)
   static const valetManualApprove = 'valet.manual.approve';
+  /// إدخال مَبيعات يَدَويّة (مَوقِع وَقَف فيه السيستم) – يَعتَمِدها شَخص تاني
+  static const valetManualAdd = 'valet.manual.add';
 
   // ===== 🆕 Point Terminal (جِهاز نُقطة الدَوام) =====
   /// عَرض حِسابات Point Terminal في شاشة Points

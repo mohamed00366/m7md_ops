@@ -777,6 +777,7 @@ RbacSeedResult seedRbac(String Function() generateId,
     perm(P.valetCreditApprove, 'valet', 'الموافقة على الإشعارات الدائنة', 'Approve credit notes'),
     perm(P.valetContractsView, 'valet', 'عرض العقود', 'View contracts'),
     perm(P.valetManualApprove, 'valet', 'اعتماد التذاكر الورقية', 'Approve manual tickets'),
+    perm(P.valetManualAdd, 'valet', 'إدخال مبيعات يدوية', 'Add manual sales'),
 
     // 🆕 جِهاز نُقطة الدَوام (Point Terminal)
     perm(P.pointTerminalView, 'point_terminal',

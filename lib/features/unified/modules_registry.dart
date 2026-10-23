@@ -87,6 +87,7 @@ import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_credits_screen.dart';
 import '../valet/valet_manual_screen.dart';
+import '../valet/valet_manual_sales_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
@@ -375,6 +376,19 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetManualApprove,
           builder: (_) => const ValetManualScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
+        ),
+        AppModule(
+          key: 'valet_manual_sales',
+          titleAr: 'مبيعات يدوية',
+          titleEn: 'Manual sales',
+          icon: Icons.point_of_sale_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetManualAdd,
+          builder: (_) => const ValetManualSalesScreen(),
           groupKey: 'valet_ops',
           groupTitleAr: 'التَشغيل',
           groupTitleEn: 'Operations',

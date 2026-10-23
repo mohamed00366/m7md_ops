@@ -22,6 +22,7 @@ class ValetAdmin extends ChangeNotifier {
   static const permCreditApprove = 'valet.credit.approve';
   static const permContracts = 'valet.contracts.view';
   static const permManualApprove = 'valet.manual.approve';
+  static const permManualAdd = 'valet.manual.add';
 
   static const _k = 'valet_admin_token';
 

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_html/html.dart' as html;
 
 import 'valet_admin.dart';
 import 'valet_ui.dart';
@@ -79,6 +83,22 @@ class _ManualBodyState extends State<_ManualBody> {
     if (r != null) _load();
   }
 
+  Future<void> _files(VJson m) async {
+    final d = await vGuard(context, () => ValetAdmin.I.call('vva_manual_files', {'p_entry': m['id']}));
+    if (d == null || !mounted) return;
+    final files = vList(d['files']);
+    if (files.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tx(context, 'لا تُوجَد مُرفَقات.', 'No attachments.'))));
+      return;
+    }
+    for (final f in files) {
+      if (!kIsWeb) continue;
+      final bytes = base64Decode(vStr(f['data']));
+      final url = html.Url.createObjectUrlFromBlob(html.Blob([bytes], vStr(f['mime']).isEmpty ? 'application/octet-stream' : vStr(f['mime'])));
+      html.window.open(url, '_blank');
+    }
+  }
+
   VPill _pill(VJson m) => switch (vStr(m['status'])) {
         'approved' => VPill('${tx(context, 'مُعتَمَد', 'Approved')} · ${m['decided_by_name'] ?? ''}', color: VC.ok),
         'rejected' => VPill(tx(context, 'مَرفوض', 'Rejected'), color: VC.bad),
@@ -134,20 +154,24 @@ class _ManualBodyState extends State<_ManualBody> {
                 for (final m in rows)
                   DataRow(cells: [
                     DataCell(Text('${vStr(m['point_name'])}\n${vStr(m['shift_code'])}', style: const TextStyle(fontSize: 12))),
-                    DataCell(Text(m['kind'] == 'ticket' ? '${tx(context, 'وَرَقة', 'Paper')} ${m['paper_no']}' : tx(context, 'مُلَخَّص وَرديّة', 'Shift summary'),
-                        style: const TextStyle(fontWeight: FontWeight.w700))),
+                    DataCell(Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text(m['kind'] == 'ticket' ? (m['paper_no'] == null ? tx(context, 'فاتورة', 'Invoice') : '${tx(context, 'وَرَقة', 'Paper')} ${m['paper_no']}') : tx(context, 'إجمالي', 'Summary'),
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      if (m['source'] == 'dashboard') ...[const SizedBox(width: 6), VPill(tx(context, 'داشبورد', 'Dashboard'), color: VC.info)],
+                      IconButton(tooltip: tx(context, 'المُرفَقات', 'Attachments'), icon: const Icon(Icons.attach_file, size: 18), onPressed: () => _files(m)),
+                    ])),
                     DataCell(SizedBox(
                       width: 240,
                       child: Text(
                         m['kind'] == 'ticket'
                             ? '${vStr(m['plate'])}  ${VF.dt(vTime(m['entry_time']))} → ${VF.dt(vTime(m['exit_time']))} · ${vStr(m['payment_mode'])}'
-                            : '${m['cars']} ${tx(context, 'سَيّارة', 'cars')} · ${tx(context, 'كاش', 'Cash')} ${VF.money(vNum(m['cash']))} · ${tx(context, 'كَرت', 'Card')} ${VF.money(vNum(m['card']))} · ${tx(context, 'مَجّانيّ', 'Free')} ${m['free_cars'] ?? 0}',
+                            : '${m['cars']} ${tx(context, 'سَيّارة', 'cars')} · ${tx(context, 'كاش', 'Cash')} ${VF.money(vNum(m['cash']))} · ${tx(context, 'كَرت', 'Card')} ${VF.money(vNum(m['card']))}${vNum(m['credit']) > 0 ? ' · ${tx(context, 'آجِل', 'Credit')} ${VF.money(vNum(m['credit']))}' : ''} · ${tx(context, 'مَجّانيّ', 'Free')} ${m['free_cars'] ?? 0}',
                         style: const TextStyle(fontSize: 12),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     )),
-                    DataCell(Text(VF.money(m['kind'] == 'ticket' ? vNum(m['amount']) : vNum(m['cash']) + vNum(m['card'])))),
+                    DataCell(Text(VF.money(m['kind'] == 'ticket' ? vNum(m['amount']) : vNum(m['cash']) + vNum(m['card']) + vNum(m['credit'])))),
                     DataCell(Text('${m['entered_by_name'] ?? '-'}\n${VF.dt(vTime(m['entered_at']))}', style: const TextStyle(fontSize: 12))),
                     DataCell(m['status'] == 'rejected' && vStr(m['reject_reason']).isNotEmpty
                         ? Tooltip(message: vStr(m['reject_reason']), child: _pill(m))
