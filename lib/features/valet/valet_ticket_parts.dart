@@ -66,6 +66,29 @@ const Map<String, String> kItemLabels = {
   'notes': 'Notes',
 };
 
+/// Text sizes of the ticket: key -> (Arabic, English, printer dots). 'm' and 'xl' are the printers' own
+/// fonts (1x / 2x); the others print as a picture.
+const Map<String, (String, String, double)> kTicketSizes = {
+  's': ('صَغير', 'Small', 18),
+  'm': ('عاديّ', 'Normal', 24),
+  'l': ('كَبير', 'Large', 32),
+  'xl': ('كَبير جِدّاً', 'X-large', 44),
+  'xxl': ('ضَخم', 'Huge', 60),
+};
+
+/// Lines printed big by default.
+const Set<String> kBigItems = {'number', 'plate_big'};
+
+/// Size of a line: own size, else 'xl' for the big lines (and big free text), else the part's size.
+String ticketSizeOf(Map<String, dynamic> part, String key) {
+  final own = '${((part['sizes'] as Map?) ?? const {})[key] ?? ''}';
+  if (kTicketSizes.containsKey(own)) return own;
+  if (kBigItems.contains(key)) return 'xl';
+  if (key.startsWith('text:') && ((part['texts'] as Map?)?[key] as Map?)?['big'] == true) return 'xl';
+  final f = '${part['font'] ?? 'm'}';
+  return kTicketSizes.containsKey(f) ? f : 'm';
+}
+
 List<Map<String, dynamic>> defaultTicketParts() => [
       {
         'id': 'customer',
@@ -104,6 +127,11 @@ Map<String, dynamic> _part(Map e) => {
       'footer': '${e['footer'] ?? ''}',
       'header': e['header'] != false,
       'header_logo': '${e['header_logo'] ?? 'auto'}',
+      'font': '${e['font'] ?? 'm'}',
+      'sizes': {
+        for (final x in ((e['sizes'] is Map) ? (e['sizes'] as Map) : const {}).entries)
+          if (kTicketSizes.containsKey('${x.value}')) '${x.key}': '${x.value}',
+      },
       'items': [for (final i in (e['items'] is List ? e['items'] as List : const [])) '$i'],
       'labels': {
         for (final x in ((e['labels'] is Map) ? (e['labels'] as Map) : const {}).entries)
@@ -459,6 +487,37 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
   };
   var header = part['header'] != false;
   var headerLogo = '${part['header_logo'] ?? 'auto'}';
+  var font = '${part['font'] ?? 'm'}';
+  final sizes = Map<String, String>.from(part['sizes'] as Map? ?? const {});
+
+  // size chosen per line (a small menu: A- … A+)
+  Widget sizeMenu(BuildContext ctx, String k, void Function(void Function()) set) {
+    final cur = ticketSizeOf({'font': font, 'sizes': sizes, 'texts': texts}, k);
+    return PopupMenuButton<String>(
+      tooltip: tx(ctx, 'حَجم الخَطّ', 'Font size'),
+      initialValue: sizes[k],
+      onSelected: (v) => set(() => v == '' ? sizes.remove(k) : sizes[k] = v),
+      itemBuilder: (_) => [
+        PopupMenuItem(value: '', child: Text(tx(ctx, 'حَجم الجُزء (افتِراضيّ)', 'Part size (default)'))),
+        for (final e in kTicketSizes.entries)
+          PopupMenuItem(
+            value: e.key,
+            child: Text(tx(ctx, e.value.$1, e.value.$2),
+                style: TextStyle(fontSize: 10 + e.value.$3 / 6, fontWeight: sizes[k] == e.key ? FontWeight.w800 : null)),
+          ),
+      ],
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: (sizes.containsKey(k) ? VC.gold : VC.muted).withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(cur.toUpperCase(),
+            style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: sizes.containsKey(k) ? VC.gold : VC.muted)),
+      ),
+    );
+  }
 
   Map<String, dynamic> current() => {
         ...part,
@@ -466,6 +525,11 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
         'footer': footer.text.trim(),
         'header': header,
         'header_logo': headerLogo,
+        'font': font,
+        'sizes': {
+          for (final e in sizes.entries)
+            if (items.contains(e.key) || e.key == 'header' || e.key == 'footer') e.key: e.value
+        },
         'items': [...items],
         'labels': {
           for (final e in labels.entries)
@@ -602,7 +666,31 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
               ),
           ]),
         ],
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
+        Row(children: [
+          Text(tx(ctx, 'حَجم الخَطّ لِلجُزء', 'Font size of the part'), style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+          const Spacer(),
+          if (header) ...[
+            Text(tx(ctx, 'الرَأس', 'Header'), style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+            sizeMenu(ctx, 'header', set),
+          ],
+        ]),
+        const SizedBox(height: 4),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final e in kTicketSizes.entries)
+            ChoiceChip(
+              label: Text(tx(ctx, e.value.$1, e.value.$2)),
+              selected: font == e.key,
+              onSelected: (_) => set(() => font = e.key),
+            ),
+        ]),
+        const SizedBox(height: 4),
+        Text(
+          tx(ctx, 'لِكُلّ سَطر حَجم خاصّ مِن الزِرّ بِجانِبه. العاديّ وَالكَبير جِدّاً بِخَطّ الطابِعة، وَالباقي يُطبَع كَصورة.',
+              'Each line can have its own size (button next to it). Normal and X-large use the printer font, the others print as a picture.'),
+          style: const TextStyle(color: VC.muted, fontSize: 11.5),
+        ),
+        const SizedBox(height: 10),
         Text(tx(ctx, 'السُطور المَطبوعة (بِالتَرتيب)', 'Printed lines (in order)'), style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         for (var i = 0; i < items.length; i++)
@@ -628,6 +716,7 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
                   Text('“${labels[items[i]]}”', style: const TextStyle(color: VC.gold, fontSize: 12, fontWeight: FontWeight.w700)),
               ]),
             ),
+            if (!const {'blank', 'divider'}.contains(items[i]) && !items[i].startsWith('logo')) sizeMenu(ctx, items[i], set),
             if (kItemLabels.containsKey(items[i]))
               IconButton(
                 tooltip: tx(ctx, 'تَعديل النَصّ المَطبوع', 'Change the printed text'),
@@ -687,15 +776,20 @@ Future<Map<String, dynamic>?> editTicketPart(BuildContext context, Map<String, d
             ),
         ]),
         const SizedBox(height: 14),
-        TextField(
-          controller: footer,
-          maxLines: 2,
-          onChanged: (_) => set(() {}),
-          decoration: InputDecoration(
-            labelText: tx(ctx, 'نَصّ في آخِر الجُزء (اختياريّ)', 'Text at the end of the part (optional)'),
-            hintText: tx(ctx, 'مِثال: الشَرِكة غَير مَسؤولة عَن المُقتَنَيات', 'e.g. We are not responsible for valuables'),
+        Row(children: [
+          Expanded(
+            child: TextField(
+              controller: footer,
+              maxLines: 2,
+              onChanged: (_) => set(() {}),
+              decoration: InputDecoration(
+                labelText: tx(ctx, 'نَصّ في آخِر الجُزء (اختياريّ)', 'Text at the end of the part (optional)'),
+                hintText: tx(ctx, 'مِثال: الشَرِكة غَير مَسؤولة عَن المُقتَنَيات', 'e.g. We are not responsible for valuables'),
+              ),
+            ),
           ),
-        ),
+          sizeMenu(ctx, 'footer', set),
+        ]),
       ]);
       final preview = Column(children: [
         Text(tx(ctx, 'المُعايَنة (وَرَق 58 مم)', 'Preview (58 mm paper)'), style: const TextStyle(color: VC.muted, fontSize: 12)),
@@ -750,23 +844,30 @@ class TicketPreview extends StatelessWidget {
   final String pointName;
 
   static const _w = 300.0; // 384 dots
+  static const _k = _w / 384; // preview px per printer dot
 
   @override
   Widget build(BuildContext context) {
     final labels = (part['labels'] as Map?)?.cast<String, dynamic>() ?? const {};
     final texts = (part['texts'] as Map?)?.cast<String, dynamic>() ?? const {};
     String lb(String k) => '${labels[k] ?? kItemLabels[k] ?? k}';
-    const base = TextStyle(fontFamily: 'monospace', fontSize: 12.5, color: Colors.black, height: 1.35);
-    final big = base.copyWith(fontSize: 22, fontWeight: FontWeight.w900);
-    final bold = base.copyWith(fontWeight: FontWeight.w800);
+    const base = TextStyle(fontFamily: 'monospace', fontSize: 12.5, color: Colors.black, height: 1.3);
+    TextStyle st(String k, {bool b = false}) {
+      final z = ticketSizeOf(part, k);
+      return base.copyWith(
+        fontSize: kTicketSizes[z]!.$3 * _k,
+        fontWeight: b || z == 'xl' || z == 'xxl' ? FontWeight.w800 : FontWeight.w400,
+      );
+    }
+
     final out = <Widget>[];
-    Widget c(String t, {TextStyle? s}) => Center(child: Text(t, textAlign: TextAlign.center, style: s ?? base));
+    Widget c(String t, String k, {bool b = false}) => Center(child: Text(t, textAlign: TextAlign.center, style: st(k, b: b)));
     // an Arabic label is printed on the right (as the app prints it)
-    Widget pair(String l, String r, {bool b = false}) => Directionality(
+    Widget pair(String k, String l, String r, {bool b = false}) => Directionality(
           textDirection: _arabic.hasMatch(l) ? TextDirection.rtl : TextDirection.ltr,
-          child: Row(children: [
-            Expanded(child: Text(l, style: b ? bold : base)),
-            Text(r, style: b ? bold : base, textDirection: TextDirection.ltr),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: Text(l, style: st(k, b: b))),
+            Text(r, style: st(k, b: b), textDirection: TextDirection.ltr),
           ]),
         );
     Widget dash() => Text('-' * 90, maxLines: 1, softWrap: false, overflow: TextOverflow.clip, style: base);
@@ -799,10 +900,10 @@ class TicketPreview extends StatelessWidget {
         out.add(logo(co ?? pt));
       }
       final leadCompany = logos.company != null && lead.any((k) => k == 'logo_company' || k == 'logo_both');
-      if (co == null && !leadCompany) out.add(c('VIP Valet', s: bold));
+      if (co == null && !leadCompany) out.add(c('VIP Valet', 'header', b: true));
       out
-        ..add(c(pointName.isEmpty ? 'POINT NAME' : pointName, s: bold))
-        ..add(c('${part['title']}'.isEmpty ? 'TICKET' : '${part['title']}'))
+        ..add(c(pointName.isEmpty ? 'POINT NAME' : pointName, 'header', b: true))
+        ..add(c('${part['title']}'.isEmpty ? 'TICKET' : '${part['title']}', 'header'))
         ..add(dash());
     }
     // the header goes after the leading logo lines
@@ -814,60 +915,60 @@ class TicketPreview extends StatelessWidget {
       if (n++ == headAt) out.addAll(head);
       switch (k) {
         case 'number':
-          out.add(c('${lb('number')} 0042', s: big));
+          out.add(c('${lb('number')} 0042', k, b: true));
         case 'code':
-          out.add(c('T-0042-BEI-26'));
+          out.add(c('T-0042-BEI-26', k));
         case 'plate':
-          out.add(pair(lb('plate'), 'D 12345', b: true));
+          out.add(pair(k, lb('plate'), 'D 12345', b: true));
         case 'plate_big':
-          out.add(c('D 12345', s: big));
+          out.add(c('D 12345', k, b: true));
         case 'color':
-          out.add(pair(lb('color'), 'White'));
+          out.add(pair(k, lb('color'), 'White'));
         case 'vehicle':
-          out.add(pair(lb('vehicle'), 'Sedan'));
+          out.add(pair(k, lb('vehicle'), 'Sedan'));
         case 'customer':
-          out.add(pair(lb('customer'), 'Visitor'));
+          out.add(pair(k, lb('customer'), 'Visitor'));
         case 'type':
-          out.add(pair(lb('type'), 'Standard'));
+          out.add(pair(k, lb('type'), 'Standard'));
         case 'mode':
-          out.add(pair(lb('mode'), 'TICKET'));
+          out.add(pair(k, lb('mode'), 'TICKET'));
         case 'card':
-          out.add(pair(lb('card'), 'C-118'));
+          out.add(pair(k, lb('card'), 'C-118'));
         case 'time_in':
-          out.add(pair(lb('time_in'), '23/10/2026 21:15'));
+          out.add(pair(k, lb('time_in'), '23/10/2026 21:15'));
         case 'time_big':
-          out.add(c('23/10/2026 21:15'));
+          out.add(c('23/10/2026 21:15', k));
         case 'price':
           final w = lb('price').split('|');
           String at(int i, String d) => i < w.length && w[i].trim().isNotEmpty ? w[i].trim() : d;
           out
             ..add(dash())
-            ..add(pair(at(0, 'Price'), '23.81'))
-            ..add(pair('${at(1, 'VAT')} 5%', '1.19'))
-            ..add(pair(at(2, 'Total'), '25.00 AED', b: true));
+            ..add(pair(k, at(0, 'Price'), '23.81'))
+            ..add(pair(k, '${at(1, 'VAT')} 5%', '1.19'))
+            ..add(pair(k, at(2, 'Total'), '25.00 AED', b: true));
         case 'qr':
           out
             ..add(const SizedBox(height: 6))
             ..add(const Center(child: Icon(Icons.qr_code_2, size: 96, color: Colors.black)))
-            ..add(c(lb('qr')));
+            ..add(c(lb('qr'), k));
         case 'received_by':
-          out.add(pair(lb('received_by'), '__________'));
+          out.add(pair(k, lb('received_by'), '__________'));
         case 'delivered_by':
-          out.add(pair(lb('delivered_by'), '__________'));
+          out.add(pair(k, lb('delivered_by'), '__________'));
         case 'parking':
-          out.add(pair(lb('parking'), '__________'));
+          out.add(pair(k, lb('parking'), '__________'));
         case 'signature':
           out
             ..add(const SizedBox(height: 16))
-            ..add(pair(lb('signature'), '__________'));
+            ..add(pair(k, lb('signature'), '__________'));
         case 'notes':
-          out.add(pair(lb('notes'), 'Scratch on the left door'));
+          out.add(pair(k, lb('notes'), 'Scratch on the left door'));
         case 'company_name':
-          out.add(c('VIP Valet', s: bold));
+          out.add(c('VIP Valet', k, b: true));
         case 'point_name':
-          out.add(c(pointName.isEmpty ? 'POINT NAME' : pointName, s: bold));
+          out.add(c(pointName.isEmpty ? 'POINT NAME' : pointName, k, b: true));
         case 'part_title':
-          out.add(c('${part['title']}'));
+          out.add(c('${part['title']}', k));
         case 'logo_company':
           out.add(logo(logos.company));
         case 'logo_point':
@@ -885,9 +986,8 @@ class TicketPreview extends StatelessWidget {
         default:
           if (k.startsWith('text:')) {
             final t = (texts[k] as Map?) ?? const {};
-            final s = (t['big'] == true ? big : base).copyWith(fontWeight: t['bold'] == true || t['big'] == true ? FontWeight.w800 : null);
             final a = switch ('${t['align']}') { 'left' => TextAlign.left, 'right' => TextAlign.right, _ => TextAlign.center };
-            out.add(SizedBox(width: double.infinity, child: Text('${t['text'] ?? ''}', textAlign: a, style: s)));
+            out.add(SizedBox(width: double.infinity, child: Text('${t['text'] ?? ''}', textAlign: a, style: st(k, b: t['bold'] == true))));
           }
       }
     }
@@ -896,7 +996,7 @@ class TicketPreview extends StatelessWidget {
     if (f.isNotEmpty) {
       out
         ..add(dash())
-        ..add(c(f));
+        ..add(c(f, 'footer'));
     }
     return Directionality(
       textDirection: TextDirection.ltr,
