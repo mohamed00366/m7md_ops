@@ -783,9 +783,14 @@ class TicketPreview extends StatelessWidget {
             child: Image.memory(png, height: h, fit: BoxFit.contain, filterQuality: FilterQuality.none),
           );
 
+    final all = [for (final i in part['items'] as List) '$i'];
+    // logo lines at the start of the list print above the header (company details)
+    final lead = all.takeWhile((k) => k.startsWith('logo_')).toList();
     if (part['header'] != false) {
-      // logo on top: 'auto' = the uploaded ones (both side by side); the company name is printed when there is no company logo
-      final hl = '${part['header_logo'] ?? 'auto'}';
+      // logo on top: 'auto' = the uploaded ones (both side by side), unless the list starts with its own logo lines;
+      // the company name is printed when no company logo is printed
+      var hl = '${part['header_logo'] ?? 'auto'}';
+      if (lead.isNotEmpty && hl == 'auto') hl = 'none';
       final co = hl == 'auto' || hl == 'company' || hl == 'both' ? logos.company : null;
       final pt = hl == 'auto' || hl == 'point' || hl == 'both' ? logos.point : null;
       if (co != null && pt != null) {
@@ -793,13 +798,20 @@ class TicketPreview extends StatelessWidget {
       } else if (co != null || pt != null) {
         out.add(logo(co ?? pt));
       }
-      if (co == null) out.add(c('VIP Valet', s: bold));
+      final leadCompany = logos.company != null && lead.any((k) => k == 'logo_company' || k == 'logo_both');
+      if (co == null && !leadCompany) out.add(c('VIP Valet', s: bold));
       out
         ..add(c(pointName.isEmpty ? 'POINT NAME' : pointName, s: bold))
         ..add(c('${part['title']}'.isEmpty ? 'TICKET' : '${part['title']}'))
         ..add(dash());
     }
-    for (final k in [for (final i in part['items'] as List) '$i']) {
+    // the header goes after the leading logo lines
+    final head = [...out];
+    out.clear();
+    final headAt = part['header'] != false ? lead.length : 0;
+    var n = 0;
+    for (final k in all) {
+      if (n++ == headAt) out.addAll(head);
       switch (k) {
         case 'number':
           out.add(c('${lb('number')} 0042', s: big));
@@ -879,6 +891,7 @@ class TicketPreview extends StatelessWidget {
           }
       }
     }
+    if (n <= headAt) out.addAll(head); // only logo lines
     final f = '${part['footer'] ?? ''}'.trim();
     if (f.isNotEmpty) {
       out
