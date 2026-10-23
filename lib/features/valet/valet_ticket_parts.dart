@@ -126,7 +126,7 @@ const Map<String, (String, String)> kReceiptItems = {
   'extras': ('المَبيت / الكَرت المَفقود / البَقشيش', 'Overnight / lost card / tips'),
   'payment': ('طَريقة الدَفع', 'Payment mode'),
   'grace': ('مَجّانيّة الدَقائق الأولى', 'Free minutes note'),
-  'card_ref': ('مَرجِع الكَرت', 'Card reference'),
+  'card_ref': ('رَقم المُوافَقة', 'Approval number'),
   'paid_change': ('المَدفوع وَالباقي', 'Paid and change'),
   'thanks': ('شُكراً', 'Thank you'),
   ...kCommonItems,
@@ -143,7 +143,7 @@ const Map<String, String> kReceiptLabels = {
   'extras': 'Overnight|Lost card|Tips|Grand total',
   'payment': 'Payment',
   'grace': 'Free – car left within {min} min',
-  'card_ref': 'Card ref',
+  'card_ref': 'Approval no.',
   'paid_change': 'Paid|Change',
   'thanks': 'Thank you!',
 };
