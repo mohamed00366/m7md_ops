@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
+import '../valet/valet_numbering_screen.dart';
 
 /// شاشة نظام الترقيم - النموذج الجديد:
 /// قاعدة واحدة لكل كيان (Rule) + عدّاد منفصل لكل (قاعدة، دولة)
@@ -102,6 +103,26 @@ class _ManagerNumberingState extends State<ManagerNumbering> {
                 ),
               ),
             ],
+          ),
+        ),
+
+        // ===== أَرقام المَبيعات (الفاليه) =====
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+          child: Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: const Icon(Icons.pin_outlined, color: AppColors.brand),
+              title: Text(s.isAr ? '🧾 أَرقام المَبيعات (الفاليه)' : '🧾 Sale numbers (Valet)',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              subtitle: Text(
+                  s.isAr
+                      ? 'رَقم البَيع: النُقطة · التاريخ · التابلت · الشِفت · المُسَلسَل — الشَكل، العَدّادات، أَرقام النِقاط، أَجهِزة التابلت'
+                      : 'Sale number: point · date · tablet · shift · serial — format, counters, point numbers, tablets',
+                  style: const TextStyle(fontSize: 11)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ValetNumberingScreen())),
+            ),
           ),
         ),
 

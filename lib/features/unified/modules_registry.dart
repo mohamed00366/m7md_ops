@@ -88,6 +88,7 @@ import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_credits_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
+import '../valet/valet_numbering_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
@@ -311,6 +312,19 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetPointsScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
+        ),
+        AppModule(
+          key: 'valet_numbering',
+          titleAr: 'تَرقيم المَبيعات',
+          titleEn: 'Sale numbering',
+          icon: Icons.pin_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetNumbering,
+          builder: (_) => const ValetNumberingScreen(embedded: true),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',

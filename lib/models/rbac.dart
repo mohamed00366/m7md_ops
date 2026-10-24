@@ -755,6 +755,8 @@ class P {
   static const valetManualApprove = 'valet.manual.approve';
   /// إدخال مَبيعات يَدَويّة (مَوقِع وَقَف فيه السيستم) – يَعتَمِدها شَخص تاني
   static const valetManualAdd = 'valet.manual.add';
+  /// نِظام تَرقيم المَبيعات: الشَكل، العَدّادات، أَرقام النِقاط، أَجهِزة التابلت
+  static const valetNumbering = 'valet.numbering.manage';
 
   // ===== 🆕 Point Terminal (جِهاز نُقطة الدَوام) =====
   /// عَرض حِسابات Point Terminal في شاشة Points
