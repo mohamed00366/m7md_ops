@@ -169,28 +169,27 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
   // ---------------------------------------------------------------- features
   List<(String, String, String, String, String)> _flags(BuildContext c) => [
         ('car_request', 'العَميل يَطلُب سَيّارَته', 'Customers can request their car', 'مِن رابِط / QR التَذكَرة المَطبوعة', 'From the ticket link / QR'),
-        ('key_rack_w_sites_or_allow', 'تَطبيق المَفاتيح', 'Key rack app', 'المُوَظَّف بِمُسَمّى Key Controller يَفتَح تَطبيق المَفاتيح', 'Staff titled "Key Controller" open the key rack app'),
-        ('sinin_w_card', 'دُخول المُوَظَّفين بِاسم المُستَخدِم وَكَلِمة المُرور', 'Staff sign in with user name + password', 'إيقاف = الدُخول بِكَرت NFC / QR فَقَط', 'Off = NFC / QR card only'),
-        ('paid_first_or_paid_after', 'السَماح بِوَرديّة "الدَفع أَوَّلاً"', 'Allow "Pay first" shifts', 'وَإلّا يَدفَع العَميل عِند الخُروج دائِماً', 'Otherwise customers pay at check-out'),
-        ('price_group_customer', 'أَسعار النُقطة لِكُلّ العُمَلاء', 'Point prices for every client', 'إيقاف = كُلّ عَميل بِأَسعاره', 'Off = each client uses its own prices'),
+        ('key_rack_w_sites_or_allow', 'تَطبيق المَفاتيح', 'Key rack app', 'تَشغيل = Key Controller يَستَلِم المَفاتيح وَيَطلُب السَيّارات · إيقاف = السائِقون يَعمَلون مِن لَوحة التَذاكِر مُباشَرة', 'On = the Key Controller holds the keys and calls the cars · Off = drivers work straight from the tickets board'),
+        ('sinin_w_card', 'دُخول المُوَظَّفين بِاسم المُستَخدِم وَكَلِمة المُرور', 'Staff sign in with user name + password', 'تَشغيل = اسم مُستَخدِم وَكَلِمة مُرور · إيقاف = كَرت المُوَظَّف NFC / QR فَقَط', 'On = user name + password · Off = staff NFC / QR card only'),
+        ('paid_first_or_paid_after', 'السَماح بِوَرديّة "الدَفع أَوَّلاً"', 'Allow "Pay first" shifts', 'تَشغيل = المُشرِف يَختار عِند فَتح الوَرديّة: الدَفع عِند الدُخول أَو عِند الخُروج · إيقاف = الدَفع عِند الخُروج دائِماً', 'On = the supervisor chooses when opening the shift: pay on entry or at check-out · Off = always at check-out'),
+        ('price_group_customer', 'سِعر واحِد لِكُلّ العُمَلاء (سِعر النُقطة)', 'One price for every client (point price)', 'تَشغيل = لا يُختار عَميل في إضافة تَذكَرة، وَالسِعر سِعر النُقطة · إيقاف = المُوَظَّف يَختار العَميل وَتُطَبَّق أَسعاره', 'On = no client is picked on Add ticket, the point price applies · Off = the staff pick the client and its prices apply'),
         ('stamp_ticket', 'تَذاكِر الخَتم', 'Stamp tickets', 'زِرّ في شاشة الدَفع: تَذكَرة مَجّانيّة بِصورة خَتم العَميل', 'Check-out button: free ticket with a stamp photo'),
         ('valet_validate', 'زِرّ "Validate for a client"', '"Validate for a client" button', 'في شاشة الدَفع: المُوَظَّف يَعمَل فاليديشن لِعَميل', 'On the check-out screen: the staff validates for a client'),
         ('photo_in_out', 'صورة السَيّارة عَلى التَذكَرة', 'Car photo on the ticket', 'زِرّ الكاميرا في إضافة تَذكَرة: يَقرَأ اللَوحة وَالنَوع وَاللَون', 'Camera button on Add ticket: reads plate, type and colour'),
         ('nfc_qr_in_out', 'كَرت التَذكَرة (NFC / QR) عِند الدُخول', 'Ticket card (NFC / QR) on entry', 'يُربَط كَرت بِكُلّ تَذكَرة؛ العَميل يُمَرِّره عَلى هاتِفه لِطَلَب سَيّارَته', 'A card is linked to each ticket; the customer taps it on a phone to request the car'),
         ('used_card_manual', 'الجِهاز يَختار NFC أَو QR', 'Device may choose NFC or QR', '', ''),
-        ('drivers_in', 'تَسجيل السائِق الذي يَصُفّ السَيّارة', 'Record the parking driver', 'مَطلوب عِند إضافة التَذكَرة', 'Required when adding the ticket'),
-        ('drivers_out', 'تَسجيل السائِق الذي يُحضِر السَيّارة', 'Record the delivering driver', 'مَطلوب قَبل تَسليم السَيّارة', 'Required before the car is handed back'),
-        ('parking_in_out', 'المَوقِف وَرَقمه', 'Parking area and number', 'المُوَظَّف يَختار مَكان الصَفّ وَرَقمه', 'The staff picks where the car is parked'),
-        ('dropdown_parkingcar', 'اختيار سائِق الصَفّ مِن قائِمة', 'Pick the parking driver from a list', 'إيقاف = مَسح كَرت السائِق', 'Off = scan the driver card'),
-        ('dropdown_time_in_out', 'اختيار السائِقين مِن قائِمة لِلحُضور', 'Pick drivers from a list for check-in / out', 'إيقاف = مَسح كَرت السائِق', 'Off = scan the driver card'),
-        ('drivers_nfc_qr', 'كُروت السائِقين (NFC / QR)', 'Driver cards (NFC / QR)', 'السائِق يُعَرِّف نَفسه بِكَرته', 'Drivers identify themselves with their card'),
-        ('show_membership', 'العُضويّات', 'Memberships', 'بَيع وَمُتابَعة العُضويّات الشَهريّة', 'Sell and check monthly members'),
+        ('drivers_in', 'سائِق الصَفّ إجباريّ', 'Parking driver required', 'لا تُدفَع التَذكَرة قَبل تَسجيل السائِق الذي صَفّ السَيّارة · إيقاف = اختياريّ', 'The ticket cannot be paid before the parking driver is recorded · Off = optional'),
+        ('drivers_out', 'سائِق التَسليم إجباريّ', 'Delivering driver required', 'لا تُدفَع التَذكَرة قَبل تَسجيل السائِق الذي أَحضَر السَيّارة · إيقاف = اختياريّ', 'The ticket cannot be paid before the delivering driver is recorded · Off = optional'),
+        ('parking_in_out', 'المَوقِف وَرَقمه إجباريّ', 'Parking area and number required', 'لا تُدفَع التَذكَرة قَبل تَسجيل مَكان الصَفّ وَرَقمه · إيقاف = اختياريّ', 'The ticket cannot be paid before the parking area and number are recorded · Off = optional'),
+        ('dropdown_parkingcar', 'اختيار السائِق مِن قائِمة (صَفّ / تَسليم)', 'Pick the driver from a list (parking / delivery)', 'تَشغيل = قائِمة بِالأَسماء أَو مَسح الكَرت · إيقاف = مَسح كَرت السائِق فَقَط', 'On = name list or card scan · Off = scan the driver card only'),
+        ('dropdown_time_in_out', 'اختيار السائِق مِن قائِمة في الحُضور', 'Pick the driver from a list in attendance', 'تَشغيل = قائِمة بِالأَسماء أَو مَسح الكَرت · إيقاف = مَسح كَرت السائِق فَقَط', 'On = name list or card scan · Off = scan the driver card only'),
+        ('show_membership', 'صَفحة العُضويّات', 'Memberships page', 'بَيع وَمُتابَعة العُضويّات الشَهريّة في التَطبيق · إيقاف = الصَفحة مَخفيّة', 'Sell and check monthly members in the app · Off = page hidden'),
         ('member_card_normal', 'كَرت العُضويّة عَلى التَذكَرة', 'Member card on tickets', 'خانة كَرت العُضو في إضافة تَذكَرة', 'Member card field on Add ticket'),
         ('member_card_gold', 'الكَرت الذَهَبيّ عَلى التَذكَرة', 'Gold card on tickets', 'خانة الكَرت الذَهَبيّ في إضافة تَذكَرة', 'Gold card field on Add ticket'),
-        ('staff_eval', 'تَقييم المُوَظَّفين', 'Staff ratings', 'المُشرِف الذي يَفتَح الوَرديّة يُقَيِّم مُوَظَّفي النُقطة (نَفس تَقييمات الداشبورد)', 'The supervisor who opens the shift rates the point staff (same ratings as the dashboard)'),
-        ('supervisor_roster', 'الروستر مِن تَطبيق الفاليه', 'Roster in the valet app', 'المُشرِف الذي يَفتَح الوَرديّة يُنشِئ روستر الأُسبوع وَيُرسِله لِلعَمَليّات', 'The supervisor who opens the shift builds the weekly roster and sends it to Operations'),
-        ('show_policies', 'سياسات الشَركة', 'Company policies', 'صَفحة لِلقِراءة فَقَط بِنَفس سياسات الداشبورد', 'Read-only page with the same policies as the dashboard'),
-        ('paid_with_app_or_keyrack', 'الدَفع في تَطبيق المَفاتيح', 'Payment at the key rack', 'العَميل يَدفَع عِند مُتَحَكِّم المَفاتيح', 'The customer pays at the key controller'),
+        ('staff_eval', 'تَقييم المُوَظَّفين مِن التَطبيق', 'Staff ratings in the app', 'تَشغيل = المُشرِف الذي فَتَح الوَرديّة يُقَيِّم مُوَظَّفي النُقطة · إيقاف = التَقييم مِن الداشبورد فَقَط', 'On = the supervisor who opened the shift rates the point staff · Off = ratings from the dashboard only'),
+        ('supervisor_roster', 'الروستر مِن تَطبيق الفاليه', 'Roster in the valet app', 'تَشغيل = المُشرِف يُنشِئ روستر الأُسبوع وَيُرسِله لِلعَمَليّات · إيقاف = الروستر مِن الداشبورد فَقَط', 'On = the supervisor builds the weekly roster and sends it to Operations · Off = roster from the dashboard only'),
+        ('show_policies', 'سياسات الشَركة في التَطبيق', 'Company policies in the app', 'تَشغيل = صَفحة لِلقِراءة بِنَفس سياسات الداشبورد · إيقاف = الصَفحة مَخفيّة', 'On = read-only page with the dashboard policies · Off = page hidden'),
+        ('paid_with_app_or_keyrack', 'الدَفع عِند مُتَحَكِّم المَفاتيح', 'Payment at the key rack', 'تَشغيل = الدَفع في تَطبيق المَفاتيح · إيقاف = الدَفع في تَطبيق الفاليه. يَعمَل فَقَط مَعَ تَشغيل تَطبيق المَفاتيح', 'On = paid in the key rack app · Off = paid in the valet app. Works only when the key rack app is on'),
       ];
 
   static const _flagIcons = <String, IconData>{
@@ -212,7 +211,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     'parking_in_out': Icons.local_parking_rounded,
     'dropdown_parkingcar': Icons.format_list_bulleted_rounded,
     'dropdown_time_in_out': Icons.schedule_rounded,
-    'drivers_nfc_qr': Icons.badge_outlined,
     'show_membership': Icons.card_membership_outlined,
     'member_card_normal': Icons.credit_card_outlined,
     'member_card_gold': Icons.workspace_premium_outlined,
@@ -240,7 +238,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     void toggleValue(String k, Object v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     final flags = {for (final f in _flags(context)) f.$1: f};
-    Widget sw(String k) {
+    Widget sw(String k, {bool enabled = true}) {
       final f = flags[k]!;
       return SizedBox(
         width: 470,
@@ -259,7 +257,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           title: Text(tx(context, f.$2, f.$3), style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: f.$4.isEmpty ? null : Text(tx(context, f.$4, f.$5)),
           value: vBool(s[k]),
-          onChanged: !_edit ? null : (v) => toggle(k, v),
+          onChanged: !_edit || !enabled ? null : (v) => toggle(k, v),
         ),
       );
     }
@@ -383,22 +381,26 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         sw('photo_in_out'),
         sw('nfc_qr_in_out'),
         sw('price_group_customer'),
+      ]),
+      section(Icons.rule_rounded, 'إجباريّ قَبل الدَفع', 'Required before payment',
+          'ما يَجِب تَسجيله عَلى التَذكَرة قَبل أَن تُدفَع. المُغلَق يَبقى مُتاحاً لَكِن اختياريّ.',
+          'What must be recorded on the ticket before it can be paid. When off it stays available but optional.', [
         sw('drivers_in'),
-        sw('dropdown_parkingcar'),
+        sw('drivers_out'),
         sw('parking_in_out'),
       ]),
-      section(Icons.contactless_outlined, 'الكُروت (NFC / QR)', 'Cards (NFC / QR)',
-          'طَريقة قِراءة كُروت التَذاكِر وَكُروت السائِقين في كُلّ أَجهِزة هذه النُقطة — لا يوجَد زِرّ لِذلك في التَطبيق.',
-          'How ticket cards and driver cards are read on every device of this point — there is no switch for it in the app.', [
+      section(Icons.contactless_outlined, 'الكُروت وَاختيار السائِق', 'Cards and picking the driver',
+          'طَريقة قِراءة الكُروت في كُلّ أَجهِزة هذه النُقطة، وَهَل يُختار السائِق مِن قائِمة أَم بِمَسح كَرته فَقَط.',
+          'How cards are read on every device of this point, and whether the driver is picked from a list or only by scanning the card.', [
         readerPicker(),
-        sw('drivers_nfc_qr'),
+        sw('dropdown_parkingcar'),
+        sw('dropdown_time_in_out'),
       ]),
       section(Icons.point_of_sale_outlined, 'الدَفع وَالخُروج', 'Payment and check-out',
           'أَزرار شاشة الدَفع وَطَريقة الدَفع في الوَرديّة.', 'Buttons of the payment screen and how the shift collects money.', [
         sw('paid_first_or_paid_after'),
         sw('valet_validate'),
         sw('stamp_ticket'),
-        sw('drivers_out'),
         findPicker(),
         approvalPicker(),
       ]),
@@ -406,21 +408,22 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           'ما يَستَطيع عَميل السَيّارة فِعله مِن هاتِفه.', 'What the car owner can do from their phone.', [
         sw('car_request'),
       ]),
-      section(Icons.badge_outlined, 'المُوَظَّفون وَالحُضور', 'Staff and attendance',
-          'دُخول المُوَظَّفين لِلتَطبيق وَتَسجيل الحُضور.', 'How staff sign in and check in / out.', [
+      section(Icons.badge_outlined, 'المُوَظَّفون وَالمُشرِف', 'Staff and supervisor',
+          'دُخول المُوَظَّفين لِلتَطبيق، وَما يَراه المُشرِف الذي فَتَح الوَرديّة.', 'How staff sign in, and what the supervisor who opened the shift sees.', [
         sw('sinin_w_card'),
-        sw('dropdown_time_in_out'),
         sw('staff_eval'),
         sw('supervisor_roster'),
         sw('show_policies'),
       ]),
       section(Icons.key_outlined, 'تَطبيق المَفاتيح', 'Key rack',
-          'مُتَحَكِّم المَفاتيح وَالدَفع عِنده.', 'The key controller and paying at the key rack.', [
+          'مُتَحَكِّم المَفاتيح وَالدَفع عِنده. الدَفع عِنده يَعمَل فَقَط مَعَ تَشغيل تَطبيق المَفاتيح.',
+          'The key controller and paying at the key rack. Paying there works only when the key rack app is on.', [
         sw('key_rack_w_sites_or_allow'),
-        sw('paid_with_app_or_keyrack'),
+        sw('paid_with_app_or_keyrack', enabled: vBool(s['key_rack_w_sites_or_allow'])),
       ]),
       section(Icons.card_membership_outlined, 'العُضويّات', 'Memberships',
-          'بَيع العُضويّات وَكُروتها عَلى التَذاكِر.', 'Selling memberships and member cards on tickets.', [
+          'صَفحة بَيع العُضويّات، وَخانات كُروت العُضويّة في إضافة تَذكَرة (كُلّ زِرّ مُستَقِلّ).',
+          'The memberships page, and the member card fields on Add ticket (each switch on its own).', [
         sw('show_membership'),
         sw('member_card_normal'),
         sw('member_card_gold'),
