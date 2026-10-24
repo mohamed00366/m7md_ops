@@ -42,6 +42,8 @@ class _SalesBodyState extends State<_SalesBody> {
   String _approval = 'optional';
   List<VJson> _clients = [];
   String? _client;
+  List<VJson> _shifts = [];
+  String? _shift; // null = the shift of that day (or a new one)
   bool _busy = false;
   final _cars = TextEditingController();
   final _free = TextEditingController(text: '0');
@@ -77,6 +79,8 @@ class _SalesBodyState extends State<_SalesBody> {
       _point = id;
       _clients = [];
       _client = null;
+      _shifts = [];
+      _shift = null;
     });
     if (id == null) return;
     try {
@@ -84,6 +88,7 @@ class _SalesBodyState extends State<_SalesBody> {
       if (!mounted) return;
       setState(() {
         _clients = vList(d['clients']);
+        _shifts = vList(d['shifts']);
         _approval = vStr(d['card_approval']).isEmpty ? 'optional' : vStr(d['card_approval']);
       });
     } catch (e) {
@@ -120,6 +125,7 @@ class _SalesBodyState extends State<_SalesBody> {
     final data = <String, dynamic>{
       'point_id': _point,
       'work_date': VF.iso(_date),
+      if (_shift != null) 'shift_id': _shift,
       'kind': _kind,
       'client_id': _client,
       'note': _note.text.trim(),
@@ -221,6 +227,33 @@ class _SalesBodyState extends State<_SalesBody> {
                 if (d != null) setState(() => _date = d);
               },
             ),
+            if (_point != null)
+              SizedBox(
+                width: 360,
+                child: DropdownButtonFormField<String?>(
+                  value: _shift,
+                  isExpanded: true,
+                  decoration: InputDecoration(labelText: tx(context, 'الوَرديّة', 'Shift'), isDense: true),
+                  items: [
+                    DropdownMenuItem<String?>(value: null, child: Text(tx(context, 'وَرديّة اليَوم (أَو وَرديّة جَديدة)', 'Shift of that day (or a new one)'))),
+                    for (final s in _shifts)
+                      DropdownMenuItem<String?>(
+                        value: vStr(s['id']),
+                        enabled: !vBool(s['locked']),
+                        child: Text(
+                          '${vBool(s['locked']) ? '🔒 ' : ''}${vStr(s['code'])} · ${VF.dt(vTime(s['start']))}${vBool(s['locked']) ? tx(context, ' · مَقفولة في Odoo', ' · closed in Odoo') : ''}',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: vBool(s['locked']) ? VC.muted : null),
+                        ),
+                      ),
+                  ],
+                  onChanged: (v) => setState(() {
+                    _shift = v;
+                    final s = _shifts.where((x) => vStr(x['id']) == v).firstOrNull;
+                    if (s != null) _date = DateTime.tryParse(vStr(s['date'])) ?? _date;
+                  }),
+                ),
+              ),
             SegmentedButton<String>(
               segments: [
                 ButtonSegment(value: 'summary', icon: const Icon(Icons.summarize_outlined), label: Text(tx(context, 'إجمالي (يَوم / فَترة)', 'Total (day / period)'))),

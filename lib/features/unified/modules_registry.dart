@@ -85,7 +85,6 @@ import '../valet/valet_points_screen.dart';
 import '../valet/valet_reports_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_contracts_screen.dart';
-import '../valet/valet_credits_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
 import '../valet/valet_numbering_screen.dart';
@@ -354,19 +353,6 @@ class ModulesRegistry {
           groupKey: 'valet_money',
           groupTitleAr: 'Odoo وَالعُقود',
           groupTitleEn: 'Odoo & contracts',
-        ),
-        AppModule(
-          key: 'valet_credits',
-          titleAr: 'الإشعارات الدائِنة',
-          titleEn: 'Credit notes',
-          icon: Icons.receipt_long,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetReportsView,
-          builder: (_) => const ValetCreditsScreen(),
-          groupKey: 'valet_ops',
-          groupTitleAr: 'التَشغيل',
-          groupTitleEn: 'Operations',
         ),
         AppModule(
           key: 'valet_contracts',

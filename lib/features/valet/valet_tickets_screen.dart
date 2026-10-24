@@ -198,7 +198,6 @@ Future<bool> showValetTicket(BuildContext context, String id) async {
             final inOdoo = vBool(ci['in_odoo']);
             final credits = vList(ci['credits']);
             final creditable = vNum(ci['creditable']);
-            final total = vNum(t['total_price']) + vNum(t['lost_card']);
             Widget row(String ar, String en, Object? v) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 3),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -259,22 +258,10 @@ Future<bool> showValetTicket(BuildContext context, String id) async {
                     ]),
                   ),
               ],
-              if (!isVoid && inOdoo && creditable > 0 && ValetAdmin.I.can(ValetAdmin.permCreditRequest)) ...[
+              if (!isVoid && inOdoo && creditable > 0) ...[
                 const SizedBox(height: 14),
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(foregroundColor: VC.warn),
-                    icon: const Icon(Icons.receipt_long),
-                    label: Text(tx(ctx, 'إشعار دائِن', 'Credit note')),
-                    onPressed: () async {
-                      if (await askTicketCredit(ctx, ticketId: id, code: vStr(t['ticket_code']), creditable: creditable, total: total)) {
-                        changed = true;
-                        reload();
-                      }
-                    },
-                  ),
-                ),
+                Text(tx(ctx, 'الإشعار الدائِن (فويد أَو تَقليل) بيِتعِمِل مِن Odoo بَس، في إقفال الوَرديّة.', 'Credit notes (void or reduce) are made in Odoo only, at shift close.'),
+                    style: const TextStyle(color: VC.muted, fontSize: 12)),
               ],
               if (!isVoid && !inOdoo && ValetAdmin.I.can(ValetAdmin.permTickets)) ...[
                 const SizedBox(height: 14),
