@@ -18,8 +18,9 @@
 <div class="bar">
   <button onclick="document.getElementById('p').className='phone'">📱 Phone</button>
   <button onclick="document.getElementById('p').className='phone tab'">💻 Tablet</button>
-  <button onclick="document.getElementById('f').src='./?t='+Date.now()">↻ Reload</button>
+  <button onclick="document.getElementById('f').src='./index.html?t='+Date.now()">↻ Reload</button>
 </div>
-<div class="wrap"><div class="phone" id="p"><iframe id="f" src="./" allow="camera; clipboard-read; clipboard-write"></iframe></div></div>
+<div class="wrap"><div class="phone" id="p"><iframe id="f" src="about:blank" allow="camera; clipboard-read; clipboard-write"></iframe></div></div>
+<script>document.getElementById('f').src='./index.html?t='+Date.now();</script>
 </body>
 </html>
