@@ -208,6 +208,9 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('require_gps', 'المَوقِع (GPS) إجباريّ', 'Location (GPS) required',
             'لا حُضور وَلا انصِراف وَلا فَتح أَو قَفل وَرديّة بِدون تَشغيل المَوقِع', 'No check-in / out and no opening or closing a shift without Location on',
             'التَطبيق يَعمَل بِدون المَوقِع، وَالحُضور يُسَجَّل بِدون مَكان', 'The app works without Location; attendance is saved without a place'),
+        ('opener_must_close', 'مَن فَتَح الوَرديّة لا يَخرُج قَبل قَفلها', 'Shift opener stays until closing',
+            'المُوَظَّف الذي فَتَح الوَرديّة لا يَستَطيع تَسجيل الخُروج مِن التَطبيق إلّا بَعد قَفل الوَرديّة', 'The staff member who opened the shift cannot log out of the app until the shift is closed',
+            'يَستَطيع تَسجيل الخُروج وَالوَرديّة تَبقى مَفتوحة', 'Can log out while the shift stays open'),
         ('sinin_w_card', 'دُخول المُوَظَّفين', 'Staff sign-in',
             'اسم مُستَخدِم وَكَلِمة مُرور', 'User name + password',
             'كَرت المُوَظَّف NFC / QR فَقَط', 'Staff NFC / QR card only'),
@@ -242,6 +245,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     'key_rack_w_sites_or_allow': Icons.key_outlined,
     'sinin_w_card': Icons.password_rounded,
     'require_gps': Icons.location_on_outlined,
+    'opener_must_close': Icons.lock_clock_outlined,
     'paid_first_or_paid_after': Icons.payments_outlined,
     'price_group_customer': Icons.sell_outlined,
     'stamp_ticket': Icons.approval_outlined,
@@ -585,61 +589,70 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         );
 
     return _page([
+      // in the order the app is used: sign in → open the shift → add a ticket → before payment → payment → …
       devicesSection(),
-      section(Icons.add_box_outlined, 'صَفحة إضافة تَذكَرة', 'Add ticket page',
-          'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة. صورة السَيّارة تَقرَأ اللَوحة وَنَوع السَيّارة وَلَونها تِلقائيّاً.',
-          'What the staff fill in when receiving a car. The car photo reads the plate, type and colour automatically.', [
+      section(Icons.login_rounded, '1 · دُخول المُوَظَّف', '1 · Staff sign-in',
+          'أَوَّل شاشة في التَطبيق: طَريقة الدُخول، المَوقِع، وَخُروج مَن فَتَح الوَرديّة.',
+          'The first screen of the app: how staff sign in, Location, and logging out of the shift opener.', [
+        loginPicker(),
+        sw('require_gps'),
+        sw('opener_must_close'),
+      ]),
+      section(Icons.play_circle_outline_rounded, '2 · فَتح الوَرديّة', '2 · Opening the shift',
+          'يُحَدَّد هُنا فَقَط وَيُطَبَّق مِن الوَرديّة التالية؛ التَطبيق يَعرِضه فَقَط. رَقم مَكينة الكارت يُكتَب بِاليَد في كُلّ وَرديّة.',
+          'Set here only and applied from the next shift; the app only shows it. The card machine number is typed by hand every shift.', [
+        sw('paid_first_or_paid_after'),
+      ]),
+      section(Icons.add_box_outlined, '3 · إضافة تَذكَرة', '3 · Add ticket',
+          'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة، وَطَريقة قِراءة الكُروت وَاختيار السائِق.',
+          'What the staff fill in when receiving a car, how cards are read and how the driver is picked.', [
         sw('photo_in_out'),
         sw('nfc_qr_in_out'),
+        readerPicker(),
         sw('price_group_customer'),
+        sw('dropdown_parkingcar'),
       ]),
-      section(Icons.rule_rounded, 'إجباريّ قَبل الدَفع', 'Required before payment',
+      section(Icons.rule_rounded, '4 · إجباريّ قَبل الدَفع', '4 · Required before payment',
           'ما يَجِب تَسجيله عَلى التَذكَرة قَبل أَن تُدفَع. المُغلَق يَبقى مُتاحاً لَكِن اختياريّ.',
           'What must be recorded on the ticket before it can be paid. When off it stays available but optional.', [
         sw('drivers_in'),
-        sw('drivers_out'),
         sw('parking_in_out'),
+        sw('drivers_out'),
       ]),
-      section(Icons.contactless_outlined, 'الكُروت وَاختيار السائِق', 'Cards and picking the driver',
-          'طَريقة قِراءة الكُروت في كُلّ أَجهِزة هذه النُقطة، وَهَل يُختار السائِق مِن قائِمة أَم بِمَسح كَرته فَقَط.',
-          'How cards are read on every device of this point, and whether the driver is picked from a list or only by scanning the card.', [
-        readerPicker(),
-        sw('dropdown_parkingcar'),
-        sw('dropdown_time_in_out'),
-      ]),
-      section(Icons.point_of_sale_outlined, 'الدَفع وَالخُروج', 'Payment and check-out',
-          'أَزرار شاشة الدَفع وَطَريقة الدَفع. طَريقة الدَفع تُحَدَّد مِن هُنا فَقَط وَتُطَبَّق مِن الوَرديّة التالية؛ التَطبيق يَعرِضها فَقَط.', 'Payment screen buttons and the payment mode. The mode is set here only and applies from the next shift; the app only shows it.', [
-        sw('paid_first_or_paid_after'),
+      section(Icons.point_of_sale_outlined, '5 · الدَفع وَالخُروج', '5 · Payment and check-out',
+          'أَزرار شاشة الدَفع، وَالبَحث عَن التَذكَرة، وَرَقم المُوافَقة لِلكارت.', 'Payment screen buttons, finding the ticket and the card approval number.', [
         sw('valet_validate'),
         sw('stamp_ticket'),
         findPicker(),
         approvalPicker(),
       ]),
-      section(Icons.person_pin_circle_outlined, 'العُمَلاء', 'Customers',
+      section(Icons.person_pin_circle_outlined, '6 · العُمَلاء', '6 · Customers',
           'ما يَستَطيع عَميل السَيّارة فِعله مِن هاتِفه.', 'What the car owner can do from their phone.', [
         sw('car_request'),
       ]),
-      section(Icons.badge_outlined, 'المُوَظَّفون وَالمُشرِف', 'Staff and supervisor',
-          'دُخول المُوَظَّفين لِلتَطبيق، وَما يَراه المُشرِف الذي فَتَح الوَرديّة.', 'How staff sign in, and what the supervisor who opened the shift sees.', [
-        loginPicker(),
-        sw('require_gps'),
-        sw('staff_eval'),
-        sw('supervisor_roster'),
-        sw('show_policies'),
+      section(Icons.schedule_rounded, '7 · الحُضور وَالانصِراف', '7 · Check-in and check-out',
+          'حُضور وَانصِراف السائِقين في النُقطة.', 'Drivers checking in and out at the point.', [
+        sw('dropdown_time_in_out'),
       ]),
-      section(Icons.key_outlined, 'تَطبيق المَفاتيح', 'Key rack',
+      section(Icons.key_outlined, '8 · تَطبيق المَفاتيح', '8 · Key rack',
           'مُتَحَكِّم المَفاتيح وَالدَفع عِنده. الدَفع عِنده يَعمَل فَقَط مَعَ تَشغيل تَطبيق المَفاتيح.',
           'The key controller and paying at the key rack. Paying there works only when the key rack app is on.', [
         sw('key_rack_w_sites_or_allow'),
         sw('paid_with_app_or_keyrack', enabled: vBool(s['key_rack_w_sites_or_allow']),
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
-      section(Icons.card_membership_outlined, 'العُضويّات', 'Memberships',
+      section(Icons.card_membership_outlined, '9 · العُضويّات', '9 · Memberships',
           'صَفحة بَيع العُضويّات، وَخانات كُروت العُضويّة في إضافة تَذكَرة (كُلّ زِرّ مُستَقِلّ).',
           'The memberships page, and the member card fields on Add ticket (each switch on its own).', [
         sw('show_membership'),
         sw('member_card_normal'),
         sw('member_card_gold'),
+      ]),
+      section(Icons.supervisor_account_outlined, '10 · المُشرِف', '10 · Supervisor',
+          'ما يَراه المُشرِف الذي فَتَح الوَرديّة في التَطبيق.', 'What the supervisor who opened the shift sees in the app.', [
+        sw('staff_eval'),
+        sw('supervisor_roster'),
+        sw('show_policies'),
       ]),
       VPanel(
         title: tx(context, 'التَذاكِر وَالرُسوم', 'Tickets and charges'),
