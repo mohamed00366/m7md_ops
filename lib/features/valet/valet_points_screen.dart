@@ -211,6 +211,9 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('require_print', 'الطِباعة إجباريّة', 'Printing required',
             'Save & Print: لا تُحفَظ التَذكَرة إلّا مَعَ طابِعة مُتَّصِلة، وَلا يَخرُج المُوَظَّف مِن الصَفحة قَبل طِباعَتها', 'Save & Print: no ticket is saved without a connected printer, and the page cannot be left before it is printed',
             'الطِباعة اختياريّة – يُمكِن المُتابَعة بِدون طِباعة', 'Printing is optional – the staff can continue without printing'),
+        ('preview_sound', 'صَوت الطِباعة', 'Printing sound',
+            'صَوت طِباعة مَعَ الوَرَقة عَلى الشاشة', 'A printing sound with the paper on the screen',
+            'بِدون صَوت', 'No sound'),
         ('opener_must_close', 'مَن فَتَح الوَرديّة لا يَخرُج قَبل قَفلها', 'Shift opener stays until closing',
             'المُوَظَّف الذي فَتَح الوَرديّة لا يَستَطيع تَسجيل الخُروج مِن التَطبيق إلّا بَعد قَفل الوَرديّة', 'The staff member who opened the shift cannot log out of the app until the shift is closed',
             'يَستَطيع تَسجيل الخُروج وَالوَرديّة تَبقى مَفتوحة', 'Can log out while the shift stays open'),
@@ -249,6 +252,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     'sinin_w_card': Icons.password_rounded,
     'require_gps': Icons.location_on_outlined,
     'require_print': Icons.print_outlined,
+    'preview_sound': Icons.volume_up_outlined,
     'opener_must_close': Icons.lock_clock_outlined,
     'paid_first_or_paid_after': Icons.payments_outlined,
     'price_group_customer': Icons.sell_outlined,
@@ -522,6 +526,34 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         );
 
+    // on-screen paper per printout kind: on/off + seconds, and the printing sound
+    Widget previewRow(String k, IconData icon, String ar, String en) {
+      final secs = vNum(s[k]).toInt();
+      final on = secs > 0;
+      return Container(
+        width: 470,
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+        decoration: BoxDecoration(
+          border: Border.all(color: (on ? VC.ok : VC.muted).withValues(alpha: on ? 0.45 : 0.25)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(children: [
+          Icon(icon, size: 20, color: on ? VC.gold : VC.muted),
+          const SizedBox(width: 10),
+          Expanded(child: Text(tx(context, ar, en), style: const TextStyle(fontWeight: FontWeight.w700))),
+          if (on)
+            DropdownButton<int>(
+              value: secs.clamp(1, 30),
+              underline: const SizedBox(),
+              items: [for (final v in const [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30]) DropdownMenuItem(value: v, child: Text(tx(context, '$v ث', '$v s')))],
+              onChanged: !_edit ? null : (v) => toggleValue(k, v ?? 3),
+            ),
+          Switch(value: on, onChanged: !_edit ? null : (v) => toggleValue(k, v ? 3 : 0)),
+        ]),
+      );
+    }
+
     // devices of the point: limits per kind + the registered devices (approval is in Settings ▸ Numbering ▸ Tablets)
     Widget limitPicker(String k, IconData icon, String ar, String en) {
       final cur = s[k] == null ? null : vNum(s[k]).toInt();
@@ -617,43 +649,52 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         sw('price_group_customer'),
         sw('dropdown_parkingcar'),
       ]),
-      section(Icons.rule_rounded, '4 · إجباريّ قَبل الدَفع', '4 · Required before payment',
+      section(Icons.receipt_long_outlined, '4 · الوَرَقة عَلى الشاشة', '4 · Paper on the screen',
+          'عِند الطِباعة تَظهَر الوَرَقة عَلى الشاشة وَهي تَخرُج مِن الطابِعة، بِنَفس شَكل الوَرَقة المَطبوعة، لِعَدد الثَواني المُختار (لِكُلّ نَوع). تَظهَر حَتّى بِدون طابِعة لِيُصَوِّرها العَميل، وَمِن لَوحة التَذاكِر: "Show ticket".',
+          'On printing, the paper appears on the screen coming out of the printer, the same as the printed one, for the chosen seconds (per kind). It also appears without a printer so the customer can take a photo, and from the board: "Show ticket".', [
+        previewRow('preview_ticket_secs', Icons.confirmation_number_outlined, 'التَذكَرة', 'Ticket'),
+        previewRow('preview_receipt_secs', Icons.receipt_outlined, 'فاتورة الدَفع', 'Payment receipt'),
+        previewRow('preview_member_secs', Icons.card_membership_outlined, 'فاتورة المُشتَرِكين', 'Membership receipt'),
+        previewRow('preview_shift_secs', Icons.summarize_outlined, 'تَقرير الوَرديّة', 'Shift report'),
+        sw('preview_sound'),
+      ]),
+      section(Icons.rule_rounded, '5 · إجباريّ قَبل الدَفع', '5 · Required before payment',
           'ما يَجِب تَسجيله عَلى التَذكَرة قَبل أَن تُدفَع. المُغلَق يَبقى مُتاحاً لَكِن اختياريّ.',
           'What must be recorded on the ticket before it can be paid. When off it stays available but optional.', [
         sw('drivers_in'),
         sw('parking_in_out'),
         sw('drivers_out'),
       ]),
-      section(Icons.point_of_sale_outlined, '5 · الدَفع وَالخُروج', '5 · Payment and check-out',
+      section(Icons.point_of_sale_outlined, '6 · الدَفع وَالخُروج', '6 · Payment and check-out',
           'أَزرار شاشة الدَفع، وَالبَحث عَن التَذكَرة، وَرَقم المُوافَقة لِلكارت.', 'Payment screen buttons, finding the ticket and the card approval number.', [
         sw('valet_validate'),
         sw('stamp_ticket'),
         findPicker(),
         approvalPicker(),
       ]),
-      section(Icons.person_pin_circle_outlined, '6 · العُمَلاء', '6 · Customers',
+      section(Icons.person_pin_circle_outlined, '7 · العُمَلاء', '7 · Customers',
           'ما يَستَطيع عَميل السَيّارة فِعله مِن هاتِفه.', 'What the car owner can do from their phone.', [
         sw('car_request'),
       ]),
-      section(Icons.schedule_rounded, '7 · الحُضور وَالانصِراف', '7 · Check-in and check-out',
+      section(Icons.schedule_rounded, '8 · الحُضور وَالانصِراف', '8 · Check-in and check-out',
           'حُضور وَانصِراف السائِقين في النُقطة.', 'Drivers checking in and out at the point.', [
         sw('dropdown_time_in_out'),
       ]),
-      section(Icons.key_outlined, '8 · تَطبيق المَفاتيح', '8 · Key rack',
+      section(Icons.key_outlined, '9 · تَطبيق المَفاتيح', '9 · Key rack',
           'مُتَحَكِّم المَفاتيح وَالدَفع عِنده. الدَفع عِنده يَعمَل فَقَط مَعَ تَشغيل تَطبيق المَفاتيح.',
           'The key controller and paying at the key rack. Paying there works only when the key rack app is on.', [
         sw('key_rack_w_sites_or_allow'),
         sw('paid_with_app_or_keyrack', enabled: vBool(s['key_rack_w_sites_or_allow']),
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
-      section(Icons.card_membership_outlined, '9 · العُضويّات', '9 · Memberships',
+      section(Icons.card_membership_outlined, '10 · العُضويّات', '10 · Memberships',
           'صَفحة بَيع العُضويّات، وَخانات كُروت العُضويّة في إضافة تَذكَرة (كُلّ زِرّ مُستَقِلّ).',
           'The memberships page, and the member card fields on Add ticket (each switch on its own).', [
         sw('show_membership'),
         sw('member_card_normal'),
         sw('member_card_gold'),
       ]),
-      section(Icons.supervisor_account_outlined, '10 · المُشرِف', '10 · Supervisor',
+      section(Icons.supervisor_account_outlined, '11 · المُشرِف', '11 · Supervisor',
           'ما يَراه المُشرِف الذي فَتَح الوَرديّة في التَطبيق.', 'What the supervisor who opened the shift sees in the app.', [
         sw('staff_eval'),
         sw('supervisor_roster'),
