@@ -472,7 +472,78 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         );
 
+    // devices of the point: limits per kind + the registered devices (approval is in Settings ▸ Numbering ▸ Tablets)
+    Widget limitPicker(String k, IconData icon, String ar, String en) {
+      final cur = s[k] == null ? null : vNum(s[k]).toInt();
+      return SizedBox(
+        width: 230,
+        child: DropdownButtonFormField<int?>(
+          value: cur,
+          isExpanded: true,
+          decoration: InputDecoration(labelText: tx(context, ar, en), prefixIcon: Icon(icon), isDense: true),
+          items: [
+            DropdownMenuItem<int?>(value: null, child: Text(tx(context, 'بِدون حَدّ', 'No limit'))),
+            for (var i = 0; i <= 10; i++) DropdownMenuItem<int?>(value: i, child: Text('$i')),
+          ],
+          onChanged: !_edit ? null : (v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}}),
+        ),
+      );
+    }
+
+    final devices = vList(d['devices']);
+    int used(String kind) => devices.where((x) => vStr(x['kind']) == kind && vStr(x['status']) != 'blocked').length;
+    Widget devicesSection() => VPanel(
+          title: tx(context, 'الأَجهِزة', 'Devices'),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Icon(Icons.tablet_android_outlined, size: 18, color: VC.gold),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                    tx(context,
+                        'كُلّ جِهاز يُرسِل رَقمه وَبَياناته (المُوديل وَنُسخة أَندرويد وَنُسخة التَطبيق) عِند دُخول المُوَظَّف. الجِهاز الزائِد عَن الحَدّ يُوقَف تِلقائيّاً وَلا يَفتَح وَرديّة. المُوافَقة وَالإيقاف وَالاستِبدال مِن: الإعدادات ← نِظام التَرقيم ← الأَجهِزة.',
+                        'Every device sends its number and details (model, Android and app version) when staff sign in. A device over the limit is blocked automatically and cannot open a shift. Approve, block or replace in Settings ▸ Numbering ▸ Tablets.'),
+                    style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            Wrap(spacing: 16, runSpacing: 12, children: [
+              limitPicker('max_valet_devices', Icons.tablet_android_outlined, 'تابلت الفاليه (المَسموح)', 'Valet tablets (allowed)'),
+              limitPicker('max_keyrack_devices', Icons.key_outlined, 'أَجهِزة الكي راك (المَسموح)', 'Key rack devices (allowed)'),
+            ]),
+            const SizedBox(height: 8),
+            Text(
+                tx(context, 'مُستَخدَم الآن: فاليه ${used('valet')} · كي راك ${used('keyrack')}',
+                    'In use now: valet ${used('valet')} · key rack ${used('keyrack')}'),
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            if (devices.isEmpty)
+              Text(tx(context, 'لا يوجَد جِهاز مُسَجَّل بَعد (يُسَجَّل مِن النُسخة 2.3.1).', 'No device registered yet (registered from version 2.3.1).'),
+                  style: const TextStyle(color: VC.muted))
+            else
+              for (final x in devices)
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(vStr(x['kind']) == 'keyrack' ? Icons.key_outlined : Icons.tablet_android_outlined,
+                      color: switch (vStr(x['status'])) { 'active' => VC.ok, 'pending' => VC.warn, _ => VC.bad }),
+                  title: Text(
+                      '${x['short_code'] == null ? tx(context, 'بِدون رَقم', 'No number') : tx(context, 'رَقم ${'${x['short_code']}'.padLeft(2, '0')}', 'No. ${'${x['short_code']}'.padLeft(2, '0')}')}'
+                      ' · ${switch (vStr(x['kind'])) { 'keyrack' => tx(context, 'كي راك', 'Key rack'), 'valet' => tx(context, 'فاليه', 'Valet'), _ => tx(context, 'غَير مَعروف', 'Unknown') }}'
+                      ' · ${switch (vStr(x['status'])) { 'active' => tx(context, 'شَغّال', 'Active'), 'pending' => tx(context, 'مُستَنّي مُوافَقة', 'Waiting'), _ => tx(context, 'مَوقوف', 'Blocked') }}'),
+                  subtitle: Text([
+                    vStr(x['model']),
+                    if (vStr(x['os_version']).isNotEmpty) 'Android ${vStr(x['os_version'])}',
+                    if (vStr(x['app_version']).isNotEmpty) 'app ${vStr(x['app_version'])}',
+                    if (x['last_seen_at'] != null) VF.dt(vTime(x['last_seen_at'])),
+                    if (vStr(x['status']) == 'blocked' && vStr(x['note']).isNotEmpty) vStr(x['note']),
+                  ].where((e) => e.isNotEmpty).join(' · ')),
+                ),
+          ]),
+        );
+
     return _page([
+      devicesSection(),
       section(Icons.add_box_outlined, 'صَفحة إضافة تَذكَرة', 'Add ticket page',
           'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة. صورة السَيّارة تَقرَأ اللَوحة وَنَوع السَيّارة وَلَونها تِلقائيّاً.',
           'What the staff fill in when receiving a car. The car photo reads the plate, type and colour automatically.', [

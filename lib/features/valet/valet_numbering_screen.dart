@@ -660,6 +660,7 @@ class _DevicesTab extends StatelessWidget {
           columns: [
             DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
             DataColumn(label: Text(tx(context, 'رَقم التابلت', 'Tablet no.'))),
+            DataColumn(label: Text(tx(context, 'الجِهاز', 'Device'))),
             DataColumn(label: Text(tx(context, 'الـ Serial', 'Serial'))),
             const DataColumn(label: Text('Android ID')),
             DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
@@ -672,6 +673,23 @@ class _DevicesTab extends StatelessWidget {
               DataRow(cells: [
                 DataCell(Text('${vStr(d['point'])}\n${vStr(d['point_name'])}', style: const TextStyle(fontSize: 12))),
                 DataCell(Text(d['short_code'] == null ? '-' : '${d['short_code']}'.padLeft(2, '0'), style: const TextStyle(fontWeight: FontWeight.w800))),
+                DataCell(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    switch (vStr(d['kind'])) {
+                      'keyrack' => VPill(tx(context, 'كي راك', 'Key rack'), color: VC.gold),
+                      'valet' => VPill(tx(context, 'فاليه', 'Valet'), color: VC.ok),
+                      _ => VPill(tx(context, 'غَير مَعروف', 'Unknown')),
+                    },
+                    if (d['limit'] != null) ...[
+                      const SizedBox(width: 6),
+                      Text(tx(context, 'الحَدّ ${d['limit']}', 'limit ${d['limit']}'), style: const TextStyle(fontSize: 11, color: VC.muted)),
+                    ],
+                  ]),
+                  Text([vStr(d['model']), if (vStr(d['os_version']).isNotEmpty) 'Android ${vStr(d['os_version'])}', if (vStr(d['app_version']).isNotEmpty) 'app ${vStr(d['app_version'])}'].where((x) => x.isNotEmpty).join(' · '),
+                      style: const TextStyle(fontSize: 11, color: VC.muted)),
+                  if (vStr(d['status']) == 'blocked' && vStr(d['note']).isNotEmpty)
+                    Text(vStr(d['note']), style: const TextStyle(fontSize: 11, color: VC.bad)),
+                ])),
                 DataCell(Text(vStr(d['serial_label']).isEmpty ? '-' : vStr(d['serial_label']))),
                 DataCell(Text(vStr(d['android_id']), style: const TextStyle(fontFamily: 'monospace', fontSize: 11))),
                 DataCell(switch (vStr(d['status'])) {
