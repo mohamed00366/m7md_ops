@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valet app preview</title>
+<style>
+  html,body{margin:0;height:100%;background:#1d2127;font-family:system-ui,sans-serif;color:#cfd3d8}
+  .wrap{height:100%;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap}
+  .phone{width:390px;height:min(844px,calc(100vh - 40px));border:10px solid #0b0d10;border-radius:38px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);background:#000}
+  .phone.tab{width:min(1024px,calc(100vw - 60px));height:min(700px,calc(100vh - 40px));border-radius:24px}
+  iframe{width:100%;height:100%;border:0;display:block}
+  .bar{position:fixed;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
+  .bar button{background:#2b3038;color:#e6c35c;border:1px solid #444b55;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px}
+</style>
+</head>
+<body>
+<div class="bar">
+  <button onclick="document.getElementById('p').className='phone'">📱 Phone</button>
+  <button onclick="document.getElementById('p').className='phone tab'">💻 Tablet</button>
+  <button onclick="document.getElementById('f').src='./?t='+Date.now()">↻ Reload</button>
+</div>
+<div class="wrap"><div class="phone" id="p"><iframe id="f" src="./" allow="camera; clipboard-read; clipboard-write"></iframe></div></div>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Sedan
+SUV
+Pickup
+Van
