@@ -193,9 +193,9 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('dropdown_time_in_out', 'السائِق في الحُضور', 'Driver in attendance',
             'قائِمة بِالأَسماء أَو مَسح الكَرت', 'Name list or card scan',
             'مَسح كَرت السائِق فَقَط', 'Driver card scan only'),
-        ('paid_first_or_paid_after', 'وَرديّة "الدَفع أَوَّلاً"', '"Pay first" shifts',
-            'المُشرِف يَختار عِند فَتح الوَرديّة: الدَفع عِند الدُخول أَو الخُروج', 'The supervisor chooses on opening: pay on entry or at check-out',
-            'الدَفع عِند الخُروج دائِماً', 'Always pay at check-out'),
+        ('paid_first_or_paid_after', 'الدَفع أَوَّلاً', 'Pay first',
+            'كُلّ الوَرديّات: العَميل يَدفَع عِند الدُخول', 'Every shift: the customer pays on entry',
+            'كُلّ الوَرديّات: العَميل يَدفَع عِند الخُروج', 'Every shift: the customer pays at check-out'),
         ('valet_validate', 'زِرّ "Validate for a client"', '"Validate for a client" button',
             'ظاهِر في شاشة الدَفع – المُوَظَّف يَعمَل فاليديشن لِعَميل', 'Shown on check-out – the staff validate for a client',
             'مَخفيّ', 'Hidden'),
@@ -491,7 +491,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         sw('dropdown_time_in_out'),
       ]),
       section(Icons.point_of_sale_outlined, 'الدَفع وَالخُروج', 'Payment and check-out',
-          'أَزرار شاشة الدَفع وَطَريقة الدَفع في الوَرديّة.', 'Buttons of the payment screen and how the shift collects money.', [
+          'أَزرار شاشة الدَفع وَطَريقة الدَفع. طَريقة الدَفع تُحَدَّد مِن هُنا فَقَط وَتُطَبَّق مِن الوَرديّة التالية؛ التَطبيق يَعرِضها فَقَط.', 'Payment screen buttons and the payment mode. The mode is set here only and applies from the next shift; the app only shows it.', [
         sw('paid_first_or_paid_after'),
         sw('valet_validate'),
         sw('stamp_ticket'),
