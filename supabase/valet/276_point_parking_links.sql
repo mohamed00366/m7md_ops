@@ -1,0 +1,5 @@
+-- 276 · vva_point: the point's Parking tab lists areas linked with "Link area"
+-- (valet_parking_links) as well as the old areas.point_id. Applied by patching the
+-- function body in place:
+--   ... from public.valet_parking_areas a where a.point_id = p_point
+--       or exists (select 1 from public.valet_parking_links l where l.area_id = a.id and l.point_id = p_point) ...
