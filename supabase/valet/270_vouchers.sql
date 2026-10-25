@@ -214,3 +214,11 @@ begin
 end $$;
 
 revoke all on function public.vv__voucher_take(uuid, text, numeric, numeric, uuid, uuid, uuid) from public, anon, authenticated;
+
+-- Applied live 2026-10-25, plus vv_pay_ticket patched (via pg_get_functiondef replace):
+--   declare v_vcode text; v_vprice numeric; v_vd numeric;
+--   after p_payment := p_payment - 'sale':
+--     v_vcode := upper(code), v_vprice := voucher_price; p_payment := p_payment - 'voucher_code' - 'voucher_price';
+--   before "-- unified sale number": if v_vcode is not null -> v_vd := vv__voucher_take(...) (raise -> vv__err),
+--     v_patch || {voucher_code, discount_type 'Voucher', discount_amount v_vd}
+-- rolled-back test: 25% voucher on 150 -> check 37.50, paid 112.50, ticket discount_type Voucher 37.50; second use refused (1/1).
