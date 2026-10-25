@@ -89,6 +89,7 @@ import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
 import '../valet/valet_numbering_screen.dart';
 import '../valet/valet_vouchers_screen.dart';
+import '../valet/valet_safety_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
@@ -442,6 +443,32 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetTicketsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
+        ),
+        AppModule(
+          key: 'valet_accidents',
+          titleAr: 'حَوادِث الفاليه',
+          titleEn: 'Valet accidents',
+          icon: Icons.car_crash_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetAccidentsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
+        ),
+        AppModule(
+          key: 'valet_assets',
+          titleAr: 'عُهَد النِقاط',
+          titleEn: 'Point assets',
+          icon: Icons.inventory_2_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetAssetsScreen(),
           groupKey: 'valet_ops',
           groupTitleAr: 'التَشغيل',
           groupTitleEn: 'Operations',
