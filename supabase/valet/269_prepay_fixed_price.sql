@@ -1,0 +1,7 @@
+-- 269 (applied live 2026-10-25): pay before the car comes also at fixed-price points.
+-- vv_prepay_ticket: grace_until only for HOURLY tickets and prepay_grace_min > 0 (0 = off, no time to leave);
+--   inserted after v_grace := ...:
+--   if v_t.ticket_mode is distinct from 'HOURLY' or coalesce(v_grace, 0) <= 0 then v_grace := null; end if;
+--   grace_until = case when v_grace is null then null else now() + make_interval(mins => v_grace) end
+-- valet_point_settings: prepay_grace_min check widened to 0..240.
+-- rolled-back test: TICKET 50 cash prepaid -> Active, hold, grace null; deliver -> Check-Out.

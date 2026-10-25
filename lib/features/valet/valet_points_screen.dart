@@ -217,8 +217,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('color_states', 'أَلوان التَذاكِر في اللَوحة', 'Ticket colours on the board',
             'لَون لِكُلّ حالة: طَلَب العَميل، طَلَب الكي راك، مَدفوعة، وَقت إضافيّ، فاليديشن، VIP – وَشَريط يَشرَح الأَلوان وَيُفَلتِر بِها', 'A colour per state: customer request, key rack request, paid, extra time, validated, VIP – with a legend that filters',
             'كُلّ التَذاكِر بِنَفس الشَكل', 'All tickets look the same'),
-        ('prepay_enabled', 'الدَفع قَبل وُصول السَيّارة (نِقاط الوَقت)', 'Pay before the car comes (hourly points)',
-            'العَميل يَدفَع وَالتَذكَرة تَبقى خَضراء عَلى اللَوحة حَتّى التَسليم، مَعَ وَقت لِلخُروج', 'The customer pays; the ticket stays green on the board until delivery, with a time to leave',
+        ('prepay_enabled', 'الدَفع قَبل وُصول السَيّارة', 'Pay before the car comes',
+            'العَميل يَدفَع وَالتَذكَرة تَبقى خَضراء عَلى اللَوحة حَتّى التَسليم. السِعر الثابِت: بِدون وَقت. نِقاط الوَقت: وَقت خُروج اختِياريّ', 'The customer pays; the ticket stays green on the board until delivery. Fixed price: no time. Hourly points: optional time to leave',
             'الدَفع عِند التَسليم فَقَط', 'Payment only at delivery'),
         ('opener_must_close', 'مَن فَتَح الوَرديّة لا يَخرُج قَبل قَفلها', 'Shift opener stays until closing',
             'المُوَظَّف الذي فَتَح الوَرديّة لا يَستَطيع تَسجيل الخُروج مِن التَطبيق إلّا بَعد قَفل الوَرديّة', 'The staff member who opened the shift cannot log out of the app until the shift is closed',
@@ -543,7 +543,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             decoration: InputDecoration(labelText: tx(context, ar, en), isDense: true, prefixIcon: const Icon(Icons.timer_outlined)),
             items: [
               for (final v in values)
-                DropdownMenuItem(value: v, child: Text(v == 0 && zeroOff ? tx(context, 'بِدون حَدّ', 'No limit') : tx(context, '$v دَقيقة', '$v min'))),
+                DropdownMenuItem(value: v, child: Text(v == 0 && zeroOff ? tx(context, 'مُطفَأ – بِدون وَقت خُروج', 'Off – no time to leave') : tx(context, '$v دَقيقة', '$v min'))),
             ],
             onChanged: !_edit || !enabled ? null : (v) => toggleValue(k, v ?? values.first),
           ),
@@ -555,8 +555,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Wrap(spacing: 12, runSpacing: 10, children: [
-                minutesPicker('prepay_grace_min', 'وَقت الخُروج بَعد الدَفع', 'Time to leave after paying', const [5, 10, 15, 20, 30, 45, 60],
-                    enabled: vBool(s['prepay_enabled'])),
+                minutesPicker('prepay_grace_min', 'وَقت الخُروج بَعد الدَفع (نِقاط الوَقت)', 'Time to leave after paying (hourly)', const [0, 5, 10, 15, 20, 30, 45, 60],
+                    zeroOff: true, enabled: vBool(s['prepay_enabled'])),
               ]),
               const SizedBox(height: 8),
               Text(tx(context, 'بَعد انتِهاء وَقت الخُروج', 'After the time to leave'), style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -567,7 +567,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                   ButtonSegment(value: 'alert', icon: const Icon(Icons.notifications_none), label: Text(tx(context, 'تَنبيه فَقَط', 'Alert only'))),
                 ],
                 selected: {after},
-                onSelectionChanged: !_edit || !vBool(s['prepay_enabled']) ? null : (v) => toggleValue('prepay_after', v.first),
+                onSelectionChanged: !_edit || !vBool(s['prepay_enabled']) || vNum(s['prepay_grace_min']) <= 0 ? null : (v) => toggleValue('prepay_after', v.first),
               ),
               const SizedBox(height: 4),
               Text(
@@ -730,8 +730,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               minutesPicker('validation_grace_min', 'وَقت الخُروج بَعد الفاليديشن (نِقاط الوَقت)', 'Time to leave after a validation (hourly)',
                   const [0, 10, 15, 20, 30, 45, 60, 90, 120], zeroOff: true),
               const SizedBox(height: 4),
-              Text(tx(context, 'بَعده يَبدَأ الحِساب مِن جَديد بِسِعر النُقطة. "بِدون حَدّ" = الفاليديشن يُغَطّي حَتّى الخُروج.',
-                      'After it the time is charged again at the point price. "No limit" = the validation covers until the exit.'),
+              Text(tx(context, 'بَعده يَبدَأ الحِساب مِن جَديد بِسِعر النُقطة. "مُطفَأ" = الفاليديشن يُغَطّي حَتّى الخُروج.',
+                      'After it the time is charged again at the point price. "Off" = the validation covers until the exit.'),
                   style: const TextStyle(color: VC.muted, fontSize: 12)),
             ]),
           ),
