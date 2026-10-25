@@ -150972,9 +150972,9 @@ if(j){j=l?B.qy:B.p
 j=A.aO(B.nd,j,o,k*0.6)}else j=o
 return A.AD(A.fA(o,A.aR(o,j,B.o,o,o,new A.aN(o,o,r,o,q,new A.rL(B.Rk,0.95,B.cN,o,0,s,B.CE,o),B.c1),o,k,o,o,o,o,k),B.x,!1,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,p.f,o,o,o,o,o,o,!1,B.bk),n)}}
 A.a1O.prototype={
-E(a){return new A.Cf(1.5,A.nW(new A.asy(this)),null)}}
+E(a){return new A.Cf(1.2,A.nW(new A.asy(this)),null)}}
 A.asy.prototype={
-$2(a,b){var s,r,q,p,o,n,m,l=null,k=b.b,j=b.d,i=B.d.aZ(k/16,20,30),h=this.a,g=h.e,f=A.a([A.a6q(0,A.id(l,l,l,new A.abD(g,l),B.a5))],t.p)
+$2(a,b){var s,r,q,p,o,n,m,l=null,k=b.b,j=b.d,i=B.d.aZ(k/15,20,30),h=this.a,g=h.e,f=A.a([A.a6q(0,A.id(l,l,l,new A.abD(g,l),B.a5))],t.p)
 for(s=k/2,r=i/2,q=j/2,p=h.c,o=0;o<25;++o){n=B.CA[o]
 m=$.bKX()
 f.push(new A.mQ(s+m.h(0,n).a*k/2-r,q+m.h(0,n).b*j/2-r,l,l,i,i,new A.abC(n,p.p(0,n),g,new A.asx(h,n),l),l))}return A.fP(B.bw,f,B.t,B.bG,l)},
