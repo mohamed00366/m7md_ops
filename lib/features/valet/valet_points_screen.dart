@@ -472,6 +472,48 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         );
 
+    // staff sign-in method of the point (enforced by the server: password vs card; NFC / QR by the app)
+    final login = const {'password', 'nfc', 'qr'}.contains(vStr(s['staff_login']))
+        ? vStr(s['staff_login'])
+        : (s['sinin_w_card'] == false ? 'card' : 'password');
+    Widget loginPicker() => SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tx(context, 'طَريقة دُخول المُوَظَّف لِلوَرديّة (إلزاميّة)', 'Staff sign-in for the shift (required)'),
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 2),
+              Text(
+                  tx(context, 'التَطبيق يَعرِض الطَريقة المُختارة فَقَط، وَالسيرفَر يَرفُض أَيّ طَريقة أُخرى.',
+                      'The app shows only the chosen way, and the server refuses any other.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+              const SizedBox(height: 6),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(value: 'password', icon: const Icon(Icons.password_rounded), label: Text(tx(context, 'اسم وَكَلِمة مُرور', 'User + password'))),
+                  const ButtonSegment(value: 'nfc', icon: Icon(Icons.nfc_rounded), label: Text('NFC')),
+                  const ButtonSegment(value: 'qr', icon: Icon(Icons.qr_code_2_rounded), label: Text('QR')),
+                ],
+                selected: {login == 'card' ? 'nfc' : login},
+                onSelectionChanged: !_edit
+                    ? null
+                    : (v) => _save('vva_point_settings_save', {
+                          'p_point': widget.pointId,
+                          // sinin_w_card is kept in step for tablets on older versions
+                          'p_data': {'staff_login': v.first, 'sinin_w_card': v.first == 'password'},
+                        }),
+              ),
+              if (login == 'card')
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(tx(context, 'الآن: كَرت NFC أَو QR (اختَر واحِدة لِلإلزام).', 'Now: NFC or QR card (pick one to require it).'),
+                      style: const TextStyle(color: VC.warn, fontSize: 12)),
+                ),
+            ]),
+          ),
+        );
+
     // devices of the point: limits per kind + the registered devices (approval is in Settings ▸ Numbering ▸ Tablets)
     Widget limitPicker(String k, IconData icon, String ar, String en) {
       final cur = s[k] == null ? null : vNum(s[k]).toInt();
@@ -579,7 +621,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       ]),
       section(Icons.badge_outlined, 'المُوَظَّفون وَالمُشرِف', 'Staff and supervisor',
           'دُخول المُوَظَّفين لِلتَطبيق، وَما يَراه المُشرِف الذي فَتَح الوَرديّة.', 'How staff sign in, and what the supervisor who opened the shift sees.', [
-        sw('sinin_w_card'),
+        loginPicker(),
         sw('require_gps'),
         sw('staff_eval'),
         sw('supervisor_roster'),
