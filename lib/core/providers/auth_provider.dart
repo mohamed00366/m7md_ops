@@ -13,7 +13,6 @@ import '../services/device_session_service.dart';
 import '../services/error_tracking_service.dart';
 import '../services/fcm_service.dart';
 import '../services/tenant_context.dart';
-import '../services/point_terminal_session_service.dart';
 import '../services/device_session_settings.dart';
 import '../services/face_attempt_tracker.dart';
 import '../services/geo_fence_service.dart';
@@ -50,6 +49,7 @@ enum LoginResult {
   // 🆕 Active-Duty-Only Policy
   onApprovedLeave,     // الموظّف في إجازة معتمدة سارية اليوم
   accountSuspended,    // حساب/موظّف معلّق
+  deviceAccount,       // حِساب جِهاز نُقطة (تَطبيق الفاليه) — لَيس لِلداشبورد
 }
 
 /// نتيجة الفحص قبل فتح شاشة بصمة الوجه
@@ -558,99 +558,14 @@ class AuthProvider extends ChangeNotifier {
     // الدول
     _countryIds = await _supabase.fetchUserCountries(userId);
 
-    // 🆕 حِسابات Point Terminal: تَحقُّق رَبط الجِهاز (Device Binding)
-    //   • أَوَّل دُخول: ربط الجِهاز الحاليّ بِالحِساب
-    //   • دُخول لاحِق: يَجِب أَن يُطابِق نَفس الجِهاز، وإلّا يُرفَض
-    //   • Terminal لا يَحتاج أَدوار → نَتَجاوَز فَحص noRoles
+    // حِسابات "جِهاز النُقطة" خاصّة بِتَطبيق الفاليه فَقَط — لا تَدخُل الداشبورد
+    // (تَطبيق Point Terminal القَديم داخِل الداشبورد حُذِف).
     if (_account!.accountType == AccountType.pointTerminal) {
-      final currentDevice =
-          await DeviceSessionService.instance.ensureDeviceId();
-
-      // 🆕 الفَحص الجَديد بِاستِخدام `point_terminal_sessions`:
-      //   - إذا الجِهاز لَه جَلسة سابِقة → اسمَح (هو جِهاز مَعروف)
-      //   - وَإلا → عُدّ الأَجهِزة المُتَّصِلة، إذا < max_devices أَو
-      //     max_devices == 0 (بِدون حَدّ) → اسمَح، وَإلا → ارفُض.
-      try {
-        final existingSession = await _supabase.client
-            .from('point_terminal_sessions')
-            .select('id')
-            .eq('account_id', _account!.id)
-            .eq('device_id', currentDevice)
-            .eq('is_active', true)
-            .maybeSingle();
-        if (existingSession == null) {
-          // جِهاز جَديد — تَحَقَّق من الحَدّ الأَقصى
-          final max = _account!.maxDevices;
-          if (max > 0) {
-            final activeRows = await _supabase.client
-                .from('point_terminal_sessions')
-                .select('device_id')
-                .eq('account_id', _account!.id)
-                .eq('is_active', true);
-            final activeDevices =
-                (activeRows as List).map((r) => r['device_id']).toSet();
-            if (activeDevices.length >= max) {
-              _account = null;
-              _roles = [];
-              _permissions = {};
-              _countryIds = [];
-              return LoginResult.deviceBlocked;
-            }
-          }
-        }
-        // اربِط الجِهاز كَأَوَّل جِهاز (لِلتَوافُق الخَلفيّ — أَوَّل واحِد فَقَط)
-        if (_account!.linkedDeviceId == null ||
-            _account!.linkedDeviceId!.isEmpty) {
-          try {
-            await _supabase.client.from('accounts').update({
-              'linked_device_id': currentDevice,
-            }).eq('id', _account!.id);
-            _account!.linkedDeviceId = currentDevice;
-          } catch (_) {}
-        }
-      } catch (e) {
-        M7Log.error('Auth', 'pointTerminal multi-device check',
-            error: e);
-      }
-
-      // 🆕 سَجِّل جَلسة Terminal في الجَدول المُخَصَّص `point_terminal_sessions`
-      // (لا نَستَخدِم employee_device_sessions لِأَنّ Terminal لا مُوَظَّف لَه)
-      try {
-        if (_account!.pointId != null) {
-          await PointTerminalSessionService.instance.registerOnLogin(
-            accountId: _account!.id,
-            pointId: _account!.pointId!,
-          );
-        }
-      } catch (e) {
-        M7Log.error('Auth', 'terminal session register', error: e);
-      }
-
-      // 🆕 سَجِّل في السِجِلّ التَدقيقيّ
-      _refreshAuditContext();
-      try {
-        AuditLogger.instance.log(
-          entityType: 'session',
-          action: AuditAction.login,
-          description:
-              'دُخول جِهاز نُقطة: ${_account!.username} (point: ${_account!.pointId})',
-        );
-      } catch (_) {}
-
-      // 🆕 حَدِّث آخِر دُخول عَلى الحِساب
-      try {
-        await _supabase.client.from('accounts').update({
-          'last_login_at':
-              DateTime.now().toUtc().toIso8601String(),
-        }).eq('id', _account!.id);
-        _account!.lastLoginAt = DateTime.now();
-      } catch (_) {}
-
-      // Terminal: لَيس بِحاجة لِأَدوار — تَخَطّى الفَحص
-      _activeRole = null;
-      _activeCountryId = _countryIds.isNotEmpty ? _countryIds.first : null;
-      notifyListeners();
-      return LoginResult.success;
+      _account = null;
+      _roles = [];
+      _permissions = {};
+      _countryIds = [];
+      return LoginResult.deviceAccount;
     }
 
     if (_roles.isEmpty && !_account!.isSuperAdmin) {
@@ -943,10 +858,7 @@ class AuthProvider extends ChangeNotifier {
         _account?.accountType == AccountType.pointTerminal;
     if (accId != null) {
       try {
-        if (isTerminal) {
-          await PointTerminalSessionService.instance
-              .deactivateOnLogout(accountId: accId);
-        } else {
+        if (!isTerminal) {
           await DeviceSessionService.instance
               .deactivateOnLogout(accountId: accId);
         }

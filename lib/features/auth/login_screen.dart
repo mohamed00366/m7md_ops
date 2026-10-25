@@ -125,6 +125,11 @@ class _LoginScreenState extends State<LoginScreen>
           detailedMsg = auth.lastDutyBlockMessageAr ??
               (s.isAr ? '⛔ الحِساب مُعَلَّق' : 'Suspended');
           break;
+        case LoginResult.deviceAccount:
+          detailedMsg = s.isAr
+              ? '📱 هذا حِساب جِهاز نُقطة — يُستَخدَم في تَطبيق الفاليه فَقَط'
+              : 'This is a point device account — use it in the valet app';
+          break;
         case LoginResult.networkError:
           detailedMsg = s.isAr
               ? '🌐 خَطَأ في الشَبَكة'
@@ -282,6 +287,8 @@ class _LoginScreenState extends State<LoginScreen>
         return isAr ? 'الحساب معطّل' : 'Account disabled';
       case LoginResult.noRoles:
         return isAr ? 'الحساب بدون أدوار' : 'No roles';
+      case LoginResult.deviceAccount:
+        return isAr ? 'هذا حِساب جِهاز نُقطة — يُستَخدَم في تَطبيق الفاليه فَقَط' : 'Point device account — use it in the valet app';
       // 🆕 سياسة "على رأس العمل فقط"
       case LoginResult.onApprovedLeave:
         final auth = context.read<AuthProvider>();
@@ -350,6 +357,11 @@ class _LoginScreenState extends State<LoginScreen>
         msg = s.isAr
             ? 'حسابك بدون أدوار. تواصل مع الإدارة'
             : 'Your account has no roles. Contact admin';
+        break;
+      case LoginResult.deviceAccount:
+        msg = s.isAr
+            ? 'هذا حِساب جِهاز نُقطة — يُستَخدَم في تَطبيق الفاليه فَقَط'
+            : 'This is a point device account — use it in the valet app';
         break;
       case LoginResult.networkError:
         msg = s.isAr

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/l10n/app_strings.dart';
-import '../../core/providers/auth_provider.dart';
 import '../../core/services/face_enrollment_service.dart';
 import '../../core/services/m7_log.dart';
 import '../../core/services/supabase_service.dart';
@@ -14,7 +12,6 @@ import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
 import 'employee_profile_hub.dart';
 import 'face_enrollment_screen.dart';
-import 'terminal_sessions_screen.dart';
 
 /// 📊 تَقرير شامِل (Account 360) عَن حِساب واحِد
 ///
@@ -31,14 +28,11 @@ class AccountReportScreen extends StatefulWidget {
 class _AccountReportScreenState extends State<AccountReportScreen> {
   bool _loading = true;
   // قِيَم تُحَدَّث بَعد الجَلب
-  int _activeSessions = 0;
-  int _totalSessions = 0;
   int _notificationsTotal = 0;
   int _notificationsUnread = 0;
   bool _hasFace = false;
   int _faceCount = 0;
   DateTime? _faceLastEnrolledAt;
-  List<_SessionRow> _sessions = const [];
 
   @override
   void initState() {
@@ -49,35 +43,12 @@ class _AccountReportScreenState extends State<AccountReportScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     await Future.wait([
-      _loadSessions(),
       _loadNotifications(),
       _loadFace(),
     ]);
     if (mounted) setState(() => _loading = false);
   }
 
-  Future<void> _loadSessions() async {
-    final supa = SupabaseService();
-    if (!supa.isReady) return;
-    try {
-      final rows = await supa.client
-          .from('point_terminal_sessions')
-          .select(
-              'id,account_id,point_id,device_id,device_name,device_label,is_active,first_login_at,last_seen_at')
-          .eq('account_id', widget.account.id)
-          .order('last_seen_at', ascending: false)
-          .limit(20);
-      final list = rows
-          .whereType<Map>()
-          .map((r) => _SessionRow.fromMap(Map<String, dynamic>.from(r)))
-          .toList();
-      _sessions = list;
-      _totalSessions = list.length;
-      _activeSessions = list.where((s) => s.isActive).length;
-        } catch (e) {
-      M7Log.error('AccountReport', 'sessions', error: e);
-    }
-  }
 
   Future<void> _loadNotifications() async {
     final supa = SupabaseService();
@@ -151,13 +122,6 @@ class _AccountReportScreenState extends State<AccountReportScreen> {
               hasFace: _hasFace,
               count: _faceCount,
               lastEnrolledAt: _faceLastEnrolledAt,
-            ),
-            const SizedBox(height: 10),
-            _SessionsSection(
-              account: acc,
-              active: _activeSessions,
-              total: _totalSessions,
-              sessions: _sessions,
             ),
             const SizedBox(height: 10),
             _ActivitySection(
@@ -699,109 +663,6 @@ class _FaceSection extends StatelessWidget {
 }
 
 // ============================================================
-// قِسم: الجَلسات وَالأَجهِزة
-// ============================================================
-class _SessionsSection extends StatelessWidget {
-  final AppAccount account;
-  final int active;
-  final int total;
-  final List<_SessionRow> sessions;
-  const _SessionsSection({
-    required this.account,
-    required this.active,
-    required this.total,
-    required this.sessions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isAr = AppStrings.of(context).isAr;
-    final auth = context.read<AuthProvider>();
-    final canManage = auth.isSuperAdmin ||
-        auth.permissions.contains(P.pointTerminalManage);
-    return _Section(
-      icon: Icons.devices_other,
-      titleAr: 'الجَلسات وَالأَجهِزة',
-      titleEn: 'Sessions & Devices',
-      color: AppColors.gold,
-      children: [
-        _Row(
-            label: isAr ? 'جَلسات نَشِطة' : 'Active sessions',
-            value: '$active',
-            color: active > 0 ? AppColors.success : Colors.grey,
-            icon: Icons.bolt),
-        _Row(
-            label: isAr ? 'إجمالي الجَلسات' : 'Total sessions',
-            value: '$total',
-            icon: Icons.history),
-        if (account.isPointTerminal)
-          _Row(
-              label: isAr ? 'حَدّ الأَجهِزة' : 'Device limit',
-              value: account.maxDevices == 0
-                  ? (isAr ? 'بِدون حَدّ' : 'Unlimited')
-                  : '${account.maxDevices}',
-              icon: Icons.numbers),
-        const SizedBox(height: 8),
-        if (sessions.isEmpty)
-          Text(isAr ? 'لا تُوجَد جَلسات.' : 'No sessions.',
-              style: const TextStyle(color: Colors.grey, fontSize: 12))
-        else
-          ...sessions.take(5).map((s) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Icon(
-                        s.isActive
-                            ? Icons.fiber_manual_record
-                            : Icons.fiber_manual_record_outlined,
-                        color: s.isActive ? AppColors.success : Colors.grey,
-                        size: 12),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        s.deviceLabel ?? s.deviceName ?? s.deviceId,
-                        style: const TextStyle(
-                            fontFamily: 'monospace', fontSize: 11),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      _fmtDate(s.lastSeenAt, withTime: true),
-                      style: const TextStyle(
-                          color: Colors.grey, fontSize: 10),
-                    ),
-                  ],
-                ),
-              )),
-        if (sessions.length > 5)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              isAr
-                  ? '… وَ ${sessions.length - 5} جَلسة إضافيّة'
-                  : '… and ${sessions.length - 5} more',
-              style: const TextStyle(fontSize: 10, color: Colors.grey),
-            ),
-          ),
-        if (sessions.isNotEmpty && canManage) ...[
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const TerminalSessionsScreen(),
-              ));
-            },
-            icon: const Icon(Icons.open_in_new),
-            label: Text(isAr
-                ? 'فَتح إدارة الجَلسات'
-                : 'Open Sessions Manager'),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
 // ============================================================
 // قِسم: النَشاط
 // ============================================================
@@ -849,42 +710,6 @@ class _ActivitySection extends StatelessWidget {
             color: notificationsUnread > 0 ? AppColors.info : null,
             icon: Icons.notifications_outlined),
       ],
-    );
-  }
-}
-
-// ============================================================
-// نَموذج صَفّ جَلسة مُبَسَّط
-// ============================================================
-class _SessionRow {
-  final String id;
-  final String deviceId;
-  final String? deviceName;
-  final String? deviceLabel;
-  final bool isActive;
-  final DateTime? firstLoginAt;
-  final DateTime? lastSeenAt;
-  const _SessionRow({
-    required this.id,
-    required this.deviceId,
-    this.deviceName,
-    this.deviceLabel,
-    required this.isActive,
-    this.firstLoginAt,
-    this.lastSeenAt,
-  });
-
-  factory _SessionRow.fromMap(Map<String, dynamic> m) {
-    DateTime? parse(dynamic v) =>
-        v == null ? null : DateTime.tryParse(v.toString());
-    return _SessionRow(
-      id: m['id']?.toString() ?? '',
-      deviceId: m['device_id']?.toString() ?? '',
-      deviceName: m['device_name']?.toString(),
-      deviceLabel: m['device_label']?.toString(),
-      isActive: m['is_active'] == true,
-      firstLoginAt: parse(m['first_login_at']),
-      lastSeenAt: parse(m['last_seen_at']),
     );
   }
 }

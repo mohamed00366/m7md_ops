@@ -24,7 +24,6 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/country_selector.dart';
 import 'features/auth/force_change_password_screen.dart';
 import 'features/auth/mandatory_face_enrollment_screen.dart';
-import 'features/point_terminal/point_terminal_home.dart';
 import 'core/services/face_enrollment_policy_settings.dart';
 import 'core/services/login_method_settings.dart';
 import 'core/services/point_terminal_settings.dart';
@@ -254,10 +253,12 @@ class _RootRouter extends StatelessWidget {
           return const LoginScreen();
         }
 
-        // 🆕 1.4) إذا الحِساب نَوع point_terminal → Gate يَفحَص GPS أَوَّلاً
+        // 1.4) حِساب جِهاز نُقطة → خُروج (خاصّ بِتَطبيق الفاليه)
         //          (لا فَحص تَغيير كَلِمة مُرور، لا تَسجيل وَجه، لا اختيار دَولة)
         if (auth.account?.accountType == AccountType.pointTerminal) {
-          return const PointTerminalGate();
+          // حِساب جِهاز نُقطة (تَطبيق الفاليه) — لا يَدخُل الداشبورد
+          WidgetsBinding.instance.addPostFrameCallback((_) => auth.logout());
+          return const LoginScreen();
         }
 
         // 🆕 1.5) إذا الحساب يَطلُب تَغيير كلمة المرور → ForceChange

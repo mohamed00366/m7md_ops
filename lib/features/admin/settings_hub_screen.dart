@@ -22,7 +22,6 @@ import 'active_duty_settings_screen.dart';
 import 'face_enrollment_policy_settings_screen.dart';
 import 'point_terminal_settings_screen.dart';
 import 'replacement_notification_settings_screen.dart';
-import 'terminal_sessions_screen.dart';
 import 'evaluation_criteria_screen.dart';
 import 'log_viewer_screen.dart';
 import 'face_embeddings_recompute_screen.dart';
@@ -1086,20 +1085,6 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
             'Geo-fence + idle timeout + late threshold + face match scope + audit photo',
         builder: (_) => const PointTerminalSettingsScreen(),
         requiredPermission: P.settingsPointTerminalView,
-      ),
-      // 🆕 أَجهِزة نِقاط الدَوام (مَربوطة بِالنُقطة)
-      _SettingEntry(
-        category: catSystem,
-        icon: Icons.computer,
-        color: AppColors.info,
-        titleAr: '🖥 أَجهِزة نِقاط الدَوام',
-        titleEn: '🖥 Terminal Devices',
-        descAr:
-            'الأَجهِزة المَربوطة بِكُلّ نُقطة + الجَلسات النَشطة — إنهاء/فَكّ رَبط',
-        descEn:
-            'Devices linked per point + active sessions — revoke/unlink',
-        builder: (_) => const TerminalSessionsScreen(),
-        requiredPermission: P.pointTerminalView,
       ),
       _SettingEntry(
         category: catSystem,

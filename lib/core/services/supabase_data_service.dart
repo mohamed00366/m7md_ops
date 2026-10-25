@@ -3285,7 +3285,6 @@ class SupabaseDataService {
       'employee_bus_assignments',
       'employee_documents',
       'point_terminal_clock_logs',
-      'point_terminal_sessions',
     ];
     int extraDeleted = 0;
     for (final t in extraTables) {
