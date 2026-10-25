@@ -214,6 +214,12 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('preview_sound', 'صَوت الطِباعة', 'Printing sound',
             'صَوت طِباعة مَعَ الوَرَقة عَلى الشاشة', 'A printing sound with the paper on the screen',
             'بِدون صَوت', 'No sound'),
+        ('color_states', 'أَلوان التَذاكِر في اللَوحة', 'Ticket colours on the board',
+            'لَون لِكُلّ حالة: طَلَب العَميل، طَلَب الكي راك، مَدفوعة، وَقت إضافيّ، فاليديشن، VIP – وَشَريط يَشرَح الأَلوان وَيُفَلتِر بِها', 'A colour per state: customer request, key rack request, paid, extra time, validated, VIP – with a legend that filters',
+            'كُلّ التَذاكِر بِنَفس الشَكل', 'All tickets look the same'),
+        ('prepay_enabled', 'الدَفع قَبل وُصول السَيّارة (نِقاط الوَقت)', 'Pay before the car comes (hourly points)',
+            'العَميل يَدفَع وَالتَذكَرة تَبقى خَضراء عَلى اللَوحة حَتّى التَسليم، مَعَ وَقت لِلخُروج', 'The customer pays; the ticket stays green on the board until delivery, with a time to leave',
+            'الدَفع عِند التَسليم فَقَط', 'Payment only at delivery'),
         ('opener_must_close', 'مَن فَتَح الوَرديّة لا يَخرُج قَبل قَفلها', 'Shift opener stays until closing',
             'المُوَظَّف الذي فَتَح الوَرديّة لا يَستَطيع تَسجيل الخُروج مِن التَطبيق إلّا بَعد قَفل الوَرديّة', 'The staff member who opened the shift cannot log out of the app until the shift is closed',
             'يَستَطيع تَسجيل الخُروج وَالوَرديّة تَبقى مَفتوحة', 'Can log out while the shift stays open'),
@@ -252,6 +258,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     'sinin_w_card': Icons.password_rounded,
     'require_gps': Icons.location_on_outlined,
     'require_print': Icons.print_outlined,
+    'color_states': Icons.palette_outlined,
+    'prepay_enabled': Icons.timer_outlined,
     'preview_sound': Icons.volume_up_outlined,
     'opener_must_close': Icons.lock_clock_outlined,
     'paid_first_or_paid_after': Icons.payments_outlined,
@@ -526,6 +534,50 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         );
 
+    // pay before the car comes (hourly): minutes to leave + what happens after; validation: minutes to leave
+    Widget minutesPicker(String k, String ar, String en, List<int> values, {bool zeroOff = false, bool enabled = true}) => SizedBox(
+          width: 230,
+          child: DropdownButtonFormField<int>(
+            value: values.contains(vNum(s[k]).toInt()) ? vNum(s[k]).toInt() : values.first,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: tx(context, ar, en), isDense: true, prefixIcon: const Icon(Icons.timer_outlined)),
+            items: [
+              for (final v in values)
+                DropdownMenuItem(value: v, child: Text(v == 0 && zeroOff ? tx(context, 'بِدون حَدّ', 'No limit') : tx(context, '$v دَقيقة', '$v min'))),
+            ],
+            onChanged: !_edit || !enabled ? null : (v) => toggleValue(k, v ?? values.first),
+          ),
+        );
+    final after = vStr(s['prepay_after']) == 'alert' ? 'alert' : 'recalc';
+    Widget prepayBox() => SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Wrap(spacing: 12, runSpacing: 10, children: [
+                minutesPicker('prepay_grace_min', 'وَقت الخُروج بَعد الدَفع', 'Time to leave after paying', const [5, 10, 15, 20, 30, 45, 60],
+                    enabled: vBool(s['prepay_enabled'])),
+              ]),
+              const SizedBox(height: 8),
+              Text(tx(context, 'بَعد انتِهاء وَقت الخُروج', 'After the time to leave'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(value: 'recalc', icon: const Icon(Icons.calculate_outlined), label: Text(tx(context, 'إعادة الحِساب وَتَحصيل الفَرق', 'Charge again, collect the difference'))),
+                  ButtonSegment(value: 'alert', icon: const Icon(Icons.notifications_none), label: Text(tx(context, 'تَنبيه فَقَط', 'Alert only'))),
+                ],
+                selected: {after},
+                onSelectionChanged: !_edit || !vBool(s['prepay_enabled']) ? null : (v) => toggleValue('prepay_after', v.first),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                  tx(context, 'إعادة الحِساب: السِعر مِن وَقت الدُخول حَتّى الخُروج الفِعليّ، ناقِص المَدفوع – وَالفَرق بِإيصال مُستَقِلّ.',
+                      'Charge again: the price from the entry to the real exit, minus what was paid – the difference on its own receipt.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+        );
+
     // on-screen paper per printout kind: on/off + seconds, and the printing sound
     Widget previewRow(String k, IconData icon, String ar, String en) {
       final secs = vNum(s[k]).toInt();
@@ -667,6 +719,23 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       ]),
       section(Icons.point_of_sale_outlined, '6 · الدَفع وَالخُروج', '6 · Payment and check-out',
           'أَزرار شاشة الدَفع، وَالبَحث عَن التَذكَرة، وَرَقم المُوافَقة لِلكارت.', 'Payment screen buttons, finding the ticket and the card approval number.', [
+        sw('color_states'),
+        sw('prepay_enabled'),
+        prepayBox(),
+        SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              minutesPicker('validation_grace_min', 'وَقت الخُروج بَعد الفاليديشن (نِقاط الوَقت)', 'Time to leave after a validation (hourly)',
+                  const [0, 10, 15, 20, 30, 45, 60, 90, 120], zeroOff: true),
+              const SizedBox(height: 4),
+              Text(tx(context, 'بَعده يَبدَأ الحِساب مِن جَديد بِسِعر النُقطة. "بِدون حَدّ" = الفاليديشن يُغَطّي حَتّى الخُروج.',
+                      'After it the time is charged again at the point price. "No limit" = the validation covers until the exit.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+        ),
         sw('valet_validate'),
         sw('stamp_ticket'),
         findPicker(),
