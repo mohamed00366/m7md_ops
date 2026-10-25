@@ -88,6 +88,7 @@ import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
 import '../valet/valet_numbering_screen.dart';
+import '../valet/valet_vouchers_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
@@ -324,6 +325,19 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetNumbering,
           builder: (_) => const ValetNumberingScreen(embedded: true),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
+        ),
+        AppModule(
+          key: 'valet_vouchers',
+          titleAr: 'القَسائِم (QR / سيريال)',
+          titleEn: 'Vouchers (QR / serial)',
+          icon: Icons.confirmation_number_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetSettingsManage,
+          builder: (_) => const ValetVouchersScreen(),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',
