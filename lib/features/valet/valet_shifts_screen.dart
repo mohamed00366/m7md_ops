@@ -69,12 +69,12 @@ class _ShiftsBodyState extends State<_ShiftsBody> {
                         ExcelSheet(
                           name: 'Shifts',
                           headers: ['Shift', 'Kind', 'Point', 'Status', 'Start', 'End', 'Opened by', 'Closed by', 'Cars', 'Closed cars', 'Pending', 'Sales', 'Tips',
-                            'Cash', 'Card', 'Free', 'Cash counted', 'Difference', 'Credits', 'Odoo', 'Card machines'],
+                            'Cash', 'Card', 'Free', 'Cash counted', 'Difference', 'Credits', 'Odoo', 'Card machines', 'Tablet phone'],
                           rows: [
                             for (final s in rows)
                               [s['code'], s['kind'], s['point'], s['status'], VF.dt(vTime(s['start'])), VF.dt(vTime(s['end'])), s['opened_by'], s['closed_by'],
                                 s['cars'], s['closed_cars'], s['pending'], s['sales'], s['tips'],
-                                s['cash'], s['card'], s['free'], s['cash_counted'], s['cash_diff'], s['credits'], s['odoo_status'], s['terminals']],
+                                s['cash'], s['card'], s['free'], s['cash_counted'], s['cash_diff'], s['credits'], s['odoo_status'], s['terminals'], s['phone']],
                           ],
                         ),
                       ]),
@@ -112,6 +112,7 @@ class _ShiftsBodyState extends State<_ShiftsBody> {
                 DataColumn(label: Text(tx(context, 'كاش', 'Cash')), numeric: true),
                 DataColumn(label: Text(tx(context, 'كَرت', 'Card')), numeric: true),
                 DataColumn(label: Text(tx(context, 'المَكَن', 'Machines'))),
+                DataColumn(label: Text(tx(context, 'هاتِف التابلت', 'Tablet phone'))),
                 DataColumn(label: Text(tx(context, 'مَعدود', 'Counted')), numeric: true),
                 DataColumn(label: Text(tx(context, 'الفَرق', 'Diff.')), numeric: true),
                 const DataColumn(label: Text('Odoo')),
@@ -136,6 +137,7 @@ class _ShiftsBodyState extends State<_ShiftsBody> {
                     DataCell(Text(s['kind'] == 'valet' ? VF.money(vNum(s['cash'])) : '-')),
                     DataCell(Text(s['kind'] == 'valet' ? VF.money(vNum(s['card'])) : '-')),
                     DataCell(Text(vStr(s['terminals']).isEmpty ? '-' : vStr(s['terminals']))),
+                    DataCell(Text(vStr(s['phone']).isEmpty ? '-' : vStr(s['phone']))),
                     DataCell(Text(s['cash_counted'] == null ? '-' : VF.money(vNum(s['cash_counted'])))),
                     DataCell(_diff(s['cash_diff'])),
                     DataCell(_odoo(context, s)),
