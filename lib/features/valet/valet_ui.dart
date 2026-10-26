@@ -456,6 +456,7 @@ class VPoints {
   static void clear() => _list = null;
 }
 
+/// اختيار النُقطة مَع البَحث بِالكِتابة (الكود أَو الاسم).
 class VPointFilter extends StatelessWidget {
   const VPointFilter({super.key, required this.points, required this.value, required this.onChanged});
   final List<VJson> points;
@@ -463,19 +464,32 @@ class VPointFilter extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        width: 260,
-        child: DropdownButtonFormField<String?>(
-          value: value,
-          isExpanded: true,
-          decoration: InputDecoration(labelText: tx(context, 'النُقطة', 'Point'), prefixIcon: const Icon(Icons.place_outlined), isDense: true),
-          items: [
-            DropdownMenuItem<String?>(value: null, child: Text(tx(context, 'كُلّ النِقاط', 'All points'))),
-            ...points.map((p) => DropdownMenuItem<String?>(value: vStr(p['id']), child: Text('${p['code']}  ${p['name']}', overflow: TextOverflow.ellipsis))),
-          ],
-          onChanged: onChanged,
-        ),
-      );
+  Widget build(BuildContext context) {
+    final all = tx(context, 'كُلّ النِقاط', 'All points');
+    return DropdownMenu<String>(
+      key: ValueKey('${value}_${points.length}'),
+      width: 300,
+      menuHeight: 380,
+      initialSelection: value ?? '',
+      enableFilter: true,
+      enableSearch: true,
+      requestFocusOnTap: true,
+      label: Text(tx(context, 'النُقطة', 'Point')),
+      leadingIcon: const Icon(Icons.place_outlined),
+      hintText: tx(context, 'اكتُب الاسم أَو الكود', 'Type a name or code'),
+      inputDecorationTheme: const InputDecorationTheme(isDense: true, border: OutlineInputBorder()),
+      filterCallback: (entries, filter) {
+        final q = filter.trim().toLowerCase();
+        if (q.isEmpty || q == all.toLowerCase()) return entries;
+        return entries.where((e) => e.label.toLowerCase().contains(q)).toList();
+      },
+      dropdownMenuEntries: [
+        DropdownMenuEntry<String>(value: '', label: all, leadingIcon: const Icon(Icons.public, size: 18)),
+        for (final p in points) DropdownMenuEntry<String>(value: vStr(p['id']), label: '${p['code']}  ${p['name']}'),
+      ],
+      onSelected: (v) => onChanged(v == null || v.isEmpty ? null : v),
+    );
+  }
 }
 
 Future<String?> vAskReason(BuildContext context, String title, String message, {required String button}) {
