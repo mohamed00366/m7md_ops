@@ -283,7 +283,7 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
         ),
       VPanel(
         title: tx(context, 'ساعات الذُروة (سَيّارات دَخَلَت)', 'Peak hours (cars in)'),
-        child: _Heatmap(cells: vList(d['heat']).map((e) => (e as List).map((x) => vNum(x).toInt()).toList()).toList()),
+        child: _Heatmap(cells: [for (final e in (d['heat'] is List ? d['heat'] as List : const [])) if (e is List && e.length == 3) [for (final x in e) vNum(x).toInt()]]),
       ),
       if (vList(s['by_hour']).isNotEmpty)
         _table(tx(context, 'الانتِظار حَسَب ساعة الطَلَب', 'Wait by request hour'), [tx(context, 'الساعة', 'Hour'), tx(context, 'طَلَبات', 'Requests'), tx(context, 'مُتَوَسِّط', 'Average')], [
@@ -559,7 +559,7 @@ class _Delta extends StatelessWidget {
     return Stack(children: [
       VKpi(label, value, icon: icon, color: color, note: note),
       PositionedDirectional(
-        top: 8,
+        bottom: 8,
         end: 10,
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(now == prev ? Icons.remove : (up ? Icons.arrow_upward : Icons.arrow_downward), size: 13, color: c),
