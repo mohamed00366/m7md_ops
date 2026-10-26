@@ -59,6 +59,7 @@ import 'roster_deadline_settings_screen.dart';
 import 'roster_employee_filter_settings_screen.dart';
 import 'roster_settings_screen.dart';
 import '../../core/services/app_module_settings.dart';
+import '../valet/valet_odoo_screen.dart';
 import 'system_health_screen.dart';
 import 'workflow_builder_screen.dart';
 
@@ -470,6 +471,18 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.settingsRosterDeadlineView,
       ),
       // 🆕 LogViewer — أداة مطوّرين
+      // 🔗 رَبط Odoo (انتَقَلَ مِن قِسم الفاليه)
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.sync_alt,
+        color: AppColors.purple,
+        titleAr: 'رَبط Odoo',
+        titleEn: 'Odoo link',
+        descAr: 'المُزامَنة مَعَ Odoo: الحالة، الأَخطاء، وَإعادة الإرسال',
+        descEn: 'Sync with Odoo: status, errors and resend',
+        builder: (_) => const ValetOdooScreen(),
+        requiredPermission: P.valetReportsView,
+      ),
       _SettingEntry(
         category: catSystemTools,
         icon: Icons.terminal_outlined,

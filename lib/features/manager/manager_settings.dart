@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/lookups.dart';
 import '../../repositories/mock_repository.dart';
 import '../../shared/widgets.dart';
+import '../valet/valet_numbering_screen.dart';
 import 'manager_numbering.dart';
 
 /// شاشة الإعدادات - إدارة القوائم المرجعية:
@@ -97,7 +98,7 @@ class _ManagerSettingsState extends State<ManagerSettings>
           child: TabBarView(
             controller: _tabs,
             children: const [
-              ManagerNumbering(),
+              _NumberingTab(),
               _CitiesTab(),
               _AreasTab(),
               _BusinessTypesTab(),
@@ -1824,4 +1825,34 @@ void _confirmDelete(
       ],
     ),
   );
+}
+
+
+/// 🔢 نِظام التَرقيم: أَكواد المُوَظَّفين وَالكِيانات + تَرقيم مَبيعات الفاليه (انتَقَلَ مِن قِسم الفاليه).
+class _NumberingTab extends StatelessWidget {
+  const _NumberingTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    return DefaultTabController(
+      length: 2,
+      child: Column(children: [
+        TabBar(
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          labelColor: AppColors.brand,
+          indicatorColor: AppColors.brand,
+          tabs: [
+            Tab(icon: const Icon(Icons.badge_outlined, size: 18), iconMargin: const EdgeInsets.only(bottom: 2),
+                text: ar ? 'المُوَظَّفون وَالكِيانات' : 'Employees & entities'),
+            Tab(icon: const Icon(Icons.pin_outlined, size: 18), iconMargin: const EdgeInsets.only(bottom: 2),
+                text: ar ? 'تَرقيم المَبيعات (الفاليه)' : 'Sale numbering (valet)'),
+          ],
+        ),
+        const Divider(height: 1),
+        const Expanded(child: TabBarView(children: [ManagerNumbering(), ValetNumberingScreen(embedded: true)])),
+      ]),
+    );
+  }
 }

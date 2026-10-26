@@ -79,13 +79,11 @@ import '../valet/valet_network_screen.dart';
 import '../valet/valet_audit_screen.dart';
 import '../valet/valet_clients_screen.dart';
 import '../valet/valet_keyrack_screen.dart';
-import '../valet/valet_odoo_screen.dart';
 import '../valet/valet_live_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
-import '../valet/valet_numbering_screen.dart';
 import '../valet/valet_safety_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
@@ -325,32 +323,6 @@ class ModulesRegistry {
           groupTitleEn: 'Apps & sites',
         ),
         AppModule(
-          key: 'valet_numbering',
-          titleAr: 'تَرقيم المَبيعات',
-          titleEn: 'Sale numbering',
-          icon: Icons.pin_outlined,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetNumbering,
-          builder: (_) => const ValetNumberingScreen(embedded: true),
-          groupKey: 'valet_apps',
-          groupTitleAr: 'التَطبيقات وَالمَواقِع',
-          groupTitleEn: 'Apps & sites',
-        ),
-        AppModule(
-          key: 'valet_odoo',
-          titleAr: 'رَبط Odoo',
-          titleEn: 'Odoo link',
-          icon: Icons.sync_alt,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetReportsView,
-          builder: (_) => const ValetOdooScreen(),
-          groupKey: 'valet_money',
-          groupTitleAr: 'Odoo وَالعُقود',
-          groupTitleEn: 'Odoo & contracts',
-        ),
-        AppModule(
           key: 'valet_manual',
           titleAr: 'التذاكر الورقية',
           titleEn: 'Paper tickets',
@@ -424,19 +396,6 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetAccidentsScreen(),
-          groupKey: 'valet_ops',
-          groupTitleAr: 'التَشغيل',
-          groupTitleEn: 'Operations',
-        ),
-        AppModule(
-          key: 'valet_assets',
-          titleAr: 'عُهَد النِقاط',
-          titleEn: 'Point assets',
-          icon: Icons.inventory_2_outlined,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetReportsView,
-          builder: (_) => const ValetAssetsScreen(),
           groupKey: 'valet_ops',
           groupTitleAr: 'التَشغيل',
           groupTitleEn: 'Operations',
