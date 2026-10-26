@@ -9,7 +9,10 @@ import 'valet_ui.dart';
 /// المال مِثل الوَرديّة وَOdoo: السِعر + البِطاقة المَفقودة + المَبيت، الدَفع المُقَسَّم، الفُروقات المَدفوعة لاحِقاً،
 /// وَيُخصَم الإشعار الدائِن المُعتَمَد. أَوقات الخِدمة تُسَجَّل على الخادِم مُنذُ 279.
 class ValetReportsScreen extends StatelessWidget {
-  const ValetReportsScreen({super.key, this.initialTab = 0, this.title});
+  const ValetReportsScreen({super.key, this.initialTab = 0, this.title, this.initialScope = VScope.all});
+
+  /// يُفتَح عَلى مَنطِقة / عَميل / فَرع / نُقطة (مِن قِسم الشَبَكة).
+  final VScope initialScope;
 
   /// 0 الملخص · 1 التشغيل · 2 الاستثناءات · 3 تطبيق العملاء · 4 الكي راك
   final int initialTab;
@@ -19,15 +22,16 @@ class ValetReportsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = ValetGate(perm: ValetAdmin.permReports, child: _ReportsBody(initialTab: initialTab));
+    final body = ValetGate(perm: ValetAdmin.permReports, child: _ReportsBody(initialTab: initialTab, initialScope: initialScope));
     if (title == null) return body;
     return Scaffold(appBar: AppBar(title: Text(title!)), body: body);
   }
 }
 
 class _ReportsBody extends StatefulWidget {
-  const _ReportsBody({this.initialTab = 0});
+  const _ReportsBody({this.initialTab = 0, this.initialScope = VScope.all});
   final int initialTab;
+  final VScope initialScope;
 
   @override
   State<_ReportsBody> createState() => _ReportsBodyState();
@@ -36,7 +40,7 @@ class _ReportsBody extends StatefulWidget {
 class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderStateMixin {
   late DateTime _from;
   late DateTime _to;
-  VScope _scope = VScope.all;
+  late VScope _scope = widget.initialScope;
   VJson? _d;
   Object? _err;
   bool _busy = false;

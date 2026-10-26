@@ -735,7 +735,7 @@ class VatAmountField extends StatelessWidget {
 class VScope {
   const VScope(this.kind, [this.id, this.label]);
   static const all = VScope('all');
-  final String kind; // all | area | client | branch | point
+  final String kind; // all | area | client | branch | point | type (branch type: restaurant, hotel…)
   final String? id;
   final String? label;
   bool get isAll => kind == 'all' || id == null;
@@ -748,6 +748,7 @@ class VScope {
         'client' => Icons.apartment,
         'branch' => Icons.storefront_outlined,
         'point' => Icons.place_outlined,
+        'type' => Icons.category_outlined,
         _ => Icons.public,
       };
 }
@@ -769,6 +770,7 @@ class VScopeFilter extends StatelessWidget {
         'client' => tx(c, 'عَميل', 'Client'),
         'branch' => tx(c, 'فَرع', 'Branch'),
         'point' => tx(c, 'نُقطة', 'Point'),
+        'type' => tx(c, 'نَوع الفَرع', 'Branch type'),
         _ => tx(c, 'الكُلّ', 'All'),
       };
 
@@ -778,6 +780,8 @@ class VScopeFilter extends StatelessWidget {
     final q = TextEditingController();
     final items = <VScope>[
       for (final a in vList(d['areas'])) VScope('area', vStr(a['id']), vStr(a['name'])),
+      for (final t in vList(d['types']))
+        VScope('type', vStr(t['id']), '${tx(context, vStr(t['name_ar']).isEmpty ? vStr(t['name']) : vStr(t['name_ar']), vStr(t['name']))}  ·  ${tx(context, '${t['branches']} فَرع', '${t['branches']} branches')}'),
       for (final c in vList(d['clients'])) VScope('client', vStr(c['id']), vStr(c['name'])),
       for (final b in vList(d['branches'])) VScope('branch', vStr(b['id']), '${vStr(b['name'])}${vStr(b['client']).isEmpty ? '' : '  ·  ${vStr(b['client'])}'}'),
       for (final p in vList(d['points'])) VScope('point', vStr(p['id']), '${vStr(p['code'])}  ${vStr(p['name'])}${vStr(p['area']).isEmpty ? '' : '  ·  ${vStr(p['area'])}'}'),
@@ -812,7 +816,7 @@ class VScopeFilter extends StatelessWidget {
         }
 
         return AlertDialog(
-          title: Text(tx(ctx, 'النِطاق: مَنطِقة · عَميل · فَرع · نُقطة', 'Scope: area · client · branch · point')),
+          title: Text(tx(ctx, 'النِطاق: مَنطِقة · نَوع · عَميل · فَرع · نُقطة', 'Scope: area · type · client · branch · point')),
           content: SizedBox(
             width: 480,
             height: 520,
@@ -834,6 +838,7 @@ class VScopeFilter extends StatelessWidget {
                       onTap: () => Navigator.pop(ctx, VScope.all),
                     ),
                   section('area'),
+                  section('type'),
                   section('client'),
                   section('branch'),
                   section('point'),

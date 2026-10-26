@@ -32,7 +32,6 @@ import '../employee/daily_memo_report.dart';
 import '../leave/my_leaves_screen.dart';
 import '../employee/employee_uniform.dart';
 // Manager modules
-import '../manager/customers_hub.dart';
 import '../manager/manager_buses.dart';
 import '../manager/manager_dashboard.dart';
 import '../manager/manager_employees.dart';
@@ -75,7 +74,7 @@ import '../supervisor/supervisor_approved_roster.dart';
 import '../camp_boss/evaluations_center.dart';
 import '../supervisor/supervisor_roster_creator.dart';
 // 🚗 Valet (VIP Valet / Key Rack / Customer apps control)
-import '../valet/valet_areas_screen.dart';
+import '../valet/valet_network_screen.dart';
 import '../valet/valet_audit_screen.dart';
 import '../valet/valet_clients_screen.dart';
 import '../valet/valet_keyrack_screen.dart';
@@ -273,17 +272,7 @@ class ModulesRegistry {
           requiredPermission: P.dashboardManagerView,
           builder: (_) => const ManagerDashboard(),
         ),
-        AppModule(
-          key: 'customers',
-          titleAr: 'العُملاء',
-          titleEn: 'Customers',
-          icon: Icons.business_outlined,
-          color: ModuleCategory.organization.color(),
-          category: ModuleCategory.organization,
-          requiredPermission: P.sitesView,
-          requiresCountry: true,
-          builder: (_) => const CustomersHub(),
-        ),
+        // 🔁 'العُمَلاء' القَديم صار قِسم الشَبَكة (المَناطِق ▸ النِقاط ▸ الفُروع وَعُمَلاؤها) في الفاليه
         // 🚫 admin_countries أُزيلَ من الدرور — مُتاح في مَركَز الإعدادات
         // 🚫 assign_supervisors نُقِلَ إلى قِسم الروستر (أَكثَر مَنطِقيّة)
 
@@ -318,14 +307,14 @@ class ModulesRegistry {
           groupTitleEn: 'Apps & sites',
         ),
         AppModule(
-          key: 'valet_areas',
-          titleAr: 'المَناطِق',
-          titleEn: 'Areas',
-          icon: Icons.map_outlined,
+          key: 'valet_network',
+          titleAr: 'الشَبَكة: العُمَلاء وَالفُروع وَالنِقاط وَالمَناطِق',
+          titleEn: 'Network: clients, branches, points, areas',
+          icon: Icons.account_tree_outlined,
           color: ModuleCategory.valet.color(),
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
-          builder: (_) => const ValetAreasScreen(),
+          builder: (_) => const ValetNetworkScreen(),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',

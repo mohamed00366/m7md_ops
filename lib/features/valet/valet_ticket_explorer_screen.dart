@@ -54,6 +54,7 @@ const _cols = <String, _Col>{
   'area_name': _Col('basic', 'Area', 'المَنطِقة'),
   'client_name': _Col('customer', 'Client (company)', 'العَميل (الشَركة)'),
   'branch_name': _Col('customer', 'Branch', 'الفَرع'),
+  'branch_type': _Col('customer', 'Branch type', 'نَوع الفَرع'),
   'ticket_status': _Col('basic', 'Status', 'الحالة'),
   'ticket_type': _Col('basic', 'Ticket type', 'نَوع التَذكَرة'),
   'ticket_name': _Col('basic', 'Ticket name', 'اسم التَذكَرة'),
