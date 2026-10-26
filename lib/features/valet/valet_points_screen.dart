@@ -630,6 +630,38 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       );
     }
 
+    // "Show / print" of a saved ticket: print it again – only the customer copy, every part, or not at all
+    final again = const {'customer', 'all', 'off'}.contains(vStr(s['reprint_ticket'])) ? vStr(s['reprint_ticket']) : 'customer';
+    Widget reprintPicker() => SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tx(context, 'إعادة طِباعة التَذكَرة عِند عَرضها', 'Print the ticket again when it is shown'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 2),
+              Text(
+                  tx(context, 'مِن "Show / print" في تَفاصيل التَذكَرة وَ "Show ticket" في اللَوحة. الطِباعة الأُولى عِند الاستِلام لا تَتَغَيَّر (كُلّ الأَجزاء).',
+                      'From "Show / print" in the ticket details and "Show ticket" on the board. The first print on receiving the car is unchanged (all parts).'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12)),
+              const SizedBox(height: 6),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(value: 'customer', icon: const Icon(Icons.person_outline), label: Text(tx(context, 'جُزء العَميل فَقَط', 'Customer copy only'))),
+                  ButtonSegment(value: 'all', icon: const Icon(Icons.copy_all_outlined), label: Text(tx(context, 'كُلّ الأَجزاء', 'All parts'))),
+                  ButtonSegment(value: 'off', icon: const Icon(Icons.print_disabled_outlined), label: Text(tx(context, 'مُغلَقة', 'Off'))),
+                ],
+                selected: {again},
+                onSelectionChanged: !_edit
+                    ? null
+                    : (v) => _save('vva_point_settings_save', {
+                          'p_point': widget.pointId,
+                          'p_data': {'reprint_ticket': v.first},
+                        }),
+              ),
+            ]),
+          ),
+        );
+
     // devices of the point: limits per kind + the registered devices (approval is in Settings ▸ Numbering ▸ Tablets)
     Widget limitPicker(String k, IconData icon, String ar, String en) {
       final cur = s[k] == null ? null : vNum(s[k]).toInt();
@@ -735,6 +767,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         previewRow('preview_member_secs', Icons.card_membership_outlined, 'فاتورة المُشتَرِكين', 'Membership receipt'),
         previewRow('preview_shift_secs', Icons.summarize_outlined, 'تَقرير الوَرديّة', 'Shift report'),
         sw('preview_sound'),
+        reprintPicker(),
       ]),
       section(Icons.rule_rounded, '5 · الصَفّ وَالمَوقِف وَالتَسليم', '5 · Driver in, parking, driver out',
           'إظهار أَو إخفاء كُلّ زِرّ في التَطبيق، وَهَل هو إجباريّ قَبل الدَفع. المَخفيّ لا يَكون إجباريّاً.',
