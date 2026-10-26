@@ -74,6 +74,7 @@ import '../supervisor/supervisor_approved_roster.dart';
 import '../camp_boss/evaluations_center.dart';
 import '../supervisor/supervisor_roster_creator.dart';
 // 🚗 Valet (VIP Valet / Key Rack / Customer apps control)
+import '../valet/valet_member_types_screen.dart';
 import '../valet/valet_network_screen.dart';
 import '../valet/valet_audit_screen.dart';
 import '../valet/valet_clients_screen.dart';
@@ -302,6 +303,19 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetPointsScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
+        ),
+        AppModule(
+          key: 'valet_member_types',
+          titleAr: 'أَنواع الاشتِراكات',
+          titleEn: 'Membership types',
+          icon: Icons.style_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetDashboardView,
+          builder: (_) => const ValetMemberTypesScreen(),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',

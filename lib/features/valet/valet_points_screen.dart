@@ -1602,7 +1602,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
   // ---------------------------------------------------------------- VIP + plans
   Widget _vipPlans(VJson d) {
     final vipFields = [('ticket_name', tx(context, 'الاسم', 'Name'), false), ('ticket_price', tx(context, 'السِعر (AED)', 'Price (AED)'), true)];
-    final planFields = [('name', tx(context, 'الاسم', 'Name'), false), ('price', tx(context, 'السِعر (AED)', 'Price (AED)'), true)];
     return _page([
       if (vList(d['vip_prices']).isEmpty)
         VPanel(
@@ -1639,27 +1638,11 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ),
       ),
       VPanel(
-        title: tx(context, 'باقات العُضويّة', 'Membership plans'),
-        actions: [if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'إضافة', 'Add')), onPressed: () => _simple('member_plan', null, planFields))],
-        child: VTable(
-          columns: [
-            DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
-            DataColumn(label: Text(tx(context, 'السِعر', 'Price')), numeric: true),
-            DataColumn(label: Text(tx(context, 'الضَريبة', 'VAT')), numeric: true),
-            DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
-            const DataColumn(label: Text('')),
-          ],
-          rows: [
-            for (final m in vList(d['member_plans']))
-              DataRow(cells: [
-                DataCell(Text(vStr(m['name']))),
-                DataCell(Text(VF.money(vNum(m['price'])))),
-                DataCell(Text(VF.money(vSplitVat(vNum(m['price']), _vat(d), false).$2 - vNum(m['price'])))),
-                DataCell(Text(VF.money(vSplitVat(vNum(m['price']), _vat(d), false).$2), style: const TextStyle(fontWeight: FontWeight.w700))),
-                DataCell(_rowActions('member_plan', m, planFields)),
-              ]),
-          ],
-        ),
+        title: tx(context, 'الاشتِراكات', 'Memberships'),
+        child: Text(
+            tx(context, 'الاشتِراكات أَصبَحَت "أَنواع الاشتِراكات" في قِسم الفاليه: الاسم وَالسِعر وَأَين يَصلُح (نُقطة · نِقاط · مَنطِقة · الكُلّ). تَظهَر هُنا الأَنواع الَّتي تُغَطّي هذه النُقطة في التَطبيق.',
+                'Memberships are now "Membership types" in the Valet section: name, price and where it is valid (one point · points · area · all). The app of this point sells the types covering it.'),
+            style: const TextStyle(color: VC.muted)),
       ),
     ]);
   }
