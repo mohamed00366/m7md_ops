@@ -635,7 +635,9 @@ var TIME_ZONE = 'Asia/Dubai';
     var dot = $('tDot');
     if (c && c.hex) { dot.style.background = c.hex; dot.style.display = ''; } else { dot.style.display = 'none'; }
     setText('tColor', c ? (c.label || t.color) : '—');
-    setText('tPoint', t.point_name || '—');
+    // 283: client branch first (the place the customer visited), then the valet point
+    setText('tPoint', [t.branch_name ? (t.client_name && t.client_name !== t.branch_name ? t.branch_name + ' (' + t.client_name + ')' : t.branch_name) : null,
+                       t.point_name].filter(Boolean).join(' · ') || '—');
     renderDuration();
   }
   function renderDuration() {
