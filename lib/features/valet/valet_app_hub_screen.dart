@@ -5,10 +5,11 @@ import 'valet_member_types_screen.dart';
 import 'valet_parking_screen.dart';
 import 'valet_points_screen.dart';
 import 'valet_safety_screen.dart';
+import 'valet_tickets_screen.dart';
 import 'valet_ui.dart';
 import 'valet_vouchers_screen.dart';
 
-/// 📱 تَطبيق الفاليه — قِسم واحِد: النِقاط (إعدادات التَطبيق) · أَنواع الاشتِراكات · القَسائِم · المَواقِف · عُهَد النِقاط.
+/// 📱 تَطبيق الفاليه — قِسم واحِد: النِقاط (إعدادات التَطبيق) · أَنواع الاشتِراكات · القَسائِم · المَواقِف · تَذاكِر الفاليه · عُهَد النِقاط.
 class ValetAppHubScreen extends StatelessWidget {
   const ValetAppHubScreen({super.key, this.initialTab = 0});
   final int initialTab;
@@ -24,6 +25,8 @@ class ValetAppHubScreen extends StatelessWidget {
               if (ValetAdmin.I.can(ValetAdmin.permSettings))
                 (Icons.confirmation_number_outlined, 'القَسائِم', 'Vouchers', const ValetVouchersScreen()),
               (Icons.garage_outlined, 'المَواقِف', 'Parking areas', const ValetParkingScreen()),
+              if (ValetAdmin.I.can(ValetAdmin.permReports))
+                (Icons.receipt_long_outlined, 'تَذاكِر الفاليه', 'Valet tickets', const ValetTicketsScreen()),
               if (ValetAdmin.I.can(ValetAdmin.permReports))
                 (Icons.inventory_2_outlined, 'عُهَد النِقاط', 'Point assets', const ValetAssetsScreen()),
             ];

@@ -85,7 +85,6 @@ import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
 import '../valet/valet_safety_screen.dart';
-import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
 import 'smart_home.dart';
 
@@ -373,19 +372,6 @@ class ModulesRegistry {
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',
-        ),
-        AppModule(
-          key: 'valet_tickets',
-          titleAr: 'تَذاكِر الفاليه',
-          titleEn: 'Valet tickets',
-          icon: Icons.confirmation_number_outlined,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetReportsView,
-          builder: (_) => const ValetTicketsScreen(),
-          groupKey: 'valet_ops',
-          groupTitleAr: 'التَشغيل',
-          groupTitleEn: 'Operations',
         ),
         AppModule(
           key: 'valet_accidents',
