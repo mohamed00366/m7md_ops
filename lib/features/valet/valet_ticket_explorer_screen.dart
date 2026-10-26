@@ -51,6 +51,9 @@ const _cols = <String, _Col>{
   'point_code': _Col('basic', 'Point code', 'كود النُقطة'),
   'point_name': _Col('basic', 'Point', 'النُقطة'),
   'site_name': _Col('basic', 'Site', 'المَوقِع'),
+  'area_name': _Col('basic', 'Area', 'المَنطِقة'),
+  'client_name': _Col('customer', 'Client (company)', 'العَميل (الشَركة)'),
+  'branch_name': _Col('customer', 'Branch', 'الفَرع'),
   'ticket_status': _Col('basic', 'Status', 'الحالة'),
   'ticket_type': _Col('basic', 'Ticket type', 'نَوع التَذكَرة'),
   'ticket_name': _Col('basic', 'Ticket name', 'اسم التَذكَرة'),
@@ -176,7 +179,7 @@ const _cols = <String, _Col>{
 
 const _presets = <String, (String, String, List<String>)>{
   'sales': ('Sales', 'المَبيعات', [
-    'ticket_code', 'point_name', 'exit_time', 'plate_number', 'ticket_name', 'payment_label', 'amount_total', 'vat_price', 'cash_amount',
+    'ticket_code', 'area_name', 'point_name', 'client_name', 'branch_name', 'exit_time', 'plate_number', 'ticket_name', 'payment_label', 'amount_total', 'vat_price', 'cash_amount',
     'card_amount', 'tips', 'discount_amount', 'opened_by_name', 'delivered_by_name',
   ]),
   'ops': ('Operations', 'التَشغيل', [
@@ -188,7 +191,7 @@ const _presets = <String, (String, String, List<String>)>{
     'key_rack_status', 'key_rack_operator_name', 'key_rack_shift_code',
   ]),
   'odoo': ('Accounting / Odoo', 'المُحاسَبة / Odoo', [
-    'ticket_code', 'sale_no', 'point_code', 'point_name', 'exit_date', 'ticket_name', 'customer_name', 'payment_label', 'ticket_price',
+    'ticket_code', 'sale_no', 'area_name', 'point_code', 'point_name', 'client_name', 'branch_name', 'exit_date', 'ticket_name', 'customer_name', 'payment_label', 'ticket_price',
     'vat_price', 'amount_total', 'cash_amount', 'card_amount', 'card_ref', 'paid_later', 'credit_notes', 'close_shift_code', 'odoo_invoice',
     'odoo_status',
   ]),
@@ -208,6 +211,7 @@ class _ExplorerState extends State<_Explorer> {
   late DateTime _from;
   late DateTime _to;
   final Set<String> _points = {};
+  VScope _scope = VScope.all;
   List<VJson> _allPoints = [];
   String _basis = 'exit';
   String _status = 'closed';
@@ -270,6 +274,7 @@ class _ExplorerState extends State<_Explorer> {
         'status': _status,
         if (_payment.isNotEmpty) 'payment': _payment,
         if (_q.text.trim().isNotEmpty) 'q': _q.text.trim(),
+        if (!_scope.isAll) 'scope': _scope.json,
         if (_sort != null) 'sort': _sort,
         'desc': _desc,
       };
@@ -392,6 +397,7 @@ class _ExplorerState extends State<_Explorer> {
             ['From', VF.iso(_from)],
             ['To', VF.iso(_to)],
             ['Points', _points.isEmpty ? 'All' : _pointNames().join(', ')],
+            ['Scope', _scope.isAll ? 'All' : '${_scope.kind}: ${_scope.label}'],
             ['Date basis', _basis],
             ['Status', _status],
             ['Payment', _payment.isEmpty ? 'Any' : _payment],
@@ -646,6 +652,10 @@ class _ExplorerState extends State<_Explorer> {
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
         child: Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          VScopeFilter(width: 260, value: _scope, onChanged: (v) {
+            setState(() => _scope = v);
+            _load();
+          }),
           OutlinedButton.icon(
             icon: const Icon(Icons.place_outlined, size: 18),
             label: Text(_points.isEmpty

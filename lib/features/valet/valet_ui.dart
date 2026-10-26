@@ -729,3 +729,144 @@ class VatAmountField extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------- scope: area · client · branch · point (282)
+/// نِطاق التَقرير: الكُلّ أَو مَنطِقة أَو عَميل (كُلّ فُروعه) أَو فَرع أَو نُقطة.
+class VScope {
+  const VScope(this.kind, [this.id, this.label]);
+  static const all = VScope('all');
+  final String kind; // all | area | client | branch | point
+  final String? id;
+  final String? label;
+  bool get isAll => kind == 'all' || id == null;
+
+  /// قيمة p_scope لِلخادِم.
+  Map<String, dynamic> get json => isAll ? <String, dynamic>{} : <String, dynamic>{kind: id};
+
+  IconData get icon => switch (kind) {
+        'area' => Icons.map_outlined,
+        'client' => Icons.apartment,
+        'branch' => Icons.storefront_outlined,
+        'point' => Icons.place_outlined,
+        _ => Icons.public,
+      };
+}
+
+class VScopeOptions {
+  static VJson? _d;
+  static Future<VJson> get() async => _d ??= await ValetAdmin.I.call('vva_scope_options');
+  static void clear() => _d = null;
+}
+
+class VScopeFilter extends StatelessWidget {
+  const VScopeFilter({super.key, required this.value, required this.onChanged, this.width = 300});
+  final VScope value;
+  final ValueChanged<VScope> onChanged;
+  final double width;
+
+  String _kindLabel(BuildContext c, String k) => switch (k) {
+        'area' => tx(c, 'مَنطِقة', 'Area'),
+        'client' => tx(c, 'عَميل', 'Client'),
+        'branch' => tx(c, 'فَرع', 'Branch'),
+        'point' => tx(c, 'نُقطة', 'Point'),
+        _ => tx(c, 'الكُلّ', 'All'),
+      };
+
+  Future<void> _open(BuildContext context) async {
+    final d = await vGuard(context, VScopeOptions.get);
+    if (d == null || !context.mounted) return;
+    final q = TextEditingController();
+    final items = <VScope>[
+      for (final a in vList(d['areas'])) VScope('area', vStr(a['id']), vStr(a['name'])),
+      for (final c in vList(d['clients'])) VScope('client', vStr(c['id']), vStr(c['name'])),
+      for (final b in vList(d['branches'])) VScope('branch', vStr(b['id']), '${vStr(b['name'])}${vStr(b['client']).isEmpty ? '' : '  ·  ${vStr(b['client'])}'}'),
+      for (final p in vList(d['points'])) VScope('point', vStr(p['id']), '${vStr(p['code'])}  ${vStr(p['name'])}${vStr(p['area']).isEmpty ? '' : '  ·  ${vStr(p['area'])}'}'),
+    ];
+    final picked = await showDialog<VScope>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
+        final f = q.text.trim().toLowerCase();
+        final shown = items.where((i) => f.isEmpty || (i.label ?? '').toLowerCase().contains(f)).toList();
+        Widget section(String kind) {
+          final l = shown.where((i) => i.kind == kind).toList();
+          if (l.isEmpty) return const SizedBox.shrink();
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 10, 8, 2),
+              child: Text('${_kindLabel(ctx, kind)} (${l.length})', style: const TextStyle(fontWeight: FontWeight.w700, color: VC.muted)),
+            ),
+            for (final i in l.take(f.isEmpty ? 8 : 200))
+              ListTile(
+                dense: true,
+                leading: Icon(i.icon, size: 20),
+                title: Text(i.label ?? '', overflow: TextOverflow.ellipsis),
+                selected: i.kind == value.kind && i.id == value.id,
+                onTap: () => Navigator.pop(ctx, i),
+              ),
+            if (f.isEmpty && l.length > 8)
+              Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4),
+                child: Text(tx(ctx, 'اكتُب لِلبَحث في الباقي (${l.length - 8})', 'Type to search the rest (${l.length - 8})'), style: const TextStyle(color: VC.muted, fontSize: 12)),
+              ),
+          ]);
+        }
+
+        return AlertDialog(
+          title: Text(tx(ctx, 'النِطاق: مَنطِقة · عَميل · فَرع · نُقطة', 'Scope: area · client · branch · point')),
+          content: SizedBox(
+            width: 480,
+            height: 520,
+            child: Column(children: [
+              TextField(
+                controller: q,
+                autofocus: true,
+                decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search), hintText: tx(ctx, 'اكتُب اسم مَنطِقة أَو عَميل أَو فَرع أَو نُقطة', 'Type an area, client, branch or point')),
+                onChanged: (_) => set(() {}),
+              ),
+              Expanded(
+                child: ListView(children: [
+                  if (f.isEmpty)
+                    ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.public),
+                      title: Text(tx(ctx, 'الكُلّ', 'Everything'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                      selected: value.isAll,
+                      onTap: () => Navigator.pop(ctx, VScope.all),
+                    ),
+                  section('area'),
+                  section('client'),
+                  section('branch'),
+                  section('point'),
+                  if (shown.isEmpty)
+                    Padding(padding: const EdgeInsets.all(20), child: Text(tx(ctx, 'لا تُوجَد نَتيجة.', 'No match.'), textAlign: TextAlign.center, style: const TextStyle(color: VC.muted))),
+                ]),
+              ),
+            ]),
+          ),
+        );
+      }),
+    );
+    q.dispose();
+    if (picked != null) onChanged(picked);
+  }
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: width,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => _open(context),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: value.isAll ? tx(context, 'النِطاق', 'Scope') : _kindLabel(context, value.kind),
+              prefixIcon: Icon(value.icon),
+              suffixIcon: const Icon(Icons.search),
+              isDense: true,
+              border: const OutlineInputBorder(),
+            ),
+            child: Text(value.isAll ? tx(context, 'الكُلّ (كُلّ المَناطِق وَالعُمَلاء)', 'Everything') : (value.label ?? ''),
+                overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
+        ),
+      );
+}

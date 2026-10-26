@@ -36,8 +36,7 @@ class _ReportsBody extends StatefulWidget {
 class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderStateMixin {
   late DateTime _from;
   late DateTime _to;
-  String? _point;
-  List<VJson> _points = [];
+  VScope _scope = VScope.all;
   VJson? _d;
   Object? _err;
   bool _busy = false;
@@ -49,7 +48,6 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
     final n = DateTime.now();
     _from = DateTime(n.year, n.month);
     _to = DateTime(n.year, n.month, n.day);
-    VPoints.get().then((p) => mounted ? setState(() => _points = p) : null).catchError((_) => null);
     _load();
   }
 
@@ -62,7 +60,7 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
   Future<void> _load() async {
     setState(() => _busy = true);
     try {
-      final d = await ValetAdmin.I.call('vva_report', {'p_from': VF.iso(_from), 'p_to': VF.iso(_to), 'p_point': _point});
+      final d = await ValetAdmin.I.call('vva_report', {'p_from': VF.iso(_from), 'p_to': VF.iso(_to), 'p_point': null, 'p_scope': _scope.json});
       if (mounted) {
         setState(() {
           _d = d;
@@ -90,6 +88,8 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
           name: 'By point',
           headers: ['Code', 'Point', 'Cars', 'Revenue', 'Tips', 'Free', 'Avg wait (s)', 'Within 5 min %', 'Open now'],
           rows: rows(d['by_point'], ['code', 'point', 'cars', 'revenue', 'tips', 'free', 'avg_wait_s', 'sla', 'open'])),
+      ExcelSheet(name: 'By area', headers: ['Area', 'Points', 'Cars', 'Revenue', 'Tips'], rows: rows(d['by_area'], ['area', 'points', 'cars', 'revenue', 'tips'])),
+      ExcelSheet(name: 'By client', headers: ['Client', 'Branches', 'Cars', 'Revenue'], rows: rows(d['by_client_sales'], ['client', 'branches', 'cars', 'revenue'])),
       ExcelSheet(name: 'By payment', headers: ['Payment', 'Cars', 'Revenue'], rows: rows(d['by_payment'], ['mode', 'cars', 'revenue'])),
       ExcelSheet(name: 'By ticket type', headers: ['Type', 'Cars', 'Revenue'], rows: rows(d['by_type'], ['type', 'cars', 'revenue'])),
       ExcelSheet(name: 'Validations', headers: ['Client', 'Cars'], rows: rows(d['by_client'], ['client', 'validations'])),
@@ -113,10 +113,10 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
     final d = _d;
     return Column(children: [
       VHead(tx(context, 'تَقارير الفاليه', 'Valet reports'),
-          subtitle: tx(context, 'نُقطة أَو كُلّ النِقاط · مُقارَنة بِالفَترة السابِقة', 'One point or all points · compared with the previous period'),
+          subtitle: tx(context, 'مَنطِقة أَو عَميل أَو فَرع أَو نُقطة · مُقارَنة بِالفَترة السابِقة', 'Area, client, branch or point · compared with the previous period'),
           actions: [
-            VPointFilter(points: _points, value: _point, onChanged: (v) {
-              _point = v;
+            VScopeFilter(value: _scope, onChanged: (v) {
+              _scope = v;
               _load();
             }),
             IconButton.filledTonal(onPressed: _busy ? null : _load, icon: const Icon(Icons.refresh)),
@@ -221,6 +221,27 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
         ]),
       ),
       if (days.isNotEmpty) VPanel(title: tx(context, 'الإيراد وَالسَيّارات يَوميّاً', 'Revenue and cars per day'), child: SizedBox(height: 240, child: _dayChart(days))),
+      if (vList(d['by_area']).isNotEmpty)
+        _table(tx(context, 'حَسَب المَنطِقة', 'By area'), [
+          tx(context, 'المَنطِقة', 'Area'),
+          tx(context, 'نِقاط', 'Points'),
+          tx(context, 'سَيّارات', 'Cars'),
+          tx(context, 'إيراد', 'Revenue'),
+          tx(context, 'إكراميّات', 'Tips'),
+        ], [
+          for (final r in vList(d['by_area']))
+            [vStr(r['area']) == '-' ? tx(context, 'بِلا مَنطِقة', 'No area') : vStr(r['area']), VF.n(vNum(r['points'])), VF.n(vNum(r['cars'])), VF.money(vNum(r['revenue'])), VF.money(vNum(r['tips']))]
+        ]),
+      if (vList(d['by_client_sales']).isNotEmpty)
+        _table(tx(context, 'حَسَب العَميل', 'By client'), [
+          tx(context, 'العَميل', 'Client'),
+          tx(context, 'فُروع', 'Branches'),
+          tx(context, 'سَيّارات', 'Cars'),
+          tx(context, 'إيراد', 'Revenue'),
+        ], [
+          for (final r in vList(d['by_client_sales']))
+            [vStr(r['client']) == '-' ? tx(context, 'بِلا عَميل (زُوّار)', 'No client (visitors)') : vStr(r['client']), VF.n(vNum(r['branches'])), VF.n(vNum(r['cars'])), VF.money(vNum(r['revenue']))]
+        ]),
       _table(tx(context, 'حَسَب النُقطة', 'By point'), [
         tx(context, 'النُقطة', 'Point'),
         tx(context, 'سَيّارات', 'Cars'),

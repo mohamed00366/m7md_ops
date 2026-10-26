@@ -31,7 +31,7 @@ class _ValetPointsScreenState extends State<ValetPointsScreen> {
             final q = _q.toLowerCase();
             final list = all.where((p) {
               if (_valetOnly && p['configured'] != true && p['terminal'] == null) return false;
-              return q.isEmpty || '${p['code']} ${p['name']}'.toLowerCase().contains(q);
+              return q.isEmpty || '${p['code']} ${p['name']} ${p['area'] ?? ''}'.toLowerCase().contains(q);
             }).toList();
             return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
               VHead(tx(context, 'تَطبيق الفاليه — النِقاط', 'Valet app — points'),
@@ -56,6 +56,7 @@ class _ValetPointsScreenState extends State<ValetPointsScreen> {
                   child: VTable(columns: [
                     DataColumn(label: Text(tx(context, 'الكود', 'Code'))),
                     DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
+                    DataColumn(label: Text(tx(context, 'المَنطِقة', 'Area'))),
                     DataColumn(label: Text(tx(context, 'حِساب الجِهاز', 'Device account'))),
                     DataColumn(label: Text(tx(context, 'العُمَلاء', 'Clients')), numeric: true),
                     DataColumn(label: Text(tx(context, 'الأَسعار', 'Prices')), numeric: true),
@@ -72,6 +73,9 @@ class _ValetPointsScreenState extends State<ValetPointsScreen> {
                         cells: [
                           DataCell(Text(vStr(p['code']))),
                           DataCell(Text(vStr(p['name']), style: const TextStyle(fontWeight: FontWeight.w600))),
+                          DataCell(p['area'] == null
+                              ? Text(tx(context, 'بِلا مَنطِقة', 'No area'), style: const TextStyle(color: VC.warn))
+                              : VPill(vStr(p['area']), color: VC.info, icon: Icons.map_outlined)),
                           DataCell(p['terminal'] == null
                               ? VPill(tx(context, 'غَير مَوجود', 'Missing'), color: VC.bad)
                               : VPill(vStr(vMap(p['terminal'])['username']), color: vBool(vMap(p['terminal'])['active']) ? VC.ok : VC.muted)),
