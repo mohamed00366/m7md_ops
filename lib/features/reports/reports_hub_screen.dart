@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/m7_app_bar.dart';
+import '../valet/valet_report_cards.dart';
 import '../valet/valet_reports_screen.dart';
 import '../valet/valet_ticket_explorer_screen.dart';
 import 'employee_aggregated_report.dart';
@@ -47,7 +48,7 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
           body: ListView(
             padding: const EdgeInsets.all(12),
             children: [
-              _valetSection(isAr),
+              const ValetReportCards(),
               const SizedBox(height: 16),
               _filterBar(filters, isAr),
               const SizedBox(height: 12),
@@ -490,43 +491,6 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
     Navigator.of(context).push(MaterialPageRoute(
       builder: entry?.builder ?? (_) => ReportDetailScreen(reportKey: key),
     ));
-  }
-
-  // ============================================================
-  // Valet · customers · key rack — the operations apps of the dashboard
-  // ============================================================
-  Widget _valetSection(bool isAr) {
-    final items = _allReports(isAr).where((r) => r.builder != null).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionTitle(isAr ? '🅿️ الفاليه · العُمَلاء · الكي راك' : '🅿️ Valet · customers · key rack'),
-        const SizedBox(height: 8),
-        LayoutBuilder(builder: (ctx, c) {
-          final cols = c.maxWidth > 1100 ? 4 : (c.maxWidth > 760 ? 3 : (c.maxWidth > 460 ? 2 : 1));
-          final w = (c.maxWidth - (cols - 1) * 8) / cols;
-          return Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final r in items)
-              SizedBox(
-                width: w,
-                child: Card(
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: r.key == 'valet_explorer' ? BorderSide(color: r.color, width: 1.5) : BorderSide.none,
-                  ),
-                  child: ListTile(
-                    onTap: () => _openReport(r.key, isAr),
-                    leading: CircleAvatar(backgroundColor: r.color.withValues(alpha: 0.15), child: Icon(r.icon, color: r.color)),
-                    title: Text(r.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                    subtitle: Text(r.subtitle, style: const TextStyle(fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis),
-                  ),
-                ),
-              ),
-          ]);
-        }),
-      ],
-    );
   }
 
   Widget _sectionTitle(String text) => Padding(

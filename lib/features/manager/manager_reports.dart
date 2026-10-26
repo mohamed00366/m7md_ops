@@ -10,6 +10,7 @@ import '../../repositories/mock_repository.dart';
 import '../../shared/m7_app_bar.dart';
 import '../../shared/m7_stats_banner.dart';
 import '../admin/account_report_screen.dart';
+import '../valet/valet_report_cards.dart';
 import '../admin/employee_documents_expiry_report_screen.dart';
 import '../camp_boss/buses/bus_report_screen.dart';
 import 'customers/master_report_screen.dart';
@@ -284,6 +285,9 @@ class _ManagerReportsState extends State<ManagerReports> {
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
+          // ===== تَقارير الفاليه / تَطبيق العُمَلاء / الكي راك (أَوَّل شَيء) =====
+          const ValetReportCards(),
+          const SizedBox(height: 16),
           // ===== شَريط إحصائيّات =====
           M7StatsBanner(stats: [
             M7Stat(
