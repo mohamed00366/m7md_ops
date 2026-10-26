@@ -74,21 +74,18 @@ import '../supervisor/supervisor_approved_roster.dart';
 import '../camp_boss/evaluations_center.dart';
 import '../supervisor/supervisor_roster_creator.dart';
 // 🚗 Valet (VIP Valet / Key Rack / Customer apps control)
-import '../valet/valet_member_types_screen.dart';
+import '../valet/valet_app_hub_screen.dart';
 import '../valet/valet_network_screen.dart';
 import '../valet/valet_audit_screen.dart';
 import '../valet/valet_clients_screen.dart';
 import '../valet/valet_keyrack_screen.dart';
 import '../valet/valet_odoo_screen.dart';
-import '../valet/valet_parking_screen.dart';
 import '../valet/valet_live_screen.dart';
-import '../valet/valet_points_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_manual_screen.dart';
 import '../valet/valet_manual_sales_screen.dart';
 import '../valet/valet_numbering_screen.dart';
-import '../valet/valet_vouchers_screen.dart';
 import '../valet/valet_safety_screen.dart';
 import '../valet/valet_tickets_screen.dart';
 import 'app_module.dart';
@@ -302,20 +299,7 @@ class ModulesRegistry {
           color: ModuleCategory.valet.color(),
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
-          builder: (_) => const ValetPointsScreen(),
-          groupKey: 'valet_apps',
-          groupTitleAr: 'التَطبيقات وَالمَواقِع',
-          groupTitleEn: 'Apps & sites',
-        ),
-        AppModule(
-          key: 'valet_member_types',
-          titleAr: 'أَنواع الاشتِراكات',
-          titleEn: 'Membership types',
-          icon: Icons.style_outlined,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetDashboardView,
-          builder: (_) => const ValetMemberTypesScreen(),
+          builder: (_) => const ValetAppHubScreen(),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',
@@ -342,32 +326,6 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetNumbering,
           builder: (_) => const ValetNumberingScreen(embedded: true),
-          groupKey: 'valet_apps',
-          groupTitleAr: 'التَطبيقات وَالمَواقِع',
-          groupTitleEn: 'Apps & sites',
-        ),
-        AppModule(
-          key: 'valet_vouchers',
-          titleAr: 'القَسائِم (QR / سيريال)',
-          titleEn: 'Vouchers (QR / serial)',
-          icon: Icons.confirmation_number_outlined,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetSettingsManage,
-          builder: (_) => const ValetVouchersScreen(),
-          groupKey: 'valet_apps',
-          groupTitleAr: 'التَطبيقات وَالمَواقِع',
-          groupTitleEn: 'Apps & sites',
-        ),
-        AppModule(
-          key: 'valet_parking',
-          titleAr: 'المَواقِف',
-          titleEn: 'Parking areas',
-          icon: Icons.garage_outlined,
-          color: ModuleCategory.valet.color(),
-          category: ModuleCategory.valet,
-          requiredPermission: P.valetDashboardView,
-          builder: (_) => const ValetParkingScreen(),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',

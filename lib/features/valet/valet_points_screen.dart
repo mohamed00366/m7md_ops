@@ -825,8 +825,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
       section(Icons.card_membership_outlined, '10 · العُضويّات', '10 · Memberships',
-          'انتَقَلَت كُلّ أَزرار العُضويّات إلى: الفاليه ← أَنواع الاشتِراكات ← "العُضويّات في كُلّ نُقطة".',
-          'All membership switches moved to: Valet → Membership types → "Memberships per point".', [
+          'انتَقَلَت كُلّ أَزرار العُضويّات إلى: تَطبيق الفاليه ← أَنواع الاشتِراكات ← "العُضويّات في كُلّ نُقطة".',
+          'All membership switches moved to: Valet app → Membership types → "Memberships per point".', [
         SizedBox(
           width: 470,
           child: Padding(
