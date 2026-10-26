@@ -489,7 +489,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     }
 
     // card payments: the 6-digit approval number from the card machine slip (matched later with the Paymob file)
-    final approval = const {'off', 'optional', 'required'}.contains(vStr(s['card_approval_code'])) ? vStr(s['card_approval_code']) : 'off';
+    String approvalOf(String k) => const {'off', 'optional', 'required'}.contains(vStr(s[k])) ? vStr(s[k]) : 'off';
     Widget approvalPicker() => SizedBox(
           width: 470,
           child: Padding(
@@ -503,15 +503,23 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                       'The employee types the approval number from the machine slip on a card payment. Never repeats; matched with the payment company file.'),
                   style: const TextStyle(color: VC.muted, fontSize: 12.5)),
               const SizedBox(height: 6),
-              SegmentedButton<String>(
-                segments: [
-                  ButtonSegment(value: 'off', icon: const Icon(Icons.visibility_off_outlined), label: Text(tx(context, 'مَخفيّة', 'Hidden'))),
-                  ButtonSegment(value: 'optional', icon: const Icon(Icons.edit_outlined), label: Text(tx(context, 'اختياريّة', 'Optional'))),
-                  ButtonSegment(value: 'required', icon: const Icon(Icons.lock_outline), label: Text(tx(context, 'إجباريّة', 'Required'))),
-                ],
-                selected: {approval},
-                onSelectionChanged: !_edit ? null : (v) => toggleValue('card_approval_code', v.first),
-              ),
+              for (final (k, ar, en) in [
+                ('card_approval_code', 'شاشة دَفع التَذكَرة', 'Ticket payment screen'),
+                ('member_card_approval', 'بَيع وَتَجديد العُضويّات', 'Selling / renewing memberships'),
+              ]) ...[
+                const SizedBox(height: 8),
+                Text(tx(context, ar, en), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(value: 'off', icon: const Icon(Icons.visibility_off_outlined), label: Text(tx(context, 'مَخفيّة', 'Hidden'))),
+                    ButtonSegment(value: 'optional', icon: const Icon(Icons.edit_outlined), label: Text(tx(context, 'اختياريّة', 'Optional'))),
+                    ButtonSegment(value: 'required', icon: const Icon(Icons.lock_outline), label: Text(tx(context, 'إجباريّة', 'Required'))),
+                  ],
+                  selected: {approvalOf(k)},
+                  onSelectionChanged: !_edit ? null : (v) => toggleValue(k, v.first),
+                ),
+              ],
             ]),
           ),
         );
