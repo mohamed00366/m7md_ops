@@ -9,14 +9,25 @@ import 'valet_ui.dart';
 /// المال مِثل الوَرديّة وَOdoo: السِعر + البِطاقة المَفقودة + المَبيت، الدَفع المُقَسَّم، الفُروقات المَدفوعة لاحِقاً،
 /// وَيُخصَم الإشعار الدائِن المُعتَمَد. أَوقات الخِدمة تُسَجَّل على الخادِم مُنذُ 279.
 class ValetReportsScreen extends StatelessWidget {
-  const ValetReportsScreen({super.key});
+  const ValetReportsScreen({super.key, this.initialTab = 0, this.title});
+
+  /// 0 الملخص · 1 التشغيل · 2 الاستثناءات · 3 تطبيق العملاء · 4 الكي راك
+  final int initialTab;
+
+  /// عند الفتح مِن مَركَز التَقارير: شاشة كامِلة بِعُنوان.
+  final String? title;
 
   @override
-  Widget build(BuildContext context) => const ValetGate(perm: ValetAdmin.permReports, child: _ReportsBody());
+  Widget build(BuildContext context) {
+    final body = ValetGate(perm: ValetAdmin.permReports, child: _ReportsBody(initialTab: initialTab));
+    if (title == null) return body;
+    return Scaffold(appBar: AppBar(title: Text(title!)), body: body);
+  }
 }
 
 class _ReportsBody extends StatefulWidget {
-  const _ReportsBody();
+  const _ReportsBody({this.initialTab = 0});
+  final int initialTab;
 
   @override
   State<_ReportsBody> createState() => _ReportsBodyState();
@@ -30,7 +41,7 @@ class _ReportsBodyState extends State<_ReportsBody> with SingleTickerProviderSta
   VJson? _d;
   Object? _err;
   bool _busy = false;
-  late final TabController _tabs = TabController(length: 5, vsync: this);
+  late final TabController _tabs = TabController(length: 5, vsync: this, initialIndex: widget.initialTab.clamp(0, 4));
 
   @override
   void initState() {

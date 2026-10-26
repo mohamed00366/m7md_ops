@@ -82,7 +82,6 @@ import '../valet/valet_odoo_screen.dart';
 import '../valet/valet_parking_screen.dart';
 import '../valet/valet_live_screen.dart';
 import '../valet/valet_points_screen.dart';
-import '../valet/valet_reports_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_manual_screen.dart';
@@ -494,7 +493,8 @@ class ModulesRegistry {
           color: ModuleCategory.valet.color(),
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
-          builder: (_) => const ValetReportsScreen(),
+          // جُزء مِن مَركَز التَقارير المُوَحَّد (يَفتَح عَلى تَصنيف الفاليه)
+          builder: (_) => const ReportsHubScreen(initialCategory: 'valet'),
           groupKey: 'valet_rep',
           groupTitleAr: 'التَقارير',
           groupTitleEn: 'Reports',

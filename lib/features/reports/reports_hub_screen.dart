@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/m7_app_bar.dart';
+import '../valet/valet_reports_screen.dart';
+import '../valet/valet_ticket_explorer_screen.dart';
 import 'employee_aggregated_report.dart';
 import 'location_aggregated_report.dart';
 import 'report_detail_screen.dart';
@@ -20,14 +22,17 @@ import 'reports_service.dart';
 import 'smart_filters.dart';
 
 class ReportsHubScreen extends StatefulWidget {
-  const ReportsHubScreen({super.key});
+  const ReportsHubScreen({super.key, this.initialCategory = 'all'});
+
+  /// 'valet' يَفتَح المَركَز عَلى تَقارير الفاليه / العُمَلاء / الكي راك.
+  final String initialCategory;
 
   @override
   State<ReportsHubScreen> createState() => _ReportsHubScreenState();
 }
 
 class _ReportsHubScreenState extends State<ReportsHubScreen> {
-  String _category = 'all';
+  late String _category = widget.initialCategory;
   String _search = '';
 
   @override
@@ -42,6 +47,8 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
           body: ListView(
             padding: const EdgeInsets.all(12),
             children: [
+              _valetSection(isAr),
+              const SizedBox(height: 16),
               _filterBar(filters, isAr),
               const SizedBox(height: 12),
               _aggregatedSection(isAr),
@@ -441,6 +448,9 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
               ('camp', isAr ? '🏕 الكَمب' : '🏕 Camp'),
               ('ops', isAr ? '🏢 العَمَليّات' : '🏢 Ops'),
               ('finance', isAr ? '💰 المالي' : '💰 Finance'),
+              ('valet', isAr ? '🅿️ الفاليه' : '🅿️ Valet'),
+              ('customers', isAr ? '🏨 العُمَلاء' : '🏨 Customers'),
+              ('keyrack', isAr ? '🔑 الكي راك' : '🔑 Key rack'),
             ])
               Padding(
                 padding: const EdgeInsets.only(right: 4),
@@ -476,9 +486,47 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
   }
 
   void _openReport(String key, bool isAr) {
+    final entry = _allReports(isAr).where((r) => r.key == key).firstOrNull;
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ReportDetailScreen(reportKey: key),
+      builder: entry?.builder ?? (_) => ReportDetailScreen(reportKey: key),
     ));
+  }
+
+  // ============================================================
+  // Valet · customers · key rack — the operations apps of the dashboard
+  // ============================================================
+  Widget _valetSection(bool isAr) {
+    final items = _allReports(isAr).where((r) => r.builder != null).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(isAr ? '🅿️ الفاليه · العُمَلاء · الكي راك' : '🅿️ Valet · customers · key rack'),
+        const SizedBox(height: 8),
+        LayoutBuilder(builder: (ctx, c) {
+          final cols = c.maxWidth > 1100 ? 4 : (c.maxWidth > 760 ? 3 : (c.maxWidth > 460 ? 2 : 1));
+          final w = (c.maxWidth - (cols - 1) * 8) / cols;
+          return Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final r in items)
+              SizedBox(
+                width: w,
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: r.key == 'valet_explorer' ? BorderSide(color: r.color, width: 1.5) : BorderSide.none,
+                  ),
+                  child: ListTile(
+                    onTap: () => _openReport(r.key, isAr),
+                    leading: CircleAvatar(backgroundColor: r.color.withValues(alpha: 0.15), child: Icon(r.icon, color: r.color)),
+                    title: Text(r.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                    subtitle: Text(r.subtitle, style: const TextStyle(fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              ),
+          ]);
+        }),
+      ],
+    );
   }
 
   Widget _sectionTitle(String text) => Padding(
@@ -492,6 +540,62 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
   // Report registry
   // ============================================================
   List<_ReportEntry> _allReports(bool isAr) => [
+        _ReportEntry(
+          key: 'valet_explorer',
+          category: 'valet',
+          title: isAr ? '🧾 مُستَكشِف بَيانات التَذاكِر' : '🧾 Ticket data explorer',
+          subtitle: isAr
+              ? 'كُلّ أَعمِدة التَذاكِر لِكُلّ النِقاط · اختَر الأَعمِدة · Excel / CSV'
+              : 'Every ticket column for every point · choose columns · Excel / CSV',
+          icon: Icons.table_view,
+          color: const Color(0xFFC9A227),
+          builder: (_) => const ValetTicketExplorerScreen(),
+        ),
+        _ReportEntry(
+          key: 'valet_sales',
+          category: 'valet',
+          title: isAr ? '💵 مَبيعات الفاليه' : '💵 Valet sales',
+          subtitle: isAr ? 'الإيراد المُطابِق لـ Odoo · النِقاط · الدَفع · مُقارَنة' : 'Revenue matching Odoo · points · payment · comparison',
+          icon: Icons.insights,
+          color: AppColors.success,
+          builder: (_) => ValetReportsScreen(initialTab: 0, title: isAr ? 'مَبيعات الفاليه' : 'Valet sales'),
+        ),
+        _ReportEntry(
+          key: 'valet_ops',
+          category: 'valet',
+          title: isAr ? '⏱ التَشغيل وَأَداء المُوَظَّفين' : '⏱ Operations and staff',
+          subtitle: isAr ? 'أَوقات الانتِظار · ساعات الذُروة · أَداء كُلّ مُوَظَّف' : 'Waiting times · peak hours · staff performance',
+          icon: Icons.timer_outlined,
+          color: Colors.indigo,
+          builder: (_) => ValetReportsScreen(initialTab: 1, title: isAr ? 'التَشغيل وَأَداء المُوَظَّفين' : 'Operations and staff'),
+        ),
+        _ReportEntry(
+          key: 'valet_exceptions',
+          category: 'valet',
+          title: isAr ? '⚠ الاستِثناءات وَكاش الوَرديّات' : '⚠ Exceptions and shift cash',
+          subtitle: isAr ? 'المُلغاة · المَجّانيّة · مَفتوحة +24 ساعة · فُروقات الكاش' : 'Voids · free · open 24h+ · cash differences',
+          icon: Icons.report_gmailerrorred,
+          color: AppColors.danger,
+          builder: (_) => ValetReportsScreen(initialTab: 2, title: isAr ? 'الاستِثناءات وَكاش الوَرديّات' : 'Exceptions and shift cash'),
+        ),
+        _ReportEntry(
+          key: 'valet_customers',
+          category: 'customers',
+          title: isAr ? '📱 تَطبيق العُمَلاء وَالتَحَقُّقات' : '📱 Customer app and validations',
+          subtitle: isAr ? 'الطَلَب مِن التَطبيق · الانتِظار · تَحَقُّقات الفَنادِق وَالمَحَلّات' : 'App requests · waiting · hotel and shop validations',
+          icon: Icons.phone_iphone,
+          color: AppColors.info,
+          builder: (_) => ValetReportsScreen(initialTab: 3, title: isAr ? 'تَطبيق العُمَلاء وَالتَحَقُّقات' : 'Customer app and validations'),
+        ),
+        _ReportEntry(
+          key: 'valet_keyrack',
+          category: 'keyrack',
+          title: isAr ? '🔑 الكي راك' : '🔑 Key rack',
+          subtitle: isAr ? 'وَقت إخراج المِفتاح · مَفاتيح +24 ساعة · مُوَظَّفو المَفاتيح' : 'Key out time · keys 24h+ · key controllers',
+          icon: Icons.key,
+          color: Colors.brown,
+          builder: (_) => ValetReportsScreen(initialTab: 4, title: isAr ? 'الكي راك' : 'Key rack'),
+        ),
         _ReportEntry(
           key: 'attendance',
           category: 'hr',
@@ -564,6 +668,7 @@ class _ReportEntry {
   final String subtitle;
   final IconData icon;
   final Color color;
+  final WidgetBuilder? builder;
   _ReportEntry({
     required this.key,
     required this.category,
@@ -571,6 +676,7 @@ class _ReportEntry {
     required this.subtitle,
     required this.icon,
     required this.color,
+    this.builder,
   });
 }
 
