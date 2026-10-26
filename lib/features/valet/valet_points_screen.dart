@@ -505,7 +505,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               const SizedBox(height: 6),
               for (final (k, ar, en) in [
                 ('card_approval_code', 'شاشة دَفع التَذكَرة', 'Ticket payment screen'),
-                ('member_card_approval', 'بَيع وَتَجديد العُضويّات', 'Selling / renewing memberships'),
               ]) ...[
                 const SizedBox(height: 8),
                 Text(tx(context, ar, en), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
@@ -759,7 +758,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة، وَطَريقة قِراءة الكُروت وَاختيار السائِق.',
           'What the staff fill in when receiving a car, how cards are read and how the driver is picked.', [
         sw('require_print'),
-        sw('show_member_pick'),
         sw('show_hotel_pick'),
         sw('photo_in_out'),
         sw('nfc_qr_in_out'),
@@ -827,11 +825,18 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
       section(Icons.card_membership_outlined, '10 · العُضويّات', '10 · Memberships',
-          'صَفحة بَيع العُضويّات، وَخانات كُروت العُضويّة في إضافة تَذكَرة (كُلّ زِرّ مُستَقِلّ).',
-          'The memberships page, and the member card fields on Add ticket (each switch on its own).', [
-        sw('show_membership'),
-        sw('member_card_normal'),
-        sw('member_card_gold'),
+          'انتَقَلَت كُلّ أَزرار العُضويّات إلى: الفاليه ← أَنواع الاشتِراكات ← "العُضويّات في كُلّ نُقطة".',
+          'All membership switches moved to: Valet → Membership types → "Memberships per point".', [
+        SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(
+                tx(context, 'صَفحة العُضويّات · كَرت العُضويّة · الكَرت الذَهَبيّ · المُشتَرِك تَحت اللَوحة · رَقم المُوافَقة لِلعُضويّات',
+                    'Memberships page · Member card · Gold card · Member under the plate · Membership approval number'),
+                style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+          ),
+        ),
       ]),
       section(Icons.supervisor_account_outlined, '11 · المُشرِف', '11 · Supervisor',
           'ما يَراه المُشرِف الذي فَتَح الوَرديّة في التَطبيق.', 'What the supervisor who opened the shift sees in the app.', [

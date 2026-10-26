@@ -81,6 +81,12 @@ class _BodyState extends State<_Body> {
               ]);
             }),
           ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            // the raw maps from the server, so a saved switch survives a rebuild of the page
+            child: _PointSwitches(points: [for (final e in (d['points'] is List ? d['points'] as List : const [])) if (e is Map) e.cast<String, dynamic>()], edit: edit),
+          ),
         ]);
       },
     );
@@ -451,6 +457,146 @@ class _BodyState extends State<_Body> {
           ],
         );
       }),
+    );
+  }
+}
+
+
+/// إظهار وَإخفاء العُضويّات في كُلّ نُقطة (كانَت في إعدادات النُقطة): صَفحة العُضويّات، الكُروت في إضافة تَذكَرة،
+/// زِرّ المُشتَرِك تَحت اللَوحة، وَرَقم المُوافَقة لِلكارت عِند البَيع.
+class _PointSwitches extends StatefulWidget {
+  const _PointSwitches({required this.points, required this.edit});
+  final List<VJson> points;
+  final bool edit;
+
+  @override
+  State<_PointSwitches> createState() => _PointSwitchesState();
+}
+
+class _PointSwitchesState extends State<_PointSwitches> {
+  String _q = '';
+  bool _onlyOn = false;
+  final _busy = <String>{};
+
+  static const _flags = [
+    ('show_membership', Icons.card_membership_outlined, 'صَفحة العُضويّات', 'Memberships page'),
+    ('member_card_normal', Icons.credit_card_outlined, 'كَرت العُضويّة', 'Member card'),
+    ('member_card_gold', Icons.workspace_premium_outlined, 'الكَرت الذَهَبيّ', 'Gold card'),
+    ('show_member_pick', Icons.directions_car_outlined, 'المُشتَرِك تَحت اللَوحة', 'Member under the plate'),
+  ];
+
+  Future<void> _set(VJson p, String k, Object v) async {
+    final key = '${p['id']}:$k';
+    final old = p[k];
+    setState(() {
+      _busy.add(key);
+      p[k] = v;
+    });
+    final r = await vGuard(context, () => ValetAdmin.I.call('vva_point_settings_save', {'p_point': p['id'], 'p_data': {k: v}}),
+        ok: tx(context, 'تَمّ الحِفظ.', 'Saved.'));
+    if (!mounted) return;
+    setState(() {
+      _busy.remove(key);
+      if (r == null) p[k] = old;
+    });
+  }
+
+  Future<void> _setAll(String k, bool v, List<VJson> list) async {
+    for (final p in list) {
+      if (vBool(p[k]) != v) await _set(p, k, v);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final q = _q.trim().toLowerCase();
+    final list = widget.points.where((p) {
+      if (_onlyOn && !vBool(p['show_membership'])) return false;
+      if (q.isEmpty) return true;
+      return '${p['name']} ${p['code']} ${p['area']}'.toLowerCase().contains(q);
+    }).toList();
+    final onCount = widget.points.where((p) => vBool(p['show_membership'])).length;
+
+    Widget sw(VJson p, String k) {
+      final busy = _busy.contains('${p['id']}:$k');
+      return busy
+          ? const SizedBox(width: 40, height: 22, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))))
+          : Switch(value: vBool(p[k]), onChanged: !widget.edit ? null : (v) => _set(p, k, v));
+    }
+
+    String appr(VJson p) => const {'off', 'optional', 'required'}.contains(vStr(p['member_card_approval'])) ? vStr(p['member_card_approval']) : 'optional';
+
+    return VPanel(
+      title: tx(context, 'العُضويّات في كُلّ نُقطة ($onCount / ${widget.points.length})', 'Memberships per point ($onCount / ${widget.points.length})'),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+            tx(context,
+                'إظهار وَإخفاء أَزرار العُضويّات في تَطبيق كُلّ نُقطة. يُطَبَّق عَلى التابلت عِند التَحديث التالي. رَقم المُوافَقة = الـ6 أَرقام مِن إيصال مَكينة الكارت عِند بَيع أَو تَجديد عُضويّة.',
+                'Show or hide the membership buttons in the app of each point. Tablets pick it up on the next refresh. Approval number = the 6 digits from the card machine slip when selling or renewing.'),
+            style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+        const SizedBox(height: 10),
+        Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          SizedBox(
+            width: 260,
+            child: TextField(
+              decoration: InputDecoration(
+                  isDense: true, prefixIcon: const Icon(Icons.search), hintText: tx(context, 'بَحث بِالنُقطة أَو المَنطِقة', 'Search point or area'), border: const OutlineInputBorder()),
+              onChanged: (v) => setState(() => _q = v),
+            ),
+          ),
+          FilterChip(
+            label: Text(tx(context, 'صَفحة العُضويّات ظاهِرة فَقَط', 'Memberships page on only')),
+            selected: _onlyOn,
+            onSelected: (v) => setState(() => _onlyOn = v),
+          ),
+          if (widget.edit && list.isNotEmpty)
+            PopupMenuButton<(String, bool)>(
+              tooltip: tx(context, 'لِكُلّ النِقاط الظاهِرة', 'For all listed points'),
+              onSelected: (e) => _setAll(e.$1, e.$2, list),
+              itemBuilder: (_) => [
+                for (final (k, _, ar, en) in _flags) ...[
+                  PopupMenuItem(value: (k, true), child: Text(tx(context, 'إظهار: $ar', 'Show: $en'))),
+                  PopupMenuItem(value: (k, false), child: Text(tx(context, 'إخفاء: $ar', 'Hide: $en'))),
+                ],
+              ],
+              child: Chip(avatar: const Icon(Icons.done_all, size: 18), label: Text(tx(context, 'تَطبيق عَلى ${list.length} نُقطة', 'Apply to ${list.length} points'))),
+            ),
+        ]),
+        const SizedBox(height: 8),
+        VTable(columns: [
+          DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
+          DataColumn(label: Text(tx(context, 'الأَنواع', 'Types')), numeric: true),
+          DataColumn(label: Text(tx(context, 'مُشتَرِكون', 'Members')), numeric: true),
+          for (final (_, icon, ar, en) in _flags)
+            DataColumn(label: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 16, color: VC.gold), const SizedBox(width: 4), Text(tx(context, ar, en))])),
+          DataColumn(label: Text(tx(context, 'رَقم المُوافَقة (كارت)', 'Approval number (card)'))),
+        ], rows: [
+          for (final p in list)
+            DataRow(cells: [
+              DataCell(Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(vStr(p['name']), style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text('${p['code'] ?? ''}${p['area'] == null ? '' : ' · ${p['area']}'}', style: const TextStyle(color: VC.muted, fontSize: 11.5)),
+              ])),
+              DataCell(vNum(p['types']) == 0
+                  ? VPill(tx(context, 'لا نَوع', 'No type'), color: VC.warn)
+                  : Text(VF.n(vNum(p['types'])))),
+              DataCell(Text(VF.n(vNum(p['active_members'])))),
+              for (final (k, _, _, _) in _flags) DataCell(sw(p, k)),
+              DataCell(_busy.contains('${p['id']}:member_card_approval')
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : DropdownButton<String>(
+                      value: appr(p),
+                      underline: const SizedBox(),
+                      onChanged: !widget.edit ? null : (v) => v == null ? null : _set(p, 'member_card_approval', v),
+                      items: [
+                        DropdownMenuItem(value: 'off', child: Text(tx(context, 'مَخفيّة', 'Hidden'))),
+                        DropdownMenuItem(value: 'optional', child: Text(tx(context, 'اختياريّة', 'Optional'))),
+                        DropdownMenuItem(value: 'required', child: Text(tx(context, 'إجباريّة', 'Required'))),
+                      ],
+                    )),
+            ]),
+        ]),
+      ]),
     );
   }
 }
