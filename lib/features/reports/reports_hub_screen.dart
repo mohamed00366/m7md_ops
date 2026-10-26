@@ -183,15 +183,6 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
               hint: isAr ? '30 يَوم' : '30 days',
             ),
             _KpiCard(
-              label: isAr ? '⚠ تَأمين' : '⚠ Insurance',
-              icon: Icons.health_and_safety,
-              color: Colors.pink.shade700,
-              fetch: () async =>
-                  (await ReportsService.instance.expiringInsuranceCount())
-                      .toString(),
-              hint: isAr ? '30 يَوم' : '30 days',
-            ),
-            _KpiCard(
               label: isAr ? '📝 إجازات pending' : '📝 Pending Leaves',
               icon: Icons.hourglass_top,
               color: Colors.amber.shade800,
@@ -562,66 +553,6 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
               : 'Employees not back from leave yet',
           icon: Icons.warning_amber,
           color: AppColors.danger,
-        ),
-        _ReportEntry(
-          key: 'insurance',
-          category: 'hr',
-          title: isAr ? '🏥 التَأمين الصِحّيّ' : '🏥 Health Insurance',
-          subtitle: isAr
-              ? 'كُلّ بَطاقات التَأمين + تَواريخ الانتِهاء'
-              : 'All insurance cards + expiry dates',
-          icon: Icons.health_and_safety,
-          color: Colors.pink.shade700,
-        ),
-        _ReportEntry(
-          key: 'uniform',
-          category: 'camp',
-          title: isAr ? '👔 إصدارات الزِيّ' : '👔 Uniform Issuances',
-          subtitle: isAr
-              ? 'ماذا تَمّ تَسليمه، لِمَن، وَمَتى'
-              : 'What was issued, to whom, when',
-          icon: Icons.checkroom,
-          color: Colors.brown,
-        ),
-        _ReportEntry(
-          key: 'roster',
-          category: 'ops',
-          title: isAr ? '📅 الروسترات الأُسبوعيّة' : '📅 Weekly Rosters',
-          subtitle: isAr
-              ? 'حالة كُلّ روستر + الاعتِماد'
-              : 'Status of every roster + approval',
-          icon: Icons.calendar_view_week,
-          color: Colors.purple,
-        ),
-        _ReportEntry(
-          key: 'forms',
-          category: 'ops',
-          title: isAr ? '📋 النَماذِج المُقَدَّمة' : '📋 Form Submissions',
-          subtitle: isAr
-              ? 'كُلّ النَماذِج بِحالاتها وَمَراحِلها'
-              : 'All form submissions + workflow steps',
-          icon: Icons.description,
-          color: Colors.teal,
-        ),
-        _ReportEntry(
-          key: 'notifications',
-          category: 'ops',
-          title: isAr ? '🔔 الإشعارات المُرسَلة' : '🔔 Notifications',
-          subtitle: isAr
-              ? 'سِجِلّ كُلّ الإشعارات + الحالة'
-              : 'Log of all notifications sent',
-          icon: Icons.notifications,
-          color: Colors.amber.shade800,
-        ),
-        _ReportEntry(
-          key: 'audit',
-          category: 'ops',
-          title: isAr ? '🔐 سِجِلّ التَدقيق' : '🔐 Audit Log',
-          subtitle: isAr
-              ? 'كُلّ تَعديل عَلى البَيانات — مَن، مَتى، ماذا'
-              : 'Every data modification — who, when, what',
-          icon: Icons.security,
-          color: Colors.grey.shade700,
         ),
       ];
 }
