@@ -456,38 +456,98 @@ class VPoints {
   static void clear() => _list = null;
 }
 
-/// اختيار النُقطة مَع البَحث بِالكِتابة (الكود أَو الاسم).
+/// اختيار النُقطة مَع البَحث بِالكِتابة (الكود أَو الاسم): يَفتَح نافِذة فيها حَقل بَحث وَالقائِمة.
 class VPointFilter extends StatelessWidget {
   const VPointFilter({super.key, required this.points, required this.value, required this.onChanged});
   final List<VJson> points;
   final String? value;
   final ValueChanged<String?> onChanged;
 
+  String _name(VJson p) => '${p['code']}  ${p['name']}';
+
+  Future<void> _open(BuildContext context) async {
+    final q = TextEditingController();
+    const all = '__all__';
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
+        final f = q.text.trim().toLowerCase();
+        final list = points.where((p) => f.isEmpty || _name(p).toLowerCase().contains(f)).toList();
+        return AlertDialog(
+          title: Text(tx(ctx, 'اختَر النُقطة', 'Choose a point')),
+          content: SizedBox(
+            width: 440,
+            height: 460,
+            child: Column(children: [
+              TextField(
+                controller: q,
+                autofocus: true,
+                decoration: InputDecoration(
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: tx(ctx, 'اكتُب اسم النُقطة أَو الكود', 'Type the point name or code'),
+                  suffixIcon: q.text.isEmpty ? null : IconButton(icon: const Icon(Icons.close), onPressed: () => set(q.clear)),
+                ),
+                onChanged: (_) => set(() {}),
+                onSubmitted: (_) {
+                  if (list.length == 1) Navigator.pop(ctx, vStr(list.first['id']));
+                },
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView(children: [
+                  if (f.isEmpty)
+                    ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.public),
+                      title: Text(tx(ctx, 'كُلّ النِقاط', 'All points'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                      selected: value == null,
+                      onTap: () => Navigator.pop(ctx, all),
+                    ),
+                  for (final p in list)
+                    ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.place_outlined),
+                      title: Text(_name(p), overflow: TextOverflow.ellipsis),
+                      selected: vStr(p['id']) == value,
+                      onTap: () => Navigator.pop(ctx, vStr(p['id'])),
+                    ),
+                  if (list.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(tx(ctx, 'لا تُوجَد نُقطة بِهذا الاسم.', 'No point with this name.'), textAlign: TextAlign.center, style: const TextStyle(color: VC.muted)),
+                    ),
+                ]),
+              ),
+            ]),
+          ),
+        );
+      }),
+    );
+    q.dispose();
+    if (picked == null) return;
+    onChanged(picked == all ? null : picked);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final all = tx(context, 'كُلّ النِقاط', 'All points');
-    return DropdownMenu<String>(
-      key: ValueKey('${value}_${points.length}'),
-      width: 300,
-      menuHeight: 380,
-      initialSelection: value ?? '',
-      enableFilter: true,
-      enableSearch: true,
-      requestFocusOnTap: true,
-      label: Text(tx(context, 'النُقطة', 'Point')),
-      leadingIcon: const Icon(Icons.place_outlined),
-      hintText: tx(context, 'اكتُب الاسم أَو الكود', 'Type a name or code'),
-      inputDecorationTheme: const InputDecorationTheme(isDense: true, border: OutlineInputBorder()),
-      filterCallback: (entries, filter) {
-        final q = filter.trim().toLowerCase();
-        if (q.isEmpty || q == all.toLowerCase()) return entries;
-        return entries.where((e) => e.label.toLowerCase().contains(q)).toList();
-      },
-      dropdownMenuEntries: [
-        DropdownMenuEntry<String>(value: '', label: all, leadingIcon: const Icon(Icons.public, size: 18)),
-        for (final p in points) DropdownMenuEntry<String>(value: vStr(p['id']), label: '${p['code']}  ${p['name']}'),
-      ],
-      onSelected: (v) => onChanged(v == null || v.isEmpty ? null : v),
+    final cur = points.where((p) => vStr(p['id']) == value).firstOrNull;
+    return SizedBox(
+      width: 280,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => _open(context),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: tx(context, 'النُقطة', 'Point'),
+            prefixIcon: const Icon(Icons.place_outlined),
+            suffixIcon: const Icon(Icons.search),
+            isDense: true,
+            border: const OutlineInputBorder(),
+          ),
+          child: Text(cur == null ? tx(context, 'كُلّ النِقاط', 'All points') : _name(cur), overflow: TextOverflow.ellipsis, maxLines: 1),
+        ),
+      ),
     );
   }
 }
