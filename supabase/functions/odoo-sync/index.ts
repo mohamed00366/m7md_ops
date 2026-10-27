@@ -184,8 +184,13 @@ Deno.serve(async (req) => {
         if (/\(429\)/.test(msg)) {
           // 303: the other tickets of this batch go back to the queue (not left "sending" for 10 minutes)
           const rest = (rows as Ticket[]).slice((rows as Ticket[]).indexOf(t) + 1);
-          for (const x of rest) {
-            await db.rpc('vv__odoo_result', { p_ticket: x.ticket_id, p_status: 'error', p_move_id: null, p_move_name: null, p_payment: null, p_error: 'Odoo busy (429) – sent again in a minute' });
+          if ((cfg as Cfg).busy_mode === 'wait') {
+            // 303: "wait for the next run" – straight back to the queue
+            if (rest.length) await db.rpc('vv__odoo_release', { p_ids: rest.map((x) => x.ticket_id) });
+          } else {
+            for (const x of rest) {
+              await db.rpc('vv__odoo_result', { p_ticket: x.ticket_id, p_status: 'error', p_move_id: null, p_move_name: null, p_payment: null, p_error: 'Odoo busy (429) – sent again later' });
+            }
           }
           return json({ ok: false, done, failed, throttled: true });
         }

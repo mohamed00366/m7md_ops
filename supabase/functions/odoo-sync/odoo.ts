@@ -5,7 +5,8 @@ export type Cfg = {
   walkin_partner: string; product_code: string; product_name: string; lost_code: string; lost_name: string;
   overnight_code?: string | null; overnight_name?: string | null;
   sales_journal: string | null; cash_journal: string | null; card_journal: string | null;
-  free_journal?: string | null;   // 302: own sales journal for 0 invoices (own numbering in Odoo); empty = the sales journal
+  free_journal?: string | null;
+  busy_tries?: number | null; busy_wait_ms?: number | null; busy_mode?: string | null;   // 303: Odoo busy (429)   // 302: own sales journal for 0 invoices (own numbering in Odoo); empty = the sales journal
   post_invoice: boolean; register_payment: boolean;
 };
 
@@ -43,10 +44,12 @@ export class Odoo {
     const url = `${this.cfg.base_url.replace(/\/+$/, '')}/json/2/${model}/${method}`;
     // 303: Odoo answers 429 when called too fast – wait and try again (3 times) before giving up
     let res = await this.fetchFn(url, { method: 'POST', headers, body: JSON.stringify(params) });
-    for (let i = 0; res.status === 429 && i < 3; i++) {
+    const tries = Math.max(0, Math.min(10, Number(this.cfg.busy_tries ?? 3)));
+    const wait = Math.max(200, Math.min(10000, Number(this.cfg.busy_wait_ms ?? 1500)));
+    for (let i = 0; res.status === 429 && i < tries; i++) {
       await res.text().catch(() => '');
       const after = Number(res.headers.get('retry-after'));
-      await new Promise((r) => setTimeout(r, Number.isFinite(after) && after > 0 ? Math.min(after, 10) * 1000 : 1500 * (i + 1)));
+      await new Promise((r) => setTimeout(r, Number.isFinite(after) && after > 0 ? Math.min(after, 10) * 1000 : wait * (i + 1)));
       res = await this.fetchFn(url, { method: 'POST', headers, body: JSON.stringify(params) });
     }
     const text = await res.text();

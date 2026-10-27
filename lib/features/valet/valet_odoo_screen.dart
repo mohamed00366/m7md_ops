@@ -185,6 +185,10 @@ class _OdooBodyState extends State<_OdooBody> {
   Set<String>? _cols; // null = every column
   List<String> _allCols = const [];
   String _colQ = '';
+  // 303: sending / re-sending
+  int _runEvery = 1, _invBatch = 10, _rowsBatch = 40, _retryMax = 10, _retryWait = 2, _busyTries = 3, _busyWaitMs = 1500, _busyResume = 1, _busyAlert = 30;
+  bool _paused = false, _autoRetry = true;
+  String _retryMode = 'grow', _busyMode = 'requeue';
   DateTime? _testedAt;
   String? _testError;
 
@@ -204,6 +208,20 @@ class _OdooBodyState extends State<_OdooBody> {
     _rowsAfter = vBool(s['rows_after_shift']);
     _rowsOnce = vBool(s['rows_once']);
     _cols = s['ticket_columns'] is List ? {for (final c in s['ticket_columns'] as List) '$c'} : null;
+    int n(String k, int d) => s[k] == null ? d : vNum(s[k]).toInt();
+    _runEvery = n('run_every_min', 1);
+    _invBatch = n('inv_batch', 10);
+    _rowsBatch = n('rows_batch', 40);
+    _retryMax = n('retry_max', 10);
+    _retryWait = n('retry_wait_min', 2);
+    _busyTries = n('busy_tries', 3);
+    _busyWaitMs = n('busy_wait_ms', 1500);
+    _busyResume = n('busy_resume_min', 1);
+    _busyAlert = n('busy_alert_min', 30);
+    _paused = vBool(s['paused']);
+    _autoRetry = s['auto_retry'] != false;
+    _retryMode = vStr(s['retry_mode']) == 'fixed' ? 'fixed' : 'grow';
+    _busyMode = vStr(s['busy_mode']) == 'wait' ? 'wait' : 'requeue';
     _dirty = false;
   }
 
@@ -230,6 +248,19 @@ class _OdooBodyState extends State<_OdooBody> {
       'rows_after_shift': _rowsAfter,
       'rows_once': _rowsOnce,
       'ticket_columns': _cols?.toList(),
+      'run_every_min': _runEvery,
+      'inv_batch': _invBatch,
+      'rows_batch': _rowsBatch,
+      'paused': _paused,
+      'auto_retry': _autoRetry,
+      'retry_max': _retryMax,
+      'retry_wait_min': _retryWait,
+      'retry_mode': _retryMode,
+      'busy_tries': _busyTries,
+      'busy_wait_ms': _busyWaitMs,
+      'busy_mode': _busyMode,
+      'busy_resume_min': _busyResume,
+      'busy_alert_min': _busyAlert,
     };
     final r = await vGuard(context, () => ValetAdmin.I.call('vva_odoo_settings_save', {'p_data': data}), ok: tx(context, 'تَمّ الحِفظ', 'Saved'));
     if (r != null) {
@@ -420,6 +451,11 @@ class _OdooBodyState extends State<_OdooBody> {
         chip(_hasKey, _hasKey ? tx(context, 'المِفتاح مَحفوظ (مُشَفَّر)', 'API key saved (encrypted)') : tx(context, 'لا يُوجَد مِفتاح', 'No API key')),
         if (s['start_from'] != null) chip(true, tx(context, 'يُرسِل مِن ${VF.dt(vTime(s['start_from']))}', 'Sends from ${VF.dt(vTime(s['start_from']))}')),
         chip(true, (s['countries'] as List? ?? const ['AE']).join(' · '), icon: Icons.public),
+        if (vBool(s['paused'])) chip(false, tx(context, 'الإرسال مُتَوَقِّف مُؤَقَّتاً', 'Sending paused'), icon: Icons.pause_circle_outline),
+        if (vTime(s['busy_since']) != null &&
+            DateTime.now().difference(vTime(s['busy_since'])!).inMinutes >= (s['busy_alert_min'] == null ? 30 : vNum(s['busy_alert_min']).toInt()))
+          chip(false, tx(context, 'Odoo مَشغول (429) مُنذ ${VF.since(context, vTime(s['busy_since']))}', 'Odoo busy (429) for ${VF.since(context, vTime(s['busy_since']))}'),
+              icon: Icons.traffic_outlined),
       ]),
     );
   }
@@ -729,11 +765,132 @@ class _OdooBodyState extends State<_OdooBody> {
         const SizedBox(height: 14),
         pair(invoiceTiming, rowsTiming),
         const SizedBox(height: 14),
+        _sendCards(context, wide),
+        const SizedBox(height: 14),
         journals,
         const SizedBox(height: 14),
         _columnsPanel(context),
       ]);
     });
+  }
+
+  // ---------------------------------------------------------------- sending / re-sending (303)
+  Widget _sendCards(BuildContext context, bool wide) {
+    final edit = _edit;
+    Widget numField(String label, int value, int min, int max, ValueChanged<int> on, {String? help, String? unit}) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: TextFormField(
+            key: ValueKey('$label-${identityHashCode(_s)}'), // new field only after a reload (not on every key)
+            initialValue: '$value',
+            enabled: edit,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(isDense: true, labelText: label, suffixText: unit, helperText: help ?? '$min – $max', helperMaxLines: 2),
+            onChanged: (v) {
+              final x = int.tryParse(v.trim());
+              if (x != null) on(x.clamp(min, max));
+            },
+          ),
+        );
+    Widget seg<T>(String label, Map<T, String> opts, T value, ValueChanged<T> on, {String? help}) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(label, style: const TextStyle(color: VC.muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<T>(
+                showSelectedIcon: false,
+                segments: [for (final e in opts.entries) ButtonSegment(value: e.key, label: Text(e.value, textAlign: TextAlign.center))],
+                selected: {value},
+                onSelectionChanged: edit ? (v) => setState(() => on(v.first)) : null,
+              ),
+            ),
+            if (help != null) Padding(padding: const EdgeInsets.only(top: 3), child: Text(help, style: const TextStyle(color: VC.muted, fontSize: 12))),
+          ]),
+        );
+    Widget toggle(String t, String sub, bool v, ValueChanged<bool> on) => Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+          decoration: BoxDecoration(
+            color: v ? VC.gold.withValues(alpha: 0.07) : null,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: v ? VC.gold.withValues(alpha: 0.6) : VC.muted.withValues(alpha: 0.25)),
+          ),
+          child: Row(children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(t, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(sub, style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+              ]),
+            ),
+            Switch(value: v, activeTrackColor: VC.gold, onChanged: edit ? (x) => setState(() => on(x)) : null),
+          ]),
+        );
+    Widget card(String title, String hint, List<Widget> children) => VPanel(
+          title: title,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(hint, style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+            const SizedBox(height: 12),
+            ...children,
+          ]),
+        );
+    Widget two(Widget a, Widget b) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: a), const SizedBox(width: 10), Expanded(child: b)]);
+
+    // last retry after N minutes
+    var total = 0;
+    for (var i = 1; i < _retryMax; i++) {
+      total += _retryWait * (_retryMode == 'grow' ? i : 1);
+    }
+    final last = total >= 60 ? tx(context, '${(total / 60).toStringAsFixed(1)} ساعة', '${(total / 60).toStringAsFixed(1)} h') : tx(context, '$total دَقيقة', '$total min');
+
+    final send = card(tx(context, '⏱ الإرسال', '⏱ Sending'), tx(context, 'كَم مَرّة وَكَم تِكِت في كُلّ دَورة', 'How often, and how many tickets per run'), [
+      seg<int>(tx(context, 'تَشغيل الإرسال كُلّ', 'Run the sending every'), {1: tx(context, 'دَقيقة', '1 min'), 2: '2', 5: '5', 10: '10', 15: '15'}, _runEvery, (v) => _runEvery = v,
+          help: tx(context, 'بِالدَقيقة · كُلّ دَورة تُرسِل المُنتَظِر', 'Minutes · every run sends what is waiting')),
+      two(numField(tx(context, 'فَواتير في كُلّ دَورة', 'Invoices per run'), _invBatch, 1, 50, (v) => _invBatch = v),
+          numField(tx(context, 'سِجِلّات تِكِت في كُلّ دَورة', 'Ticket records per run'), _rowsBatch, 1, 200, (v) => _rowsBatch = v)),
+      toggle(tx(context, 'إيقاف مُؤَقَّت لِلإرسال', 'Pause sending'), tx(context, 'يُوقِف الإرسال بِدون إيقاف الرَبط · التِكِتات تَنتَظِر في الطابور', 'Stops sending without switching the link off · tickets wait in the queue'),
+          _paused, (v) => _paused = v),
+    ]);
+    final retry = card(tx(context, '🔁 تِكرار الإرسال عِند الخَطَأ', '🔁 Re-sending after an error'), tx(context, 'لَمّا Odoo يَرفُض فاتورة', 'When Odoo refuses an invoice'), [
+      toggle(tx(context, 'إعادة الإرسال تِلقائيّاً', 'Re-send automatically'), tx(context, 'الفاتورة اللي فيها خَطَأ تَتبِعِت تاني لِوَحدها', 'An invoice in error is sent again by itself'), _autoRetry,
+          (v) => _autoRetry = v),
+      two(
+          numField(tx(context, 'عَدَد المُحاوَلات', 'Attempts'), _retryMax, 1, 50, (v) => setState(() => _retryMax = v),
+              help: tx(context, 'بَعدها تَقِف وَتَستَنّى «إعادة إرسال الأَخطاء»', 'Then it waits for "Retry errors"')),
+          numField(tx(context, 'الانتِظار بَين المُحاوَلات', 'Wait between attempts'), _retryWait, 1, 120, (v) => setState(() => _retryWait = v), unit: tx(context, 'د', 'min'))),
+      seg<String>(tx(context, 'طَريقة الانتِظار', 'Waiting'), {'fixed': tx(context, 'ثابِت', 'Fixed'), 'grow': tx(context, 'يَزيد مَعَ كُلّ مُحاوَلة', 'Grows each attempt')}, _retryMode,
+          (v) => _retryMode = v,
+          help: _retryMode == 'grow'
+              ? tx(context, 'يَزيد: $_retryWait ← ${_retryWait * 2} ← ${_retryWait * 3} دَقائِق …', 'Grows: $_retryWait → ${_retryWait * 2} → ${_retryWait * 3} min …')
+              : tx(context, 'كُلّ $_retryWait دَقيقة', 'Every $_retryWait min')),
+      Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: VC.muted.withValues(alpha: 0.3))),
+        child: Text(
+            _autoRetry
+                ? tx(context, '📌 آخِر مُحاوَلة بَعد حَوالي $last مِن أَوَّل خَطَأ', '📌 Last attempt about $last after the first error')
+                : tx(context, '📌 الأَخطاء لا تُعاد إلّا بِزِرّ «إعادة إرسال الأَخطاء»', '📌 Errors are sent again only with "Retry errors"'),
+            style: const TextStyle(fontSize: 13)),
+      ),
+    ]);
+    final busy = card(tx(context, '🚦 لَمّا Odoo مَشغول (429)', '🚦 When Odoo is busy (429)'), tx(context, '«طَلَبات كَتير في وَقت قَصير»', '"Too many requests in a short time"'), [
+      two(numField(tx(context, 'مُحاوَلات فَوريّة', 'Immediate tries'), _busyTries, 0, 10, (v) => _busyTries = v, help: tx(context, 'جُوّه نَفس الدَورة', 'In the same run')),
+          numField(tx(context, 'الانتِظار قَبلها', 'Wait before'), _busyWaitMs, 200, 10000, (v) => _busyWaitMs = v, unit: 'ms', help: tx(context, 'يَزيد كُلّ مَرّة', 'Grows each time'))),
+      seg<String>(tx(context, 'لَو فِضِل مَشغول', 'If it stays busy'), {'requeue': tx(context, 'الباقي يَرجَع لِلطابور', 'The rest back to the queue'), 'wait': tx(context, 'يَستَنّى الدَورة الجايّة', 'Wait for the next run')},
+          _busyMode, (v) => _busyMode = v),
+      two(numField(tx(context, 'يَرجَع يِحاوِل بَعد', 'Try again after'), _busyResume, 1, 60, (v) => _busyResume = v, unit: tx(context, 'د', 'min')),
+          numField(tx(context, 'تَنبيه لَو استَمَرّ', 'Alert if it lasts'), _busyAlert, 5, 1440, (v) => _busyAlert = v, unit: tx(context, 'د', 'min'), help: tx(context, 'تَنبيه في الداشبورد', 'Alert in the dashboard'))),
+    ]);
+    if (!wide) return Column(children: [send, const SizedBox(height: 14), retry, const SizedBox(height: 14), busy]);
+    return IntrinsicHeight(
+      child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(child: send),
+        const SizedBox(width: 14),
+        Expanded(child: retry),
+        const SizedBox(width: 14),
+        Expanded(child: busy),
+      ]),
+    );
   }
 
   // ---------------------------------------------------------------- columns sent (301)
