@@ -25,6 +25,10 @@ import 'package:universal_html/html.dart' as html;
 /// تَدعم عدّة أوراق (sheets) في ملف واحد، مع رؤوس ملوَّنة وعرض أعمدة تلقائي.
 /// تَعمل على Web (تنزيل تلقائي) و Desktop/Mobile (يَستلزم share sheet لاحقاً).
 class ExcelExporter {
+  /// The bytes of the last export (tests / non-web callers).
+  @visibleForTesting
+  static List<int>? lastBytes;
+
   /// تصدير ملف Excel بأوراق متعدّدة.
   /// يُرجع true عند النجاح.
   static Future<bool> export({
@@ -39,13 +43,10 @@ class ExcelExporter {
       for (var i = 0; i < sheets.length; i++) {
         final sheet = sheets[i];
         // أنشئ/استعمل الورقة
-        final ws = i == 0
-            ? excel[defaultSheetName]
-            : excel[sheet.name];
-        if (i == 0) {
-          // أعد تسمية الورقة الأولى لاسم الـ sheet المطلوب
-          excel.rename(defaultSheetName, sheet.name);
-        }
+        // the first sheet is renamed BEFORE taking it: excel.rename copies the sheet to the new name, so a
+        // reference taken earlier points at the dropped copy and its cells never reach the file (empty export)
+        if (i == 0 && defaultSheetName != sheet.name) excel.rename(defaultSheetName, sheet.name);
+        final ws = excel[sheet.name];
 
         // 1) رؤوس الأعمدة (ملوَّنة)
         final headerStyle = CellStyle(
@@ -88,6 +89,7 @@ class ExcelExporter {
 
       // 4) إخراج البايتات
       final bytes = excel.save();
+      lastBytes = bytes;
       if (bytes == null) return false;
 
       // 5) Download (Web)
