@@ -41,7 +41,14 @@ export class Odoo {
     };
     if (this.cfg.database) headers['X-Odoo-Database'] = this.cfg.database;
     const url = `${this.cfg.base_url.replace(/\/+$/, '')}/json/2/${model}/${method}`;
-    const res = await this.fetchFn(url, { method: 'POST', headers, body: JSON.stringify(params) });
+    // 303: Odoo answers 429 when called too fast – wait and try again (3 times) before giving up
+    let res = await this.fetchFn(url, { method: 'POST', headers, body: JSON.stringify(params) });
+    for (let i = 0; res.status === 429 && i < 3; i++) {
+      await res.text().catch(() => '');
+      const after = Number(res.headers.get('retry-after'));
+      await new Promise((r) => setTimeout(r, Number.isFinite(after) && after > 0 ? Math.min(after, 10) * 1000 : 1500 * (i + 1)));
+      res = await this.fetchFn(url, { method: 'POST', headers, body: JSON.stringify(params) });
+    }
     const text = await res.text();
     let data: any = null;
     try { data = text ? JSON.parse(text) : null; } catch { /* html error page */ }

@@ -181,7 +181,14 @@ Deno.serve(async (req) => {
         // a wrong key / address fails every ticket: stop this run
         if (/401|404|API key/.test(msg)) return json({ ok: false, done, failed, error: msg });
         // Odoo says too many requests: stop now, the queue retries these next minute
-        if (/\(429\)/.test(msg)) return json({ ok: false, done, failed, throttled: true });
+        if (/\(429\)/.test(msg)) {
+          // 303: the other tickets of this batch go back to the queue (not left "sending" for 10 minutes)
+          const rest = (rows as Ticket[]).slice((rows as Ticket[]).indexOf(t) + 1);
+          for (const x of rest) {
+            await db.rpc('vv__odoo_result', { p_ticket: x.ticket_id, p_status: 'error', p_move_id: null, p_move_name: null, p_payment: null, p_error: 'Odoo busy (429) – sent again in a minute' });
+          }
+          return json({ ok: false, done, failed, throttled: true });
+        }
       }
     }
   }
