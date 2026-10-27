@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_member_cards_panel.dart';
 import 'valet_network_data.dart';
 import 'valet_ui.dart';
 
@@ -86,6 +87,11 @@ class _BodyState extends State<_Body> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             // the raw maps from the server, so a saved switch survives a rebuild of the page
             child: _PointSwitches(points: [for (final e in (d['points'] is List ? d['points'] as List : const [])) if (e is Map) e.cast<String, dynamic>()], edit: edit),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: MemberCardsPanel(edit: edit),
           ),
         ]);
       },
