@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'valet_admin.dart';
+import 'valet_key_boards_panel.dart';
 import 'valet_hourly.dart';
 import 'valet_parking_screen.dart';
 import 'valet_ticket_parts.dart';
@@ -743,6 +744,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     return _page([
       // in the order the app is used: sign in → open the shift → add a ticket → before payment → payment → …
       devicesSection(),
+      KeyBoardsPanel(pointId: widget.pointId, edit: _edit),
       section(Icons.login_rounded, '1 · دُخول المُوَظَّف', '1 · Staff sign-in',
           'أَوَّل شاشة في التَطبيق: طَريقة الدُخول، المَوقِع، وَخُروج مَن فَتَح الوَرديّة.',
           'The first screen of the app: how staff sign in, Location, and logging out of the shift opener.', [
