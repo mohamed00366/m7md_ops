@@ -23,7 +23,7 @@ class ValetAppHubScreen extends StatelessWidget {
           builder: (context, _) {
             final tabs = <(IconData, String, String, Widget)>[
               (Icons.local_parking, 'النِقاط', 'Points', const ValetPointsScreen()),
-              (Icons.style_outlined, 'أَنواع الاشتِراكات', 'Membership types', const ValetMemberTypesScreen()),
+              (Icons.style_outlined, 'الاشتِراكات', 'Memberships', const ValetMemberTypesScreen()),
               if (ValetAdmin.I.can(ValetAdmin.permSettings))
                 (Icons.confirmation_number_outlined, 'القَسائِم', 'Vouchers', const ValetVouchersScreen()),
               (Icons.garage_outlined, 'المَواقِف', 'Parking areas', const ValetParkingScreen()),
