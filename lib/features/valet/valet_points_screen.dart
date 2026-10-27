@@ -807,6 +807,36 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ),
         sw('valet_validate'),
         sw('stamp_ticket'),
+        // the Finished screen: a checked-out car stays there N minutes (repark possible), then it is closed by itself
+        SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SizedBox(
+                width: 300,
+                child: DropdownButtonFormField<int>(
+                  value: const [0, 5, 10, 15, 20, 30, 45, 60, 90, 120].contains(s['finished_visible_min'] == null ? 30 : vNum(s['finished_visible_min']).toInt())
+                      ? (s['finished_visible_min'] == null ? 30 : vNum(s['finished_visible_min']).toInt())
+                      : 30,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                      labelText: tx(context, 'بَقاء التَذكَرة في شاشة Finished', 'Time on the Finished screen'), isDense: true, prefixIcon: const Icon(Icons.timer_outlined)),
+                  items: [
+                    for (final v in const [0, 5, 10, 15, 20, 30, 45, 60, 90, 120])
+                      DropdownMenuItem(value: v, child: Text(v == 0 ? tx(context, 'كُلّ الوَرديّة', 'The whole shift') : tx(context, '$v دَقيقة', '$v min'))),
+                  ],
+                  onChanged: !_edit ? null : (v) => toggleValue('finished_visible_min', v ?? 30),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                  tx(context, 'بَعد الخُروج تَظهَر التَذكَرة في شاشة Finished وَيُمكِن إرجاعها لِلباركِنج (Repark). بَعد هذا الوَقت تُقفَل وَتَختَفي تِلقائيّاً.',
+                      'After check-out the ticket shows on the Finished screen and can be reparked. After this time it is closed and leaves the screen.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+        ),
         findPicker(),
         approvalPicker(),
       ]),
