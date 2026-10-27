@@ -48,6 +48,7 @@ class _OdooBodyState extends State<_OdooBody> {
       final first = _s == null;
       setState(() {
         _s = vMap(r[0]['settings']);
+        _allCols = [for (final c in (r[0]['ticket_columns_all'] as List? ?? const [])) '$c'];
         if (first || refill || !_dirty) _fill(_s!);
         _hasKey = vBool(r[0]['has_key']);
         _stats = vMap(r[0]['stats']);
@@ -177,6 +178,12 @@ class _OdooBodyState extends State<_OdooBody> {
   // ---------------------------------------------------------------- settings (inline tab)
   final _c = <String, TextEditingController>{};
   bool _post = true, _pay = true, _hideKey = true, _dirty = false;
+  // 301: when / what is sent
+  String _invMoment = 'paid', _rowsScope = 'all';
+  bool _invAfter = false, _rowsAfter = false, _rowsOnce = false;
+  Set<String>? _cols; // null = every column
+  List<String> _allCols = const [];
+  String _colQ = '';
   DateTime? _testedAt;
   String? _testError;
 
@@ -190,6 +197,12 @@ class _OdooBodyState extends State<_OdooBody> {
     _ctl('api_key').text = '';
     _post = s['post_invoice'] != false;
     _pay = s['register_payment'] != false;
+    _invMoment = vStr(s['inv_moment']) == 'finish' ? 'finish' : 'paid';
+    _invAfter = vBool(s['inv_after_shift']);
+    _rowsScope = vStr(s['rows_scope']) == 'closed' ? 'closed' : 'all';
+    _rowsAfter = vBool(s['rows_after_shift']);
+    _rowsOnce = vBool(s['rows_once']);
+    _cols = s['ticket_columns'] is List ? {for (final c in s['ticket_columns'] as List) '$c'} : null;
     _dirty = false;
   }
 
@@ -209,6 +222,12 @@ class _OdooBodyState extends State<_OdooBody> {
       'card_journal': _ctl('card_journal').text,
       'post_invoice': _post,
       'register_payment': _pay,
+      'inv_moment': _invMoment,
+      'inv_after_shift': _invAfter,
+      'rows_scope': _rowsScope,
+      'rows_after_shift': _rowsAfter,
+      'rows_once': _rowsOnce,
+      'ticket_columns': _cols?.toList(),
     };
     final r = await vGuard(context, () => ValetAdmin.I.call('vva_odoo_settings_save', {'p_data': data}), ok: tx(context, 'تَمّ الحِفظ', 'Saved'));
     if (r != null) {
@@ -424,7 +443,8 @@ class _OdooBodyState extends State<_OdooBody> {
       title: tx(context, 'كَيف يَعمَل الرَبط', 'How the link works'),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          step(1, const Color(0xFF16181D), tx(context, 'دَفع التِكِت', 'Ticket paid'), tx(context, 'كاش / بِطاقة', 'Cash / card')),
+          step(1, const Color(0xFF16181D), vStr(s['inv_moment']) == 'finish' ? tx(context, 'اكتِمال التِكِت', 'Ticket finished') : tx(context, 'دَفع التِكِت', 'Ticket paid'),
+              vBool(s['inv_after_shift']) ? tx(context, 'بَعد إغلاق الشِفت', 'after the shift closes') : tx(context, 'فَوراً', 'at once')),
           arrow(),
           step(2, const Color(0xFF714B67), tx(context, 'فاتورة عَميل', 'Customer invoice'),
               '${or(vStr(s['product_code']), 'VALET')} · ${journals[0]}'),
@@ -519,25 +539,6 @@ class _OdooBodyState extends State<_OdooBody> {
             for (var i = 0; i < c.length; i++) ...[if (i > 0) const SizedBox(width: 12), Expanded(child: c[i])],
           ]),
         );
-    Widget opt(String t, String sub, bool v, ValueChanged<bool> on) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
-          decoration: BoxDecoration(
-            color: v ? VC.gold.withValues(alpha: 0.07) : null,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: v ? VC.gold.withValues(alpha: 0.6) : VC.muted.withValues(alpha: 0.25)),
-          ),
-          child: Row(children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(t, style: const TextStyle(fontWeight: FontWeight.w700)),
-                Text(sub, style: const TextStyle(color: VC.muted, fontSize: 12.5)),
-              ]),
-            ),
-            Switch(value: v, activeTrackColor: VC.gold, onChanged: edit ? (x) => setState(() => on(x)) : null),
-          ]),
-        );
-
     final connection = card(Icons.power_outlined, tx(context, 'الاتِّصال', 'Connection'), tx(context, 'بَرنامِج الحِسابات وَبَيانات الدُخول', 'The accounting system and its sign-in'), [
       row([
         InputDecorator(
@@ -614,9 +615,53 @@ class _OdooBodyState extends State<_OdooBody> {
       ]),
     ]);
 
-    final posting = card(Icons.bolt_outlined, tx(context, 'خِيارات التَرحيل', 'Posting options'), tx(context, 'ماذا يَحدُث لِلفاتورة بَعد إنشائها', 'What happens to the invoice after it is created'), [
-      opt(tx(context, 'تَرحيل الفاتورة (Post)', 'Post the invoice'), tx(context, 'الفاتورة تُرَحَّل فَوراً بَدَل مُسَوَّدة', 'The invoice is posted at once instead of a draft'), _post, (v) => _post = v),
-      opt(tx(context, 'تَسجيل الدَفع', 'Register the payment'), tx(context, 'دَفعة كاش أَو بِطاقة عَلى نَفس الفاتورة', 'A cash or card payment on the same invoice'), _pay, (v) => _pay = v),
+    Widget seg<T>(String label, Map<T, String> opts, T value, ValueChanged<T> on, {String? help}) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(label, style: const TextStyle(color: VC.muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<T>(
+                showSelectedIcon: false,
+                segments: [for (final e in opts.entries) ButtonSegment(value: e.key, label: Text(e.value, textAlign: TextAlign.center))],
+                selected: {value},
+                onSelectionChanged: edit ? (v) => setState(() => on(v.first)) : null,
+              ),
+            ),
+            if (help != null) Padding(padding: const EdgeInsets.only(top: 3), child: Text(help, style: const TextStyle(color: VC.muted, fontSize: 12))),
+          ]),
+        );
+    final invState = !_post ? 'draft' : (_pay ? 'pay' : 'post');
+    final invoiceTiming = card(Icons.schedule, tx(context, 'مَتى تُرسَل الفاتورة', 'When the invoice is sent'), tx(context, 'فاتورة العَميل في الحِسابات', 'The customer invoice in the accounts'), [
+      seg<String>(tx(context, 'اللَحظة', 'Moment'), {'paid': tx(context, 'بَعد الدَفع (Check-Out)', 'After payment (Check-Out)'), 'finish': tx(context, 'بَعد اكتِمال التِكِت (Finish)', 'When finished (Finish)')},
+          _invMoment, (v) => _invMoment = v,
+          help: tx(context, 'بَعد الدَفع: لَحظة دَفع العَميل · بَعد الاكتِمال: بَعد خُروج السَيّارة وَإنهاء التِكِت', 'After payment: when the customer pays · Finished: after the car left and the ticket is finished')),
+      seg<bool>(tx(context, 'مَعَ الشِفت', 'With the shift'), {false: tx(context, 'فَوراً (قَبل إغلاق الشِفت)', 'At once (before shift close)'), true: tx(context, 'بَعد إغلاق الشِفت', 'After the shift closes')},
+          _invAfter, (v) => _invAfter = v,
+          help: tx(context, 'بَعد الإغلاق: التِكِتات تَنتَظِر حَتّى يُغلِق المُشرِف الشِفت ثُمّ تُرسَل كُلّها', 'After closing: tickets wait until the supervisor closes the shift, then all are sent')),
+      seg<String>(tx(context, 'حالة الفاتورة في Odoo', 'Invoice state in Odoo'),
+          {'draft': tx(context, 'مُسَوَّدة', 'Draft'), 'post': tx(context, 'مُرَحَّلة (Post)', 'Posted'), 'pay': tx(context, 'مُرَحَّلة + الدَفع', 'Posted + payment')}, invState, (v) {
+        _post = v != 'draft';
+        _pay = v == 'pay';
+      }),
+      Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: VC.muted.withValues(alpha: 0.3))),
+        child: Text(
+            tx(context,
+                '📌 كُلّ تِكِت يُرسَل ${_invMoment == 'paid' ? 'بَعد الدَفع' : 'بَعد اكتِمال التِكِت'} · ${_invAfter ? 'بَعد إغلاق الشِفت' : 'فَوراً'} · فاتورة ${invState == 'draft' ? 'مُسَوَّدة' : invState == 'post' ? 'مُرَحَّلة' : 'مُرَحَّلة مَعَ الدَفع'}',
+                '📌 Every ticket is sent ${_invMoment == 'paid' ? 'after payment' : 'when finished'} · ${_invAfter ? 'after the shift closes' : 'at once'} · ${invState == 'draft' ? 'draft' : invState == 'post' ? 'posted' : 'posted with payment'} invoice'),
+            style: const TextStyle(fontSize: 13)),
+      ),
+    ]);
+    final rowsTiming = card(Icons.table_rows_outlined, tx(context, 'مَتى يُرسَل سِجِلّ التِكِت', 'When the ticket record is sent'),
+        tx(context, 'صَفّ التِكِت بِأَعمِدَته في Odoo ← Valet ← Tickets', 'The ticket row with its columns in Odoo → Valet → Tickets'), [
+      seg<String>(tx(context, 'أَيّ تِكِتات', 'Which tickets'), {'all': tx(context, 'كُلّ التِكِتات (حَتّى النَشِطة)', 'Every ticket (active too)'), 'closed': tx(context, 'المَدفوعة / المُكتَمِلة فَقَط', 'Paid / finished only')},
+          _rowsScope, (v) => _rowsScope = v),
+      seg<bool>(tx(context, 'مَعَ الشِفت', 'With the shift'), {false: tx(context, 'فَوراً', 'At once'), true: tx(context, 'بَعد إغلاق الشِفت', 'After the shift closes')}, _rowsAfter, (v) => _rowsAfter = v),
+      seg<bool>(tx(context, 'التَحديث', 'Updates'), {false: tx(context, 'كُلّ تَغيير يُرسَل', 'Every change is sent'), true: tx(context, 'مَرّة واحِدة فَقَط', 'Once only')}, _rowsOnce, (v) => _rowsOnce = v,
+          help: tx(context, 'مَرّة واحِدة: بَعد الإرسال لا تُرسَل تَعديلات التِكِت', 'Once: changes to a ticket are not sent after it was sent')),
     ]);
 
     return LayoutBuilder(builder: (context, box) {
@@ -643,9 +688,135 @@ class _OdooBodyState extends State<_OdooBody> {
         const SizedBox(height: 14),
         pair(what, invoice),
         const SizedBox(height: 14),
-        pair(journals, posting),
+        pair(invoiceTiming, rowsTiming),
+        const SizedBox(height: 14),
+        journals,
+        const SizedBox(height: 14),
+        _columnsPanel(context),
       ]);
     });
+  }
+
+  // ---------------------------------------------------------------- columns sent (301)
+  static const _locked = {'id', 'ticket_code', 'total_price'};
+
+  static String _groupOf(String c) {
+    bool any(List<String> l) => l.any((x) => c.contains(x));
+    if (const {'opened_by', 'received_by', 'delivered_by', 'validated_staff', 'stamp_responsible'}.contains(c) || c.endsWith('_operator')) return 'staff';
+    if (any(['member_', 'qr_card', 'validated', 'stamp_', 'customer_approved', 'card_ref'])) return 'approval';
+    if (any(['price', 'payment', 'tips', 'paid', 'remaining', 'lost', 'total', 'discount', 'over_night', 'cash_part', 'card_part', 'voucher', 'amount', 'prepaid'])) return 'money';
+    if (any(['parking_', 'slot_', 'key_rack', 'car_request', 'recar', 'repark', 'estimated'])) return 'parking';
+    if (c.endsWith('_time') || c.endsWith('_at') || c == 'grace_until') return 'time';
+    if (any(['plate', 'vehicle', 'selected_', 'photo'])) return 'car';
+    if (any(['ticket', 'customer_name', 'is_vip', 'notes', 'sale_', 'business_date', 'before_', 'void_', 'hotel', 'apartment', 'staff_visitors'])) return 'ticket';
+    return 'system';
+  }
+
+  Widget _columnsPanel(BuildContext context) {
+    final all = _allCols;
+    bool on(String c) => _locked.contains(c) || _cols == null || _cols!.contains(c);
+    final picked = all.where(on).length;
+    final groups = <String, (IconData, String, String)>{
+      'ticket': (Icons.confirmation_number_outlined, 'التِكِت', 'Ticket'),
+      'car': (Icons.directions_car_outlined, 'السَيّارة', 'Car'),
+      'time': (Icons.schedule, 'الأَوقات', 'Times'),
+      'money': (Icons.payments_outlined, 'السِعر وَالدَفع', 'Price and payment'),
+      'staff': (Icons.badge_outlined, 'المُوَظَّفون', 'Staff'),
+      'parking': (Icons.local_parking, 'الباركينج وَالمَفاتيح', 'Parking and keys'),
+      'approval': (Icons.verified_outlined, 'المُوافَقات وَالعُضويّة', 'Approvals and membership'),
+      'system': (Icons.settings_outlined, 'النِظام', 'System'),
+    };
+    final q = _colQ.trim().toLowerCase();
+    void toggle(String c, bool v) => setState(() {
+          final s = _cols ?? {...all};
+          v ? s.add(c) : s.remove(c);
+          _cols = s;
+        });
+    Widget group(String g) {
+      final list = all.where((c) => _groupOf(c) == g && (q.isEmpty || c.contains(q))).toList();
+      if (list.isEmpty) return const SizedBox.shrink();
+      final n = list.where(on).length;
+      final (icon, ar, en) = groups[g]!;
+      return Container(
+        width: 270,
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: VC.muted.withValues(alpha: 0.22))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+          Row(children: [
+            Icon(icon, size: 18, color: VC.gold),
+            const SizedBox(width: 6),
+            Expanded(child: Text(tx(context, ar, en), style: const TextStyle(fontWeight: FontWeight.w800))),
+            InkWell(
+              onTap: !_edit ? null : () => setState(() {
+                final s = _cols ?? {...all};
+                final allOn = list.every(on);
+                for (final c in list) {
+                  if (!_locked.contains(c)) allOn ? s.remove(c) : s.add(c);
+                }
+                _cols = s;
+              }),
+              child: VPill('$n/${list.length}', color: n == list.length ? VC.ok : (n == 0 ? VC.muted : VC.info)),
+            ),
+          ]),
+          const SizedBox(height: 4),
+          for (final c in list)
+            InkWell(
+              onTap: !_edit || _locked.contains(c) ? null : () => toggle(c, !on(c)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 1.5),
+                child: Row(children: [
+                  Icon(_locked.contains(c) ? Icons.lock : (on(c) ? Icons.check_box : Icons.check_box_outline_blank),
+                      size: 18, color: on(c) ? VC.gold : VC.muted.withValues(alpha: 0.6)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(c,
+                        textDirection: TextDirection.ltr,
+                        style: TextStyle(fontFamily: 'monospace', fontSize: 12.5, color: on(c) ? null : VC.muted)),
+                  ),
+                ]),
+              ),
+            ),
+        ]),
+      );
+    }
+
+    return VPanel(
+      title: tx(context, 'الأَعمِدة المُرَحَّلة', 'Columns sent'),
+      actions: [
+        VPill(tx(context, '$picked مِن ${all.length} عَمود', '$picked of ${all.length} columns'), color: VC.ok, icon: Icons.check),
+        if (_edit) ...[
+          TextButton(onPressed: () => setState(() => _cols = null), child: Text(tx(context, 'الكُلّ', 'All'))),
+          TextButton(onPressed: () => setState(() => _cols = <String>{}), child: Text(tx(context, 'لا شَيء', 'None'))),
+          TextButton(
+              onPressed: () => setState(() => _cols = {for (final c in all) if (_groupOf(c) != 'system') c}),
+              child: Text(tx(context, 'الافتِراضي', 'Default'))),
+        ],
+      ],
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(
+            tx(context,
+                'اختَر أَعمِدة التِكِت الّتي تَصِل إلى Odoo ← Valet ← Tickets · المُقفَل 🔒 يُرسَل دائِماً · «الكُلّ» يَشمَل الأَعمِدة الجَديدة تِلقائيّاً، وَغَير ذلك العَمود الجَديد مُطفَأ حَتّى تَختاره.',
+                'Choose the ticket columns that reach Odoo → Valet → Tickets · 🔒 is always sent · "All" includes new columns automatically; otherwise a new column stays off until you choose it.'),
+            style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: 280,
+          child: TextField(
+            decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search), hintText: tx(context, 'بَحث عَن عَمود', 'Find a column')),
+            onChanged: (v) => setState(() => _colQ = v),
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (all.isEmpty)
+          Text(tx(context, 'لا تُوجَد قائِمة أَعمِدة بَعد.', 'No column list yet.'), style: const TextStyle(color: VC.muted))
+        else
+          Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.start, children: [for (final g in groups.keys) group(g)]),
+        const SizedBox(height: 8),
+        Text(tx(context, 'اضغَط «حِفظ الإعدادات» فَوق بَعد التَغيير. تَغيير الأَعمِدة يُعيد إرسال التِكِتات بِالأَعمِدة الجَديدة تَدريجيّاً (40 كُلّ دَقيقة).',
+                'Press "Save settings" above after a change. Changing the columns re-sends the tickets with the new columns gradually (40 a minute).'),
+            style: const TextStyle(color: VC.muted, fontSize: 12)),
+      ]),
+    );
   }
 
   Widget _invoicePreview(BuildContext context) {
