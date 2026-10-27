@@ -826,8 +826,8 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
       section(Icons.card_membership_outlined, '10 · العُضويّات', '10 · Memberships',
-          'صَفحة المُشتَرِكين وَزِرّ المُشتَرِكين في شاشة التَذكَرة: تَطبيق الفاليه ← أَنواع الاشتِراكات ← "العُضويّات في كُلّ نُقطة". رَقم المُوافَقة لِلعُضويّات في القِسم 6.',
-          'Members page and the member button on the ticket screen: Valet app → Membership types → "Memberships per point". The membership approval number is in section 6.', [
+          'صَفحة المُشتَرِكين وَزِرّ المُشتَرِكين في شاشة التَذكَرة: تَطبيق الفاليه ← الاشتِراكات ← تَبويب "النِقاط". رَقم المُوافَقة لِلعُضويّات في القِسم 6.',
+          'Members page and the member button on the ticket screen: Valet app → Memberships → "Points" tab. The membership approval number is in section 6.', [
         SizedBox(
           width: 470,
           child: Padding(
