@@ -471,15 +471,15 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
         requiredPermission: P.settingsRosterDeadlineView,
       ),
       // 🆕 LogViewer — أداة مطوّرين
-      // 🔗 رَبط Odoo (انتَقَلَ مِن قِسم الفاليه)
+      // 🧮 الرَبط مَعَ بَرنامِج الحِسابات (Odoo)
       _SettingEntry(
         category: catSystemTools,
-        icon: Icons.sync_alt,
-        color: AppColors.purple,
-        titleAr: 'رَبط Odoo',
-        titleEn: 'Odoo link',
-        descAr: 'المُزامَنة مَعَ Odoo: الحالة، الأَخطاء، وَإعادة الإرسال',
-        descEn: 'Sync with Odoo: status, errors and resend',
+        icon: Icons.calculate_outlined,
+        color: const Color(0xFFC9A227),
+        titleAr: 'الرَبط مَعَ بَرنامِج الحِسابات',
+        titleEn: 'Accounting link',
+        descAr: 'فَواتير التِكِتات إلى بَرنامِج الحِسابات: الحالة، الإعدادات، الحِسابات التَحليليّة، وَالسِجِلّ',
+        descEn: 'Ticket invoices to the accounting system: status, settings, analytic accounts and log',
         builder: (_) => const ValetOdooScreen(),
         requiredPermission: P.valetReportsView,
       ),
