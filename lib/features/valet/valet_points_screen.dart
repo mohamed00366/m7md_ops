@@ -310,8 +310,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
 
   Widget _features(VJson d) {
     final s = vMap(d['settings']);
-    final prefix = TextEditingController(text: vStr(s['ticket_prefix']));
-    final desc = TextEditingController(text: vStr(s['description']));
     final lost = TextEditingController(text: vNum(s['lost_ticket_price']).toString());
     final night = TextEditingController(text: vNum(s['over_night_price']).toString());
     final freeMin = TextEditingController(text: vNum(s['free_minutes']).toInt().toString());
@@ -319,13 +317,9 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       final x = vStr(v);
       return RegExp(r'^\d{1,2}:\d{2}').hasMatch(x) ? x.substring(0, x.indexOf(':') + 3) : d;
     }
-    final onAt = TextEditingController(text: hm(s['over_night_at'], '00:00'));
-    final onFrom = TextEditingController(text: hm(s['over_night_from'], '00:00'));
-    final onTo = TextEditingController(text: hm(s['over_night_to'], '06:00'));
-    final onHours = TextEditingController(text: vNum(s['over_night_hours']) > 0 ? '${vNum(s['over_night_hours'])}' : '12');
-    final onRule = const {'cutoff', 'window', 'hours'}.contains(vStr(s['over_night_rule'])) ? vStr(s['over_night_rule']) : 'cutoff';
+    final siteOpen = TextEditingController(text: hm(s['site_open_at'], ''));
+    final siteClose = TextEditingController(text: hm(s['site_close_at'], ''));
     String? okTime(String v) => RegExp(r'^([01]?\d|2[0-3]):[0-5]\d$').hasMatch(v.trim()) ? v.trim() : null;
-    final vat = TextEditingController(text: (vNum(s['vat_rate']) * 100).toStringAsFixed(2));
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     void toggleValue(String k, Object v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     final flags = {for (final f in _flags(context)) f.$1: f};
@@ -886,89 +880,81 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             FilledButton.icon(
               icon: const Icon(Icons.save_outlined),
               label: Text(tx(context, 'حِفظ', 'Save')),
-              onPressed: () => _save('vva_point_settings_save', {
-                'p_point': widget.pointId,
-                'p_data': {
-                  'ticket_prefix': prefix.text,
-                  'description': desc.text,
-                  'lost_ticket_price': num.tryParse(lost.text) ?? 0,
-                  'over_night_price': num.tryParse(night.text) ?? 0,
-                  'free_minutes': (int.tryParse(freeMin.text.trim()) ?? 0).clamp(0, 600),
-                  if (okTime(onAt.text) != null) 'over_night_at': okTime(onAt.text),
-                  if (okTime(onFrom.text) != null) 'over_night_from': okTime(onFrom.text),
-                  if (okTime(onTo.text) != null) 'over_night_to': okTime(onTo.text),
-                  if ((num.tryParse(onHours.text.trim()) ?? 0) > 0) 'over_night_hours': num.parse(onHours.text.trim()),
-                },
-              }),
+              onPressed: () {
+                final h24 = vBool(s['site_24h']);
+                final close = okTime(siteClose.text), open = okTime(siteOpen.text);
+                _save('vva_point_settings_save', {
+                  'p_point': widget.pointId,
+                  'p_data': {
+                    'lost_ticket_price': num.tryParse(lost.text) ?? 0,
+                    'over_night_price': num.tryParse(night.text) ?? 0,
+                    'free_minutes': (int.tryParse(freeMin.text.trim()) ?? 0).clamp(0, 600),
+                    if (!h24 && open != null) 'site_open_at': open,
+                    if (!h24 && close != null) ...{'site_close_at': close, 'over_night_rule': 'cutoff', 'over_night_at': close},
+                    if (h24) 'over_night_enabled': false,
+                  },
+                });
+              },
             ),
         ],
         child: Wrap(spacing: 14, runSpacing: 14, children: [
-          _field(prefix, tx(context, 'بادِئة التَذكَرة', 'Ticket prefix'), help: 'T-0001-PREFIX-26', width: 220),
-          SizedBox(
-            width: 200,
-            child: TextField(
-              controller: vat,
-              enabled: false,
-              decoration: InputDecoration(
-                isDense: true,
-                labelText: tx(context, 'الضَريبة %', 'VAT %'),
-                helperText: tx(context, 'مِن إعدادات الدَولة', 'From the country settings'),
-              ),
-            ),
-          ),
-          _field(desc, tx(context, 'وَصف يُطبَع عَلى التَذكَرة', 'Description printed on the ticket'), width: 460),
+          // 1 · lost ticket – a button on the payment screen
           SizedBox(
             width: 360,
             child: Row(children: [
               Switch(value: vBool(s['lost_ticket_enabled']), onChanged: !_edit ? null : (v) => toggle('lost_ticket_enabled', v)),
               const SizedBox(width: 8),
-              Expanded(child: _field(lost, tx(context, 'رَسم التَذكَرة المَفقودة (AED)', 'Lost ticket fee (AED)'), number: true)),
+              Expanded(
+                child: _field(lost, tx(context, 'رَسم التَذكَرة المَفقودة (AED)', 'Lost ticket fee (AED)'),
+                    number: true, help: tx(context, 'يَظهَر زِرّاً في شاشة الدَفع', 'Shown as a button on the payment screen')),
+              ),
             ]),
           ),
+          // 2 · site hours → overnight
           SizedBox(
-            width: 360,
-            child: Row(children: [
-              Switch(value: vBool(s['over_night_enabled']), onChanged: !_edit ? null : (v) => toggle('over_night_enabled', v)),
-              const SizedBox(width: 8),
-              Expanded(child: _field(night, tx(context, 'رَسم المَبيت (AED)', 'Overnight fee (AED)'), number: true)),
+            width: 620,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tx(context, 'مَواعيد المَوقِع (تَوقيت دُبَي)', 'Site hours (Dubai time)'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 6),
+              Wrap(spacing: 12, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                FilterChip(
+                  avatar: const Icon(Icons.all_inclusive, size: 18),
+                  label: Text(tx(context, 'يَعمَل 24 ساعة', 'Works 24 hours')),
+                  selected: vBool(s['site_24h']),
+                  onSelected: !_edit ? null : (v) => _save('vva_point_settings_save', {
+                    'p_point': widget.pointId,
+                    'p_data': {'site_24h': v, if (v) 'over_night_enabled': false},
+                  }),
+                ),
+                if (!vBool(s['site_24h'])) ...[
+                  _field(siteOpen, tx(context, 'يَفتَح الساعة (HH:MM)', 'Opens at (HH:MM)'), width: 170),
+                  _field(siteClose, tx(context, 'يُقفِل الساعة (HH:MM)', 'Closes at (HH:MM)'), width: 170),
+                ],
+              ]),
             ]),
           ),
-          if (vBool(s['over_night_enabled']))
+          if (!vBool(s['site_24h']))
             SizedBox(
-              width: 560,
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(tx(context, 'مَتى تَكون التَذكَرة مَبيت؟ (تَوقيت دُبَي)', 'When is a ticket overnight? (Dubai time)'),
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(value: 'cutoff', icon: const Icon(Icons.schedule), label: Text(tx(context, 'بَعد ساعة مُعَيَّنة', 'After a set hour'))),
-                    ButtonSegment(value: 'window', icon: const Icon(Icons.date_range), label: Text(tx(context, 'فَترة بَين وَقتَين', 'Between two times'))),
-                    ButtonSegment(value: 'hours', icon: const Icon(Icons.timelapse), label: Text(tx(context, 'عَدد ساعات', 'Total hours'))),
-                  ],
-                  selected: {onRule},
-                  onSelectionChanged: !_edit ? null : (v) => toggleValue('over_night_rule', v.first),
+              width: 360,
+              child: Row(children: [
+                Switch(value: vBool(s['over_night_enabled']), onChanged: !_edit ? null : (v) => toggle('over_night_enabled', v)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _field(night, tx(context, 'رَسم المَبيت (AED)', 'Overnight fee (AED)'),
+                      number: true,
+                      help: tx(context, 'لِكُلّ مَرّة تَبقى السَيّارة بَعد وَقت الإقفال', 'For every closing time the car is still parked')),
                 ),
-                const SizedBox(height: 10),
-                Wrap(spacing: 12, runSpacing: 10, children: [
-                  if (onRule == 'cutoff')
-                    _field(onAt, tx(context, 'السَيّارة ما زالَت داخِل السّاعة', 'Still parked at (HH:MM)'),
-                        help: tx(context, 'مَثَلاً 02:00 – رَسم لِكُلّ لَيلة', 'e.g. 02:00 – one fee per night'), width: 260),
-                  if (onRule == 'window') ...[
-                    _field(onFrom, tx(context, 'مِن (HH:MM)', 'From (HH:MM)'), width: 160),
-                    _field(onTo, tx(context, 'إلى (HH:MM)', 'To (HH:MM)'),
-                        help: tx(context, 'قَد تَتَخَطّى مُنتَصَف اللَيل، مَثَلاً 22:00 – 05:00', 'May cross midnight, e.g. 22:00 – 05:00'), width: 300),
-                  ],
-                  if (onRule == 'hours')
-                    _field(onHours, tx(context, 'عَدد الساعات', 'Hours parked'),
-                        help: tx(context, 'رَسم لِكُلّ عَدد ساعات كامِل، مَثَلاً 12', 'One fee for every full N hours, e.g. 12'), width: 260, number: true),
-                ]),
-                const SizedBox(height: 4),
-                Text(tx(context, 'يُضاف الرَسم في شاشة الدَفع كَبَند مُستَقِلّ (مِثل الكَرت المَفقود). اِضغَط حِفظ بَعد تَعديل الأَوقات.',
-                        'The fee is added on the payment screen as its own line (like the lost card). Press Save after changing the times.'),
-                    style: const TextStyle(color: VC.muted, fontSize: 12.5)),
               ]),
             ),
+          SizedBox(
+            width: 620,
+            child: Text(
+                vBool(s['site_24h'])
+                    ? tx(context, 'المَوقِع 24 ساعة: لا يوجَد رَسم مَبيت.', 'A 24-hour site: no overnight fee.')
+                    : tx(context, 'المَبيت: السَيّارة ما زالَت داخِل المَوقِع وَقت الإقفال الرَسمي ← يُضاف الرَسم في شاشة الدَفع. اِضغَط حِفظ بَعد تَعديل الأَوقات.',
+                        'Overnight: the car is still parked at the official closing time → the fee is added on the payment screen. Press Save after changing the times.'),
+                style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+          ),
           SizedBox(
             width: 360,
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
