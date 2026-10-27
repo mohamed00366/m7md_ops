@@ -23,10 +23,12 @@ class _Body extends StatefulWidget {
 
 class _BodyState extends State<_Body> {
   Net? _net;
+  List<VJson> _countries = const [];
 
   Future<VJson> _load() async {
     final r = await Future.wait([ValetAdmin.I.call('vva_member_types'), if (_net == null) ValetAdmin.I.call('vva_network')]);
     if (r.length > 1) _net = Net(r[1]);
+    _countries = vList(r[0]['countries']);
     return r[0];
   }
 
@@ -44,8 +46,8 @@ class _BodyState extends State<_Body> {
         return ListView(padding: const EdgeInsets.only(bottom: 32), children: [
           VHead(
             tx(context, 'أَنواع الاشتِراكات', 'Membership types'),
-            subtitle: tx(context, 'الاسم وَالسِعر وَأَين يَصلُح الاشتِراك · التَطبيق يَبيع الأَنواع الَّتي تُغَطّي نُقطَته · المُشتَرِك مَجّانيّ في كُلّ مَواقِع نَوعه',
-                'Name, price and where it is valid · the app sells the types covering its point · a member parks free at every point of the type'),
+            subtitle: tx(context, 'نُقطة: مَدفوع وَيُباع في التَطبيق وَهُنا · عِدّة نِقاط / مَنطِقة / دَولة / كُلّ الدُوَل: مَدفوع أَو مَجّانيّ وَمِن هُنا فَقَط · المُشتَرِك مَجّانيّ في كُلّ مَواقِع نَوعه',
+                'One point: paid, sold in the app and here · several points / area / country / all countries: paid or free, from here only · a member parks free at every point of the type'),
             actions: [
               IconButton.filledTonal(onPressed: reload, icon: const Icon(Icons.refresh)),
               if (edit)
@@ -103,7 +105,13 @@ class _BodyState extends State<_Body> {
     final gross = vNum(t['price']) * (1 + _vat);
     final on = vBool(t['is_active']);
     final cov = vStr(t['coverage']);
-    final icon = switch (cov) { 'all' => Icons.public, 'area' => Icons.map_outlined, 'points' => Icons.scatter_plot_outlined, _ => Icons.place_outlined };
+    final icon = switch (cov) {
+      'global' || 'all' => Icons.public,
+      'country' => Icons.flag_outlined,
+      'area' => Icons.map_outlined,
+      'points' => Icons.scatter_plot_outlined,
+      _ => Icons.place_outlined
+    };
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: on ? VC.gold.withValues(alpha: 0.6) : VC.muted.withValues(alpha: 0.3))),
@@ -174,12 +182,13 @@ class _BodyState extends State<_Body> {
     final price = TextEditingController(text: t == null ? '' : (vNum(t['price']) * (1 + _vat)).toStringAsFixed(2));
     var free = t != null && vNum(t['price']) == 0;
     var cov = vStr(t?['coverage']).isEmpty ? 'point' : vStr(t!['coverage']);
+    if (cov == 'all') cov = 'global';
+    String? country = t?['country_id'] == null ? (_countries.length == 1 ? vStr(_countries.first['id']) : null) : vStr(t!['country_id']);
     var points = {for (final p in (t?['point_ids'] as List? ?? const [])) '$p'};
     var areas = {for (final a in (t?['area_ids'] as List? ?? const [])) '$a'};
     String? site = t?['site_id'] == null ? null : vStr(t!['site_id']);
     var cars = t == null ? 2 : vNum(t['max_cars']).toInt();
     var durations = {for (final m in (t?['durations'] as List? ?? const [1, 3, 6, 12])) vNum(m).toInt()};
-    var inApp = t == null || vBool(t['sell_in_app']);
     var active = t == null || vBool(t['is_active']);
     var busy = false;
     return showDialog<bool>(
@@ -216,22 +225,42 @@ class _BodyState extends State<_Body> {
                     selected: free,
                     avatar: const Icon(Icons.card_giftcard, size: 18),
                     label: Text(tx(ctx, 'مَجّانيّ', 'Free')),
-                    onSelected: (v) => set(() {
-                      free = v;
-                      if (v) inApp = false;
-                    }),
+                    // one point = sold in the app = always paid
+                    onSelected: cov == 'point' ? null : (v) => set(() => free = v),
                   ),
                 ]),
                 sec(tx(ctx, 'أَين يَصلُح', 'Where it is valid')),
                 SegmentedButton<String>(
+                  showSelectedIcon: false,
                   segments: [
                     ButtonSegment(value: 'point', icon: const Icon(Icons.place_outlined), label: Text(tx(ctx, 'نُقطة', 'One point'))),
                     ButtonSegment(value: 'points', icon: const Icon(Icons.scatter_plot_outlined), label: Text(tx(ctx, 'نِقاط', 'Points'))),
                     ButtonSegment(value: 'area', icon: const Icon(Icons.map_outlined), label: Text(tx(ctx, 'مَنطِقة', 'Area'))),
-                    ButtonSegment(value: 'all', icon: const Icon(Icons.public), label: Text(tx(ctx, 'الكُلّ', 'All'))),
+                    ButtonSegment(value: 'country', icon: const Icon(Icons.flag_outlined), label: Text(tx(ctx, 'دَولة', 'Country'))),
+                    ButtonSegment(value: 'global', icon: const Icon(Icons.public), label: Text(tx(ctx, 'كُلّ الدُوَل', 'All countries'))),
                   ],
                   selected: {cov},
-                  onSelectionChanged: (v) => set(() => cov = v.first),
+                  onSelectionChanged: (v) => set(() {
+                    cov = v.first;
+                    if (cov == 'point') free = false;
+                  }),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: (cov == 'point' ? VC.gold : VC.info).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                  child: Row(children: [
+                    Icon(cov == 'point' ? Icons.phone_android : Icons.business, size: 18, color: cov == 'point' ? VC.gold : VC.info),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        cov == 'point'
+                            ? tx(ctx, 'يُباع وَيُجَدَّد في تَطبيق الفاليه وَمِن الداشبورد · بِسِعر دائِماً', 'Sold and renewed in the valet app and from the dashboard · always paid')
+                            : tx(ctx, 'يُنشَأ وَيُجَدَّد مِن الداشبورد فَقَط · مَدفوع أَو مَجّانيّ · المُشتَرِك يُعرَف في كُلّ نِقاط النَوع', 'Created and renewed from the dashboard only · paid or free · the member is recognised at every point of the type'),
+                        style: const TextStyle(fontSize: 12.5),
+                      ),
+                    ),
+                  ]),
                 ),
                 const SizedBox(height: 8),
                 if (cov == 'point' || cov == 'points')
@@ -256,7 +285,16 @@ class _BodyState extends State<_Body> {
                       if (r != null) set(() => areas = r);
                     },
                   ),
-                if (cov == 'all') Text(tx(ctx, 'يَصلُح في كُلّ نِقاط الفاليه.', 'Valid at every valet point.'), style: const TextStyle(color: VC.muted)),
+                if (cov == 'country')
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final c in _countries)
+                      ChoiceChip(
+                        label: Text(tx(ctx, vStr(c['name_ar']).isEmpty ? vStr(c['name']) : vStr(c['name_ar']), vStr(c['name']))),
+                        selected: country == vStr(c['id']),
+                        onSelected: (_) => set(() => country = vStr(c['id'])),
+                      ),
+                  ]),
+                if (cov == 'global') Text(tx(ctx, 'يَصلُح في كُلّ نِقاط الفاليه في كُلّ الدُوَل.', 'Valid at every valet point in every country.'), style: const TextStyle(color: VC.muted)),
                 const SizedBox(height: 10),
                 NetPickField(
                   label: tx(ctx, 'لِعَميل مُعَيَّن (اختياريّ)', 'Only for a client (optional)'),
@@ -283,13 +321,6 @@ class _BodyState extends State<_Body> {
                     FilterChip(selected: durations.contains(m), label: Text(l), onSelected: (v) => set(() => v ? durations.add(m) : (durations.length > 1 ? durations.remove(m) : null))),
                 ]),
                 const SizedBox(height: 8),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: inApp,
-                  title: Text(tx(ctx, 'يُباع في تَطبيق الفاليه', 'Sold in the valet app')),
-                  subtitle: Text(tx(ctx, 'مُغلَق: يُضاف المُشتَرِك مِن هُنا فَقَط (مُناسِب لِلمَجّانيّ)', 'Off: members are added here only (good for free passes)')),
-                  onChanged: (v) => set(() => inApp = v),
-                ),
                 SwitchListTile(contentPadding: EdgeInsets.zero, value: active, title: Text(tx(ctx, 'فَعّال', 'Active')), onChanged: (v) => set(() => active = v)),
               ]),
             ),
@@ -301,7 +332,9 @@ class _BodyState extends State<_Body> {
                   ? null
                   : () async {
                       final g = double.tryParse(price.text.trim()) ?? 0;
+                      if (cov == 'point' && g <= 0) return vToast(ctx, tx(ctx, 'اشتِراك النُقطة يُباع في التَطبيق وَيَحتاج سِعراً.', 'A one-point membership is sold in the app and needs a price.'), error: true);
                       if (!free && g <= 0) return vToast(ctx, tx(ctx, 'اكتُب السِعر أَو اختَر مَجّانيّ.', 'Enter the price or choose Free.'), error: true);
+                      if (cov == 'country' && country == null) return vToast(ctx, tx(ctx, 'اختَر الدَولة.', 'Choose the country.'), error: true);
                       set(() => busy = true);
                       final r = await vGuard(
                           ctx,
@@ -313,10 +346,10 @@ class _BodyState extends State<_Body> {
                                   'coverage': cov,
                                   'point_ids': points.toList(),
                                   'area_ids': areas.toList(),
+                                  'country_id': country,
                                   'site_id': site,
                                   'max_cars': cars,
                                   'durations': (durations.toList()..sort()),
-                                  'sell_in_app': inApp,
                                   'is_active': active,
                                 }
                               }),
@@ -402,7 +435,7 @@ class _BodyState extends State<_Body> {
       );
 
   Future<bool?> _addMember(BuildContext context, VJson t) {
-    final name = TextEditingController(), phone = TextEditingController(), p1 = TextEditingController(), p2 = TextEditingController();
+    final name = TextEditingController(), phone = TextEditingController(), p1 = TextEditingController(), p2 = TextEditingController(), card = TextEditingController();
     var from = DateTime.now();
     var to = DateTime(from.year + 1, from.month, from.day).subtract(const Duration(days: 1));
     return showDialog<bool>(
@@ -418,6 +451,16 @@ class _BodyState extends State<_Body> {
           content: SizedBox(
             width: 480,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              TextField(
+                  controller: card,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: InputDecoration(
+                      labelText: tx(ctx, 'رَقم الكَرت المَطبوع (اختياريّ)', 'Printed card number (optional)'),
+                      hintText: 'VIP-000001',
+                      helperText: tx(ctx, 'يَصير رَقم المُشتَرِك · فارِغ = رَقم M- تِلقائيّ', 'Becomes the member code · empty = automatic M- number'),
+                      prefixIcon: const Icon(Icons.credit_card),
+                      isDense: true)),
+              const SizedBox(height: 10),
               TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'الاسم *', 'Name *'), isDense: true)),
               const SizedBox(height: 10),
               TextField(controller: phone, decoration: InputDecoration(labelText: tx(ctx, 'الهاتِف', 'Phone'), isDense: true)),
@@ -447,6 +490,7 @@ class _BodyState extends State<_Body> {
                     () => ValetAdmin.I.call('vva_member_add', {
                           'p_data': {
                             'type_id': t['id'],
+                            if (card.text.trim().isNotEmpty) 'card_no': card.text.trim(),
                             'name': name.text.trim(),
                             'phone': phone.text.trim(),
                             'vehicle_reg1': p1.text.trim(),
