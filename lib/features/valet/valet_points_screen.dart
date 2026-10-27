@@ -431,6 +431,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                 segments: [
                   const ButtonSegment(value: 'nfc', icon: Icon(Icons.nfc_rounded), label: Text('NFC')),
                   const ButtonSegment(value: 'qr', icon: Icon(Icons.qr_code_scanner_rounded), label: Text('QR')),
+                  ButtonSegment(value: 'both', icon: const Icon(Icons.all_inclusive_rounded), label: Text(tx(context, 'NFC + QR مَعاً', 'NFC + QR together'))),
                   ButtonSegment(value: 'device', icon: const Icon(Icons.phone_android), label: Text(tx(context, 'كُلّ جِهاز يَختار', 'Each device'))),
                 ],
                 selected: {reader},
@@ -526,43 +527,44 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         );
 
     // staff sign-in method of the point (enforced by the server: password vs card; NFC / QR by the app)
-    final login = const {'password', 'nfc', 'qr'}.contains(vStr(s['staff_login']))
-        ? vStr(s['staff_login'])
-        : (s['sinin_w_card'] == false ? 'card' : 'password');
+    // staff sign-in methods: any of password / NFC / QR (several at once); old rows: one value or sinin_w_card
+    const loginOrder = ['password', 'nfc', 'qr'];
+    final loginSet = <String>{
+      for (final x in vStr(s['staff_login']).split(',')) if (loginOrder.contains(x.trim())) x.trim(),
+    };
+    if (loginSet.isEmpty) loginSet.addAll(s['sinin_w_card'] == false ? const ['nfc', 'qr'] : const ['password']);
     Widget loginPicker() => SizedBox(
           width: 470,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(tx(context, 'طَريقة دُخول المُوَظَّف لِلوَرديّة (إلزاميّة)', 'Staff sign-in for the shift (required)'),
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(tx(context, 'طُرُق دُخول المُوَظَّف لِلوَرديّة', 'Staff sign-in methods for the shift'), style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(
-                  tx(context, 'التَطبيق يَعرِض الطَريقة المُختارة فَقَط، وَالسيرفَر يَرفُض أَيّ طَريقة أُخرى.',
-                      'The app shows only the chosen way, and the server refuses any other.'),
+                  tx(context, 'اختَر طَريقة أَو أَكثَر. التَطبيق يَعرِض المُختار فَقَط، وَالسيرفَر يَرفُض غَيره.',
+                      'Pick one or more. The app shows only those, and the server refuses any other.'),
                   style: const TextStyle(color: VC.muted, fontSize: 12.5)),
               const SizedBox(height: 6),
               SegmentedButton<String>(
+                multiSelectionEnabled: true,
+                emptySelectionAllowed: false,
                 segments: [
                   ButtonSegment(value: 'password', icon: const Icon(Icons.password_rounded), label: Text(tx(context, 'اسم وَكَلِمة مُرور', 'User + password'))),
                   const ButtonSegment(value: 'nfc', icon: Icon(Icons.nfc_rounded), label: Text('NFC')),
                   const ButtonSegment(value: 'qr', icon: Icon(Icons.qr_code_2_rounded), label: Text('QR')),
                 ],
-                selected: {login == 'card' ? 'nfc' : login},
+                selected: loginSet,
                 onSelectionChanged: !_edit
                     ? null
-                    : (v) => _save('vva_point_settings_save', {
+                    : (v) {
+                        final list = [for (final x in loginOrder) if (v.contains(x)) x];
+                        _save('vva_point_settings_save', {
                           'p_point': widget.pointId,
                           // sinin_w_card is kept in step for tablets on older versions
-                          'p_data': {'staff_login': v.first, 'sinin_w_card': v.first == 'password'},
-                        }),
+                          'p_data': {'staff_login': list.join(','), 'sinin_w_card': list.contains('password')},
+                        });
+                      },
               ),
-              if (login == 'card')
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(tx(context, 'الآن: كَرت NFC أَو QR (اختَر واحِدة لِلإلزام).', 'Now: NFC or QR card (pick one to require it).'),
-                      style: const TextStyle(color: VC.warn, fontSize: 12)),
-                ),
             ]),
           ),
         );
