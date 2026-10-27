@@ -835,6 +835,32 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             ]),
           ),
         ),
+        // VIP numbering on the key board: its own numbers, or the same numbering as the other cars
+        SizedBox(
+          width: 470,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(tx(context, 'تَرقيم سَيّارات VIP عَلى تابلو المَفاتيح', 'VIP numbering on the key board'), style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(value: 'separate', icon: const Icon(Icons.workspace_premium_outlined), label: Text(tx(context, 'تابلو مُنفَصِل لِلـ VIP', 'Own VIP numbers'))),
+                  ButtonSegment(value: 'same', icon: const Icon(Icons.format_list_numbered), label: Text(tx(context, 'نَفس التابلو', 'Same board'))),
+                ],
+                selected: {vStr(s['vip_slots']) == 'same' ? 'same' : 'separate'},
+                onSelectionChanged: !_edit ? null : (v) => toggleValue('vip_slots', v.first),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                  vStr(s['vip_slots']) == 'same'
+                      ? tx(context, 'VIP يَأخُذ أَصغَر رَقم فاضي مَعَ باقي السَيّارات (1، 2، 3 … لِلكُلّ).', 'VIP takes the lowest free number together with the other cars (1, 2, 3 … for all).')
+                      : tx(context, 'VIP لَه تَرقيم خاصّ يَبدَأ مِن 1، مُنفَصِل عَن باقي السَيّارات.', 'VIP has its own numbers from 1, apart from the other cars.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12)),
+              Text(tx(context, 'يُطَبَّق عَلى التَذاكِر الجَديدة.', 'Applies to new tickets.'), style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+        ),
         findPicker(),
         approvalPicker(),
       ]),
