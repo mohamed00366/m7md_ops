@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'valet_admin.dart';
 import 'valet_credits_screen.dart';
+import 'valet_numbering_screen.dart';
 import 'valet_odoo_analytic.dart';
 import 'valet_ui.dart';
 
@@ -269,7 +270,7 @@ class _OdooBodyState extends State<_OdooBody> {
     final rows = _rows ?? const <VJson>[];
     final errors = vNum(_stats['error']).toInt();
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _header(context),
         const ValetOdooAlerts(),
@@ -287,6 +288,7 @@ class _OdooBodyState extends State<_OdooBody> {
                 icon: const Icon(Icons.receipt_long_outlined, size: 18),
                 iconMargin: const EdgeInsets.only(bottom: 2),
                 text: errors > 0 ? tx(context, 'سِجِلّ الإرسال · $errors خَطَأ', 'Send log · $errors errors') : tx(context, 'سِجِلّ الإرسال', 'Send log')),
+            Tab(icon: const Icon(Icons.pin_outlined, size: 18), iconMargin: const EdgeInsets.only(bottom: 2), text: tx(context, 'تَرقيم المَبيعات', 'Sale numbering')),
           ],
         ),
         const Divider(height: 1),
@@ -296,6 +298,19 @@ class _OdooBodyState extends State<_OdooBody> {
             _settingsTab(context),
             ListView(padding: const EdgeInsets.all(16), children: [OdooAnalyticPanel(enabled: _hasKey && vStr(_s!['base_url']).isNotEmpty)]),
             RefreshIndicator(onRefresh: _load, child: ListView(padding: const EdgeInsets.all(16), children: [_log(context, rows)])),
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: VC.info.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: VC.info.withValues(alpha: 0.4))),
+                child: Text(
+                    tx(context,
+                        'رَقم البَيع الخاصّ بِنا: S لِلمَدفوع وَ Z لِلصِفر (سِلسِلَتان مُنفَصِلَتان). يُرسَل مَعَ الفاتورة إلى Odoo في «مَرجِع الدَفع». قَبل التَشغيل: وافِق عَلى كُلّ تابلت في تَبويب «الأَجهِزة» – التابلت غَير المُوافَق عَلَيه لا يَقبَل الدَفع وَالتَرقيم يَعمَل.',
+                        'Our own sale number: S for paid and Z for zero (two separate series). It goes to Odoo with the invoice as the "Payment reference". Before switching it on, approve every tablet in "Tablets" – a tablet not approved cannot take payments while numbering is on.'),
+                    style: const TextStyle(fontSize: 13)),
+              ),
+              const Expanded(child: ValetNumberingScreen(embedded: true)),
+            ]),
           ]),
         ),
       ]),
