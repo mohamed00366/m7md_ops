@@ -479,10 +479,8 @@ class _PointSwitchesState extends State<_PointSwitches> {
   final _busy = <String>{};
 
   static const _flags = [
-    ('show_membership', Icons.card_membership_outlined, 'صَفحة العُضويّات', 'Memberships page'),
-    ('member_card_normal', Icons.credit_card_outlined, 'كَرت العُضويّة', 'Member card'),
-    ('member_card_gold', Icons.workspace_premium_outlined, 'الكَرت الذَهَبيّ', 'Gold card'),
-    ('show_member_pick', Icons.directions_car_outlined, 'المُشتَرِك تَحت اللَوحة', 'Member under the plate'),
+    ('show_membership', Icons.card_membership_outlined, 'صَفحة المُشتَرِكين في التَطبيق', 'Members page in the app'),
+    ('show_member_pick', Icons.add_card_outlined, 'زِرّ المُشتَرِكين في شاشة التَذكَرة', 'Member button on the ticket screen'),
   ];
 
   Future<void> _set(VJson p, String k, Object v) async {
@@ -524,15 +522,13 @@ class _PointSwitchesState extends State<_PointSwitches> {
           : Switch(value: vBool(p[k]), onChanged: !widget.edit ? null : (v) => _set(p, k, v));
     }
 
-    String appr(VJson p) => const {'off', 'optional', 'required'}.contains(vStr(p['member_card_approval'])) ? vStr(p['member_card_approval']) : 'optional';
-
     return VPanel(
       title: tx(context, 'العُضويّات في كُلّ نُقطة ($onCount / ${widget.points.length})', 'Memberships per point ($onCount / ${widget.points.length})'),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
             tx(context,
-                'إظهار وَإخفاء أَزرار العُضويّات في تَطبيق كُلّ نُقطة. يُطَبَّق عَلى التابلت عِند التَحديث التالي. رَقم المُوافَقة = الـ6 أَرقام مِن إيصال مَكينة الكارت عِند بَيع أَو تَجديد عُضويّة.',
-                'Show or hide the membership buttons in the app of each point. Tablets pick it up on the next refresh. Approval number = the 6 digits from the card machine slip when selling or renewing.'),
+                'زِرّان لِكُلّ نُقطة: صَفحة المُشتَرِكين (بَيع وَتَجديد وَمُتابَعة)، وَزِرّ المُشتَرِكين في شاشة التَذكَرة (يُقرَأ الكَرت بِـ NFC أَو QR فَقَط — عُضويّة أَو كَرت ذَهَبيّ). يُطَبَّق عَلى التابلت عِند التَحديث التالي.',
+                'Two switches per point: the members page (sell, renew, follow up), and the member button on the ticket screen (the card is read by NFC or QR only — member or gold card). Tablets pick it up on the next refresh.'),
             style: const TextStyle(color: VC.muted, fontSize: 12.5)),
         const SizedBox(height: 10),
         Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -569,7 +565,6 @@ class _PointSwitchesState extends State<_PointSwitches> {
           DataColumn(label: Text(tx(context, 'مُشتَرِكون', 'Members')), numeric: true),
           for (final (_, icon, ar, en) in _flags)
             DataColumn(label: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 16, color: VC.gold), const SizedBox(width: 4), Text(tx(context, ar, en))])),
-          DataColumn(label: Text(tx(context, 'رَقم المُوافَقة (كارت)', 'Approval number (card)'))),
         ], rows: [
           for (final p in list)
             DataRow(cells: [
@@ -582,18 +577,6 @@ class _PointSwitchesState extends State<_PointSwitches> {
                   : Text(VF.n(vNum(p['types'])))),
               DataCell(Text(VF.n(vNum(p['active_members'])))),
               for (final (k, _, _, _) in _flags) DataCell(sw(p, k)),
-              DataCell(_busy.contains('${p['id']}:member_card_approval')
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : DropdownButton<String>(
-                      value: appr(p),
-                      underline: const SizedBox(),
-                      onChanged: !widget.edit ? null : (v) => v == null ? null : _set(p, 'member_card_approval', v),
-                      items: [
-                        DropdownMenuItem(value: 'off', child: Text(tx(context, 'مَخفيّة', 'Hidden'))),
-                        DropdownMenuItem(value: 'optional', child: Text(tx(context, 'اختياريّة', 'Optional'))),
-                        DropdownMenuItem(value: 'required', child: Text(tx(context, 'إجباريّة', 'Required'))),
-                      ],
-                    )),
             ]),
         ]),
       ]),

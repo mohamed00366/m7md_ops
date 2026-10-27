@@ -505,6 +505,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               const SizedBox(height: 6),
               for (final (k, ar, en) in [
                 ('card_approval_code', 'شاشة دَفع التَذكَرة', 'Ticket payment screen'),
+                ('member_card_approval', 'بَيع وَتَجديد العُضويّات', 'Selling / renewing memberships'),
               ]) ...[
                 const SizedBox(height: 8),
                 Text(tx(context, ar, en), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
@@ -825,15 +826,15 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
       section(Icons.card_membership_outlined, '10 · العُضويّات', '10 · Memberships',
-          'انتَقَلَت كُلّ أَزرار العُضويّات إلى: تَطبيق الفاليه ← أَنواع الاشتِراكات ← "العُضويّات في كُلّ نُقطة".',
-          'All membership switches moved to: Valet app → Membership types → "Memberships per point".', [
+          'صَفحة المُشتَرِكين وَزِرّ المُشتَرِكين في شاشة التَذكَرة: تَطبيق الفاليه ← أَنواع الاشتِراكات ← "العُضويّات في كُلّ نُقطة". رَقم المُوافَقة لِلعُضويّات في القِسم 6.',
+          'Members page and the member button on the ticket screen: Valet app → Membership types → "Memberships per point". The membership approval number is in section 6.', [
         SizedBox(
           width: 470,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Text(
-                tx(context, 'صَفحة العُضويّات · كَرت العُضويّة · الكَرت الذَهَبيّ · المُشتَرِك تَحت اللَوحة · رَقم المُوافَقة لِلعُضويّات',
-                    'Memberships page · Member card · Gold card · Member under the plate · Membership approval number'),
+                tx(context, 'صَفحة المُشتَرِكين · زِرّ المُشتَرِكين في شاشة التَذكَرة',
+                    'Members page · Member button on the ticket screen'),
                 style: const TextStyle(color: VC.muted, fontSize: 12.5)),
           ),
         ),
