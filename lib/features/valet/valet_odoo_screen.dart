@@ -306,6 +306,14 @@ class _OdooBodyState extends State<_OdooBody> {
   Widget _header(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         child: Row(children: [
+          if (Navigator.of(context).canPop()) ...[
+            IconButton.filledTonal(
+              tooltip: tx(context, 'رُجوع', 'Back'),
+              onPressed: () => Navigator.of(context).maybePop(),
+              icon: const BackButtonIcon(),
+            ),
+            const SizedBox(width: 10),
+          ],
           Container(
             width: 50,
             height: 50,
@@ -442,18 +450,28 @@ class _OdooBodyState extends State<_OdooBody> {
     final flow = VPanel(
       title: tx(context, 'كَيف يَعمَل الرَبط', 'How the link works'),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          step(1, const Color(0xFF16181D), vStr(s['inv_moment']) == 'finish' ? tx(context, 'اكتِمال التِكِت', 'Ticket finished') : tx(context, 'دَفع التِكِت', 'Ticket paid'),
-              vBool(s['inv_after_shift']) ? tx(context, 'بَعد إغلاق الشِفت', 'after the shift closes') : tx(context, 'فَوراً', 'at once')),
-          arrow(),
-          step(2, const Color(0xFF714B67), tx(context, 'فاتورة عَميل', 'Customer invoice'),
-              '${or(vStr(s['product_code']), 'VALET')} · ${journals[0]}'),
-          arrow(),
-          step(3, VC.gold, tx(context, 'تَرحيل', 'Posted'), vBool(s['post_invoice'] ?? true) ? tx(context, 'Post تِلقائي', 'Auto post') : tx(context, 'مُسَوَّدة', 'Draft')),
-          arrow(),
-          step(4, VC.ok, tx(context, 'تَسجيل الدَفع', 'Payment'),
-              s['register_payment'] != false ? '${journals[1]} / ${journals[2]}' : tx(context, 'مُتَوَقِّف', 'Off')),
-        ]),
+        Builder(builder: (context) {
+          // 4 steps, or 5 when the invoices wait for the shift to close
+          final after = vBool(s['inv_after_shift']);
+          final post = s['post_invoice'] != false;
+          final steps = <(Color, String, String)>[
+            (
+              const Color(0xFF16181D),
+              vStr(s['inv_moment']) == 'finish' ? tx(context, 'اكتِمال التِكِت', 'Ticket finished') : tx(context, 'دَفع التِكِت', 'Ticket paid'),
+              vStr(s['inv_moment']) == 'finish' ? 'Finish' : tx(context, 'كاش / بِطاقة', 'Cash / card'),
+            ),
+            if (after) (VC.info, tx(context, 'إغلاق الشِفت', 'Shift closed'), tx(context, 'المُشرِف يُغلِق الشِفت', 'The supervisor closes it')),
+            (const Color(0xFF714B67), tx(context, 'فاتورة عَميل', 'Customer invoice'), '${or(vStr(s['product_code']), 'VALET')} · ${journals[0]}'),
+            (VC.gold, tx(context, 'تَرحيل', 'Posted'), post ? tx(context, 'Post تِلقائي', 'Auto post') : tx(context, 'مُسَوَّدة', 'Draft')),
+            (VC.ok, tx(context, 'تَسجيل الدَفع', 'Payment'), post && s['register_payment'] != false ? '${journals[1]} / ${journals[2]}' : tx(context, 'مُتَوَقِّف', 'Off')),
+          ];
+          return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            for (var i = 0; i < steps.length; i++) ...[
+              if (i > 0) arrow(),
+              step(i + 1, steps[i].$1, steps[i].$2, steps[i].$3),
+            ],
+          ]);
+        }),
         const SizedBox(height: 14),
         Text(tx(context, 'آخِر الفَواتير', 'Latest invoices'), style: const TextStyle(fontWeight: FontWeight.w800)),
         const SizedBox(height: 4),
