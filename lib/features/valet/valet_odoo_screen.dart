@@ -191,7 +191,7 @@ class _OdooBodyState extends State<_OdooBody> {
   TextEditingController _ctl(String k) => _c.putIfAbsent(k, () => TextEditingController()..addListener(() => _dirty = true));
 
   void _fill(VJson s) {
-    for (final k in const ['base_url', 'database', 'walkin_partner', 'product_code', 'product_name', 'lost_code', 'lost_name', 'sales_journal', 'cash_journal', 'card_journal']) {
+    for (final k in const ['base_url', 'database', 'walkin_partner', 'product_code', 'product_name', 'lost_code', 'lost_name', 'sales_journal', 'cash_journal', 'card_journal', 'free_journal']) {
       _ctl(k).text = vStr(s[k]);
     }
     _ctl('countries').text = (s['countries'] as List? ?? const ['AE']).join(', ');
@@ -221,6 +221,7 @@ class _OdooBodyState extends State<_OdooBody> {
       'sales_journal': _ctl('sales_journal').text,
       'cash_journal': _ctl('cash_journal').text,
       'card_journal': _ctl('card_journal').text,
+      'free_journal': _ctl('free_journal').text,
       'post_invoice': _post,
       'register_payment': _pay,
       'inv_moment': _invMoment,
@@ -646,6 +647,11 @@ class _OdooBodyState extends State<_OdooBody> {
         f('cash_journal', tx(context, 'الكاش', 'Cash'), hint: 'CSH1', mono: true),
         f('card_journal', tx(context, 'البِطاقة', 'Card'), hint: 'BNK1', mono: true),
       ]),
+      f('free_journal', tx(context, 'يَوميّة الفَواتير المَجّانيّة (صِفر)', 'Journal for free (0) invoices'),
+          hint: 'FREE',
+          mono: true,
+          helper: tx(context, 'يَوميّة مَبيعات ثانية في Odoo: فَواتير الصِفر تَأخُذ تَرقيماً خاصّاً (مِثل FREE/2026/0001) · فارِغ = نَفس يَوميّة المَبيعات',
+              'A second sales journal in Odoo: 0 invoices get their own numbering (e.g. FREE/2026/0001) · empty = the sales journal')),
     ]);
 
     Widget seg<T>(String label, Map<T, String> opts, T value, ValueChanged<T> on, {String? help}) => Padding(

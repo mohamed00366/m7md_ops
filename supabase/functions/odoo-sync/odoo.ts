@@ -5,6 +5,7 @@ export type Cfg = {
   walkin_partner: string; product_code: string; product_name: string; lost_code: string; lost_name: string;
   overnight_code?: string | null; overnight_name?: string | null;
   sales_journal: string | null; cash_journal: string | null; card_journal: string | null;
+  free_journal?: string | null;   // 302: own sales journal for 0 invoices (own numbering in Odoo); empty = the sales journal
   post_invoice: boolean; register_payment: boolean;
 };
 
@@ -330,7 +331,7 @@ export async function syncTicket(o: Odoo, refs: Refs, cfg: Cfg, t: Ticket, onMov
   if (!move) {
     let [partner, prod, journal, currency] = await Promise.all([
       refs.partner(), refs.product(cfg.product_code, cfg.product_name, tax?.id ?? null),
-      refs.journal('sale', cfg.sales_journal), refs.currency(t.currency),
+      refs.journal('sale', free && cfg.free_journal ? cfg.free_journal : cfg.sales_journal), refs.currency(t.currency),
     ]);
     // manual sale "on account": the invoice is on the client (the site's company), left unpaid
     if (t.payment_mode === 'Credit') {
