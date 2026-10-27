@@ -99,7 +99,10 @@ class _ParkingBodyState extends State<_ParkingBody> {
                 for (final a in rows)
                   DataRow(cells: [
                     DataCell(Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(vStr(a['name']), style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text(vStr(a['name']), style: const TextStyle(fontWeight: FontWeight.w600)),
+                        if (vBool(a['is_vip'])) ...[const SizedBox(width: 6), const VPill('VIP', color: VC.gold, icon: Icons.workspace_premium_outlined)],
+                      ]),
                       if (vStr(a['notes']).isNotEmpty) Text(vStr(a['notes']), style: const TextStyle(color: VC.muted, fontSize: 12)),
                     ])),
                     DataCell(Text(
@@ -157,6 +160,7 @@ Future<VJson?> showParkingAreaDialog(BuildContext context, VJson? area, {String?
   final capacity = TextEditingController(text: area == null ? '' : vNum(area['capacity']).toInt().toString());
   final notes = TextEditingController(text: vStr(area?['notes']));
   bool approved = area == null ? true : vBool(area['approved']);
+  bool vip = area != null && vBool(area['is_vip']);
   final linked = <String>{
     for (final p in vList(area?['points'])) vStr(p['id']),
     if (withPoint != null) withPoint,
@@ -195,6 +199,15 @@ Future<VJson?> showParkingAreaDialog(BuildContext context, VJson? area, {String?
                 ),
               ),
             ]),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.workspace_premium_outlined, color: VC.gold),
+              title: Text(tx(ctx, 'باركِنج VIP', 'VIP parking')),
+              subtitle: Text(tx(ctx, 'سَيّارات VIP تُصَفّ هُنا فَقَط (لَو مَوقِف واحِد يُختار تِلقائيّاً)، وَالمُشتَرِكون وَالعادي لا يَرَونه.',
+                  'VIP cars are parked only here (one area = chosen by itself); members and normal tickets never see it.')),
+              value: vip,
+              onChanged: (v) => set(() => vip = v),
+            ),
             const SizedBox(height: 6),
             TextField(controller: notes, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظات / العُنوان', 'Notes / address'))),
             const SizedBox(height: 14),
@@ -243,6 +256,7 @@ Future<VJson?> showParkingAreaDialog(BuildContext context, VJson? area, {String?
                     'name': name.text.trim(),
                     'capacity': int.tryParse(capacity.text.trim()) ?? 0,
                     'approved': approved,
+                    'is_vip': vip,
                     'notes': notes.text.trim(),
                     'point_ids': linked.toList(),
                   },
