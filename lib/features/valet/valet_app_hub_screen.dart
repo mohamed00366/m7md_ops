@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
 import 'valet_cards_screen.dart';
+import 'valet_staff_analytics_screen.dart';
 import 'valet_link_screen.dart';
 import 'valet_manual_sales_screen.dart';
 import 'valet_manual_screen.dart';
@@ -35,6 +36,8 @@ class ValetAppHubScreen extends StatelessWidget {
                 (Icons.link_rounded, 'لينك العَميل', 'Customer link', const ValetLinkScreen()),
               if (ValetAdmin.I.can(ValetAdmin.permSettings))
                 (Icons.style_outlined, 'كُروت NFC', 'NFC cards', const ValetCardsScreen()),
+              if (ValetAdmin.I.can(ValetAdmin.permReports))
+                (Icons.insights_outlined, 'تَحليل المُوظَّفين', 'Staff analysis', const ValetStaffAnalyticsScreen()),
               if (ValetAdmin.I.can(ValetAdmin.permManualAdd) || ValetAdmin.I.can(ValetAdmin.permManualApprove))
                 (Icons.edit_note_outlined, 'المَبيعات اليَدَويّة', 'Manual sales', const _ManualTabs()),
               if (ValetAdmin.I.can(ValetAdmin.permReports))
