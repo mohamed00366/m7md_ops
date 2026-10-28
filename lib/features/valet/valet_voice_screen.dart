@@ -355,6 +355,31 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
     }
   }
 
+  /// DB 314: the models this key may use (asked from Google by the server).
+  Future<void> _models() async {
+    final r = await vGuard(context, () => ValetAdmin.I.call('vva_ai_models', {}));
+    if (r == null || !mounted) return;
+    final list = vList(r['models']);
+    final pick = await showDialog<String>(
+      context: context,
+      builder: (c) => SimpleDialog(
+        title: Text(tx(c, 'اختار الموديل (flash = أسرع وأرخص)', 'Choose the model (flash = faster and cheaper)')),
+        children: [
+          for (final m in list)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(c, vStr(m['id'])),
+              child: Row(children: [
+                Expanded(child: Text(vStr(m['id']), textDirection: TextDirection.ltr, style: TextStyle(fontWeight: vStr(m['id']) == vStr(_cfg['model']) ? FontWeight.w800 : FontWeight.w500))),
+                Text(vStr(m['name']), style: const TextStyle(color: _muted, fontSize: 12)),
+              ]),
+            ),
+          if (list.isEmpty) Padding(padding: const EdgeInsets.all(16), child: Text(tx(c, 'مفيش موديلات', 'No models'))),
+        ],
+      ),
+    );
+    if (pick != null && mounted) _c('model', pick);
+  }
+
   Future<void> _test() async {
     setState(() => _tryOut = '…');
     final r = await vGuard(context, () => ValetAdmin.I.call('vva_ai_test', {'p_text': _try.text}));
@@ -558,17 +583,19 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
             const SizedBox(height: 12),
             Wrap(spacing: 14, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
               SizedBox(
-                width: 220,
-                child: DropdownButtonFormField<String>(
-                  value: const ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'].contains(vStr(_cfg['model'])) ? vStr(_cfg['model']) : 'gemini-2.5-flash',
-                  decoration: InputDecoration(labelText: tx(context, 'الموديل', 'Model'), isDense: true),
-                  items: const [
-                    DropdownMenuItem(value: 'gemini-2.5-flash', child: Text('gemini-2.5-flash')),
-                    DropdownMenuItem(value: 'gemini-2.5-flash-lite', child: Text('gemini-2.5-flash-lite')),
-                    DropdownMenuItem(value: 'gemini-2.5-pro', child: Text('gemini-2.5-pro')),
-                  ],
-                  onChanged: (v) => _c('model', v),
+                width: 260,
+                child: TextFormField(
+                  key: ValueKey('model${_cfg['model']}${_d.hashCode}'),
+                  initialValue: vStr(_cfg['model']),
+                  textDirection: TextDirection.ltr,
+                  decoration: InputDecoration(labelText: tx(context, 'الموديل', 'Model'), isDense: true, hintText: 'gemini-…-flash'),
+                  onChanged: (v) => _c('model', v.trim()),
                 ),
+              ),
+              OutlinedButton.icon(
+                onPressed: keySet ? _models : null,
+                icon: const Icon(Icons.list_alt, size: 18),
+                label: Text(tx(context, 'الموديلات المتاحة لمفتاحك', 'Models of your key')),
               ),
               SizedBox(
                 width: 220,
