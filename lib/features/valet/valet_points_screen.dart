@@ -134,7 +134,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
   Widget build(BuildContext context) {
     final d = _d;
     return DefaultTabController(
-      length: 6,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: Text(d == null ? widget.title : '${vMap(d['point'])['code']} · ${vMap(d['point'])['name']}'),
@@ -147,7 +147,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
               tabs: [
             Tab(text: tx(context, 'المَزايا', 'Features')),
             Tab(text: tx(context, 'الأَسعار', 'Prices')),
-            Tab(text: tx(context, 'VIP وَالعُضويّات', 'VIP & memberships')),
             Tab(text: tx(context, 'المَواقِف', 'Parking')),
             Tab(text: tx(context, 'حِساب الجِهاز', 'Device account')),
             Tab(text: tx(context, 'المُعِدّات وَالمَكَن وَالدَفاتِر', 'Equipment, machines & books')),
@@ -155,7 +154,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ),
         body: d == null
             ? Center(child: _err != null ? Text(vErr(context, _err!)) : const CircularProgressIndicator())
-            : TabBarView(children: [_features(d), _prices(d), _vipPlans(d), _parking(d), _terminal(d), _equipment(d)]),
+            : TabBarView(children: [_features(d), _prices(d), _parking(d), _terminal(d), _equipment(d)]),
       ),
     );
   }
@@ -1552,54 +1551,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     );
   }
 
-  // ---------------------------------------------------------------- VIP + plans
-  Widget _vipPlans(VJson d) {
-    final vipFields = [('ticket_name', tx(context, 'الاسم', 'Name'), false), ('ticket_price', tx(context, 'السِعر (AED)', 'Price (AED)'), true)];
-    return _page([
-      if (vList(d['vip_prices']).isEmpty)
-        VPanel(
-          title: tx(context, 'أَسعار VIP', 'VIP prices'),
-          child: Text(
-              tx(context, 'أَسعار VIP أَصبَحَت أَسعار فَرع VIP في تَبويب "الأَسعار" (ثابِت أَو بِالساعة، لِكُلّ نُقطة).',
-                  'VIP prices are now the prices of the VIP branch in the "Prices" tab (fixed or hourly, per point).'),
-              style: const TextStyle(color: VC.muted)),
-        )
-      else
-      VPanel(
-        title: tx(context, 'أَسعار VIP (قَديمة)', 'VIP prices (old)'),
-        actions: [if (_edit) FilledButton.icon(icon: const Icon(Icons.add), label: Text(tx(context, 'إضافة', 'Add')), onPressed: () => _simple('vip_price', null, vipFields))],
-        child: VTable(
-          columns: [
-            DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
-            DataColumn(label: Text(tx(context, 'السِعر', 'Price')), numeric: true),
-            DataColumn(label: Text(tx(context, 'الضَريبة', 'VAT')), numeric: true),
-            DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
-            DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
-            const DataColumn(label: Text('')),
-          ],
-          rows: [
-            for (final v in vList(d['vip_prices']))
-              DataRow(cells: [
-                DataCell(Text(vStr(v['ticket_name']))),
-                DataCell(Text(VF.money(vNum(v['ticket_price'])))),
-                DataCell(Text(VF.money(vSplitVat(vNum(v['ticket_price']), _vat(d), false).$2 - vNum(v['ticket_price'])))),
-                DataCell(Text(VF.money(vSplitVat(vNum(v['ticket_price']), _vat(d), false).$2), style: const TextStyle(fontWeight: FontWeight.w700))),
-                DataCell(vBool(v['is_active']) ? VPill(tx(context, 'فَعّال', 'Active'), color: VC.ok) : VPill(tx(context, 'مُتَوَقِّف', 'Off'))),
-                DataCell(_rowActions('vip_price', v, vipFields)),
-              ]),
-          ],
-        ),
-      ),
-      VPanel(
-        title: tx(context, 'الاشتِراكات', 'Memberships'),
-        child: Text(
-            tx(context, 'الاشتِراكات أَصبَحَت "أَنواع الاشتِراكات" في قِسم الفاليه: الاسم وَالسِعر وَأَين يَصلُح (نُقطة · نِقاط · مَنطِقة · الكُلّ). تَظهَر هُنا الأَنواع الَّتي تُغَطّي هذه النُقطة في التَطبيق.',
-                'Memberships are now "Membership types" in the Valet section: name, price and where it is valid (one point · points · area · all). The app of this point sells the types covering it.'),
-            style: const TextStyle(color: VC.muted)),
-      ),
-    ]);
-  }
-
   // ---------------------------------------------------------------- parking (linked areas)
   Future<VJson?> _areaById(String id) async {
     final all = await vGuard(context, () => ValetAdmin.I.call('vva_parking_areas'));
@@ -1727,137 +1678,9 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     ]);
   }
 
-  Widget _rowActions(String kind, VJson row, List<(String, String, bool)> fields, {String activeKey = 'is_active'}) {
-    if (!_edit) return const SizedBox();
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      if (row.containsKey(activeKey))
-        Switch(
-          value: vBool(row[activeKey]),
-          onChanged: (v) => _save('vva_item_save', {
-            'p_kind': kind,
-            'p_data': {'id': row['id'], 'point_id': widget.pointId, activeKey: v},
-          }),
-        ),
-      IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () => _simple(kind, row, fields)),
-      IconButton(
-        icon: const Icon(Icons.delete_outline, color: VC.bad),
-        onPressed: () async {
-          if (await vConfirm(context, tx(context, 'حَذف', 'Delete'), '${row['name'] ?? row['ticket_name']}')) {
-            if (!mounted) return;
-            _save('vva_row_delete', {'p_kind': kind, 'p_id': row['id']}, ok: tx(context, 'تَمّ الحَذف.', 'Deleted.'));
-          }
-        },
-      ),
-    ]);
-  }
-
   num _vat(VJson d) => vMap(d['settings'])['vat_rate'] == null ? 0.05 : vNum(vMap(d['settings'])['vat_rate']);
 
   /// VIP price / membership plan: name + amount typed with VAT included or added (stored NET).
-  Future<void> _netPriceDialog(String kind, VJson? row) async {
-    final d = _d;
-    if (d == null) return;
-    final vatRate = _vat(d);
-    final nameKey = kind == 'vip_price' ? 'ticket_name' : 'name';
-    final priceKey = kind == 'vip_price' ? 'ticket_price' : 'price';
-    bool incl = row == null ? true : (row['vat_included'] as bool? ?? false);
-    final net = vNum(row?[priceKey]);
-    final name = TextEditingController(text: vStr(row?[nameKey]));
-    final amount = TextEditingController(text: row == null ? '' : (incl ? vSplitVat(net, vatRate, false).$2 : net).toString());
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, set) {
-        return AlertDialog(
-          title: Text(row == null
-              ? (kind == 'vip_price' ? tx(ctx, 'سِعر VIP جَديد', 'New VIP price') : tx(ctx, 'باقة عُضويّة جَديدة', 'New membership plan'))
-              : tx(ctx, 'تَعديل', 'Edit')),
-          content: SizedBox(
-            width: 440,
-            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              TextField(controller: name, decoration: InputDecoration(labelText: tx(ctx, 'الاسم *', 'Name *'))),
-              const SizedBox(height: 12),
-              VatAmountField(
-                controller: amount,
-                included: incl,
-                vatRate: vatRate,
-                label: tx(ctx, 'المَبلَغ (AED) *', 'Amount (AED) *'),
-                extra: kind == 'member_plan' ? tx(ctx, ' شَهريّاً', ' per month') : '',
-                onToggle: () => set(() => incl = !incl),
-                onChanged: () => set(() {}),
-              ),
-            ]),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
-            FilledButton(
-              onPressed: () {
-                if (name.text.trim().isEmpty || num.tryParse(amount.text) == null) {
-                  vToast(ctx, tx(ctx, 'أَدخِل الاسم وَالمَبلَغ.', 'Enter the name and the amount.'), error: true);
-                  return;
-                }
-                final (pr, _) = vSplitVat(num.parse(amount.text), vatRate, incl);
-                Navigator.pop(ctx);
-                _save('vva_item_save', {
-                  'p_kind': kind,
-                  'p_data': {
-                    if (row != null) 'id': row['id'],
-                    'point_id': widget.pointId,
-                    nameKey: name.text.trim(),
-                    priceKey: pr,
-                    'vat_included': incl,
-                  },
-                });
-              },
-              child: Text(tx(ctx, 'حِفظ', 'Save')),
-            ),
-          ],
-        );
-      }),
-    );
-  }
-
-  Future<void> _simple(String kind, VJson? row, List<(String, String, bool)> fields) async {
-    if (kind == 'vip_price' || kind == 'member_plan') return _netPriceDialog(kind, row);
-    final ctrls = {for (final f in fields) f.$1: TextEditingController(text: row == null ? '' : vStr(row[f.$1]))};
-    await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(row == null ? tx(ctx, 'إضافة', 'Add') : tx(ctx, 'تَعديل', 'Edit')),
-        content: SizedBox(
-          width: 380,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            for (final f in fields)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextField(
-                  controller: ctrls[f.$1],
-                  keyboardType: f.$3 ? const TextInputType.numberWithOptions(decimal: true) : null,
-                  decoration: InputDecoration(labelText: f.$2),
-                ),
-              ),
-          ]),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _save('vva_item_save', {
-                'p_kind': kind,
-                'p_data': {
-                  if (row != null) 'id': row['id'],
-                  'point_id': widget.pointId,
-                  for (final f in fields) f.$1: f.$3 ? (num.tryParse(ctrls[f.$1]!.text) ?? 0) : ctrls[f.$1]!.text.trim(),
-                },
-              });
-            },
-            child: Text(tx(ctx, 'حِفظ', 'Save')),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ---------------------------------------------------------------- device account
   Widget _terminal(VJson d) {
     final t = d['terminal'] == null ? null : vMap(d['terminal']);
