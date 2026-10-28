@@ -103,7 +103,9 @@
     -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
   }
   main { display: flex; flex-direction: column; gap: 12px; }
-  main.is-progress #vProgress { order: -1; }
+  main.is-progress #vProgress { order: -3; }
+  main.is-progress #vRule { order: -2; }
+  main.is-progress #vCancel, main.is-progress #noCancel { order: -1; }
   main .foot { order: 9; }
   .pad { padding: 16px; }
 
@@ -200,6 +202,46 @@
   .ready-banner strong { display: block; font-size: 19px; }
   .ready-banner span { font-size: 14px; opacity: .9; }
   .poll-note { font-size: 12px; color: var(--t3); margin: 14px 0 0; text-align: center; }
+
+  /* 309: countdown, valet note, delay apology, rule, cancel, price, alerts */
+  .timer { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 14px; }
+  .timer .tv { font-family: "Inter", sans-serif; font-weight: 800; font-size: 58px; line-height: 1; letter-spacing: -1.5px; direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+  .timer .tv.late { font-size: 40px; }
+  .timer .tl { font-size: 12.5px; color: var(--t3); font-weight: 700; margin-bottom: 2px; }
+  .timer .at { font-size: 13px; color: var(--t2); font-weight: 700; text-align: end; }
+  .timer .at b { display: block; font-family: "Inter", sans-serif; font-size: 18px; color: var(--t1); direction: ltr; unicode-bidi: isolate; }
+  .tbar { height: 6px; border-radius: 6px; background: var(--track); margin-top: 12px; overflow: hidden; }
+  .tbar i { display: block; height: 100%; width: 0; background: var(--fill); border-radius: 6px; transition: width 1s linear; }
+  .echo { margin-top: 10px; font-size: 13px; color: var(--t3); }
+  .echo b { color: var(--t2); }
+  .vnote { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; border-radius: 14px; padding: 11px 13px; background: var(--field); border: 1px solid var(--edge); font-size: 13.5px; font-weight: 600; color: var(--t2); }
+  .vnote svg { flex: 0 0 18px; margin-top: 2px; }
+  .vnote b { display: block; color: var(--t1); font-size: 12px; }
+  .delay { border-radius: 16px; padding: 13px 14px; background: var(--w-bg); border: 1px solid var(--w-b); color: var(--w-t); display: flex; gap: 10px; margin-bottom: 12px; }
+  .delay svg { flex: 0 0 18px; margin-top: 3px; }
+  .delay strong { display: block; font-size: 15.5px; }
+  .delay span { font-size: 13px; font-weight: 600; line-height: 1.6; }
+  .rule { display: flex; gap: 10px; align-items: flex-start; border-radius: 14px; padding: 11px 13px; font-size: 12.8px; font-weight: 600; color: var(--t2); background: var(--card); border: 1px dashed var(--t3); line-height: 1.6; }
+  .rule svg { flex: 0 0 18px; margin-top: 2px; }
+  .btn-out { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 52px; border-radius: 16px; border: 1.5px solid var(--err-b); background: var(--err-bg); color: var(--err); font-weight: 800; font-size: 16px; cursor: pointer; }
+  .btn-out.confirm { background: var(--err); color: #fff; border-color: var(--err); }
+  .btn-out[disabled] { opacity: .7; cursor: progress; }
+  .small { font-size: 12px; color: var(--t3); text-align: center; margin-top: 6px; }
+  .lock { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 54px; border-radius: 18px; background: var(--field); border: 1px solid var(--edge); color: var(--t3); font-weight: 800; margin-top: 12px; }
+  .ended { border-radius: 16px; padding: 12px 14px; background: var(--field); border: 1px solid var(--edge); color: var(--t2); font-weight: 600; font-size: 13.5px; margin-bottom: 12px; }
+  .ended strong { display: block; color: var(--t1); font-size: 15.5px; }
+  .price { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 14px 14px; padding: 12px 14px; border-radius: 16px; background: var(--field); border: 1px solid var(--edge); }
+  .price .pv { font-family: "Inter", sans-serif; font-weight: 800; font-size: 30px; line-height: 1.1; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+  .price .pv s { font-size: 16px; color: var(--t3); font-weight: 600; margin-inline-end: 6px; }
+  .price .pv small { font-size: 13px; color: var(--t3); }
+  .price .pl { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--t3); font-weight: 600; text-align: end; min-width: 0; }
+  .toast { position: fixed; z-index: 60; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top)); max-width: 496px; margin: 0 auto; border-radius: 16px; padding: 13px 15px; display: flex; gap: 10px; align-items: center;
+    background: var(--t1); color: var(--bg2); font-weight: 800; font-size: 15px; box-shadow: 0 14px 34px rgba(0,0,0,.35); transform: translateY(-140%); transition: transform .35s ease; }
+  html[data-theme="dark"] .toast { color: #0B0F17; }
+  .toast.on { transform: none; }
+  .toast svg { flex: 0 0 22px; }
+  .alerts-on { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; color: var(--t3); font-weight: 700; margin-top: 10px; background: none; border: 0; width: 100%; cursor: pointer; padding: 6px; }
+  .alerts-on b { color: var(--t1); }
 
   /* discount code */
   .vc-row { display: flex; gap: 8px; align-items: stretch; }
@@ -305,10 +347,25 @@
       <div><dt data-i18n="location">Location</dt><dd id="tPoint">—</dd></div>
       <div><dt data-i18n="parkedAt">Parked at</dt><dd><span id="tEntry">—</span><span class="duration" id="tDuration"></span></dd></div>
     </dl>
+    <div class="price" id="tPrice" hidden>
+      <div><div class="k" id="tPriceLbl"></div><div class="pv" id="tPriceVal"></div></div>
+      <div class="pl" id="tPriceLines"></div>
+    </div>
+  </section>
+
+  <!-- 309: car returned to the parking (no-show) -->
+  <section id="vReturned" class="card" hidden>
+    <div class="msg">
+      <div class="msg-icon" style="color:var(--w-t);background:var(--w-bg);border-color:var(--w-b)" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></div>
+      <h1 id="retTitle" tabindex="-1" data-i18n="retTitle">Your car was returned to the parking</h1>
+      <p data-i18n="retText">The pick-up time ended and the car was not collected. Please go to the valet desk with your ticket to collect it.</p>
+      <div class="lock"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span data-i18n="retLock">Requests from this page are closed</span></div>
+    </div>
   </section>
 
   <!-- REQUEST FORM -->
   <section id="vRequest" class="card pad" hidden>
+    <div class="ended" id="reqCancelled" hidden><strong data-i18n="cxTitle">Your request was cancelled</strong><span data-i18n="cxText">Your car is still safe in the parking. You can request it again at any time.</span></div>
     <form id="reqForm" novalidate>
       <label class="field-label" for="note"><span data-i18n="noteLabel">Note for the valet</span> <small data-i18n="optional">(optional)</small></label>
       <textarea id="note" name="note" dir="auto" maxlength="200" rows="2" autocomplete="off" aria-describedby="noteHint"></textarea>
@@ -323,12 +380,26 @@
 
   <!-- PROGRESS -->
   <section id="vProgress" class="card pass eta-card" hidden aria-labelledby="pTitle">
+    <div class="delay" id="pDelay" role="status" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <div><strong data-i18n="delayTitle">Sorry for the wait</strong><span id="pDelayText"></span></div>
+    </div>
     <div class="eta-head">
       <span class="stat go" id="pStat"><i></i><span id="pStatText"></span></span>
       <span class="k"><span data-i18n="ticketShort">Ticket</span> <span class="tno ltr" id="pNo"></span></span>
     </div>
     <h2 class="status-title" id="pTitle" tabindex="-1"></h2>
     <p class="status-sub" id="pSub"></p>
+    <div class="echo" id="pEcho" hidden></div>
+    <div class="timer" id="pTimer" hidden>
+      <div><div class="tl" id="pTimerLbl"></div><div class="tv" id="pTimerVal">--:--</div></div>
+      <div class="at" id="pAt"></div>
+    </div>
+    <div class="tbar" id="pBar" hidden><i id="pBarFill"></i></div>
+    <div class="vnote" id="pReply" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/></svg>
+      <div><b data-i18n="replyLbl">Note from the valet</b><span id="pReplyText" dir="auto"></span></div>
+    </div>
     <div class="eta" id="pEta" hidden>
       <div class="eta-lbl" data-i18n="eta">Estimated time</div><div class="eta-val" id="pEtaVal"></div>
     </div>
@@ -348,7 +419,22 @@
     </ol>
     <div class="alert alert-soft" id="pConn" role="status" hidden></div>
     <p class="poll-note" id="pPoll"></p>
+    <button type="button" class="alerts-on" id="alertsBtn" hidden></button>
   </section>
+
+  <!-- 309: pick-up rule + cancel -->
+  <div class="rule" id="vRule" hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <div data-i18n="ruleText">Please arrive before the time runs out. If the car is not collected in time, it will be returned to the parking and can no longer be requested from this page.</div>
+  </div>
+  <section id="vCancel" hidden>
+    <button type="button" class="btn-out" id="cancelBtn" data-i18n="cancelBtn">Cancel request</button>
+    <div class="small" id="cancelHint" data-i18n="cancelHint">You can cancel until the driver leaves with your car</div>
+    <div class="alert" id="cancelErr" role="alert" hidden></div>
+  </section>
+  <p class="small" id="noCancel" hidden data-i18n="noCancel">The request cannot be cancelled after the driver left with your car</p>
+
+  <div class="toast" id="toast" role="alert" aria-live="assertive"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="toastText"></span></div>
 
   <!-- DISCOUNT CODE -->
   <section id="vVoucher" class="card pad" hidden aria-labelledby="vcTitle">
@@ -387,7 +473,7 @@
    ===================================================================== */
 var SUPABASE_URL = 'https://weftpekmmesgfhdawutj.supabase.co';
 var SUPABASE_ANON_KEY = 'sb_publishable_mpGl1t33_k36OPXVYeflHA_HVTonx_V'; // publishable (public) key of the unified project
-var POLL_MS = 15000;          // refresh interval while waiting for the car
+var POLL_MS = 10000;          // refresh interval while waiting for the car (x2 in the background)
 var REQUEST_TIMEOUT_MS = 15000;
 var TIME_ZONE = 'Asia/Dubai';
 
@@ -431,7 +517,34 @@ var TIME_ZONE = 'Asia/Dubai';
       vcScanHint: 'Point the camera at the QR code', vcClose: 'Close', vcAdded: 'Code {c} added',
       vcOff: '{v} AED off', vcPct: '{v}% off', vcPrice: 'You pay {v} AED', vcMax: ' (up to {m} AED)', vcAtPay: 'The discount is taken off when you pay.',
       vcRemove: 'Remove code', vcBranch: 'This code is for {b}. Please visit {b} and have your ticket validated there to get the discount.',
-      vcNoCam: 'The camera cannot be opened. Please type the code.', vcEmpty: 'Enter the discount code.', vcFailed: 'Code not accepted: {e}'
+      vcNoCam: 'The camera cannot be opened. Please type the code.', vcEmpty: 'Enter the discount code.', vcFailed: 'Code not accepted: {e}',
+      // 309
+      retTitle: 'Your car was returned to the parking', retText: 'The pick-up time ended and the car was not collected. Please go to the valet desk with your ticket to collect it.',
+      retLock: 'Requests from this page are closed',
+      cxTitle: 'Your request was cancelled', cxText: 'Your car is still safe in the parking. You can request it again at any time.',
+      delayTitle: 'Sorry for the wait',
+      delayText: 'We added {n} min to your delivery time due to {r}. We are bringing your car as fast as we can — thank you for your patience.',
+      delayTextNoR: 'We added {n} min to your delivery time. We are bringing your car as fast as we can — thank you for your patience.',
+      rTraffic: 'heavy traffic', rBusy: 'a very busy moment', rFar: 'the car being parked far away',
+      replyLbl: 'Note from the valet',
+      ruleText: 'Please arrive before the time runs out. If the car is not collected in time, it will be returned to the parking and can no longer be requested from this page.',
+      cancelBtn: 'Cancel request', cancelSure: 'Tap again to confirm cancelling', cancelling: 'Cancelling…',
+      cancelHint: 'You can cancel until the driver leaves with your car', noCancel: 'The request cannot be cancelled after the driver left with your car',
+      cancelFailed: 'Could not cancel: {e}',
+      pTitleA: 'Request sent', pSubA: 'Waiting for the valet team to confirm…',
+      pTitleB: 'Request confirmed', pSubB: 'Our team is getting your car ready.', pSubBk: 'Your key was received — the car is being sent.',
+      pTitleC: 'Your car is on its way to you', pSubC: 'The driver took the key and left with your car.',
+      stConfirmed: 'Getting ready', stDriver: 'Driver on the way',
+      tLeft: 'Time left for delivery', tPick: 'Please collect within', tBy: 'Delivery around', tNewBy: 'New delivery time',
+      tAlmost: 'Almost there', tPickNow: 'Please collect now', echo: 'Your note: ',
+      priceDue: 'Amount due so far', pricePaid: 'Paid', priceMember: 'Included in your membership', priceFree: 'Free',
+      vatIncl: 'VAT included', pNights: 'Overnight × {n} · {v}', pCode: 'Code {c} · −{v}', pBase: '{d} · {v}', pDisc: 'Discount −{v}',
+      alertsOn: 'Alerts are on — keep this page open', alertsAsk: 'Turn on alerts for your car',
+      nTitle: 'M7 NEXUS · Valet',
+      nApproved: 'Request confirmed — your car will be ready in about {n} min.', nDelay: 'Sorry, we added {n} min to your delivery time.',
+      nKey: 'Your key was received — the car is being sent.', nOut: 'The driver is on the way with your car.',
+      nReady: 'Your car is ready! Please go to the pick-up point.', nReturned: 'Your car was returned to the parking.',
+      nSoon: 'Please collect your car — {n} min left.', nCancelled: 'Your request was cancelled.'
     },
     ar: {
       title: 'اطلب سيارتي · M7 NEXUS',
@@ -468,7 +581,34 @@ var TIME_ZONE = 'Asia/Dubai';
       vcScanHint: 'وجّه الكاميرا إلى رمز QR', vcClose: 'إغلاق', vcAdded: 'تمت إضافة الكود {c}',
       vcOff: 'خصم {v} درهم', vcPct: 'خصم {v}%', vcPrice: 'تدفع {v} درهم فقط', vcMax: ' (حتى {m} درهم)', vcAtPay: 'يُخصم المبلغ عند الدفع.',
       vcRemove: 'إزالة الكود', vcBranch: 'هذا الكود خاص بـ {b}. يرجى زيارة {b} وعمل فاليديشن لتذكرتك هناك للاستفادة من الخصم.',
-      vcNoCam: 'تعذّر فتح الكاميرا. يرجى كتابة الكود.', vcEmpty: 'اكتب كود الخصم.', vcFailed: 'لم يتم قبول الكود: {e}'
+      vcNoCam: 'تعذّر فتح الكاميرا. يرجى كتابة الكود.', vcEmpty: 'اكتب كود الخصم.', vcFailed: 'لم يتم قبول الكود: {e}',
+      // 309
+      retTitle: 'تمت إعادة سيارتك إلى البركنج', retText: 'انتهى وقت الاستلام ولم يتم استلام السيارة. لاستلامها يرجى التوجه إلى مكتب الفاليه ومعك التذكرة.',
+      retLock: 'الطلب من هذه الصفحة غير متاح',
+      cxTitle: 'تم إلغاء طلبك', cxText: 'سيارتك ما زالت آمنة في البركنج. يمكنك طلبها مرة أخرى في أي وقت.',
+      delayTitle: 'نعتذر عن التأخير',
+      delayText: 'أضفنا {n} دقائق إلى وقت التسليم بسبب {r}. نعمل على إحضار سيارتك بأسرع وقت ممكن، شكراً لتفهمك.',
+      delayTextNoR: 'أضفنا {n} دقائق إلى وقت التسليم. نعمل على إحضار سيارتك بأسرع وقت ممكن، شكراً لتفهمك.',
+      rTraffic: 'الزحام الحالي', rBusy: 'ضغط العمل الحالي', rFar: 'بُعد موقف السيارة',
+      replyLbl: 'ملاحظة الفاليه',
+      ruleText: 'يرجى الحضور قبل انتهاء الوقت. في حال انتهاء الوقت وعدم الاستلام، سيتم إعادة السيارة إلى البركنج ولن يمكن طلبها مرة أخرى من هذه الصفحة.',
+      cancelBtn: 'إلغاء الطلب', cancelSure: 'اضغط مرة أخرى لتأكيد الإلغاء', cancelling: 'جارٍ الإلغاء…',
+      cancelHint: 'يمكنك الإلغاء حتى خروج السائق بالسيارة', noCancel: 'لا يمكن إلغاء الطلب بعد خروج السائق بالسيارة',
+      cancelFailed: 'تعذّر الإلغاء: {e}',
+      pTitleA: 'تم إرسال طلبك', pSubA: 'في انتظار تأكيد فريق الفاليه…',
+      pTitleB: 'تم تأكيد طلبك', pSubB: 'فريقنا يجهّز سيارتك الآن.', pSubBk: 'تم استلام مفتاحك — جارٍ إرسال السيارة.',
+      pTitleC: 'سيارتك في الطريق إليك', pSubC: 'السائق استلم المفتاح وخرج بالسيارة.',
+      stConfirmed: 'جاري التجهيز', stDriver: 'السائق في الطريق',
+      tLeft: 'الوقت المتبقي للتسليم', tPick: 'يرجى الاستلام خلال', tBy: 'التسليم حوالي', tNewBy: 'التسليم الجديد',
+      tAlmost: 'قاربنا على الوصول', tPickNow: 'يرجى الاستلام الآن', echo: 'ملاحظتك: ',
+      priceDue: 'المبلغ المستحق حتى الآن', pricePaid: 'مدفوع', priceMember: 'مشمول بالعضوية', priceFree: 'مجاني',
+      vatIncl: 'شامل الضريبة', pNights: 'مبيت × {n} · {v}', pCode: 'كود {c} · −{v}', pBase: '{d} · {v}', pDisc: 'خصم −{v}',
+      alertsOn: 'التنبيهات مفعّلة — اترك الصفحة مفتوحة', alertsAsk: 'فعّل التنبيهات لسيارتك',
+      nTitle: 'M7 NEXUS · الفاليه',
+      nApproved: 'تم تأكيد طلبك — سيارتك ستكون جاهزة خلال {n} دقيقة تقريباً.', nDelay: 'نعتذر، أضفنا {n} دقائق إلى وقت التسليم.',
+      nKey: 'تم استلام مفتاحك — جارٍ إرسال السيارة.', nOut: 'السائق في الطريق بسيارتك.',
+      nReady: 'سيارتك جاهزة! تفضل بالتوجه إلى نقطة الاستلام.', nReturned: 'تمت إعادة سيارتك إلى البركنج.',
+      nSoon: 'يرجى استلام سيارتك — باقي {n} دقيقة.', nCancelled: 'تم إلغاء طلبك.'
     }
   };
 
@@ -629,14 +769,201 @@ var TIME_ZONE = 'Asia/Dubai';
     if (st === 'check-out' && !isRequested(t)) return true;
     return false;
   }
-  function isRequested(t) { return String(t.car_request_status || '').toLowerCase() === 'ordered'; }
   // ready = the staff pressed "Car ready" for THIS request (car_arrival alone can be left from an earlier request that was reparked)
   function isReady(t) { return String(t.estimated_ready || '').toLowerCase() === 'ready'; }
+  // 309: request state from the server (none | requested | approved | driver_out | ready | cancelled | returned)
+  function req(t) {
+    if (t.req) return t.req;
+    if (String(t.car_request_status || '').toLowerCase() !== 'ordered') return 'none';
+    if (isReady(t)) return 'ready';
+    return t.estimated_time != null && String(t.estimated_time).trim() !== '' ? 'approved' : 'requested';
+  }
+  function isRequested(t) { var r = req(t); return r === 'requested' || r === 'approved' || r === 'driver_out' || r === 'ready'; }
   function stage(t) {               // 1 requested, 2 being brought, 3 ready
-    if (isReady(t)) return 3;
-    if (t.estimated_time != null && String(t.estimated_time).trim() !== '') return 2;
+    var r = req(t);
+    if (r === 'ready') return 3;
+    if (r === 'approved' || r === 'driver_out') return 2;
     if (String(t.status || '').toLowerCase() === 'check-out') return 2;
     return 1;
+  }
+  var skew = 0;                     // server clock − device clock (ms)
+  function nowS() { return Date.now() + skew; }
+  function mmss(ms) {
+    var s = Math.max(0, Math.round(ms / 1000)), m = Math.floor(s / 60);
+    return (m < 10 ? '0' : '') + m + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+  }
+
+  /* ------------------------- price (same rules as the valet app) ------------------------- */
+  // Port of lib/core/pricing.dart, special_days.dart, overnight.dart and payment/pricing_loader.dart.
+  var DUBAI = 4 * 3600e3;
+  function r2(v) { return Math.round(v * 100) / 100; }
+  function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+  function localDay(d) { var l = new Date(d.getTime() + DUBAI); return Date.UTC(l.getUTCFullYear(), l.getUTCMonth(), l.getUTCDate()); }
+  function isoDay(d) { var l = new Date(d.getTime() + DUBAI); var w = l.getUTCDay(); return w === 0 ? 7 : w; }
+  function hm(v, def) { var m = /^(\d{1,2}):(\d{2})/.exec(String(v || '')); return m ? (+m[1]) * 60 + (+m[2]) : def; }
+  function parseDur(s) {
+    if (s == null) return null; var t = String(s).trim();
+    if (!t || /^inf/i.test(t)) return null;
+    var p = t.split(':'); return (parseInt(p[0], 10) || 0) * 60 + (p.length > 1 ? parseInt(p[1], 10) || 0 : 0);
+  }
+  function hourly(slabs, entry, exit) {
+    var mins = Math.max(0, Math.floor((exit - entry) / 60000));
+    if (!slabs.length) return { price: 0, minutes: mins };
+    var s = slabs.slice().sort(function (a, b) { return a.from - b.from; });
+    for (var i = 0; i < s.length; i++) {
+      var x = s[i];
+      if (!(mins >= x.from && (x.to == null || mins < x.to))) continue;
+      if (x.to != null) return { price: r2(x.price), minutes: mins };
+      var base = 0; s.forEach(function (y) { if (y.to != null && y.price > base) base = y.price; });
+      var extra = Math.max(1, Math.ceil((mins - x.from) / 60));
+      return { price: r2(base + x.price * extra), minutes: mins };
+    }
+    if (mins < s[0].from) return { price: r2(s[0].price), minutes: mins };
+    var last = s.reduce(function (a, b) { return (b.to || 0) >= (a.to || 0) ? b : a; });
+    return { price: r2(last.price), minutes: mins };
+  }
+  function applyDisc(price, value, type, ttype) {
+    var ok = price > 0 && value > 0 && String(type || '').trim() && String(ttype || '').trim() && ttype !== '0';
+    if (!ok) return r2(price);
+    switch (String(type).toUpperCase()) {
+      case 'FIXED_AMOUNT': return r2(Math.min(price, Math.max(0, price - value)));
+      case 'PERCENTAGE': return r2(Math.min(price, Math.max(0, price - price * value / 100)));
+      case 'FULL_AMOUNT': return 0;
+      default: return r2(price);
+    }
+  }
+  function covers(sd, day) {        // day = UTC ms of a Dubai calendar day
+    var f = new Date(String(sd.date_from).slice(0, 10) + 'T00:00:00Z'), t = sd.date_to ? new Date(String(sd.date_to).slice(0, 10) + 'T00:00:00Z') : f;
+    if (isNaN(f)) return false; if (isNaN(t) || t < f) t = f;
+    var len = Math.round((t - f) / 864e5), d = new Date(day), rep = sd.repeat || 'once', i, s;
+    var within = function (a) { return day >= a && day <= a + len * 864e5; };
+    if (rep === 'yearly') {
+      if (day < f.getTime()) return false;
+      for (i = -1; i <= 0; i++) { s = new Date(Date.UTC(d.getUTCFullYear() + i, f.getUTCMonth(), f.getUTCDate())); if (s.getUTCMonth() === f.getUTCMonth() && within(s.getTime())) return true; }
+      return false;
+    }
+    if (rep === 'monthly') {
+      if (day < f.getTime()) return false;
+      for (i = -1; i <= 0; i++) { s = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + i, f.getUTCDate())); if (s.getUTCDate() === f.getUTCDate() && within(s.getTime())) return true; }
+      return false;
+    }
+    if (rep === 'monthly_nth') return day >= f.getTime() && d.getUTCDay() === f.getUTCDay() && Math.floor((d.getUTCDate() - 1) / 7) === Math.floor((f.getUTCDate() - 1) / 7);
+    return day >= f.getTime() && day <= t.getTime();
+  }
+  function nightsOf(o, entry, exit) {
+    if (!o.enabled || o.price <= 0 || !entry || exit <= entry) return 0;
+    var a = entry.getTime() + DUBAI, b = exit.getTime() + DUBAI, n = 0, d, s, e;
+    var day0 = function (ms) { var x = new Date(ms); return Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate()); };
+    if (o.rule === 'hours') return o.hours > 0 ? Math.floor((b - a) / 3600e3 / o.hours) : 0;
+    if (o.rule === 'window') {
+      for (d = day0(a) - 864e5; d <= b; d += 864e5) {
+        s = d + o.from * 60000; e = d + o.to * 60000; if (e <= s) e += 864e5;
+        if (s < b && e > a) n++;
+      }
+      return n;
+    }
+    for (d = day0(a); d <= b; d += 864e5) { s = d + o.at * 60000; if (s > a && s <= b) n++; }
+    return n;
+  }
+  function netOf(total, vat) {
+    var p = r2(total / (1 + vat));
+    var cands = [0, 0.01, -0.01];
+    for (var i = 0; i < cands.length; i++) { var x = r2(p + cands[i]); if (r2(x + r2(x * vat)) === r2(total)) return x; }
+    return p;
+  }
+  function computePrice(p, v) {
+    if (!p) return null;
+    var exit = new Date(nowS()), entry = parseDate(p.entry_time) || exit, st = p.settings || {}, vat = num(p.vat_rate) || 0.05;
+    var mode = String(p.mode || ''), pm = String(p.payment_mode || '');
+    if ((pm === 'Cash' || pm === 'C-Card') && mode !== 'HOURLY') return { kind: 'paid', total: num(p.total_price) };
+    var clientId = p.validated_by || p.site_id || null;
+    var group = !clientId && (String(p.customer_name || '').trim() === 'Group-' + (p.point_name || '') || !!st.price_group_customer);
+    var branchId = clientId && clientId !== p.visitor_id ? clientId : null;
+    var b = null; (p.branch_pricing || []).forEach(function (x) { if (x.site_id === branchId) b = x; });
+    var has = function (k) { return b && b[k] != null; };
+    var h24 = has('site_24h') ? !!b.site_24h : !!st.site_24h;
+    var close = b && b.site_close_at ? hm(b.site_close_at, null) : null;
+    var on = { enabled: false, price: 0 };
+    if (!h24) on = {
+      enabled: has('over_night_enabled') ? !!b.over_night_enabled : !!st.over_night_enabled,
+      price: has('over_night_price') ? num(b.over_night_price) : num(st.over_night_price),
+      rule: close != null ? 'cutoff' : (['cutoff', 'window', 'hours'].indexOf(st.over_night_rule) >= 0 ? st.over_night_rule : 'cutoff'),
+      at: close != null ? close : hm(st.over_night_at, 0), from: hm(st.over_night_from, 0), to: hm(st.over_night_to, 360),
+      hours: num(st.over_night_hours) > 0 ? num(st.over_night_hours) : 12
+    };
+    var basis = has('special_day_basis') && ['entry', 'exit', 'any'].indexOf(b.special_day_basis) >= 0 ? b.special_day_basis
+              : (['entry', 'exit', 'any'].indexOf(st.special_day_basis) >= 0 ? st.special_day_basis : 'entry');
+    var days = [], da = localDay(entry), db = localDay(exit);
+    if (basis === 'exit') days = [db];
+    else if (basis === 'any') { for (var d = da; d <= db && days.length < 62; d += 864e5) days.push(d); if (!days.length) days = [da]; }
+    else days = [da];
+    var pick = function (site) {
+      var sds = p.special_days || [];
+      for (var i = 0; i < sds.length; i++) { var s = sds[i]; if ((s.site_id || null) !== site) continue; if (days.some(function (x) { return covers(s, x); })) return s; }
+      return null;
+    };
+    var sd = (branchId ? pick(branchId) : null) || pick(null);
+    var freeMin = Math.min(600, Math.max(0, has('free_minutes') ? num(b.free_minutes) : num(st.free_minutes)));
+    // hourly tables
+    var rows = (p.prices || []).filter(function (r) { return String(r.ticket_mode || '').trim().toUpperCase() === 'HOURLY'; });
+    var names = [String(p.ticket_type || '').trim(), String(p.ticket_name || '').trim()].filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+    var forDay = function (rs, day) {
+      var by = {}, out = [];
+      rs.forEach(function (r) { var k = (r.site_id || '') + '|' + String(r.ticket_name || '').trim(); (by[k] = by[k] || []).push(r); });
+      Object.keys(by).forEach(function (k) {
+        var g = by[k], dd = function (r) { return (r.days || []).map(Number).filter(function (x) { return x >= 1 && x <= 7; }); };
+        var f = g.filter(function (r) { return dd(r).indexOf(day) >= 0; });
+        out = out.concat(f.length ? f : g.filter(function (r) { return !dd(r).length; }));
+      });
+      return out;
+    };
+    var slabsOf = function (rs) { return rs.map(function (r) { return { from: parseDur(r.start_time) || 0, to: parseDur(r.finish_time), price: num(r.price) }; }); };
+    var groupSlabs = function (day) {
+      var all = forDay(rows.filter(function (r) { return !r.site_id; }), day);
+      for (var i = 0; i < names.length; i++) { var m = all.filter(function (r) { return String(r.ticket_name || '').trim() === names[i]; }); if (m.length) return slabsOf(m); }
+      var set = {}; all.forEach(function (r) { set[String(r.ticket_name || '').trim()] = 1; });
+      return Object.keys(set).length === 1 ? slabsOf(all) : [];
+    };
+    var custSlabs = function (day) {
+      if (!clientId) return [];
+      var all = forDay((p.prices || []).filter(function (r) { return r.site_id === clientId && String(r.ticket_mode || '').trim().toUpperCase() === mode.toUpperCase(); }), day);
+      for (var i = 0; i < names.length; i++) { var m = all.filter(function (r) { return String(r.ticket_name || '').trim() === names[i]; }); if (m.length) return slabsOf(m); }
+      return slabsOf(all);
+    };
+    var hq = { price: 0, minutes: Math.max(0, Math.floor((exit - entry) / 60000)) };
+    if (mode === 'HOURLY') {
+      var slabs = group ? groupSlabs(isoDay(entry)) : custSlabs(isoDay(entry));
+      if (!slabs.length && !group) slabs = groupSlabs(isoDay(entry));
+      if (!slabs.length && !sd) return { kind: 'unknown' };
+      hq = hourly(slabs, entry, exit);
+      var vAt = parseDate(p.validated_at), g = num(st.validation_grace_min);
+      if (vAt && g > 0) {
+        var ge = new Date(vAt.getTime() + g * 60000);
+        if (exit > ge) {
+          var bf = hourly(slabs, entry, ge > entry ? ge : entry), af = hourly(groupSlabs(isoDay(ge)), ge, exit);
+          hq = { price: r2(bf.price + af.price), minutes: hq.minutes };
+        }
+      }
+    }
+    var stored = num(p.ticket_price), dv = num(p.discount_amount), price, base, grace = false;
+    if (freeMin > 0 && hq.minutes <= freeMin && (mode === 'TICKET' || mode === 'HOURLY' || !mode)) { price = 0; base = 0; grace = true; }
+    else if (mode === 'Stamp Ticket' || mode === 'VIP' || mode === 'Member') { price = r2(stored); base = price; }
+    else if (mode === 'HOURLY') { base = hq.price; price = applyDisc(hq.price, dv, p.discount_type, p.discount_ticket_type); }
+    else { base = stored; price = applyDisc(stored, dv, p.discount_type, p.discount_ticket_type); }
+    var sdUsed = (mode === 'TICKET' || mode === 'HOURLY' || !mode) ? sd : null;
+    if (sdUsed && !grace) { price = sdUsed.mode === 'price' ? netOf(num(sdUsed.price), vat) : 0; base = price; }
+    var nights = mode === 'Stamp Ticket' ? 0 : (sdUsed && sdUsed.charge_overnight === false ? 0 : nightsOf(on, entry, exit));
+    var total = r2(price + r2(price * vat)), before = r2(base + r2(base * vat));
+    var off = 0;
+    if (v && v.code && total > 0) {
+      var val = num(v.value);
+      off = v.kind === 'amount' ? val : v.kind === 'price' ? total - val : Math.min(total * val / 100, v.max != null ? num(v.max) : 1e12);
+      off = r2(Math.max(0, Math.min(total, off)));
+    }
+    var overnight = r2(nights * num(on.price));
+    if (mode === 'Member' && total <= 0 && !overnight) return { kind: 'member' };
+    return { kind: 'price', total: r2(total + overnight - off), before: r2(before + overnight), base: before, disc: r2(before - total),
+             nights: nights, overnight: overnight, off: off, code: v && v.code, minutes: hq.minutes, special: sdUsed && sdUsed.name, grace: grace };
   }
 
   /* ------------------------------ render ------------------------------ */
@@ -670,33 +997,51 @@ var TIME_ZONE = 'Asia/Dubai';
   }
 
   function render() {
+    var r = ticket ? req(ticket) : 'none';
     show('vLoading', view === 'loading');
     show('vMsg', view === 'msg');
-    show('vTicket', view === 'active' || view === 'progress' || (view === 'msg' && msgKind === 'closed' && !!ticket));
+    show('vTicket', view === 'active' || view === 'progress' || view === 'returned' || (view === 'msg' && msgKind === 'closed' && !!ticket));
     show('vRequest', view === 'active');
+    show('reqCancelled', view === 'active' && r === 'cancelled');
+    show('vReturned', view === 'returned');
     show('vProgress', view === 'progress');
+    show('vRule', view === 'progress' && r !== 'requested');
+    show('vCancel', view === 'progress' && !!ticket && !!ticket.can_cancel);
+    show('noCancel', view === 'progress' && r === 'driver_out');
     $('main').classList.toggle('is-progress', view === 'progress');
     show('vVoucher', (view === 'active' || view === 'progress') && !!ticket);
     if (ticket) renderVoucher();
     if (ticket) renderTicket();
     if (view === 'msg') renderMsg();
     if (view === 'progress') renderProgress();
+    if (view === 'progress') renderCancel();
     if (view === 'active') setText('reqBtnText', submitting ? tr('sending') : tr('requestBtn'));
   }
 
+  function statusText(t) {
+    var r = req(t);
+    if (r === 'ready') return tr('stReady');
+    if (r === 'driver_out') return tr('stDriver');
+    if (r === 'approved') return tr('stConfirmed');
+    if (r === 'requested') return tr('stReq');
+    return tr('stParked');
+  }
   function renderTicket() {
     var t = ticket;
     setText('tNo', t.short_no != null && t.short_no !== '' ? t.short_no : '—');
     setText('pNo', t.short_no != null && t.short_no !== '' ? t.short_no : '');
     var stg = view === 'progress' ? stage(t) : 0;
-    setText('tStatText', stg === 3 ? tr('stReady') : stg === 2 ? tr('stOnWay') : stg === 1 ? tr('stReq') : tr('stParked'));
+    setText('tStatText', view === 'progress' ? statusText(t) : tr('stParked'));
     $('tStat').className = stg === 0 || stg === 3 ? 'stat' : 'stat go';
+    renderPrice();
     setText('tPlate', t.plate || '—');
     var c = colorInfo(t.color);
     var dot = $('tDot');
     if (c && c.hex) { dot.style.background = c.hex; dot.style.display = ''; } else { dot.style.display = 'none'; }
     setText('tColor', c ? (c.label || t.color) : '—');
-    setText('tPoint', t.point_name || '—');
+    // 283: client branch first (the place the customer visited), then the valet point
+    setText('tPoint', [t.branch_name ? (t.client_name && t.client_name !== t.branch_name ? t.branch_name + ' (' + t.client_name + ')' : t.branch_name) : null,
+                       t.point_name].filter(Boolean).join(' · ') || '—');
     renderDuration();
   }
   function renderDuration() {
@@ -705,6 +1050,39 @@ var TIME_ZONE = 'Asia/Dubai';
     setText('tEntry', d ? fmtEntry(d) : '—');
     var closed = isClosed(ticket);
     setText('tDuration', d && !closed ? tr('parkedFor', { d: fmtDuration(Date.now() - d.getTime()) }) : '');
+    renderPrice();
+  }
+
+  function cur(v) { return money(v) + ' ' + (lang === 'ar' ? 'درهم' : 'AED'); }
+  function renderPrice() {
+    var box = $('tPrice');
+    if (!ticket || !ticket.pay || isClosed(ticket)) { show('tPrice', false); return; }
+    var q = null;
+    try { q = computePrice(ticket.pay, voucher); } catch (e) { q = null; }
+    if (!q || q.kind === 'unknown') { show('tPrice', false); return; }
+    var val = $('tPriceVal'), lines = $('tPriceLines');
+    val.textContent = ''; lines.textContent = '';
+    var add = function (s) { var sp = document.createElement('span'); sp.textContent = s; lines.appendChild(sp); };
+    var small = function (s) { var e = document.createElement('small'); e.textContent = ' ' + s; return e; };
+    if (q.kind === 'paid') {
+      setText('tPriceLbl', tr('pricePaid'));
+      val.appendChild(document.createTextNode(money(q.total))); val.appendChild(small(lang === 'ar' ? 'درهم' : 'AED'));
+    } else if (q.kind === 'member') {
+      setText('tPriceLbl', '');
+      val.textContent = tr('priceMember'); val.style.fontSize = '18px';
+    } else {
+      val.style.fontSize = '';
+      setText('tPriceLbl', tr('priceDue'));
+      if (q.before > q.total) { var s = document.createElement('s'); s.textContent = money(q.before); val.appendChild(s); }
+      val.appendChild(document.createTextNode(q.total > 0 ? money(q.total) : tr('priceFree')));
+      if (q.total > 0) val.appendChild(small(lang === 'ar' ? 'درهم' : 'AED'));
+      add(tr('pBase', { d: fmtDuration(q.minutes * 60000), v: money(q.base) }) + (q.special ? ' · ' + q.special : ''));
+      if (q.disc > 0) add(tr('pDisc', { v: money(q.disc) }));
+      if (q.nights > 0) add(tr('pNights', { n: q.nights, v: money(q.overnight) }));
+      if (q.off > 0) add(tr('pCode', { c: q.code, v: money(q.off) }));
+      add(tr('vatIncl'));
+    }
+    show('tPrice', true);
   }
 
   function renderMsg() {
@@ -740,41 +1118,200 @@ var TIME_ZONE = 'Asia/Dubai';
         : String(n);
       if (n === s) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     }
+    var t = ticket, r = req(t);
     // road: the car moves from "requested" to "ready"
-    var pos = s === 3 ? 100 : s === 2 ? 55 : 12;
+    var pos = r === 'ready' ? 100 : r === 'driver_out' ? 72 : r === 'approved' ? 42 : 12;
     $('pFill').style.width = pos + '%';
     $('pCar').style.insetInlineStart = pos + '%';
-    setText('pStatText', s === 3 ? tr('stReady') : s === 2 ? tr('stOnWay') : tr('stReq'));
+    setText('pStatText', statusText(t));
     $('pStat').className = s === 3 ? 'stat' : 'stat go';
-    setText('pTitle', tr('pTitle' + s));
-    setText('pSub', tr('pSub' + s));
+    var title = r === 'ready' ? tr('pTitle3') : r === 'driver_out' ? tr('pTitleC') : r === 'approved' ? tr('pTitleB') : tr('pTitleA');
+    var sub = r === 'ready' ? tr('pSub3') : r === 'driver_out' ? tr('pSubC')
+            : r === 'approved' ? (t.key_rack === 'received' ? tr('pSubBk') : tr('pSubB')) : tr('pSubA');
+    setText('pTitle', title);
+    setText('pSub', sub);
     // When ready, the green banner carries the message; keep the heading for screen readers only.
     $('pTitle').className = s === 3 ? 'status-title sr-only' : 'status-title';
     show('pSub', s < 3);
-    var eta = ticket.estimated_time;
-    var hasEta = s < 3 && eta != null && String(eta).trim() !== '';
+    // the customer's note (until the valet answers)
+    var note = String(t.request_note || '').trim();
+    show('pEcho', r === 'requested' && !!note);
+    if (r === 'requested' && note) { var e = $('pEcho'); e.textContent = tr('echo'); var b = document.createElement('b'); b.textContent = '«' + note + '»'; b.dir = 'auto'; e.appendChild(b); }
+    // the valet's note
+    var reply = String(t.reply || '').trim();
+    show('pReply', !!reply && r !== 'requested');
+    setText('pReplyText', reply);
+    // delay apology
+    var added = num(t.eta_added);
+    show('pDelay', added > 0 && (r === 'approved' || r === 'driver_out'));
+    if (added > 0) {
+      var rr = String(t.eta_reason || '').trim(), key = { traffic: 'rTraffic', busy: 'rBusy', 'far slot': 'rFar', far: 'rFar' }[rr.toLowerCase()];
+      var reason = key ? tr(key) : rr;
+      setText('pDelayText', reason ? tr('delayText', { n: added, r: reason }) : tr('delayTextNoR', { n: added }));
+    }
+    // old flow (no countdown): minutes only
+    var eta = t.estimated_time;
+    var hasEta = s < 3 && !t.eta_at && eta != null && String(eta).trim() !== '';
     show('pEta', hasEta);
     if (hasEta) setText('pEtaVal', fmtEta(eta));
     show('pReady', s === 3);
     show('pConn', connLost && s < 3);
     setText('pConn', tr('connLost'));
-    setText('pPoll', s === 3 ? '' : (document.hidden ? tr('pollPaused') : tr('pollOn')));
+    setText('pPoll', s === 3 ? '' : tr('pollOn'));
+    renderTimer();
+    renderAlertsBtn();
+  }
+
+  // countdown: delivery (approved / driver out) or pick-up (ready)
+  function renderTimer() {
+    var t = ticket; if (!t || view !== 'progress') return;
+    var r = req(t), end = null, start = null, lbl = '', at = '';
+    if ((r === 'approved' || r === 'driver_out') && t.eta_at) {
+      end = parseDate(t.eta_at); start = parseDate(t.approved_at) || end;
+      lbl = tr('tLeft'); at = num(t.eta_added) > 0 ? tr('tNewBy') : tr('tBy');
+    } else if (r === 'ready' && t.ready_at && num(t.pickup_min) > 0) {
+      start = parseDate(t.ready_at); end = start ? new Date(start.getTime() + num(t.pickup_min) * 60000) : null;
+      lbl = tr('tPick');
+    }
+    show('pTimer', !!end); show('pBar', !!end);
+    if (!end) return;
+    var left = end.getTime() - nowS(), tv = $('pTimerVal');
+    if (left > 0) { tv.textContent = mmss(left); tv.className = 'tv'; setText('pTimerLbl', lbl); }
+    else { tv.textContent = r === 'ready' ? tr('tPickNow') : tr('tAlmost'); tv.className = 'tv late'; setText('pTimerLbl', ''); }
+    var total = Math.max(1, end.getTime() - (start ? start.getTime() : end.getTime() - 1));
+    $('pBarFill').style.width = Math.min(100, Math.max(0, 100 - left / total * 100)) + '%';
+    var a = $('pAt'); a.textContent = '';
+    if (at) { a.appendChild(document.createTextNode(at)); var b = document.createElement('b'); b.textContent = fmtTime(end); a.appendChild(b); }
+    // reminder: pick-up time almost over
+    if (r === 'ready' && left > 0 && left <= 2 * 60000 && !soonSaid) { soonSaid = true; alertUser(tr('nSoon', { n: Math.max(1, Math.ceil(left / 60000)) }), true); }
+  }
+  var soonSaid = false;
+  var tickTimer = null;
+  function startTick() { if (!tickTimer) tickTimer = setInterval(renderTimer, 1000); }
+  function stopTick() { if (tickTimer) { clearInterval(tickTimer); tickTimer = null; } }
+
+  /* ------------------------------ cancel ------------------------------ */
+  var cancelArmed = 0, cancelBusy = false;
+  function renderCancel() {
+    var b = $('cancelBtn');
+    b.textContent = cancelBusy ? tr('cancelling') : cancelArmed ? tr('cancelSure') : tr('cancelBtn');
+    b.className = cancelArmed ? 'btn-out confirm' : 'btn-out';
+    b.disabled = cancelBusy;
+  }
+  function cancelRequest() {
+    if (cancelBusy || !token) return;
+    unlockAudio();
+    if (!cancelArmed) { cancelArmed = setTimeout(function () { cancelArmed = 0; renderCancel(); }, 5000); renderCancel(); return; }
+    clearTimeout(cancelArmed); cancelArmed = 0; cancelBusy = true; show('cancelErr', false); renderCancel();
+    rpc('vv_public_cancel_car', { p_public_token: token }).then(function (d) {
+      cancelBusy = false;
+      if (d.ok && d.ticket) { announce(tr('nCancelled')); applyTicket(d.ticket, false); }
+      else { cancelFailed(errText(d) || '—'); if (d.code === 'too_late') poll(true); renderCancel(); }
+    }, function (err) { cancelBusy = false; cancelFailed(err.network ? tr('netShort') : err.message); renderCancel(); });
+  }
+  function cancelFailed(text) {
+    var el = $('cancelErr'), parts = tr('cancelFailed').split('{e}');
+    el.textContent = ''; el.appendChild(document.createTextNode(parts[0]));
+    var b = document.createElement('bdi'); b.textContent = text; el.appendChild(b);
+    el.appendChild(document.createTextNode(parts[1] || '')); show('cancelErr', true);
+  }
+
+  /* ------------------------------ alerts (sound, vibration, notification) ------------------------------ */
+  var audio = null, swReg = null, titleTimer = null, baseTitle = '';
+  function unlockAudio() {
+    try {
+      if (!audio) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) audio = new AC(); }
+      if (audio && audio.state === 'suspended') audio.resume();
+    } catch (e) {}
+  }
+  function beep(strong) {
+    if (!audio || audio.state !== 'running') return;
+    var n = strong ? 3 : 2, t0 = audio.currentTime + 0.02;
+    for (var i = 0; i < n; i++) {
+      var o = audio.createOscillator(), g = audio.createGain(), t = t0 + i * 0.32;
+      o.type = 'sine'; o.frequency.setValueAtTime(i % 2 ? 1175 : 880, t);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+      o.connect(g); g.connect(audio.destination); o.start(t); o.stop(t + 0.28);
+    }
+  }
+  function notifyAllowed() { return 'Notification' in window && Notification.permission === 'granted'; }
+  function enableAlerts() {
+    unlockAudio();
+    if ('serviceWorker' in navigator && !swReg) {
+      navigator.serviceWorker.register('/request/sw.js', { scope: '/request/' }).then(function (r) { swReg = r; }, function () {});
+    }
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { var p = Notification.requestPermission(function () { renderAlertsBtn(); }); if (p && p.then) p.then(function () { renderAlertsBtn(); }); } catch (e) {}
+    }
+    renderAlertsBtn();
+  }
+  function renderAlertsBtn() {
+    var b = $('alertsBtn'); if (!b) return;
+    var on = audio && audio.state === 'running' && (!('Notification' in window) || Notification.permission !== 'default');
+    show('alertsBtn', view === 'progress' && req(ticket || {}) !== 'ready');
+    b.textContent = '';
+    var bell = document.createElement('span'); bell.textContent = on ? '🔔' : '🔕'; bell.setAttribute('aria-hidden', 'true');
+    b.appendChild(bell);
+    var tx = document.createElement(on ? 'span' : 'b'); tx.textContent = on ? tr('alertsOn') : tr('alertsAsk'); b.appendChild(tx);
+  }
+  function alertUser(text, strong) {
+    beep(strong);
+    try { if (navigator.vibrate) navigator.vibrate(strong ? [400, 150, 400, 150, 600] : [250, 120, 250]); } catch (e) {}
+    setText('toastText', text);
+    var el = $('toast'); el.classList.add('on');
+    clearTimeout(el._t); el._t = setTimeout(function () { el.classList.remove('on'); }, strong ? 9000 : 6000);
+    announce(text);
+    if (document.hidden) {
+      if (notifyAllowed()) {
+        var opt = { body: text, tag: 'vv-car', renotify: true, icon: '/request/m7_mark.png', badge: '/request/m7_mark.png', vibrate: [300, 120, 300], data: { url: location.href } };
+        try {
+          if (swReg && swReg.showNotification) swReg.showNotification(tr('nTitle'), opt);
+          else new Notification(tr('nTitle'), opt);
+        } catch (e) {}
+      }
+      if (!titleTimer) {
+        baseTitle = document.title; var flip = false;
+        titleTimer = setInterval(function () { flip = !flip; document.title = flip ? '🔔 ' + text : baseTitle; }, 1200);
+      }
+    }
+  }
+  function stopTitleFlash() { if (titleTimer) { clearInterval(titleTimer); titleTimer = null; document.title = baseTitle || tr('title'); } }
+  // what changed since the last poll → one alert (the most important)
+  function changes(a, b) {
+    if (!a || !b) return null;
+    var ra = req(a), rb = req(b);
+    if (rb === 'returned' && ra !== 'returned') return [tr('nReturned'), true];
+    if (rb === 'ready' && ra !== 'ready') return [tr('nReady'), true];
+    if (rb === 'driver_out' && ra !== 'driver_out') return [tr('nOut'), false];
+    if (num(b.eta_added) > num(a.eta_added)) return [tr('nDelay', { n: num(b.eta_added) - num(a.eta_added) }), false];
+    if (rb === 'approved' && ra === 'requested') {
+      var e = parseDate(b.eta_at), n = e ? Math.max(1, Math.round((e.getTime() - nowS()) / 60000)) : num(b.estimated_time);
+      return [tr('nApproved', { n: n || '—' }), false];
+    }
+    if (rb === 'approved' && b.key_rack === 'received' && a.key_rack !== 'received') return [tr('nKey'), false];
+    return null;
   }
 
   /* ------------------------------ flow ------------------------------ */
   function applyTicket(t, fromPoll) {
+    var prev = ticket;
     ticket = t || {};
+    var sn = parseDate(ticket.now); if (sn) skew = sn.getTime() - Date.now();
     if (!isClosed(ticket)) loadVoucher();
-    if (isClosed(ticket)) { view = 'msg'; msgKind = 'closed'; msgDetail = ''; stopPolling(); }
+    var r = req(ticket);
+    if (fromPoll && prev) { var c = changes(prev, ticket); if (c) alertUser(c[0], c[1]); }
+    if (r !== 'ready') soonSaid = false;
+    if (isClosed(ticket)) { view = 'msg'; msgKind = 'closed'; msgDetail = ''; stopPolling(); stopTick(); }
+    else if (r === 'returned') { view = 'returned'; startPolling(); stopTick(); }
     else if (isRequested(ticket)) {
       view = 'progress';
       var s = stage(ticket);
       if (s !== lastStage) {
-        if (lastStage || !fromPoll) announce(s === 3 ? tr('liveReady') : s === 2 ? tr('liveBrought') : tr('liveReq'));
+        if (!fromPoll && !lastStage) announce(s === 3 ? tr('liveReady') : s === 2 ? tr('liveBrought') : tr('liveReq'));
         lastStage = s;
       }
-      if (s === 3) stopPolling(); else startPolling();
-    } else { view = 'active'; stopPolling(); }
+      startPolling(); startTick();
+    } else { view = 'active'; stopPolling(); stopTick(); lastStage = 0; }
     startDurationTimer();
     render();
   }
@@ -812,6 +1349,7 @@ var TIME_ZONE = 'Asia/Dubai';
   function submitRequest(ev) {
     if (ev) ev.preventDefault();
     if (submitting || !ticket) return;
+    enableAlerts();               // the tap allows sound / vibration / notifications for this request
     submitting = true;
     var btn = $('reqBtn');
     btn.disabled = true;
@@ -835,6 +1373,7 @@ var TIME_ZONE = 'Asia/Dubai';
         setErr(errText(data) || '—');
         show('reqErr', true);
         render();
+        if (data.code === 'returned') poll(true);
       }
     }, function (err) {
       finishSubmit();
@@ -971,7 +1510,7 @@ var TIME_ZONE = 'Asia/Dubai';
 
   /* ------------------------------ polling ------------------------------ */
   function poll() {
-    if (pollInFlight || document.hidden || !token) return;
+    if (pollInFlight || !token) return;
     pollInFlight = true;
     rpc('vv_public_ticket', { p_public_token: token }).then(function (data) {
       pollInFlight = false;
@@ -983,12 +1522,13 @@ var TIME_ZONE = 'Asia/Dubai';
       if (view === 'progress') render();
     });
   }
+  // 309: keep checking while the page is in the background too (alerts), slower then
   function startPolling() {
-    if (pollTimer || document.hidden) return;
-    pollTimer = setInterval(poll, POLL_MS);
+    if (pollTimer) return;
+    pollTimer = setInterval(poll, document.hidden ? POLL_MS * 2 : POLL_MS);
   }
   function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
-  function wantsPolling() { return view === 'progress' && ticket && stage(ticket) < 3; }
+  function wantsPolling() { return (view === 'progress' || view === 'returned') && !!ticket; }
 
   function startDurationTimer() {
     if (durTimer || document.hidden) return;
@@ -997,10 +1537,11 @@ var TIME_ZONE = 'Asia/Dubai';
   function stopDurationTimer() { if (durTimer) { clearInterval(durTimer); durTimer = null; } }
 
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { stopPolling(); stopDurationTimer(); if (view === 'progress') render(); }
+    if (document.hidden) { stopDurationTimer(); if (wantsPolling()) { stopPolling(); startPolling(); } }
     else {
+      stopTitleFlash();
       if (ticket) { renderDuration(); startDurationTimer(); }
-      if (wantsPolling()) { poll(); startPolling(); render(); }
+      if (wantsPolling()) { stopPolling(); poll(); startPolling(); render(); }
     }
   });
   window.addEventListener('online', function () {
@@ -1014,6 +1555,12 @@ var TIME_ZONE = 'Asia/Dubai';
   $('vcApply').addEventListener('click', function () { sendVoucher(codeFrom($('vcInput').value)); });
   $('vcInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); sendVoucher(codeFrom($('vcInput').value)); } });
   $('vcScan').addEventListener('click', startScan);
+  $('cancelBtn').addEventListener('click', cancelRequest);
+  $('alertsBtn').addEventListener('click', enableAlerts);
+  document.addEventListener('pointerdown', unlockAudio, { passive: true });
+  if ('serviceWorker' in navigator && notifyAllowed()) {
+    navigator.serviceWorker.register('/request/sw.js', { scope: '/request/' }).then(function (r) { swReg = r; }, function () {});
+  }
   $('vcScanClose').addEventListener('click', stopScan);
   $('themeBtn').addEventListener('click', function () {
     var t = theme() === 'dark' ? 'light' : 'dark';
