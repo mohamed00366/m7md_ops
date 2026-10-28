@@ -138,6 +138,27 @@ class _ValetVoiceScreenState extends State<ValetVoiceScreen> {
             ]),
             _sw('voice_on', 'المايك في التطبيق', 'Mic in the app', 'لو مقفول: زرار المايك مش بيظهر في شاشة إضافة تكت', 'Off: no mic button on the Add ticket screen', true),
             const SizedBox(height: 6),
+            Text(tx(context, 'التسجيل الجديد', 'A new recording'), style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 6),
+            SegmentedButton<String>(
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: 'add', label: Text(tx(context, 'يكمّل التكت اللي على الشاشة', 'Adds to the ticket on the screen'))),
+                ButtonSegment(value: 'new', label: Text(tx(context, 'كل تسجيل = تكت جديد', 'Each recording = a new ticket'))),
+              ],
+              selected: {vStr(_set['voice_mode']) == 'new' ? 'new' : 'add'},
+              onSelectionChanged: (v) => _s('voice_mode', v.first),
+            ),
+            const SizedBox(height: 4),
+            Text(tx(context, 'يكمّل: الموظف يقدر يقول التكت على كذا مرة (اللوحة، بعدين اللون، بعدين الضرر …) و«عربية جديدة» تبدأ تكت تاني · «احفظ / اطبع» تحفظ وتطبع',
+                    'Adds: the valet may say the ticket in several parts (plate, then colour, then damage …); «new car» starts another ticket · «save / print» saves and prints'),
+                style: const TextStyle(color: _muted, fontSize: 12)),
+            _sw('voice_search', 'البحث والدفع بالصوت', 'Search & payment by voice',
+                'مايك في لوحة التكتات («56»، «افتح الدفع 56») وفي شاشة الدفع («كاش 200 بقشيش 10 اطبع»)', 'Mic on the board («56», «pay 56») and on the payment («cash 200 tips 10 print»)', true),
+            _sw('voice_ask', 'أسئلة للمساعد عن التطبيق', 'Questions to the assistant',
+                'الموظف يسأل أي سؤال عن التطبيق بالصوت أو بالكتابة والمساعد يرد من دليل التطبيق', 'The staff ask any question about the app; the assistant answers from the app guide', true),
+            _sw('voice_speak', 'الرد بالصوت', 'Answers read aloud', 'المساعد يقرا الرد بصوت عالي (الموظف يقدر يقفله)', 'The assistant reads its answer aloud (the valet may turn it off)', true),
+            const SizedBox(height: 6),
             Text(tx(context, 'اللغات المسموحة', 'Languages allowed'), style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
             Wrap(spacing: 8, children: [
@@ -200,6 +221,15 @@ class _ValetVoiceScreenState extends State<ValetVoiceScreen> {
           for (final l in vList(d['langs'])) _miniStat(_langName(context, vStr(l['lang'])), vNum(l['n']).toInt(), vNum(l['ok']).toInt()),
           for (final p in vList(d['people'])) _miniStat(vStr(p['employee']).isEmpty ? '—' : vStr(p['employee']), vNum(p['n']).toInt(), vNum(p['ok']).toInt()),
         ]),
+      ),
+      _section(context, tx(context, 'أسئلة الموظفين للمساعد', 'Questions of the staff')),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        child: vList(d['questions']).isEmpty
+            ? HubCard(child: Text(tx(context, 'مفيش أسئلة في الفترة دي', 'No questions in this period'), style: const TextStyle(color: _muted)))
+            : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                for (final q in vList(d['questions'])) Padding(padding: const EdgeInsets.only(bottom: 8), child: questionCard(context, q)),
+              ]),
       ),
       _section(context, tx(context, 'سجل التسجيلات', 'Recordings log')),
       Padding(
@@ -298,6 +328,7 @@ class ValetAiScreen extends StatefulWidget {
 }
 
 class _ValetAiScreenState extends State<ValetAiScreen> {
+  bool _helpEdited = false;
   VJson? _d;
   Object? _err;
   VJson _cfg = {};
@@ -321,6 +352,7 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
   }
 
   void _apply(VJson d) => setState(() {
+        _helpEdited = false;
         _d = d;
         _err = null;
         _cfg = Map<String, dynamic>.from((d['settings'] as Map?) ?? {});
@@ -345,7 +377,8 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
     final d = await vGuard(
         context,
         () => ValetAdmin.I.call('vva_ai_save', {
-              'p_config': {for (final k in const ['provider', 'model', 'enabled', 'fallback', 'monthly_limit', 'backup_models']) k: _cfg[k]},
+              'p_config': {for (final k in const ['provider', 'model', 'enabled', 'fallback', 'monthly_limit', 'backup_models', 'ask_on']) k: _cfg[k],
+              if (_helpEdited) 'help_text': _cfg['help_text']},
               'p_key': key,
             }),
         ok: tx(context, 'تم الحفظ', 'Saved'));
@@ -578,6 +611,14 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
               title: Text(tx(context, 'المساعد شغّال', 'Assistant on'), style: const TextStyle(fontWeight: FontWeight.w700)),
               subtitle: Text(tx(context, 'مقفول = الموبايل بيفهم لوحده بالقاموس بس', 'Off = the phone reads with the dictionary only'), style: const TextStyle(fontSize: 12)),
             ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _cfg['ask_on'] != false,
+              onChanged: (v) => _c('ask_on', v),
+              title: Text(tx(context, 'الأسئلة عن التطبيق', 'Questions about the app'), style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(tx(context, 'الموظف يسأل («ازاي أعمل إعادة طباعة؟») والمساعد يرد من دليل التطبيق اللي تحت', 'The staff ask («how do I reprint?») and the assistant answers from the guide below'),
+                  style: const TextStyle(fontSize: 12)),
+            ),
             Text(tx(context, 'إمتى يتبعت الكلام للذكاء؟', 'When does the text go to the AI?'), style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
             SegmentedButton<String>(
@@ -653,6 +694,60 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
               Padding(padding: const EdgeInsets.only(top: 8), child: SelectableText('→ $_tryOut', textDirection: TextDirection.ltr, style: const TextStyle(fontWeight: FontWeight.w700))),
           ]),
         ),
+      ),
+      // ---------------- app guide (DB 318)
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        child: HubCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              const Icon(Icons.menu_book_outlined),
+              const SizedBox(width: 8),
+              Expanded(child: Text(tx(context, 'دليل التطبيق (المساعد بيرد منه)', 'App guide (the assistant answers from it)'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15))),
+              if (_cfg['help_custom'] == true)
+                TextButton.icon(
+                  onPressed: () {
+                    _c('help_text', '');
+                    _helpEdited = true;
+                    _save();
+                  },
+                  icon: const Icon(Icons.restart_alt, size: 18),
+                  label: Text(tx(context, 'رجوع للدليل الأصلي', 'Back to the built-in guide')),
+                ),
+              FilledButton.icon(onPressed: _dirty ? () => _save() : null, icon: const Icon(Icons.save_outlined), label: Text(tx(context, 'حفظ', 'Save'))),
+            ]),
+            const SizedBox(height: 4),
+            Text(tx(context, 'اكتب بالإنجليزي أو العربي: الخطوات، القواعد، الأسعار العامة، أرقام التواصل … المساعد مش هيرد بحاجة مش مكتوبة هنا.',
+                    'Write in English or Arabic: steps, rules, general prices, contacts … the assistant does not answer with anything not written here.'),
+                style: const TextStyle(color: _muted, fontSize: 12)),
+            const SizedBox(height: 8),
+            TextFormField(
+              key: ValueKey('help${_d.hashCode}'),
+              initialValue: vStr(_cfg['help_text']),
+              minLines: 8,
+              maxLines: 22,
+              textDirection: TextDirection.ltr,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12.5),
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+              onChanged: (v) {
+                _helpEdited = true;
+                _c('help_text', v);
+              },
+            ),
+          ]),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+        child: Text(tx(context, 'آخر أسئلة الموظفين (كل النقاط)', 'Latest questions of the staff (all points)'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        child: vList(d['questions']).isEmpty
+            ? HubCard(child: Text(tx(context, 'مفيش أسئلة لسه', 'No questions yet'), style: const TextStyle(color: _muted)))
+            : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                for (final q in vList(d['questions']).take(30)) Padding(padding: const EdgeInsets.only(bottom: 8), child: questionCard(context, q)),
+              ]),
       ),
       // ---------------- accuracy
       Padding(
@@ -751,4 +846,26 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
       ]),
     );
   }
+}
+
+/// One question of a valet and the answer of the assistant.
+Widget questionCard(BuildContext c, VJson q) {
+  final lang = vStr(q['lang']);
+  final rtl = lang != 'en';
+  return HubCard(
+    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+        Text(_time(q['at']), style: const TextStyle(color: _muted, fontSize: 12)),
+        Text(vStr(q['employee']).isEmpty ? '—' : vStr(q['employee']), style: const TextStyle(fontWeight: FontWeight.w800)),
+        if (vStr(q['point']).isNotEmpty) hubPill(vStr(q['point'])),
+        if (vStr(q['screen']).isNotEmpty) hubPill(vStr(q['screen'])),
+      ]),
+      const SizedBox(height: 6),
+      Text('❓ ${vStr(q['question'])}', textDirection: rtl ? TextDirection.rtl : TextDirection.ltr, style: const TextStyle(fontWeight: FontWeight.w700)),
+      const SizedBox(height: 4),
+      Text(vStr(q['answer']).isEmpty ? tx(c, '(ماوصلش رد)', '(no answer)') : '💬 ${vStr(q['answer'])}',
+          textDirection: rtl ? TextDirection.rtl : TextDirection.ltr, style: const TextStyle(color: _muted, height: 1.4)),
+    ]),
+  );
 }
