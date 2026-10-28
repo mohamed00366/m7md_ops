@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'valet_admin.dart';
 import 'valet_key_boards_panel.dart';
 import 'valet_hourly.dart';
 import 'valet_parking_screen.dart';
+import 'valet_pricing_rules.dart';
 import 'valet_ticket_parts.dart';
 import 'valet_ui.dart';
 
@@ -310,16 +310,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
 
   Widget _features(VJson d) {
     final s = vMap(d['settings']);
-    final lost = TextEditingController(text: vNum(s['lost_ticket_price']).toString());
-    final night = TextEditingController(text: vNum(s['over_night_price']).toString());
-    final freeMin = TextEditingController(text: vNum(s['free_minutes']).toInt().toString());
-    String hm(dynamic v, String d) {
-      final x = vStr(v);
-      return RegExp(r'^\d{1,2}:\d{2}').hasMatch(x) ? x.substring(0, x.indexOf(':') + 3) : d;
-    }
-    final siteOpen = TextEditingController(text: hm(s['site_open_at'], ''));
-    final siteClose = TextEditingController(text: hm(s['site_close_at'], ''));
-    String? okTime(String v) => RegExp(r'^([01]?\d|2[0-3]):[0-5]\d$').hasMatch(v.trim()) ? v.trim() : null;
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     void toggleValue(String k, Object v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     final flags = {for (final f in _flags(context)) f.$1: f};
@@ -901,101 +891,16 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       ]),
       VPanel(
         title: tx(context, 'التَذاكِر وَالرُسوم', 'Tickets and charges'),
-        actions: [
-          if (_edit)
-            FilledButton.icon(
-              icon: const Icon(Icons.save_outlined),
-              label: Text(tx(context, 'حِفظ', 'Save')),
-              onPressed: () {
-                final h24 = vBool(s['site_24h']);
-                final close = okTime(siteClose.text), open = okTime(siteOpen.text);
-                _save('vva_point_settings_save', {
-                  'p_point': widget.pointId,
-                  'p_data': {
-                    'lost_ticket_price': num.tryParse(lost.text) ?? 0,
-                    'over_night_price': num.tryParse(night.text) ?? 0,
-                    'free_minutes': (int.tryParse(freeMin.text.trim()) ?? 0).clamp(0, 600),
-                    if (!h24 && open != null) 'site_open_at': open,
-                    if (!h24 && close != null) ...{'site_close_at': close, 'over_night_rule': 'cutoff', 'over_night_at': close},
-                    if (h24) 'over_night_enabled': false,
-                  },
-                });
-              },
-            ),
-        ],
-        child: Wrap(spacing: 14, runSpacing: 14, children: [
-          // 1 · lost ticket – a button on the payment screen
-          SizedBox(
-            width: 360,
-            child: Row(children: [
-              Switch(value: vBool(s['lost_ticket_enabled']), onChanged: !_edit ? null : (v) => toggle('lost_ticket_enabled', v)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _field(lost, tx(context, 'رَسم التَذكَرة المَفقودة (AED)', 'Lost ticket fee (AED)'),
-                    number: true, help: tx(context, 'يَظهَر زِرّاً في شاشة الدَفع', 'Shown as a button on the payment screen')),
-              ),
-            ]),
-          ),
-          // 2 · site hours → overnight
-          SizedBox(
-            width: 620,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(tx(context, 'مَواعيد المَوقِع (تَوقيت دُبَي)', 'Site hours (Dubai time)'), style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 6),
-              Wrap(spacing: 12, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                FilterChip(
-                  avatar: const Icon(Icons.all_inclusive, size: 18),
-                  label: Text(tx(context, 'يَعمَل 24 ساعة', 'Works 24 hours')),
-                  selected: vBool(s['site_24h']),
-                  onSelected: !_edit ? null : (v) => _save('vva_point_settings_save', {
-                    'p_point': widget.pointId,
-                    'p_data': {'site_24h': v, if (v) 'over_night_enabled': false},
-                  }),
-                ),
-                if (!vBool(s['site_24h'])) ...[
-                  _field(siteOpen, tx(context, 'يَفتَح الساعة (HH:MM)', 'Opens at (HH:MM)'), width: 170),
-                  _field(siteClose, tx(context, 'يُقفِل الساعة (HH:MM)', 'Closes at (HH:MM)'), width: 170),
-                ],
-              ]),
-            ]),
-          ),
-          if (!vBool(s['site_24h']))
-            SizedBox(
-              width: 360,
-              child: Row(children: [
-                Switch(value: vBool(s['over_night_enabled']), onChanged: !_edit ? null : (v) => toggle('over_night_enabled', v)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _field(night, tx(context, 'رَسم المَبيت (AED)', 'Overnight fee (AED)'),
-                      number: true,
-                      help: tx(context, 'لِكُلّ مَرّة تَبقى السَيّارة بَعد وَقت الإقفال', 'For every closing time the car is still parked')),
-                ),
-              ]),
-            ),
-          SizedBox(
-            width: 620,
+        child: Row(children: [
+          const Icon(Icons.sell_outlined, color: VC.gold),
+          const SizedBox(width: 8),
+          Expanded(
             child: Text(
-                vBool(s['site_24h'])
-                    ? tx(context, 'المَوقِع 24 ساعة: لا يوجَد رَسم مَبيت.', 'A 24-hour site: no overnight fee.')
-                    : tx(context, 'المَبيت: السَيّارة ما زالَت داخِل المَوقِع وَقت الإقفال الرَسمي ← يُضاف الرَسم في شاشة الدَفع. اِضغَط حِفظ بَعد تَعديل الأَوقات.',
-                        'Overnight: the car is still parked at the official closing time → the fee is added on the payment screen. Press Save after changing the times.'),
-                style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+                tx(context, 'مَواعيد المَوقِع، المَبيت، التِكِت المَفقود، الدَقائِق المَجّانيّة وَالأَيّام الخاصّة اِتنَقَلِت لِتَبويب "الأَسعار" (لِلنُقطة وَلِكُلّ فَرع).',
+                    'Site hours, overnight, lost ticket, free minutes and special days moved to the "Prices" tab (for the point and for each branch).'),
+                style: const TextStyle(color: VC.muted)),
           ),
-          SizedBox(
-            width: 360,
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10, right: 8),
-                child: Icon(Icons.timer_outlined, color: vNum(s['free_minutes']) > 0 ? VC.gold : VC.muted),
-              ),
-              Expanded(
-                child: _field(freeMin, tx(context, 'مَجّانيّة إذا خَرَجَت خِلال (دَقيقة)', 'Free if the car leaves within (minutes)'),
-                    number: true,
-                    help: tx(context, '0 = إيقاف · مِثال 10: التَذكَرة مَجّانيّة لَو خَرَجَت السَيّارة خِلال 10 دَقائِق',
-                        '0 = off · e.g. 10: the ticket is free when the car leaves within 10 minutes')),
-              ),
-            ]),
-          ),
+          TextButton(onPressed: () => DefaultTabController.of(context).animateTo(1), child: Text(tx(context, 'الأَسعار', 'Prices'))),
         ]),
       ),
       _branchesPanel(d),
@@ -1096,17 +1001,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     );
   }
 
-  Widget _field(TextEditingController c, String label, {String? help, double width = 280, bool number = false}) => SizedBox(
-        width: width,
-        child: TextField(
-          controller: c,
-          enabled: _edit,
-          keyboardType: number ? const TextInputType.numberWithOptions(decimal: true) : null,
-          inputFormatters: number ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))] : null,
-          decoration: InputDecoration(labelText: label, helperText: help, isDense: true),
-        ),
-      );
-
   // ---------------------------------------------------------------- prices
   /// Hourly rows grouped into tables: same client + ticket name + days.
   static List<List<VJson>> hourlyTables(List<VJson> prices) {
@@ -1142,6 +1036,13 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             IconButton(tooltip: tx(context, 'حَذف', 'Delete'), icon: const Icon(Icons.delete_outline, color: VC.bad), onPressed: onDelete),
           ]);
     return _page([
+      PricingRulesPanel(
+        pointId: widget.pointId,
+        settings: vMap(d['settings']),
+        clients: vList(d['clients']),
+        edit: _edit,
+        onSavePoint: (data) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': data}),
+      ),
       VPanel(
         title: tx(context, 'أَسعار ثابِتة (${fixed.length})', 'Fixed prices (${fixed.length})'),
         actions: [
