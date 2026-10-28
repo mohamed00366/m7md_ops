@@ -69,7 +69,8 @@ begin
         from public.valet_special_days d left join public.sites s on s.id = d.site_id
        where d.point_id = p_point), '[]'::jsonb),
     'branch_pricing', coalesce((
-      select jsonb_agg(to_jsonb(b.*)) from public.valet_branch_pricing b where b.point_id = p_point), '[]'::jsonb));
+      select jsonb_agg(to_jsonb(b.*)) from public.valet_branch_pricing b where b.point_id = p_point), '[]'::jsonb),
+    'point_settings', (select to_jsonb(s.*) from public.valet_point_settings s where s.point_id = p_point));
 end $$;
 
 create or replace function public.vva_branch_pricing_save(p_token text, p_point uuid, p_site uuid, p_data jsonb)

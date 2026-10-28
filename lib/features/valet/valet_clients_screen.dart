@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_pricing_rules.dart';
 import 'valet_ui.dart';
 
 /// 🤝 تَطبيق العُمَلاء — مَن يَتَحَقَّق مِن التَذاكِر، في أَيّ نِقاط، بِأَيّ حُدود وَخَصم، وَحِساباتهم.
@@ -193,6 +194,9 @@ class _ValetClientDetailScreenState extends State<ValetClientDetailScreen> {
   VJson? _d;
   Object? _err;
   bool get _edit => ValetAdmin.I.can(ValetAdmin.permClients);
+
+  /// Point whose pricing rules for this branch are shown (DB 305).
+  String? _pricePoint;
 
   @override
   void initState() {
@@ -407,6 +411,41 @@ class _ValetClientDetailScreenState extends State<ValetClientDetailScreen> {
                     ]),
             ),
             const SizedBox(height: 14),
+            if (points.isNotEmpty) ...[
+              VPanel(
+                title: tx(context, 'تَسعير الفَرع في كُلّ نُقطة', 'Branch pricing at each point'),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Text(
+                      tx(context,
+                          'نَفس إعدادات تَسعير النُقطة: مَواعيد المَوقِع، المَبيت، التِكِت المَفقود، الدَقائِق المَجّانيّة، التِكِت يِتحاسِب بِأَنهي يَوم، وَالأَيّام الخاصّة. تِتطَبَّق لَمّا الفَرع يِعمِل فاليديشن، وَأَيّ خانة "زي النُقطة" تاخُد قيمة النُقطة.',
+                          'The same settings as the point pricing: site hours, overnight, lost ticket, free minutes, which day prices the ticket, and special days. They apply once this branch validates a ticket; anything "Same as point" uses the point\'s value.'),
+                      style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+                  const SizedBox(height: 10),
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final p in points)
+                      ChoiceChip(
+                        avatar: const Icon(Icons.place_outlined, size: 18),
+                        label: Text('${p['code']} · ${p['name']}'),
+                        selected: (_pricePoint ?? vStr(points.first['id'])) == vStr(p['id']),
+                        onSelected: (_) => setState(() => _pricePoint = vStr(p['id'])),
+                      ),
+                  ]),
+                ]),
+              ),
+              const SizedBox(height: 14),
+              PricingRulesPanel(
+                key: ValueKey('pr-${_pricePoint ?? vStr(points.first['id'])}'),
+                pointId: _pricePoint ?? vStr(points.first['id']),
+                settings: const {},
+                clients: [
+                  {'id': widget.siteId, 'name': vStr(c['name']), 'system_kind': null},
+                ],
+                fixedSite: widget.siteId,
+                edit: ValetAdmin.I.can(ValetAdmin.permSettings),
+                onSavePoint: (_) async {},
+              ),
+              const SizedBox(height: 14),
+            ],
             VPanel(
               title: tx(context, 'أَسعار هذا العَميل', 'Prices of this client'),
               child: VTable(

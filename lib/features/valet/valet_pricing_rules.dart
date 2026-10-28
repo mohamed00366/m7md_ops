@@ -16,13 +16,21 @@ class PricingRulesPanel extends StatefulWidget {
     required this.clients,
     required this.edit,
     required this.onSavePoint,
+    this.fixedSite,
   });
+
+  /// Branch page: only this branch's rules at [pointId] (no point / branch chooser).
+  final String? fixedSite;
 
   final String pointId;
   final VJson settings;
   final List<VJson> clients;
   final bool edit;
   final Future<void> Function(Map<String, dynamic> data) onSavePoint;
+
+  /// Test / preview hook: returns the vva_pricing answer instead of calling the server.
+  @visibleForTesting
+  static Future<VJson> Function()? debugLoad;
 
   @override
   State<PricingRulesPanel> createState() => _PricingRulesPanelState();
@@ -38,12 +46,16 @@ class _PricingRulesPanelState extends State<PricingRulesPanel> {
   @override
   void initState() {
     super.initState();
+    _scope = widget.fixedSite;
     _load();
   }
 
+  /// Point settings: from the page, or (branch page) from vva_pricing.
+  VJson get _point => widget.settings.isNotEmpty ? widget.settings : vMap(_x?['point_settings']);
+
   Future<void> _load() async {
     try {
-      final r = await ValetAdmin.I.call('vva_pricing', {'p_point': widget.pointId});
+      final r = await (PricingRulesPanel.debugLoad?.call() ?? ValetAdmin.I.call('vva_pricing', {'p_point': widget.pointId}));
       if (mounted) setState(() => (_x = r, _ver++));
     } catch (e) {
       if (mounted) setState(() => _err = e);
@@ -76,6 +88,7 @@ class _PricingRulesPanelState extends State<PricingRulesPanel> {
   Widget build(BuildContext context) {
     final x = _x;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (widget.fixedSite == null) ...[
       VPanel(
         title: tx(context, 'قَواعِد التَسعير', 'Pricing rules'),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -107,17 +120,22 @@ class _PricingRulesPanelState extends State<PricingRulesPanel> {
         ]),
       ),
       const SizedBox(height: 14),
+      ],
       if (x == null)
         Center(child: Padding(padding: const EdgeInsets.all(16), child: _err != null ? Text(vErr(context, _err!)) : const CircularProgressIndicator()))
       else ...[
         _RulesForm(
-          key: ValueKey('${_scope ?? 'point'}#$_ver#${widget.settings.hashCode}'),
+          key: ValueKey('${_scope ?? 'point'}#$_ver#${_point.hashCode}'),
           branch: _scope != null,
-          values: _scope == null ? widget.settings : (_branchRow(_scope!) ?? const {}),
-          point: widget.settings,
+          values: _scope == null ? _point : (_branchRow(_scope!) ?? const {}),
+          point: _point,
           edit: widget.edit,
           onSave: (data) => _scope == null ? widget.onSavePoint(data) : _call('vva_branch_pricing_save', {'p_site': _scope, 'p_data': data}),
         ),
+        if (_scope == null && widget.fixedSite == null && _branches.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _branchBasis(),
+        ],
         const SizedBox(height: 14),
         _specialDays(vList(x['special_days']).where((d) => vStr(d['site_id']).isEmpty ? _scope == null : vStr(d['site_id']) == _scope).toList()),
       ],
@@ -150,6 +168,43 @@ class _PricingRulesPanelState extends State<PricingRulesPanel> {
       const SizedBox(width: 6),
       step(VC.ok, '4', '+ الرُسوم', '+ Charges', 'مَبيت · تِكِت مَفقود', 'Overnight · lost ticket'),
     ]);
+  }
+
+  /// Point page: which day prices the ticket for each branch (after its validation), like the mock.
+  Widget _branchBasis() {
+    return VPanel(
+      title: tx(context, 'الفُروع · لَمّا التِكِت يِتعِمِله فاليديشن', 'Branches · once the ticket is validated'),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(tx(context, 'التِكِت يِتحاسِب بِأَنهي يَوم في كُلّ فَرع. باقي إعدادات الفَرع: اِضغَط اسمه فوق.', 'Which day prices the ticket at each branch. The other branch settings: tap its name above.'),
+            style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+        const SizedBox(height: 8),
+        for (final b in _branches)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              SizedBox(width: 170, child: Text(vStr(b['name']), style: const TextStyle(fontWeight: FontWeight.w600))),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: SegmentedButton<String>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(value: '', label: Text(tx(context, 'زي النُقطة', 'Same as point'))),
+                      ButtonSegment(value: 'entry', label: Text(tx(context, 'الدُخول', 'Entry'))),
+                      ButtonSegment(value: 'exit', label: Text(tx(context, 'الخُروج', 'Exit'))),
+                      ButtonSegment(value: 'any', label: Text(tx(context, 'أَيّ يَوم', 'Any day'))),
+                    ],
+                    selected: {vStr(_branchRow(vStr(b['id']))?['special_day_basis'])},
+                    onSelectionChanged: !widget.edit
+                        ? null
+                        : (v) => _call('vva_branch_pricing_save', {'p_site': b['id'], 'p_data': {'special_day_basis': v.first}}),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+      ]),
+    );
   }
 
   // ---------------------------------------------------------------- special days
@@ -491,7 +546,7 @@ class _RulesFormState extends State<_RulesForm> {
       );
 
   Widget _box(IconData icon, String title, String sub, List<Widget> children, {String? hint}) => Container(
-        width: 520,
+        width: 490,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(border: Border.all(color: VC.muted.withValues(alpha: .25)), borderRadius: BorderRadius.circular(14)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
