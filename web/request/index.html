@@ -630,7 +630,8 @@ var TIME_ZONE = 'Asia/Dubai';
     return false;
   }
   function isRequested(t) { return String(t.car_request_status || '').toLowerCase() === 'ordered'; }
-  function isReady(t) { return String(t.estimated_ready || '').toLowerCase() === 'ready' || !!t.car_arrival; }
+  // ready = the staff pressed "Car ready" for THIS request (car_arrival alone can be left from an earlier request that was reparked)
+  function isReady(t) { return String(t.estimated_ready || '').toLowerCase() === 'ready'; }
   function stage(t) {               // 1 requested, 2 being brought, 3 ready
     if (isReady(t)) return 3;
     if (t.estimated_time != null && String(t.estimated_time).trim() !== '') return 2;
