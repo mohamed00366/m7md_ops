@@ -342,10 +342,10 @@
     </div>
     <div class="perf" aria-hidden="true"></div>
     <dl class="facts">
-      <div><dt data-i18n="plate">Plate</dt><dd><span class="plate"><b>UAE</b><span id="tPlate">—</span></span></dd></div>
-      <div><dt data-i18n="color">Colour</dt><dd><span class="color-wrap"><span class="dot" id="tDot" aria-hidden="true"></span><span id="tColor">—</span></span></dd></div>
-      <div><dt data-i18n="location">Location</dt><dd id="tPoint">—</dd></div>
-      <div><dt data-i18n="parkedAt">Parked at</dt><dd><span id="tEntry">—</span><span class="duration" id="tDuration"></span></dd></div>
+      <div id="fPlate"><dt data-i18n="plate">Plate</dt><dd><span class="plate"><b>UAE</b><span id="tPlate">—</span></span></dd></div>
+      <div id="fColor"><dt data-i18n="color">Colour</dt><dd><span class="color-wrap"><span class="dot" id="tDot" aria-hidden="true"></span><span id="tColor">—</span></span></dd></div>
+      <div id="fLoc"><dt data-i18n="location">Location</dt><dd id="tPoint">—</dd></div>
+      <div id="fParked"><dt data-i18n="parkedAt">Parked at</dt><dd><span id="tEntry">—</span><span class="duration" id="tDuration"></span></dd></div>
     </dl>
     <div class="price" id="tPrice" hidden>
       <div><div class="k" id="tPriceLbl"></div><div class="pv" id="tPriceVal"></div></div>
@@ -365,6 +365,7 @@
 
   <!-- REQUEST FORM -->
   <section id="vRequest" class="card pad" hidden>
+    <div class="ended" id="reqOff" hidden><strong data-i18n="offTitle">Please ask the valet desk</strong><span data-i18n="offText">Requests from this page are paused at this location. Please ask the valet desk for your car.</span></div>
     <div class="ended" id="reqCancelled" hidden><strong data-i18n="cxTitle">Your request was cancelled</strong><span data-i18n="cxText">Your car is still safe in the parking. You can request it again at any time.</span></div>
     <form id="reqForm" novalidate>
       <label class="field-label" for="note"><span data-i18n="noteLabel">Note for the valet</span> <small data-i18n="optional">(optional)</small></label>
@@ -544,7 +545,9 @@ var TIME_ZONE = 'Asia/Dubai';
       nApproved: 'Request confirmed — your car will be ready in about {n} min.', nDelay: 'Sorry, we added {n} min to your delivery time.',
       nKey: 'Your key was received — the car is being sent.', nOut: 'The driver is on the way with your car.',
       nReady: 'Your car is ready! Please go to the pick-up point.', nReturned: 'Your car was returned to the parking.',
-      nSoon: 'Please collect your car — {n} min left.', nCancelled: 'Your request was cancelled.'
+      nSoon: 'Please collect your car — {n} min left.', nCancelled: 'Your request was cancelled.',
+      offTitle: 'Please ask the valet desk', offText: 'Requests from this page are paused at this location. Please ask the valet desk for your car.',
+      cancelHintA: 'You can cancel until the valet confirms your request'
     },
     ar: {
       title: 'اطلب سيارتي · M7 NEXUS',
@@ -608,7 +611,9 @@ var TIME_ZONE = 'Asia/Dubai';
       nApproved: 'تم تأكيد طلبك — سيارتك ستكون جاهزة خلال {n} دقيقة تقريباً.', nDelay: 'نعتذر، أضفنا {n} دقائق إلى وقت التسليم.',
       nKey: 'تم استلام مفتاحك — جارٍ إرسال السيارة.', nOut: 'السائق في الطريق بسيارتك.',
       nReady: 'سيارتك جاهزة! تفضل بالتوجه إلى نقطة الاستلام.', nReturned: 'تمت إعادة سيارتك إلى البركنج.',
-      nSoon: 'يرجى استلام سيارتك — باقي {n} دقيقة.', nCancelled: 'تم إلغاء طلبك.'
+      nSoon: 'يرجى استلام سيارتك — باقي {n} دقيقة.', nCancelled: 'تم إلغاء طلبك.',
+      offTitle: 'يرجى مراجعة مكتب الفاليه', offText: 'الطلب من هذه الصفحة متوقف حالياً في هذا الموقع. يرجى طلب سيارتك من مكتب الفاليه.',
+      cancelHintA: 'يمكنك الإلغاء حتى يؤكد الفاليه طلبك'
     }
   };
 
@@ -661,9 +666,23 @@ var TIME_ZONE = 'Asia/Dubai';
     if (!m) return '';
     try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (e) { return ''; }
   }
+  // 310: texts set in the dashboard ("Customer link") replace the built-in ones, key by key
+  var LINK = null;
+  function msgOverride(key) {
+    var m = LINK && LINK.messages && LINK.messages[key];
+    var v = m && m[lang];
+    return v && String(v).trim() ? String(v) : null;
+  }
+  function msgOn(key) { var m = LINK && LINK.messages && LINK.messages[key]; return !(m && m.on === false); }
+  function show_(key) { var s = LINK && LINK.show; return !(s && s[key] === false); }
   function tr(key, vars) {
-    var s = (T[lang] && T[lang][key]) || T.en[key] || key;
+    var s = msgOverride(key) || (T[lang] && T[lang][key]) || T.en[key] || key;
     if (vars) for (var k in vars) if (vars.hasOwnProperty(k)) s = s.split('{' + k + '}').join(vars[k]);
+    if (s.indexOf('{') >= 0 && typeof ticket !== 'undefined' && ticket) {
+      var eta = ticket.eta_at ? parseDate(ticket.eta_at) : null;
+      s = s.split('{ticket}').join(ticket.short_no || '').split('{point}').join(ticket.point_name || '')
+           .split('{time}').join(eta ? fmtTime(eta) : '');
+    }
     return s;
   }
   function setText(id, s) { var el = $(id); if (el) el.textContent = s == null ? '' : s; }
@@ -671,7 +690,7 @@ var TIME_ZONE = 'Asia/Dubai';
   function announce(s) { var el = $('live'); el.textContent = ''; setTimeout(function () { el.textContent = s; }, 60); }
 
   /* ------------------------------ API ------------------------------ */
-  function rpc(name, body) {
+  var rpc = function (name, body) {
     var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, REQUEST_TIMEOUT_MS) : null;
     var opts = {
@@ -980,6 +999,10 @@ var TIME_ZONE = 'Asia/Dubai';
     var m = $('themeColor'); if (m) m.setAttribute('content', dark ? '#0B0F17' : '#EEF1F5');
   }
 
+  function applyStaticTexts() {
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) nodes[i].textContent = tr(nodes[i].getAttribute('data-i18n'));
+  }
   function applyLang() {
     var html = document.documentElement;
     html.setAttribute('lang', lang);
@@ -1002,14 +1025,18 @@ var TIME_ZONE = 'Asia/Dubai';
     show('vMsg', view === 'msg');
     show('vTicket', view === 'active' || view === 'progress' || view === 'returned' || (view === 'msg' && msgKind === 'closed' && !!ticket));
     show('vRequest', view === 'active');
-    show('reqCancelled', view === 'active' && r === 'cancelled');
+    var off = !!(LINK && LINK.enabled === false) && view === 'active';
+    show('reqCancelled', view === 'active' && r === 'cancelled' && !off);
+    show('reqOff', off);
+    show('reqForm', !off);
     show('vReturned', view === 'returned');
     show('vProgress', view === 'progress');
-    show('vRule', view === 'progress' && r !== 'requested');
+    show('vRule', view === 'progress' && r !== 'requested' && msgOn('ruleText'));
     show('vCancel', view === 'progress' && !!ticket && !!ticket.can_cancel);
     show('noCancel', view === 'progress' && r === 'driver_out');
     $('main').classList.toggle('is-progress', view === 'progress');
-    show('vVoucher', (view === 'active' || view === 'progress') && !!ticket);
+    show('vVoucher', (view === 'active' || view === 'progress') && !!ticket && !(LINK && LINK.voucher === false));
+    setText('cancelHint', LINK && LINK.cancel_until === 'approved' ? tr('cancelHintA') : tr('cancelHint'));
     if (ticket) renderVoucher();
     if (ticket) renderTicket();
     if (view === 'msg') renderMsg();
@@ -1035,6 +1062,9 @@ var TIME_ZONE = 'Asia/Dubai';
     $('tStat').className = stg === 0 || stg === 3 ? 'stat' : 'stat go';
     renderPrice();
     setText('tPlate', t.plate || '—');
+    show('fPlate', show_('plate') && !!t.plate); show('fColor', show_('color') && !!t.color);
+    show('fLoc', show_('location') && !!t.point_name); show('fParked', show_('parked_at'));
+    $('tNo').style.visibility = show_('ticket_no') ? '' : 'hidden';
     var c = colorInfo(t.color);
     var dot = $('tDot');
     if (c && c.hex) { dot.style.background = c.hex; dot.style.display = ''; } else { dot.style.display = 'none'; }
@@ -1081,6 +1111,7 @@ var TIME_ZONE = 'Asia/Dubai';
       if (q.nights > 0) add(tr('pNights', { n: q.nights, v: money(q.overnight) }));
       if (q.off > 0) add(tr('pCode', { c: q.code, v: money(q.off) }));
       add(tr('vatIncl'));
+      lines.style.display = show_('price_lines') ? '' : 'none';
     }
     show('tPrice', true);
   }
@@ -1147,6 +1178,7 @@ var TIME_ZONE = 'Asia/Dubai';
     if (added > 0) {
       var rr = String(t.eta_reason || '').trim(), key = { traffic: 'rTraffic', busy: 'rBusy', 'far slot': 'rFar', far: 'rFar' }[rr.toLowerCase()];
       var reason = key ? tr(key) : rr;
+      ((LINK && LINK.reasons) || []).forEach(function (x) { if (x && String(x.key || '').toLowerCase() === rr.toLowerCase() && x[lang]) reason = x[lang]; });
       setText('pDelayText', reason ? tr('delayText', { n: added, r: reason }) : tr('delayTextNoR', { n: added }));
     }
     // old flow (no countdown): minutes only
@@ -1183,7 +1215,7 @@ var TIME_ZONE = 'Asia/Dubai';
     var a = $('pAt'); a.textContent = '';
     if (at) { a.appendChild(document.createTextNode(at)); var b = document.createElement('b'); b.textContent = fmtTime(end); a.appendChild(b); }
     // reminder: pick-up time almost over
-    if (r === 'ready' && left > 0 && left <= 2 * 60000 && !soonSaid) { soonSaid = true; alertUser(tr('nSoon', { n: Math.max(1, Math.ceil(left / 60000)) }), true); }
+    if (r === 'ready' && left > 0 && left <= 2 * 60000 && !soonSaid) { soonSaid = true; if (msgOn('nSoon')) alertUser(tr('nSoon', { n: Math.max(1, Math.ceil(left / 60000)) }), true); }
   }
   var soonSaid = false;
   var tickTimer = null;
@@ -1278,17 +1310,21 @@ var TIME_ZONE = 'Asia/Dubai';
   function stopTitleFlash() { if (titleTimer) { clearInterval(titleTimer); titleTimer = null; document.title = baseTitle || tr('title'); } }
   // what changed since the last poll → one alert (the most important)
   function changes(a, b) {
+    var c = changeKey(a, b);
+    return c && msgOn(c[0]) ? [tr(c[0], c[1]), c[2]] : null;
+  }
+  function changeKey(a, b) {
     if (!a || !b) return null;
     var ra = req(a), rb = req(b);
-    if (rb === 'returned' && ra !== 'returned') return [tr('nReturned'), true];
-    if (rb === 'ready' && ra !== 'ready') return [tr('nReady'), true];
-    if (rb === 'driver_out' && ra !== 'driver_out') return [tr('nOut'), false];
-    if (num(b.eta_added) > num(a.eta_added)) return [tr('nDelay', { n: num(b.eta_added) - num(a.eta_added) }), false];
+    if (rb === 'returned' && ra !== 'returned') return ['nReturned', null, true];
+    if (rb === 'ready' && ra !== 'ready') return ['nReady', null, true];
+    if (rb === 'driver_out' && ra !== 'driver_out') return ['nOut', null, false];
+    if (num(b.eta_added) > num(a.eta_added)) return ['nDelay', { n: num(b.eta_added) - num(a.eta_added) }, false];
     if (rb === 'approved' && ra === 'requested') {
       var e = parseDate(b.eta_at), n = e ? Math.max(1, Math.round((e.getTime() - nowS()) / 60000)) : num(b.estimated_time);
-      return [tr('nApproved', { n: n || '—' }), false];
+      return ['nApproved', { n: n || '—' }, false];
     }
-    if (rb === 'approved' && b.key_rack === 'received' && a.key_rack !== 'received') return [tr('nKey'), false];
+    if (rb === 'approved' && b.key_rack === 'received' && a.key_rack !== 'received') return ['nKey', null, false];
     return null;
   }
 
@@ -1296,6 +1332,7 @@ var TIME_ZONE = 'Asia/Dubai';
   function applyTicket(t, fromPoll) {
     var prev = ticket;
     ticket = t || {};
+    if (ticket.link) { LINK = ticket.link; applyStaticTexts(); }
     var sn = parseDate(ticket.now); if (sn) skew = sn.getTime() - Date.now();
     if (!isClosed(ticket)) loadVoucher();
     var r = req(ticket);
@@ -1510,7 +1547,7 @@ var TIME_ZONE = 'Asia/Dubai';
 
   /* ------------------------------ polling ------------------------------ */
   function poll() {
-    if (pollInFlight || !token) return;
+    if (pollInFlight || !token || demo) return;
     pollInFlight = true;
     rpc('vv_public_ticket', { p_public_token: token }).then(function (data) {
       pollInFlight = false;
@@ -1574,8 +1611,52 @@ var TIME_ZONE = 'Asia/Dubai';
     applyLang();
   });
 
-  applyLang();
-  load();
+  /* ------------------------------ 310: preview for the dashboard ------------------------------ */
+  // /request/?demo=<state>: a sample ticket (no server call); the dashboard sends its unsaved texts / settings
+  // with postMessage({type: 'vv-link', link, state, lang, theme}).
+  var demo = (/[?&]demo=([a-z_]+)/.exec(window.location.search || '') || [])[1];
+  function demoTicket(st) {
+    var n = Date.now(), iso = function (ms) { return new Date(ms).toISOString(); };
+    var pay = { mode: 'TICKET', ticket_price: 142.86, total_price: 150, customer_name: 'Visitor', ticket_type: 'VALET 150 AED', site_id: 'v', visitor_id: 'v',
+      entry_time: iso(n - 158 * 60000), vat_rate: 0.05, point_name: 'Demo', settings: { free_minutes: 5 }, branch_pricing: [], special_days: [], prices: [] };
+    var b = { short_no: '0060', plate: '**315', color: 'Black', point_name: 'M7 NEXUS Demo', entry_time: pay.entry_time, status: 'Active', now: iso(n),
+      pickup_min: 10, eta_added: 0, pay: pay, link: LINK, car_request_status: 'ordered', request_note: lang === 'ar' ? 'أنا عند المدخل الرئيسي' : 'I am at the main entrance' };
+    var reply = lang === 'ar' ? 'سيارتك عند البوابة B' : 'Your car will be at gate B';
+    var x = {
+      none: { req: 'none', car_request_status: 'pending', can_request: true },
+      requested: { req: 'requested', request_time: iso(n - 30000), can_cancel: true },
+      approved: { req: 'approved', estimated_time: '8', approved_at: iso(n - 15000), eta_at: iso(n + 7 * 60000 + 45000), reply: reply, can_cancel: !(LINK && LINK.cancel_until !== 'driver_out') },
+      key_rack: { req: 'approved', estimated_time: '8', approved_at: iso(n - 60000), eta_at: iso(n + 6 * 60000), reply: reply, key_rack: 'received', can_cancel: true },
+      driver_out: { req: 'driver_out', estimated_time: '8', approved_at: iso(n - 3 * 60000), eta_at: iso(n + 4 * 60000), reply: reply, key_rack: 'out' },
+      delay: { req: 'driver_out', estimated_time: '13', approved_at: iso(n - 4 * 60000), eta_at: iso(n + 9 * 60000), eta_added: 5, eta_reason: 'Traffic', reply: reply },
+      ready: { req: 'ready', estimated_ready: 'ready', ready_at: iso(n - 90000) },
+      returned: { req: 'returned', car_request_status: 'returned' },
+      cancelled: { req: 'cancelled', car_request_status: 'cancelled', can_request: true }
+    }[st] || {};
+    for (var k in x) if (x.hasOwnProperty(k)) b[k] = x[k];
+    return b;
+  }
+  if (demo) {
+    token = '';
+    rpc = function () { return Promise.resolve({ ok: true, code: null }); };
+    window.addEventListener('message', function (e) {
+      var d = e.data || {};
+      if (d.type !== 'vv-link') return;
+      if (d.link) LINK = d.link;
+      if (d.state) demo = d.state;
+      if (d.lang === 'ar' || d.lang === 'en') lang = d.lang;
+      if (d.theme === 'dark' || d.theme === 'light') document.documentElement.setAttribute('data-theme', d.theme);
+      ticket = null; lastStage = 0;
+      applyTicket(demoTicket(demo), false); applyLang();
+    });
+    applyLang();
+    applyTicket(demoTicket(demo), false);
+    stopPolling();
+    try { if (window.parent !== window) window.parent.postMessage({ type: 'vv-link-ready' }, '*'); } catch (e) {}
+  } else {
+    applyLang();
+    load();
+  }
 })();
 </script>
 </body>

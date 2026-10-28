@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_link_screen.dart';
 import 'valet_manual_sales_screen.dart';
 import 'valet_manual_screen.dart';
 import 'valet_member_types_screen.dart';
@@ -29,6 +30,8 @@ class ValetAppHubScreen extends StatelessWidget {
               (Icons.garage_outlined, 'المَواقِف', 'Parking areas', const ValetParkingScreen()),
               if (ValetAdmin.I.can(ValetAdmin.permReports))
                 (Icons.receipt_long_outlined, 'تَذاكِر الفاليه', 'Valet tickets', const ValetTicketsScreen()),
+              if (ValetAdmin.I.can(ValetAdmin.permSettings))
+                (Icons.link_rounded, 'لينك العَميل', 'Customer link', const ValetLinkScreen()),
               if (ValetAdmin.I.can(ValetAdmin.permManualAdd) || ValetAdmin.I.can(ValetAdmin.permManualApprove))
                 (Icons.edit_note_outlined, 'المَبيعات اليَدَويّة', 'Manual sales', const _ManualTabs()),
               if (ValetAdmin.I.can(ValetAdmin.permReports))
