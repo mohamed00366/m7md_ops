@@ -180,6 +180,27 @@
   }
   .alert-soft { background: var(--gold-soft); color: #5C4A0E; border-color: #E8D9A0; font-weight: 600; }
 
+  /* ---------- discount code ---------- */
+  .vc-row { display: flex; gap: 8px; align-items: stretch; }
+  .vc-input {
+    flex: 1; min-width: 0; min-height: 52px; border: 1.5px solid #9AA5B1; border-radius: 12px; padding: 8px 12px;
+    background: #fff; font-size: 17px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; direction: ltr;
+  }
+  .vc-input:focus { border-color: var(--gold-dark); outline: 3px solid rgba(201,162,39,.35); outline-offset: 0; }
+  .vc-btn {
+    min-height: 52px; min-width: 52px; padding: 0 14px; border-radius: 12px; border: 0; cursor: pointer;
+    background: var(--graphite); color: #fff; font-weight: 800; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .vc-btn.gold { background: var(--gold); color: var(--graphite); }
+  .vc-btn[disabled] { opacity: .7; cursor: progress; }
+  .vc-ok { margin-top: 12px; border-radius: 12px; padding: 12px 14px; background: var(--ok-soft); border: 1px solid #A9D8BE; color: var(--ok); font-weight: 700; }
+  .vc-ok small { display: block; color: #24543C; font-weight: 600; font-size: 14px; }
+  .vc-ok .vc-code { direction: ltr; unicode-bidi: isolate; letter-spacing: 1px; }
+  .vc-remove { background: none; border: 0; color: var(--err); font-weight: 700; cursor: pointer; padding: 6px 0 0; font-size: 14px; }
+  .vc-scan { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+  .vc-scan video { width: min(92vw, 420px); aspect-ratio: 1; object-fit: cover; border-radius: 18px; border: 3px solid var(--gold); background: #000; }
+  .vc-scan p { color: #fff; margin: 14px 0; text-align: center; }
+
   /* ---------- progress ---------- */
   .status-title { font-size: 22px; font-weight: 800; margin: 0 0 4px; }
   .status-sub { color: var(--muted); margin: 0; }
@@ -349,6 +370,30 @@
     <p class="poll-note" id="pPoll"></p>
   </section>
 
+  <!-- DISCOUNT CODE -->
+  <section id="vVoucher" class="card pad" hidden aria-labelledby="vcTitle">
+    <label class="field-label" id="vcTitle" for="vcInput"><span data-i18n="vcLabel">Discount code</span> <small data-i18n="optional">(optional)</small></label>
+    <div id="vcForm">
+      <div class="vc-row">
+        <input id="vcInput" class="vc-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="VV-XXXX-XXXX">
+        <button type="button" class="vc-btn" id="vcScan" aria-label="Scan QR">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg>
+        </button>
+        <button type="button" class="vc-btn gold" id="vcApply" data-i18n="vcApply">Apply</button>
+      </div>
+      <div class="hint" data-i18n="vcHint">Type the code or scan its QR. The discount is taken off when you pay.</div>
+    </div>
+    <div class="vc-ok" id="vcOk" hidden></div>
+    <div class="alert alert-soft" id="vcNote" role="status" hidden></div>
+    <div class="alert" id="vcErr" role="alert" hidden></div>
+  </section>
+
+  <div class="vc-scan" id="vcScanBox" hidden>
+    <video id="vcVideo" playsinline muted></video>
+    <p data-i18n="vcScanHint">Point the camera at the QR code</p>
+    <button type="button" class="vc-btn gold" id="vcScanClose" data-i18n="vcClose">Close</button>
+  </div>
+
   <p class="foot"><span data-i18n="foot">VIP Valet &amp; Parking · Dubai</span></p>
 </main>
 
@@ -399,7 +444,12 @@ var TIME_ZONE = 'Asia/Dubai';
       minutes: '{n} min', hm: '{h} h {m} min', justNow: 'less than a minute',
       today: 'Today', yesterday: 'Yesterday',
       liveReq: 'Your car has been requested.', liveBrought: 'Your car is on its way.', liveReady: 'Your car is ready.',
-      switchTo: 'عرض الصفحة بالعربية', switchLabel: 'عربي', switchLang: 'ar'
+      switchTo: 'عرض الصفحة بالعربية', switchLabel: 'عربي', switchLang: 'ar',
+      vcLabel: 'Discount code', vcApply: 'Apply', vcHint: 'Type the code or scan its QR. The discount is taken off when you pay.',
+      vcScanHint: 'Point the camera at the QR code', vcClose: 'Close', vcAdded: 'Code {c} added',
+      vcOff: '{v} AED off', vcPct: '{v}% off', vcPrice: 'You pay {v} AED', vcMax: ' (up to {m} AED)', vcAtPay: 'The discount is taken off when you pay.',
+      vcRemove: 'Remove code', vcBranch: 'This code is for {b}. Please visit {b} and have your ticket validated there to get the discount.',
+      vcNoCam: 'The camera cannot be opened. Please type the code.', vcEmpty: 'Enter the discount code.', vcFailed: 'Code not accepted: {e}'
     },
     ar: {
       title: 'اطلب سيارتي · VIP Valet',
@@ -429,7 +479,12 @@ var TIME_ZONE = 'Asia/Dubai';
       minutes: '{n} دقيقة', hm: '{h} ساعة و{m} دقيقة', justNow: 'أقل من دقيقة',
       today: 'اليوم', yesterday: 'أمس',
       liveReq: 'تم طلب سيارتك.', liveBrought: 'سيارتك في الطريق.', liveReady: 'سيارتك جاهزة.',
-      switchTo: 'View this page in English', switchLabel: 'English', switchLang: 'en'
+      switchTo: 'View this page in English', switchLabel: 'English', switchLang: 'en',
+      vcLabel: 'كود الخصم', vcApply: 'تطبيق', vcHint: 'اكتب الكود أو امسح رمز QR الخاص به. يُخصم المبلغ عند الدفع.',
+      vcScanHint: 'وجّه الكاميرا إلى رمز QR', vcClose: 'إغلاق', vcAdded: 'تمت إضافة الكود {c}',
+      vcOff: 'خصم {v} درهم', vcPct: 'خصم {v}%', vcPrice: 'تدفع {v} درهم فقط', vcMax: ' (حتى {m} درهم)', vcAtPay: 'يُخصم المبلغ عند الدفع.',
+      vcRemove: 'إزالة الكود', vcBranch: 'هذا الكود خاص بـ {b}. يرجى زيارة {b} وعمل فاليديشن لتذكرتك هناك للاستفادة من الخصم.',
+      vcNoCam: 'تعذّر فتح الكاميرا. يرجى كتابة الكود.', vcEmpty: 'اكتب كود الخصم.', vcFailed: 'لم يتم قبول الكود: {e}'
     }
   };
 
@@ -621,6 +676,8 @@ var TIME_ZONE = 'Asia/Dubai';
     show('vTicket', view === 'active' || view === 'progress' || (view === 'msg' && msgKind === 'closed' && !!ticket));
     show('vRequest', view === 'active');
     show('vProgress', view === 'progress');
+    show('vVoucher', (view === 'active' || view === 'progress') && !!ticket);
+    if (ticket) renderVoucher();
     if (ticket) renderTicket();
     if (view === 'msg') renderMsg();
     if (view === 'progress') renderProgress();
@@ -699,6 +756,7 @@ var TIME_ZONE = 'Asia/Dubai';
   /* ------------------------------ flow ------------------------------ */
   function applyTicket(t, fromPoll) {
     ticket = t || {};
+    if (!isClosed(ticket)) loadVoucher();
     if (isClosed(ticket)) { view = 'msg'; msgKind = 'closed'; msgDetail = ''; stopPolling(); }
     else if (isRequested(ticket)) {
       view = 'progress';
@@ -793,6 +851,116 @@ var TIME_ZONE = 'Asia/Dubai';
     var sp = $('reqSpin'); if (sp && sp.parentNode) sp.parentNode.removeChild(sp);
   }
 
+  /* ------------------------------ discount code ------------------------------ */
+  var voucher = null;        // {code, name, kind, value, max, branches, note}
+  var vcBusy = false;
+  var vcLoaded = false;
+  function money(v) { var n = Number(v); return isFinite(n) ? (n % 1 === 0 ? String(n) : n.toFixed(2)) : String(v); }
+  function renderVoucher() {
+    var v = voucher && voucher.code ? voucher : null;
+    show('vcForm', !v);
+    show('vcOk', !!v);
+    show('vcNote', !!(v && voucher.branches && voucher.note));
+    if (v) {
+      var box = $('vcOk'); box.textContent = '';
+      var head = document.createElement('div');
+      var parts = tr('vcAdded').split('{c}');
+      head.appendChild(document.createTextNode(parts[0]));
+      var c = document.createElement('span'); c.className = 'vc-code'; c.textContent = v.code; head.appendChild(c);
+      head.appendChild(document.createTextNode(parts[1] || ''));
+      box.appendChild(head);
+      var what = v.kind === 'percent' ? tr('vcPct', { v: money(v.value) }) + (v.max ? tr('vcMax', { m: money(v.max) }) : '')
+               : v.kind === 'price' ? tr('vcPrice', { v: money(v.value) }) : tr('vcOff', { v: money(v.value) });
+      var sm = document.createElement('small'); sm.textContent = (v.name ? v.name + ' · ' : '') + what + ' · ' + tr('vcAtPay'); box.appendChild(sm);
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'vc-remove'; rm.textContent = tr('vcRemove');
+      rm.addEventListener('click', function () { sendVoucher(''); }); box.appendChild(rm);
+      if (voucher.branches && voucher.note) setText('vcNote', tr('vcBranch', { b: voucher.branches }));
+    }
+  }
+  function vcError(text) {
+    var el = $('vcErr'), parts = tr('vcFailed').split('{e}');
+    el.textContent = '';
+    el.appendChild(document.createTextNode(parts[0]));
+    var b = document.createElement('bdi'); b.textContent = text; el.appendChild(b);
+    el.appendChild(document.createTextNode(parts[1] || ''));
+    show('vcErr', true);
+  }
+  function loadVoucher() {
+    if (vcLoaded || !token) return;
+    vcLoaded = true;
+    rpc('vv_public_voucher', { p_public_token: token, p_code: null }).then(function (d) {
+      if (d.ok) { voucher = d.code ? d : null; render(); }
+    }, function () { vcLoaded = false; });
+  }
+  function codeFrom(raw) {
+    var s = String(raw || '').trim();
+    var m = /[?&](?:code|voucher|v)=([^&#]+)/i.exec(s);
+    if (m) { try { s = decodeURIComponent(m[1]); } catch (e) { s = m[1]; } }
+    else if (/^https?:\/\//i.test(s)) s = s.replace(/[?#].*$/, '').replace(/\/+$/, '').split('/').pop();
+    return s.replace(/\s+/g, '').toUpperCase();
+  }
+  function sendVoucher(code) {
+    if (vcBusy || !token) return;
+    show('vcErr', false);
+    if (code !== '' && !code) { vcError(tr('vcEmpty')); return; }
+    vcBusy = true;
+    $('vcApply').disabled = true;
+    rpc('vv_public_voucher', { p_public_token: token, p_code: code }).then(function (d) {
+      vcBusy = false; $('vcApply').disabled = false;
+      if (d.ok) { voucher = d.code ? d : null; $('vcInput').value = ''; render(); announce(d.code ? tr('vcAdded', { c: d.code }) : tr('vcRemove')); }
+      else vcError(errText(d) || '—');
+    }, function (err) {
+      vcBusy = false; $('vcApply').disabled = false;
+      vcError(err.network ? tr('netShort') : err.message);
+    });
+  }
+  var scanStream = null, scanTimer = null;
+  function stopScan() {
+    if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
+    if (scanStream) { scanStream.getTracks().forEach(function (t) { t.stop(); }); scanStream = null; }
+    show('vcScanBox', false);
+  }
+  function loadJsQr() {
+    return new Promise(function (ok, no) {
+      if (window.jsQR) return ok(window.jsQR);
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+      s.onload = function () { ok(window.jsQR); }; s.onerror = no;
+      document.head.appendChild(s);
+    });
+  }
+  function startScan() {
+    show('vcErr', false);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { vcError(tr('vcNoCam')); return; }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(function (stream) {
+      scanStream = stream;
+      var video = $('vcVideo');
+      video.srcObject = stream;
+      video.play();
+      show('vcScanBox', true);
+      var found = function (text) { if (!text) return; stopScan(); var c = codeFrom(text); $('vcInput').value = c; sendVoucher(c); };
+      if ('BarcodeDetector' in window) {
+        var det = new window.BarcodeDetector({ formats: ['qr_code'] });
+        scanTimer = setInterval(function () {
+          if (video.readyState < 2) return;
+          det.detect(video).then(function (r) { if (r && r.length) found(r[0].rawValue); }, function () {});
+        }, 300);
+      } else {
+        loadJsQr().then(function (jsQR) {
+          var cv = document.createElement('canvas'), ctx = cv.getContext('2d');
+          scanTimer = setInterval(function () {
+            if (video.readyState < 2) return;
+            cv.width = video.videoWidth; cv.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, cv.width, cv.height);
+            var img = ctx.getImageData(0, 0, cv.width, cv.height);
+            var r = jsQR(img.data, img.width, img.height);
+            if (r && r.data) found(r.data);
+          }, 350);
+        }, function () { stopScan(); vcError(tr('vcNoCam')); });
+      }
+    }, function () { vcError(tr('vcNoCam')); });
+  }
+
   /* ------------------------------ polling ------------------------------ */
   function poll() {
     if (pollInFlight || document.hidden || !token) return;
@@ -835,6 +1003,10 @@ var TIME_ZONE = 'Asia/Dubai';
   /* ------------------------------ wiring ------------------------------ */
   $('reqForm').addEventListener('submit', submitRequest);
   $('retryBtn').addEventListener('click', function () { load(); });
+  $('vcApply').addEventListener('click', function () { sendVoucher(codeFrom($('vcInput').value)); });
+  $('vcInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); sendVoucher(codeFrom($('vcInput').value)); } });
+  $('vcScan').addEventListener('click', startScan);
+  $('vcScanClose').addEventListener('click', stopScan);
   $('langBtn').addEventListener('click', function () {
     lang = lang === 'ar' ? 'en' : 'ar';
     try { window.localStorage.setItem('vv_req_lang', lang); } catch (e) {}

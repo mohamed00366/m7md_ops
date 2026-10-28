@@ -93,7 +93,8 @@ class _VouchersBodyState extends State<_VouchersBody> {
     final title = vStr(b['name']);
     final disc = _discountEn(b);
     final valid = 'Valid ${_d(b['valid_from'])} – ${_d(b['valid_to'])}';
-    final where = vStr(b['point_names']).isEmpty ? 'All points' : vStr(b['point_names']);
+    final where = (vStr(b['point_names']).isEmpty ? 'All points' : vStr(b['point_names'])) +
+        (vStr(b['site_names']).isEmpty ? '' : ' · ${vStr(b['site_names'])} only');
     // 3 × 7 cards on an A4 page, each with its QR and serial
     const perPage = 21;
     for (var i = 0; i < codes.length; i += perPage) {
@@ -225,8 +226,13 @@ class _VouchersBodyState extends State<_VouchersBody> {
                     DataCell(Text(_discountText(context, b))),
                     DataCell(SizedBox(
                       width: 220,
-                      child: Text(vStr(b['point_names']).isEmpty ? tx(context, 'كُلّ النِقاط', 'All points') : vStr(b['point_names']),
-                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                          [
+                            vStr(b['point_names']).isEmpty ? tx(context, 'كُلّ النِقاط', 'All points') : vStr(b['point_names']),
+                            if (vStr(b['site_names']).isNotEmpty) '${tx(context, 'فَرع', 'Branch')}: ${vStr(b['site_names'])}',
+                          ].join('\n'),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis),
                     )),
                     DataCell(Text('${_d(b['valid_from'])} → ${_d(b['valid_to'])}',
                         style: TextStyle(color: vStr(b['valid_to']).compareTo(today) < 0 ? VC.bad : null))),
@@ -326,6 +332,14 @@ Future<void> _showCodes(BuildContext context, VJson b, List<VJson> codes) {
 Future<VJson?> _showCreateDialog(BuildContext context) async {
   final points = await vGuard(context, VPoints.get);
   if (points == null || !context.mounted) return null;
+  // DB 306: codes only for some branches (validated by them / given to them for their customer app)
+  final clientsRes = await vGuard(context, () => ValetAdmin.I.call('vva_clients'));
+  if (clientsRes == null || !context.mounted) return null;
+  final branches = vList(clientsRes['clients']).where((c) => vList(c['points']).isNotEmpty).toList()
+    ..sort((a, b) => vStr(a['name']).toLowerCase().compareTo(vStr(b['name']).toLowerCase()));
+  var allBranches = true;
+  final chosenSites = <String>{};
+  String qb = '';
   final name = TextEditingController();
   final buyer = TextEditingController();
   final sale = TextEditingController();
@@ -489,6 +503,39 @@ Future<VJson?> _showCreateDialog(BuildContext context) async {
               ],
               const SizedBox(height: 14),
               Row(children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(tx(ctx, 'الفُروع', 'Branches'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                        tx(ctx, 'كود فَرع: يَنفَع لِلتَذاكِر اللي الفَرع عَمَل لَها فاليديشن، وَالفَرع يِقدَر يِستَخدِمه مِن تَطبيق العُمَلاء.',
+                            'Branch code: works on tickets that branch validated; the branch can use it from the customer app.'),
+                        style: const TextStyle(color: VC.muted, fontSize: 12)),
+                  ]),
+                ),
+                Text(tx(ctx, 'كُلّ التَذاكِر', 'Every ticket')),
+                Switch(value: allBranches, onChanged: (v) => set(() => allBranches = v)),
+              ]),
+              if (!allBranches) ...[
+                TextField(
+                  decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search, size: 18), hintText: tx(ctx, 'بَحث (${chosenSites.length} مُختار)', 'Search (${chosenSites.length} chosen)')),
+                  onChanged: (v) => set(() => qb = v),
+                ),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView(shrinkWrap: true, children: [
+                    for (final c in branches.where((c) => vStr(c['name']).toLowerCase().contains(qb.toLowerCase())))
+                      CheckboxListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        value: chosenSites.contains(vStr(c['id'])),
+                        title: Text(vStr(c['name'])),
+                        onChanged: (v) => set(() => v == true ? chosenSites.add(vStr(c['id'])) : chosenSites.remove(vStr(c['id']))),
+                      ),
+                  ]),
+                ),
+              ],
+              const SizedBox(height: 14),
+              Row(children: [
                 SizedBox(
                   width: 150,
                   child: TextField(controller: count, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: tx(ctx, 'عَدَد القَسائِم *', 'Number of codes *'), helperText: '1 – 5000')),
@@ -510,6 +557,10 @@ Future<VJson?> _showCreateDialog(BuildContext context) async {
             icon: const Icon(Icons.qr_code_2),
             label: Text(tx(ctx, 'تَوليد القَسائِم', 'Generate')),
             onPressed: () async {
+              if (!allBranches && chosenSites.isEmpty) {
+                vToast(ctx, tx(ctx, 'اختَر فَرع واحِد عَلى الأَقَلّ.', 'Choose at least one branch.'), error: true);
+                return;
+              }
               if (!allPoints && chosen.isEmpty) {
                 vToast(ctx, tx(ctx, 'اختَر نُقطة واحِدة عَلى الأَقَلّ.', 'Choose at least one point.'), error: true);
                 return;
@@ -526,6 +577,7 @@ Future<VJson?> _showCreateDialog(BuildContext context) async {
                     'max': kind == 'percent' ? max.text.trim() : '',
                     'uses': switch (uses) { 'once' => '1', 'n' => usesN.text.trim(), _ => '' },
                     'points': allPoints ? <String>[] : chosen.toList(),
+                    'sites': allBranches ? <String>[] : chosenSites.toList(),
                     'valid_from': from.toIso8601String().substring(0, 10),
                     'valid_days': days.text.trim(),
                     'count': count.text.trim(),
