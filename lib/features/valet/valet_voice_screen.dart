@@ -345,7 +345,7 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
     final d = await vGuard(
         context,
         () => ValetAdmin.I.call('vva_ai_save', {
-              'p_config': {for (final k in const ['provider', 'model', 'enabled', 'fallback', 'monthly_limit']) k: _cfg[k]},
+              'p_config': {for (final k in const ['provider', 'model', 'enabled', 'fallback', 'monthly_limit', 'backup_models']) k: _cfg[k]},
               'p_key': key,
             }),
         ok: tx(context, 'تم الحفظ', 'Saved'));
@@ -394,7 +394,7 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
       throw StateError('No answer from the AI.');
     });
     if (!mounted) return;
-    setState(() => _tryOut = r == null ? null : '${vStr(r['text'])}   (${vStr(r['ms'])} ms)');
+    setState(() => _tryOut = r == null ? null : '${vStr(r['text'])}   (${vStr(r['model'])} · ${vStr(r['ms'])} ms)');
     _load();
   }
 
@@ -617,7 +617,25 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
                   onChanged: (v) => _c('monthly_limit', int.tryParse(v) ?? limit),
                 ),
               ),
+              SizedBox(
+                width: 420,
+                child: TextFormField(
+                  key: ValueKey('bk${_d.hashCode}'),
+                  initialValue: ((_cfg['backup_models'] as List?) ?? const []).map(vStr).join(', '),
+                  textDirection: TextDirection.ltr,
+                  decoration: InputDecoration(
+                      isDense: true,
+                      labelText: tx(context, 'موديلات احتياطية (بالترتيب، بينها فاصلة)', 'Backup models (in order, comma separated)'),
+                      helperText: tx(context, 'لو Google قالت «ضغط عالي» أو «خلصت الحصة» السيرفر بيجرب اللي بعده لوحده', 'On «high demand» or «quota» the server tries the next one by itself')),
+                  onChanged: (v) => _c('backup_models', [for (final x in v.split(',')) if (x.trim().isNotEmpty) x.trim()]),
+                ),
+              ),
             ]),
+            if (vStr(u['last_ok']).isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(tx(context, 'آخر رد ناجح: ${vStr(u['last_ok'])}', 'Last good answer: ${vStr(u['last_ok'])}'), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+              ),
             if (vStr(u['last_error']).isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 10),
