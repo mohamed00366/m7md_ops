@@ -3,310 +3,278 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1F2933">
+<meta name="theme-color" content="#EEF1F5" id="themeColor">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>Request my car · VIP Valet</title>
+<title>Request my car · M7 NEXUS</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F2933'/%3E%3Cpath d='M16 20l16 26 16-26' fill='none' stroke='%23C9A227' stroke-width='6' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<script>
+(function () {
+  var t = null;
+  try { t = window.localStorage.getItem('vv_req_theme'); } catch (e) {}
+  if (t !== 'light' && t !== 'dark') t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@500;600;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --graphite: #1F2933;
-    --graphite-2: #2B3743;
-    --graphite-3: #3E4C59;
-    --gold: #C9A227;
-    --gold-dark: #8A6D12;      /* gold text on light backgrounds (contrast >= 4.5:1) */
-    --gold-soft: #F4EBCB;
-    --bg: #F4F2ED;
-    --card: #FFFFFF;
-    --text: #1F2933;
-    --muted: #52606D;
-    --line: #E1DDD2;
-    --ok: #1E7B4F;
-    --ok-soft: #E3F3EA;
-    --err: #A61B1B;
-    --err-soft: #FBE9E9;
-    --radius: 18px;
+  /* M7 NEXUS – request page. Day / night themes (html[data-theme]). */
+  :root, html[data-theme="light"] {
+    --bg: #EEF1F5; --bg2: #FFFFFF; --t1: #0F172A; --t2: #334155; --t3: #64748B;
+    --card: #FFFFFF; --edge: #E2E8F0; --field: #F4F6F9;
+    --hero: linear-gradient(160deg, #FFFFFF, #F1F4F8);
+    --sh: 0 10px 30px rgba(15,23,42,.08);
+    --num: linear-gradient(180deg, #0F172A, #475569);
+    --ok: #059669; --ok-bg: #ECFDF5; --ok-b: #A7F3D0; --ok-t: #065F46;
+    --w-bg: #FFFBEB; --w-b: #FDE68A; --w-t: #92400E;
+    --err: #B91C1C; --err-bg: #FEF2F2; --err-b: #FECACA;
+    --track: #E2E8F0; --fill: #334155;
+    --map-filter: brightness(0); --map-op: .13; --lion-op: .045;
+    --radius: 22px;
+    color-scheme: light;
+  }
+  html[data-theme="dark"] {
+    --bg: #090C12; --bg2: #121722; --t1: #F1F5F9; --t2: #CBD5E1; --t3: #8391A7;
+    --card: rgba(255,255,255,.05); --edge: rgba(255,255,255,.10); --field: rgba(0,0,0,.28);
+    --hero: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    --sh: 0 12px 30px rgba(0,0,0,.45);
+    --num: linear-gradient(180deg, #FFFFFF, #94A3B8);
+    --ok: #34D399; --ok-bg: rgba(52,211,153,.08); --ok-b: rgba(52,211,153,.28); --ok-t: #A7F3D0;
+    --w-bg: rgba(251,191,36,.08); --w-b: rgba(251,191,36,.28); --w-t: #FDE68A;
+    --err: #FCA5A5; --err-bg: rgba(248,113,113,.08); --err-b: rgba(248,113,113,.28);
+    --track: rgba(255,255,255,.10); --fill: #E2E8F0;
+    --map-filter: none; --map-op: .22; --lion-op: .04;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Cairo", "Segoe UI", Tahoma, Roboto, Arial, sans-serif;
-    font-size: 17px;
-    line-height: 1.5;
-    min-height: 100vh;
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--t1);
+    font-family: "Cairo", "Inter", "Segoe UI", Tahoma, Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.5;
+    position: relative; overflow-x: hidden;
   }
-  button, textarea { font: inherit; color: inherit; }
-  .sr-only {
-    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-  }
-  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  html[data-theme="dark"] body { background: radial-gradient(120% 50% at 50% 0%, #1B2433 0%, #0B0F17 55%, #07090E 100%) fixed, #07090E; }
+  button, textarea, input { font: inherit; color: inherit; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  :focus-visible { outline: 3px solid var(--t3); outline-offset: 3px; }
   [tabindex="-1"]:focus, [tabindex="-1"]:focus-visible { outline: none; }
-
-  /* ---------- header ---------- */
-  .top {
-    background: var(--graphite);
-    color: #fff;
-    padding: 14px 16px 64px;
-    padding-top: calc(14px + env(safe-area-inset-top));
-  }
-  .top-inner {
-    max-width: 520px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .brand-mark {
-    width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px;
-    background: #fff; border: 1px solid var(--graphite-3);
-    display: flex; align-items: center; justify-content: center; overflow: hidden;
-  }
-  .brand-mark img { width: 38px; height: 38px; object-fit: contain; display: block; }
-  /* M7 Nexus lion as a faded watermark behind the page */
-  body::before {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background: url("/request/m7_mark.png") no-repeat center 58% / min(78vw, 420px) auto;
-    opacity: .06;
-  }
-  .brand-text { line-height: 1.15; min-width: 0; }
-  .brand-name { font-weight: 800; font-size: 17px; letter-spacing: .3px; }
-  .brand-name b { color: var(--gold); font-weight: 800; }
-  .brand-sub { font-size: 12.5px; color: #CBD2D9; }
-  .lang-btn {
-    flex: 0 0 auto;
-    min-height: 44px; min-width: 64px; padding: 0 14px;
-    border-radius: 999px; border: 1.5px solid var(--gold);
-    background: transparent; color: var(--gold);
-    font-weight: 700; font-size: 15px; cursor: pointer;
-  }
-  .lang-btn:active { background: rgba(201,162,39,.15); }
-
-  /* ---------- layout ---------- */
-  main {
-    max-width: 520px; margin: -48px auto 0; padding: 0 16px 32px;
-    padding-bottom: calc(32px + env(safe-area-inset-bottom));
-  }
-  .card {
-    background: var(--card); border-radius: var(--radius);
-    box-shadow: 0 6px 24px rgba(31,41,51,.10), 0 1px 3px rgba(31,41,51,.08);
-    overflow: hidden;
-  }
-  .card + .card, .card + .block, .block + .card { margin-top: 16px; }
-  .pad { padding: 20px; }
   [hidden] { display: none !important; }
-
-  /* ---------- ticket ---------- */
-  .ticket-head {
-    background: var(--graphite-2); color: #fff; text-align: center;
-    padding: 18px 20px 20px; position: relative;
-  }
-  .ticket-label { font-size: 13px; color: #CBD2D9; text-transform: uppercase; letter-spacing: 1.5px; }
-  html[lang="ar"] .ticket-label { letter-spacing: 0; text-transform: none; font-size: 14px; }
-  .ticket-no {
-    font-size: 56px; font-weight: 800; line-height: 1.1; color: var(--gold);
-    letter-spacing: 2px; direction: ltr; unicode-bidi: isolate; word-break: break-all;
-  }
-  .ticket-head::after {
-    /* perforation */
-    content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px;
-    background-image: linear-gradient(90deg, var(--graphite-2) 50%, transparent 50%);
-    background-size: 12px 2px;
-  }
-  .rows { margin: 0; padding: 6px 20px 4px; }
-  .row {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 12px 0; border-bottom: 1px solid var(--line);
-  }
-  .row:last-child { border-bottom: 0; }
-  .row dt { color: var(--muted); font-size: 15px; margin: 0; flex: 0 0 auto; }
-  .row dd { margin: 0; font-weight: 700; text-align: end; min-width: 0; overflow-wrap: anywhere; }
-  .plate {
-    display: inline-block; direction: ltr; unicode-bidi: isolate;
-    border: 2px solid var(--graphite); border-radius: 8px; padding: 0 10px;
-    font-weight: 800; letter-spacing: 2px; font-size: 18px; background: #fff;
-    font-family: "Cairo", "Segoe UI", Arial, sans-serif;
-  }
-  .color-wrap { display: inline-flex; align-items: center; gap: 8px; }
-  .dot {
-    width: 20px; height: 20px; border-radius: 50%; flex: 0 0 20px;
-    border: 2px solid rgba(31,41,51,.25); background: #ccc;
-  }
-  .duration { display: block; font-weight: 600; color: var(--muted); font-size: 14px; }
   .ltr { direction: ltr; unicode-bidi: isolate; }
 
-  /* ---------- request form ---------- */
-  .block { }
-  .field-label { display: block; font-weight: 700; margin-bottom: 6px; }
-  .field-label small { font-weight: 400; color: var(--muted); }
+  /* background: world map (top) + lion watermark */
+  .bg-map {
+    position: absolute; left: 0; right: 0; top: 0; height: 340px; pointer-events: none; z-index: 0;
+    background: url("/request/map.webp") no-repeat 61% 44% / max(1500px, 380vw) auto;
+    filter: var(--map-filter); opacity: var(--map-op);
+    -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent); mask-image: linear-gradient(180deg, #000 40%, transparent);
+  }
+  .bg-lion {
+    position: fixed; inset-inline-end: -80px; bottom: -40px; width: min(92vw, 420px); aspect-ratio: 432 / 457; pointer-events: none; z-index: 0;
+    background: url("/request/m7_mark.png") no-repeat center / contain; opacity: var(--lion-op);
+  }
+  html[data-theme="dark"] .bg-lion { background-image: url("/request/m7_mark_white.png"); }
+
+  /* header */
+  .top { position: relative; z-index: 1; padding: 18px 16px 0; padding-top: calc(18px + env(safe-area-inset-top)); }
+  .top-inner { max-width: 520px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand-mark { width: 40px; height: 42px; flex: 0 0 40px; display: block; object-fit: contain; }
+  .brand-mark.dark-only { display: none; }
+  html[data-theme="dark"] .brand-mark.light-only { display: none; }
+  html[data-theme="dark"] .brand-mark.dark-only { display: block; }
+  .brand-text { line-height: 1.15; min-width: 0; }
+  .brand-name { font-family: "Inter", sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 3px; direction: ltr; unicode-bidi: isolate; }
+  .brand-sub { font-size: 11.5px; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tools { display: flex; gap: 6px; flex: 0 0 auto; }
+  .tool {
+    min-height: 40px; min-width: 40px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--edge); background: var(--card); color: var(--t2);
+    font-family: "Inter", "Cairo", sans-serif; font-weight: 600; font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .tool svg { display: block; }
+
+  /* layout */
+  main { position: relative; z-index: 1; max-width: 520px; margin: 0 auto; padding: 18px 16px 28px; padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
+  .card {
+    background: var(--card); border: 1px solid var(--edge); border-radius: var(--radius); box-shadow: var(--sh);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  }
+  main { display: flex; flex-direction: column; gap: 12px; }
+  main.is-progress #vProgress { order: -1; }
+  main .foot { order: 9; }
+  .pad { padding: 16px; }
+
+  /* boarding-pass ticket */
+  .pass { background: var(--hero); border-radius: 26px; position: relative; }
+  .pass-top { padding: 18px 18px 16px; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+  .k { font-size: 12px; color: var(--t3); }
+  .ticket-no {
+    font-family: "Inter", sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -1.5px; margin-top: 2px;
+    background: var(--num); -webkit-background-clip: text; background-clip: text; color: transparent;
+    direction: ltr; unicode-bidi: isolate; word-break: break-all;
+  }
+  .stat {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; border-radius: 999px; padding: 5px 12px;
+    font-weight: 700; font-size: 12.5px; background: var(--ok-bg); border: 1px solid var(--ok-b); color: var(--ok);
+  }
+  .stat i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  .stat.go { background: var(--field); border-color: var(--edge); color: var(--t2); }
+  .perf { position: relative; height: 0; border-top: 2px dashed var(--edge); margin: 0 22px; }
+  .perf::before, .perf::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); border: 1px solid var(--edge); }
+  .perf::before { right: -35px; clip-path: inset(0 0 0 50%); }
+  .perf::after { left: -35px; clip-path: inset(0 50% 0 0); }
+  html[data-theme="dark"] .perf::before, html[data-theme="dark"] .perf::after { background: #0B0F17; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 10px; padding: 16px 18px 18px; margin: 0; }
+  .facts div { min-width: 0; }
+  .facts dt { font-size: 12px; color: var(--t3); margin: 0; }
+  .facts dd { margin: 2px 0 0; font-weight: 700; font-size: 14.5px; overflow-wrap: anywhere; }
+  .plate {
+    display: inline-flex; align-items: stretch; border-radius: 6px; overflow: hidden; border: 1.5px solid var(--t1);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 1.5px; direction: ltr; unicode-bidi: isolate;
+  }
+  .plate b { background: var(--t1); color: var(--bg2); font-size: 9px; letter-spacing: .5px; padding: 2px 5px; display: grid; place-items: center; }
+  html[data-theme="dark"] .plate b { color: #0B0F17; }
+  .plate span { padding: 1px 8px; }
+  .color-wrap { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 12px; border: 1px solid #94A3B8; background: #ccc; }
+  .duration { display: block; font-weight: 600; color: var(--t3); font-size: 12.5px; }
+
+  /* forms */
+  .field-label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; font-size: 14px; color: var(--t2); margin-bottom: 8px; }
+  .field-label small { font-weight: 600; color: var(--t3); font-size: 12px; }
   textarea {
-    width: 100%; min-height: 76px; resize: vertical;
-    border: 1.5px solid #9AA5B1; border-radius: 12px; padding: 10px 12px;
-    background: #fff; font-size: 16px; line-height: 1.4;
+    width: 100%; min-height: 56px; resize: vertical; border: 1px solid var(--edge); border-radius: 14px; padding: 11px 13px;
+    background: var(--field); font-size: 16px; line-height: 1.4;
   }
-  textarea:focus { border-color: var(--gold-dark); outline: 3px solid rgba(201,162,39,.35); outline-offset: 0; }
-  .hint { font-size: 13px; color: var(--muted); margin-top: 4px; text-align: end; }
+  textarea::placeholder, .vc-input::placeholder { color: var(--t3); opacity: .8; }
+  textarea:focus, .vc-input:focus { outline: 2px solid var(--t3); outline-offset: 0; }
+  .hint { font-size: 12.5px; color: var(--t3); margin-top: 6px; }
   .btn {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; min-height: 64px; padding: 12px 20px; margin-top: 16px;
-    border: 0; border-radius: 16px; cursor: pointer;
-    background: var(--gold); color: var(--graphite);
-    font-size: 21px; font-weight: 800;
-    box-shadow: 0 4px 0 #A6851C, 0 8px 18px rgba(201,162,39,.35);
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .08s ease, box-shadow .08s ease;
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 58px; padding: 10px 20px; margin-top: 12px;
+    border-radius: 18px; cursor: pointer; font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    background: linear-gradient(180deg, #9AA6B6 0%, #7A8798 48%, #5E6B7D 52%, #4A5566 100%);
+    border: 1px solid rgba(255,255,255,.55);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 6px rgba(15,23,42,.30), 0 10px 22px rgba(15,23,42,.25);
+    -webkit-tap-highlight-color: transparent; transition: transform .08s ease, box-shadow .08s ease;
   }
-  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #A6851C, 0 4px 10px rgba(201,162,39,.3); }
+  html[data-theme="dark"] .btn {
+    background: linear-gradient(180deg, rgba(203,213,225,.30) 0%, rgba(148,163,184,.20) 50%, rgba(100,116,139,.18) 51%, rgba(71,85,105,.26) 100%);
+    border-color: rgba(255,255,255,.26); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 12px 26px rgba(0,0,0,.5);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  }
+  .btn:active { transform: translateY(2px); }
   .btn[disabled] { opacity: .8; cursor: progress; transform: none; }
   .btn[aria-busy="true"] svg { display: none; }
-  .btn-secondary {
-    background: var(--graphite); color: #fff; box-shadow: none; font-size: 18px; min-height: 56px;
-  }
-  .btn-secondary:active { box-shadow: none; }
-  .spinner {
-    width: 22px; height: 22px; border-radius: 50%;
-    border: 3px solid rgba(31,41,51,.25); border-top-color: var(--graphite);
-    animation: spin .8s linear infinite;
-  }
-  .btn-secondary .spinner { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
+  .btn-secondary { font-size: 16px; min-height: 52px; }
+  .spinner { width: 20px; height: 20px; border-radius: 50%; border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .alert {
-    border-radius: 12px; padding: 12px 14px; margin-top: 14px; font-weight: 600;
-    background: var(--err-soft); color: var(--err); border: 1px solid #F0C4C4;
-  }
-  .alert-soft { background: var(--gold-soft); color: #5C4A0E; border-color: #E8D9A0; font-weight: 600; }
+  .alert { border-radius: 14px; padding: 11px 13px; margin-top: 12px; font-weight: 600; font-size: 13.5px; background: var(--err-bg); color: var(--err); border: 1px solid var(--err-b); }
+  .alert-soft { background: var(--w-bg); color: var(--w-t); border-color: var(--w-b); }
 
-  /* ---------- discount code ---------- */
+  /* tracking */
+  .eta-card { padding: 18px; }
+  .eta-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .eta-head .tno { font-family: "Inter", sans-serif; font-weight: 800; font-size: 15px; color: var(--t1); }
+  .status-title { font-size: 21px; font-weight: 800; margin: 14px 0 0; line-height: 1.3; }
+  .status-sub { color: var(--t3); margin: 2px 0 0; font-size: 14px; }
+  .eta { margin-top: 14px; }
+  .eta-val { font-family: "Inter", "Cairo", sans-serif; font-weight: 800; font-size: 48px; line-height: 1; letter-spacing: -1px; }
+  .eta-lbl { font-size: 12.5px; color: var(--t3); font-weight: 700; margin-bottom: 2px; }
+  .road { position: relative; margin: 26px 6px 4px; height: 6px; border-radius: 6px; background: var(--track); }
+  .road .fill { position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 0; border-radius: 6px; background: var(--fill); transition: width .6s ease; }
+  .road .car {
+    position: absolute; inset-inline-start: 0; top: 50%; width: 40px; height: 40px; margin-top: -20px; margin-inline-start: -20px; border-radius: 50%;
+    background: var(--bg2); border: 1px solid var(--edge); display: grid; place-items: center; color: var(--t1); box-shadow: var(--sh); transition: inset-inline-start .6s ease;
+  }
+  html[data-theme="dark"] .road .car { background: #1A2130; }
+  .road .end { position: absolute; inset-inline-end: -3px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; border: 3px solid var(--fill); background: var(--bg2); }
+  .steps { list-style: none; display: flex; justify-content: space-between; margin: 14px 0 0; padding: 0; }
+  .step { font-size: 12.5px; font-weight: 600; color: var(--t3); text-align: center; flex: 1; }
+  .step:first-child { text-align: start; } .step:last-child { text-align: end; }
+  .step.done, .step.current { color: var(--t1); font-weight: 800; }
+  .step .bullet, .step .step-desc { display: none; }
+  .ready-banner { background: var(--ok-bg); border: 1px solid var(--ok-b); color: var(--ok-t); border-radius: 16px; padding: 14px; display: flex; gap: 12px; align-items: center; margin-top: 14px; }
+  .ready-banner strong { display: block; font-size: 19px; }
+  .ready-banner span { font-size: 14px; opacity: .9; }
+  .poll-note { font-size: 12px; color: var(--t3); margin: 14px 0 0; text-align: center; }
+
+  /* discount code */
   .vc-row { display: flex; gap: 8px; align-items: stretch; }
   .vc-input {
-    flex: 1; min-width: 0; min-height: 52px; border: 1.5px solid #9AA5B1; border-radius: 12px; padding: 8px 12px;
-    background: #fff; font-size: 17px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; direction: ltr;
+    flex: 1; min-width: 0; min-height: 50px; border: 1px solid var(--edge); border-radius: 14px; padding: 8px 12px; background: var(--field);
+    font-family: "Inter", sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; direction: ltr;
   }
-  .vc-input:focus { border-color: var(--gold-dark); outline: 3px solid rgba(201,162,39,.35); outline-offset: 0; }
   .vc-btn {
-    min-height: 52px; min-width: 52px; padding: 0 14px; border-radius: 12px; border: 0; cursor: pointer;
-    background: var(--graphite); color: #fff; font-weight: 800; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 50px; min-width: 50px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--edge); cursor: pointer;
+    background: var(--card); color: var(--t2); font-weight: 800; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   }
-  .vc-btn.gold { background: var(--gold); color: var(--graphite); }
+  .btn.vc-apply { margin: 0; width: auto; min-height: 50px; padding: 0 16px; font-size: 15px; border-radius: 14px; }
+  .btn.vc-apply[disabled] { opacity: .7; cursor: progress; }
   .vc-btn[disabled] { opacity: .7; cursor: progress; }
-  .vc-ok { margin-top: 12px; border-radius: 12px; padding: 12px 14px; background: var(--ok-soft); border: 1px solid #A9D8BE; color: var(--ok); font-weight: 700; }
-  .vc-ok small { display: block; color: #24543C; font-weight: 600; font-size: 14px; }
-  .vc-ok .vc-code { direction: ltr; unicode-bidi: isolate; letter-spacing: 1px; }
-  .vc-remove { background: none; border: 0; color: var(--err); font-weight: 700; cursor: pointer; padding: 6px 0 0; font-size: 14px; }
-  .vc-scan { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
-  .vc-scan video { width: min(92vw, 420px); aspect-ratio: 1; object-fit: cover; border-radius: 18px; border: 3px solid var(--gold); background: #000; }
+  .vc-ok { margin-top: 10px; border-radius: 16px; padding: 12px 14px; background: var(--ok-bg); border: 1px solid var(--ok-b); color: var(--ok-t); font-weight: 700; }
+  .vc-ok small { display: block; font-weight: 600; font-size: 12.5px; opacity: .9; }
+  .vc-ok .vc-code { font-family: "Inter", sans-serif; direction: ltr; unicode-bidi: isolate; letter-spacing: 1px; }
+  .vc-remove { background: none; border: 0; color: var(--err); font-weight: 700; cursor: pointer; padding: 6px 0 0; font-size: 13px; }
+  .vc-scan { position: fixed; inset: 0; z-index: 50; background: rgba(2,6,12,.94); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+  .vc-scan video { width: min(92vw, 420px); aspect-ratio: 1; object-fit: cover; border-radius: 22px; border: 2px solid rgba(255,255,255,.5); background: #000; }
   .vc-scan p { color: #fff; margin: 14px 0; text-align: center; }
+  .vc-scan .btn { width: auto; min-width: 160px; }
 
-  /* ---------- progress ---------- */
-  .status-title { font-size: 22px; font-weight: 800; margin: 0 0 4px; }
-  .status-sub { color: var(--muted); margin: 0; }
-  .eta {
-    margin-top: 14px; display: flex; align-items: center; gap: 12px;
-    background: var(--gold-soft); border-radius: 14px; padding: 12px 14px;
-  }
-  .eta-val { font-size: 24px; font-weight: 800; color: var(--graphite); }
-  .eta-lbl { font-size: 14px; color: #5C4A0E; }
-  .steps { list-style: none; margin: 18px 0 0; padding: 0; }
-  .step { position: relative; display: flex; gap: 14px; padding-bottom: 22px; }
-  .step:last-child { padding-bottom: 0; }
-  .step::before {
-    content: ""; position: absolute; top: 34px; bottom: 2px;
-    inset-inline-start: 15px; width: 2px; background: var(--line);
-  }
-  .step:last-child::before { display: none; }
-  .step.done::before { background: var(--gold); }
-  .bullet {
-    position: relative; z-index: 1;
-    width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%;
-    border: 2px solid #9AA5B1; background: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 14px; color: var(--muted);
-  }
-  .step.done .bullet { background: var(--gold); border-color: var(--gold); color: var(--graphite); }
-  .step.current .bullet { border-color: var(--gold); color: var(--graphite); background: var(--gold-soft); }
-  .step.current .bullet::after {
-    content: ""; position: absolute; inset: -6px; border-radius: 50%;
-    border: 2px solid var(--gold); opacity: .6; animation: pulse 2s ease-out infinite;
-  }
-  .step.ready .bullet { background: var(--ok); border-color: var(--ok); color: #fff; }
-  .step-text { padding-top: 3px; }
-  .step-name { font-weight: 700; }
-  .step:not(.done):not(.current):not(.ready) .step-name { color: var(--muted); font-weight: 600; }
-  .step-desc { font-size: 14px; color: var(--muted); }
-  @keyframes pulse { 0% { transform: scale(.85); opacity: .7; } 100% { transform: scale(1.35); opacity: 0; } }
-  .ready-banner {
-    background: var(--ok-soft); border: 1.5px solid #A9D8BE; color: var(--ok);
-    border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center; margin-top: 14px;
-  }
-  .ready-banner strong { display: block; font-size: 20px; }
-  .ready-banner span { color: #24543C; font-size: 15px; }
-  .poll-note { font-size: 13px; color: var(--muted); margin-top: 14px; text-align: center; }
+  /* message states */
+  .msg { text-align: center; padding: 28px 20px 24px; }
+  .msg-icon { width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--field); border: 1px solid var(--edge); }
+  .msg-icon.err { background: var(--err-bg); border-color: var(--err-b); }
+  .msg-icon.ok { background: var(--ok-bg); border-color: var(--ok-b); }
+  .msg h1 { font-size: 21px; margin: 0 0 6px; line-height: 1.3; }
+  .msg p { margin: 0; color: var(--t3); }
+  .msg .detail { margin-top: 10px; font-size: 12.5px; direction: ltr; unicode-bidi: isolate; }
 
-  /* ---------- message states ---------- */
-  .msg { text-align: center; padding: 30px 22px 26px; }
-  .msg-icon {
-    width: 72px; height: 72px; margin: 0 auto 12px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; background: var(--gold-soft);
-  }
-  .msg-icon.err { background: var(--err-soft); }
-  .msg-icon.ok { background: var(--ok-soft); }
-  .msg h1 { font-size: 23px; margin: 0 0 6px; line-height: 1.3; }
-  .msg p { margin: 0; color: var(--muted); }
-  .msg .detail { margin-top: 10px; font-size: 13px; color: var(--muted); direction: ltr; unicode-bidi: isolate; }
-
-  /* ---------- skeleton ---------- */
-  .sk { background: linear-gradient(90deg, #ECE9E1 25%, #F6F4EF 50%, #ECE9E1 75%); background-size: 200% 100%;
-        animation: shimmer 1.3s linear infinite; border-radius: 8px; }
+  /* skeleton */
+  .sk { background: linear-gradient(90deg, var(--field) 25%, var(--edge) 50%, var(--field) 75%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; border-radius: 8px; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  .foot { text-align: center; font-size: 13px; color: var(--muted); margin-top: 22px; }
-  .foot a { color: var(--gold-dark); font-weight: 700; }
+  .foot { text-align: center; color: var(--t3); font-family: "Inter", sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 2.5px; margin-top: 18px; opacity: .85; }
 
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
-    .spinner { border-top-color: var(--graphite); }
-  }
-  @media (max-width: 340px) {
-    .ticket-no { font-size: 46px; }
-    .brand-sub { display: none; }
-    .btn { font-size: 19px; }
-  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  @media (max-width: 350px) { .ticket-no { font-size: 52px; } .brand-sub { display: none; } }
 </style>
 </head>
 <body>
+<div class="bg-map" aria-hidden="true"></div>
+<div class="bg-lion" aria-hidden="true"></div>
 <header class="top">
   <div class="top-inner">
     <div class="brand">
-      <div class="brand-mark" aria-hidden="true">
-        <img src="/request/m7_logo.png" alt="" width="36" height="36">
-      </div>
+      <img class="brand-mark light-only" src="/request/m7_mark.png" alt="" width="40" height="42">
+      <img class="brand-mark dark-only" src="/request/m7_mark_white.png" alt="" width="40" height="42">
       <div class="brand-text">
-        <div class="brand-name"><b>VIP</b> <span data-i18n="brand">Valet &amp; Parking</span></div>
-        <div class="brand-sub" data-i18n="brandSub">Request your car</div>
+        <div class="brand-name">M7 NEXUS</div>
+        <div class="brand-sub" data-i18n="brandSub">Valet parking · Request your car</div>
       </div>
     </div>
-    <button type="button" class="lang-btn" id="langBtn" lang="ar" aria-label="عرض الصفحة بالعربية">عربي</button>
+    <div class="tools">
+      <button type="button" class="tool" id="themeBtn" aria-label="Night mode"></button>
+      <button type="button" class="tool" id="langBtn" lang="ar" aria-label="عرض الصفحة بالعربية">عربي</button>
+    </div>
   </div>
 </header>
 
 <main id="main">
-  <!-- live region for screen readers -->
   <div class="sr-only" aria-live="polite" aria-atomic="true" id="live"></div>
 
   <!-- LOADING -->
-  <section id="vLoading" class="card" aria-busy="true">
-    <div class="ticket-head">
-      <div class="ticket-label" data-i18n="loading">Loading your ticket…</div>
-      <div class="sk" style="height:58px;width:160px;margin:8px auto 0;opacity:.25"></div>
-    </div>
+  <section id="vLoading" class="card pass" aria-busy="true">
+    <div class="pass-top"><div style="width:100%">
+      <div class="k" data-i18n="loading">Loading your ticket…</div>
+      <div class="sk" style="height:56px;width:150px;margin-top:8px"></div>
+    </div></div>
+    <div class="perf"></div>
     <div class="pad">
-      <div class="sk" style="height:20px;margin-bottom:16px"></div>
-      <div class="sk" style="height:20px;margin-bottom:16px;width:80%"></div>
-      <div class="sk" style="height:20px;width:60%"></div>
+      <div class="sk" style="height:18px;margin-bottom:14px"></div>
+      <div class="sk" style="height:18px;width:70%"></div>
     </div>
   </section>
 
@@ -321,17 +289,21 @@
     </div>
   </section>
 
-  <!-- TICKET -->
-  <section id="vTicket" class="card" hidden aria-labelledby="ticketLabel">
-    <div class="ticket-head">
-      <div class="ticket-label" id="ticketLabel" data-i18n="ticketNo">Ticket number</div>
-      <div class="ticket-no" id="tNo">—</div>
+  <!-- TICKET (boarding pass) -->
+  <section id="vTicket" class="card pass" hidden aria-labelledby="ticketLabel">
+    <div class="pass-top">
+      <div>
+        <div class="k" id="ticketLabel" data-i18n="ticketNo">Ticket number</div>
+        <div class="ticket-no" id="tNo">—</div>
+      </div>
+      <span class="stat" id="tStat"><i></i><span id="tStatText"></span></span>
     </div>
-    <dl class="rows">
-      <div class="row"><dt data-i18n="plate">Plate</dt><dd><span class="plate" id="tPlate">—</span></dd></div>
-      <div class="row"><dt data-i18n="color">Colour</dt><dd><span class="color-wrap"><span class="dot" id="tDot" aria-hidden="true"></span><span id="tColor">—</span></span></dd></div>
-      <div class="row"><dt data-i18n="location">Location</dt><dd id="tPoint">—</dd></div>
-      <div class="row"><dt data-i18n="parkedAt">Parked at</dt><dd><span id="tEntry">—</span><span class="duration" id="tDuration"></span></dd></div>
+    <div class="perf" aria-hidden="true"></div>
+    <dl class="facts">
+      <div><dt data-i18n="plate">Plate</dt><dd><span class="plate"><b>UAE</b><span id="tPlate">—</span></span></dd></div>
+      <div><dt data-i18n="color">Colour</dt><dd><span class="color-wrap"><span class="dot" id="tDot" aria-hidden="true"></span><span id="tColor">—</span></span></dd></div>
+      <div><dt data-i18n="location">Location</dt><dd id="tPoint">—</dd></div>
+      <div><dt data-i18n="parkedAt">Parked at</dt><dd><span id="tEntry">—</span><span class="duration" id="tDuration"></span></dd></div>
     </dl>
   </section>
 
@@ -342,7 +314,7 @@
       <textarea id="note" name="note" dir="auto" maxlength="200" rows="2" autocomplete="off" aria-describedby="noteHint"></textarea>
       <div class="hint" id="noteHint" data-i18n="noteHint">e.g. “I’m at the main entrance”</div>
       <button type="submit" class="btn" id="reqBtn">
-        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
         <span id="reqBtnText" data-i18n="requestBtn">Request my car</span>
       </button>
       <div class="alert" id="reqErr" role="alert" hidden></div>
@@ -350,16 +322,24 @@
   </section>
 
   <!-- PROGRESS -->
-  <section id="vProgress" class="card pad" hidden aria-labelledby="pTitle">
+  <section id="vProgress" class="card pass eta-card" hidden aria-labelledby="pTitle">
+    <div class="eta-head">
+      <span class="stat go" id="pStat"><i></i><span id="pStatText"></span></span>
+      <span class="k"><span data-i18n="ticketShort">Ticket</span> <span class="tno ltr" id="pNo"></span></span>
+    </div>
     <h2 class="status-title" id="pTitle" tabindex="-1"></h2>
     <p class="status-sub" id="pSub"></p>
     <div class="eta" id="pEta" hidden>
-      <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#8A6D12" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      <div><div class="eta-lbl" data-i18n="eta">Estimated time</div><div class="eta-val" id="pEtaVal"></div></div>
+      <div class="eta-lbl" data-i18n="eta">Estimated time</div><div class="eta-val" id="pEtaVal"></div>
     </div>
-    <div class="ready-banner" id="pReady" hidden style="margin-top:0">
-      <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#1E7B4F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>
+    <div class="ready-banner" id="pReady" hidden>
+      <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7.5 12 3 3 6-6"/></svg>
       <div><strong data-i18n="readyTitle">Your car is ready</strong><span data-i18n="readySub">Please proceed to the valet desk.</span></div>
+    </div>
+    <div class="road" aria-hidden="true">
+      <div class="fill" id="pFill"></div>
+      <div class="end"></div>
+      <div class="car" id="pCar"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg></div>
     </div>
     <ol class="steps" id="pSteps">
       <li class="step" id="s1"><div class="bullet">1</div><div class="step-text"><div class="step-name" data-i18n="st1">Requested</div><div class="step-desc" data-i18n="st1d">The valet team received your request</div></div></li>
@@ -377,9 +357,9 @@
       <div class="vc-row">
         <input id="vcInput" class="vc-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="VV-XXXX-XXXX">
         <button type="button" class="vc-btn" id="vcScan" aria-label="Scan QR">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg>
         </button>
-        <button type="button" class="vc-btn gold" id="vcApply" data-i18n="vcApply">Apply</button>
+        <button type="button" class="btn vc-apply" id="vcApply" data-i18n="vcApply">Apply</button>
       </div>
       <div class="hint" data-i18n="vcHint">Type the code or scan its QR. The discount is taken off when you pay.</div>
     </div>
@@ -391,10 +371,10 @@
   <div class="vc-scan" id="vcScanBox" hidden>
     <video id="vcVideo" playsinline muted></video>
     <p data-i18n="vcScanHint">Point the camera at the QR code</p>
-    <button type="button" class="vc-btn gold" id="vcScanClose" data-i18n="vcClose">Close</button>
+    <button type="button" class="btn" id="vcScanClose" data-i18n="vcClose">Close</button>
   </div>
 
-  <p class="foot"><span data-i18n="foot">VIP Valet &amp; Parking · Dubai</span></p>
+  <p class="foot">M7 NEXUS · DUBAI</p>
 </main>
 
 <script>
@@ -417,8 +397,10 @@ var TIME_ZONE = 'Asia/Dubai';
   /* ------------------------------ i18n ------------------------------ */
   var T = {
     en: {
-      title: 'Request my car · VIP Valet',
-      brand: 'Valet & Parking', brandSub: 'Request your car',
+      title: 'Request my car · M7 NEXUS',
+      brand: 'Valet & Parking', brandSub: 'Valet parking · Request your car',
+      ticketShort: 'Ticket', stParked: 'Parked', stReq: 'Requested', stOnWay: 'On its way', stReady: 'Ready',
+      themeDark: 'Night mode', themeLight: 'Day mode',
       loading: 'Loading your ticket…', ticketNo: 'Ticket number',
       plate: 'Plate', color: 'Colour', location: 'Location', parkedAt: 'Parked at',
       parkedFor: 'Parked for {d}', noteLabel: 'Note for the valet', optional: '(optional)',
@@ -439,7 +421,7 @@ var TIME_ZONE = 'Asia/Dubai';
       closedTitle: 'Thank you!', closedText: 'This ticket is closed. We hope to see you again soon.',
       noCardTitle: 'No car on this card', noCardText: 'No car is parked with this card right now. If you just handed over your car, please try again in a minute or ask the valet desk.',
       netTitle: 'No connection', netText: 'We could not reach the server. Check your internet connection and try again.',
-      retry: 'Try again', foot: 'VIP Valet & Parking · Dubai',
+      retry: 'Try again', foot: 'M7 NEXUS · Dubai',
       reqFailed: 'Could not send the request: {e}', netShort: 'No connection. Please try again.',
       minutes: '{n} min', hm: '{h} h {m} min', justNow: 'less than a minute',
       today: 'Today', yesterday: 'Yesterday',
@@ -452,8 +434,10 @@ var TIME_ZONE = 'Asia/Dubai';
       vcNoCam: 'The camera cannot be opened. Please type the code.', vcEmpty: 'Enter the discount code.', vcFailed: 'Code not accepted: {e}'
     },
     ar: {
-      title: 'اطلب سيارتي · VIP Valet',
-      brand: 'لخدمة صف السيارات', brandSub: 'اطلب سيارتك',
+      title: 'اطلب سيارتي · M7 NEXUS',
+      brand: 'لخدمة صف السيارات', brandSub: 'خدمة صف السيارات · اطلب سيارتك',
+      ticketShort: 'تذكرة', stParked: 'في الموقف', stReq: 'تم الطلب', stOnWay: 'جاري الإحضار', stReady: 'جاهزة',
+      themeDark: 'الوضع الليلي', themeLight: 'الوضع النهاري',
       loading: 'جارٍ تحميل التذكرة…', ticketNo: 'رقم التذكرة',
       plate: 'اللوحة', color: 'اللون', location: 'الموقع', parkedAt: 'وقت الإيقاف',
       parkedFor: 'منذ {d}', noteLabel: 'ملاحظة لموظف الخدمة', optional: '(اختياري)',
@@ -474,7 +458,7 @@ var TIME_ZONE = 'Asia/Dubai';
       closedTitle: 'شكراً لك!', closedText: 'تم إغلاق هذه التذكرة. نتطلع لرؤيتك مجدداً.',
       noCardTitle: 'لا توجد سيارة على هذا الكرت', noCardText: 'لا توجد سيارة مسجّلة على هذا الكرت حالياً. إذا سلّمت سيارتك للتو فحاول مرة أخرى بعد دقيقة أو راجع مكتب الفاليه.',
       netTitle: 'لا يوجد اتصال', netText: 'تعذّر الوصول إلى الخادم. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.',
-      retry: 'حاول مرة أخرى', foot: 'VIP لخدمة صف السيارات · دبي',
+      retry: 'حاول مرة أخرى', foot: 'M7 NEXUS · دبي',
       reqFailed: 'تعذّر إرسال الطلب: {e}', netShort: 'لا يوجد اتصال. يرجى المحاولة مرة أخرى.',
       minutes: '{n} دقيقة', hm: '{h} ساعة و{m} دقيقة', justNow: 'أقل من دقيقة',
       today: 'اليوم', yesterday: 'أمس',
@@ -655,6 +639,19 @@ var TIME_ZONE = 'Asia/Dubai';
   }
 
   /* ------------------------------ render ------------------------------ */
+  /* ------------------------------ theme ------------------------------ */
+  var SUN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var MOON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  function theme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+  function applyTheme() {
+    var dark = theme() === 'dark';
+    var b = $('themeBtn');
+    b.innerHTML = dark ? SUN : MOON;            // the button shows the mode it switches to
+    b.setAttribute('aria-label', dark ? tr('themeLight') : tr('themeDark'));
+    b.setAttribute('title', dark ? tr('themeLight') : tr('themeDark'));
+    var m = $('themeColor'); if (m) m.setAttribute('content', dark ? '#0B0F17' : '#EEF1F5');
+  }
+
   function applyLang() {
     var html = document.documentElement;
     html.setAttribute('lang', lang);
@@ -667,6 +664,7 @@ var TIME_ZONE = 'Asia/Dubai';
     b.setAttribute('lang', tr('switchLang'));
     b.setAttribute('aria-label', tr('switchTo'));
     $('note').setAttribute('placeholder', '');
+    applyTheme();
     render();
   }
 
@@ -676,6 +674,7 @@ var TIME_ZONE = 'Asia/Dubai';
     show('vTicket', view === 'active' || view === 'progress' || (view === 'msg' && msgKind === 'closed' && !!ticket));
     show('vRequest', view === 'active');
     show('vProgress', view === 'progress');
+    $('main').classList.toggle('is-progress', view === 'progress');
     show('vVoucher', (view === 'active' || view === 'progress') && !!ticket);
     if (ticket) renderVoucher();
     if (ticket) renderTicket();
@@ -687,6 +686,10 @@ var TIME_ZONE = 'Asia/Dubai';
   function renderTicket() {
     var t = ticket;
     setText('tNo', t.short_no != null && t.short_no !== '' ? t.short_no : '—');
+    setText('pNo', t.short_no != null && t.short_no !== '' ? t.short_no : '');
+    var stg = view === 'progress' ? stage(t) : 0;
+    setText('tStatText', stg === 3 ? tr('stReady') : stg === 2 ? tr('stOnWay') : stg === 1 ? tr('stReq') : tr('stParked'));
+    $('tStat').className = stg === 0 || stg === 3 ? 'stat' : 'stat go';
     setText('tPlate', t.plate || '—');
     var c = colorInfo(t.color);
     var dot = $('tDot');
@@ -738,6 +741,12 @@ var TIME_ZONE = 'Asia/Dubai';
         : String(n);
       if (n === s) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     }
+    // road: the car moves from "requested" to "ready"
+    var pos = s === 3 ? 100 : s === 2 ? 55 : 12;
+    $('pFill').style.width = pos + '%';
+    $('pCar').style.insetInlineStart = pos + '%';
+    setText('pStatText', s === 3 ? tr('stReady') : s === 2 ? tr('stOnWay') : tr('stReq'));
+    $('pStat').className = s === 3 ? 'stat' : 'stat go';
     setText('pTitle', tr('pTitle' + s));
     setText('pSub', tr('pSub' + s));
     // When ready, the green banner carries the message; keep the heading for screen readers only.
@@ -1007,6 +1016,12 @@ var TIME_ZONE = 'Asia/Dubai';
   $('vcInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); sendVoucher(codeFrom($('vcInput').value)); } });
   $('vcScan').addEventListener('click', startScan);
   $('vcScanClose').addEventListener('click', stopScan);
+  $('themeBtn').addEventListener('click', function () {
+    var t = theme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    try { window.localStorage.setItem('vv_req_theme', t); } catch (e) {}
+    applyTheme();
+  });
   $('langBtn').addEventListener('click', function () {
     lang = lang === 'ar' ? 'en' : 'ar';
     try { window.localStorage.setItem('vv_req_lang', lang); } catch (e) {}
