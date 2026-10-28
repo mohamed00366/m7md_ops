@@ -6,6 +6,7 @@ import 'package:printing/printing.dart';
 
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
+import 'valet_card_design.dart';
 import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
@@ -275,7 +276,7 @@ class _ValetCardsScreenState extends State<ValetCardsScreen> {
             'One card registry · how a card is linked to a ticket is an option of each point'),
         actions: [
           HubButton(label: tx(context, 'Excel / ملف البرمجة', 'Excel / write file'), icon: Icons.table_view, onPressed: cards.isEmpty ? null : _exportExcel),
-          HubButton(label: tx(context, 'PDF للطباعة', 'PDF labels'), icon: Icons.picture_as_pdf_outlined, onPressed: cards.isEmpty ? null : _exportPdf),
+          HubButton(label: tx(context, 'ملصقات بسيطة PDF', 'Simple labels PDF'), icon: Icons.picture_as_pdf_outlined, onPressed: cards.isEmpty ? null : _exportPdf),
           HubButton(label: tx(context, 'دفعة كروت جديدة', 'New cards'), icon: Icons.add, primary: true, onPressed: _point == null ? null : _newBatch),
         ],
       ),
@@ -298,6 +299,17 @@ class _ValetCardsScreenState extends State<ValetCardsScreen> {
         },
       ),
       Padding(padding: const EdgeInsets.fromLTRB(20, 16, 20, 0), child: _modesCard()),
+      if (_point != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: CardDesignPanel(
+            key: ValueKey('design$_point'),
+            pointId: _point!,
+            pointName: vStr(pts.where((p) => vStr(p['id']) == _point).firstOrNull?['name']),
+            cards: cards,
+            edit: ValetAdmin.I.can(ValetAdmin.permSettings),
+          ),
+        ),
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
         child: LayoutBuilder(builder: (context, c) {

@@ -382,7 +382,17 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
 
   Future<void> _test() async {
     setState(() => _tryOut = '…');
-    final r = await vGuard(context, () => ValetAdmin.I.call('vva_ai_test', {'p_text': _try.text}));
+    // DB 316: the call is queued on the server, the answer is asked for every second
+    final r = await vGuard(context, () async {
+      final start = await ValetAdmin.I.call('vva_ai_test', {'p_text': _try.text});
+      final req = start['req'];
+      for (var i = 0; i < 30; i++) {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        final a = await ValetAdmin.I.call('vva_ai_test_result', {'p_req': req});
+        if (a['pending'] != true) return a;
+      }
+      throw StateError('No answer from the AI.');
+    });
     if (!mounted) return;
     setState(() => _tryOut = r == null ? null : '${vStr(r['text'])}   (${vStr(r['ms'])} ms)');
     _load();
