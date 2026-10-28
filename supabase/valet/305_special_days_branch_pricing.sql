@@ -58,8 +58,9 @@ create index if not exists valet_special_days_point_idx on public.valet_special_
 alter table public.valet_special_days enable row level security;
 
 -- ---------------------------------------------------------------- dashboard
+-- volatile: vva__auth updates the session (a stable function runs read-only)
 create or replace function public.vva_pricing(p_token text, p_point uuid)
-returns jsonb language plpgsql stable security definer set search_path = public as $$
+returns jsonb language plpgsql volatile security definer set search_path = public as $$
 begin
   perform public.vva__auth(p_token, 'valet.dashboard.view');
   return jsonb_build_object('ok', true,
