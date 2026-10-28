@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
 import 'valet_credits_screen.dart';
+import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
 /// 🎫 تَذاكِر الفاليه — بَحث، تَفاصيل، وَإلغاء (بِسَبَب مَكتوب).
@@ -24,7 +25,6 @@ class _TicketsBodyState extends State<_TicketsBody> {
   late DateTime _from;
   late DateTime _to;
   String? _point;
-  String _status = '';
   final _q = TextEditingController();
   List<VJson> _points = [];
   List<VJson>? _rows;
@@ -48,7 +48,7 @@ class _TicketsBodyState extends State<_TicketsBody> {
       final d = await ValetAdmin.I.call('vva_tickets', {
         'p_query': _q.text.trim(),
         'p_point': _point,
-        'p_status': _status,
+        'p_status': '',
         'p_from': search ? null : VF.iso(_from),
         'p_to': search ? null : VF.iso(_to),
         'p_limit': 1000,
@@ -83,95 +83,181 @@ class _TicketsBodyState extends State<_TicketsBody> {
     ]);
   }
 
+  String _chip = '';
+  static final _def = HubView('tickets', mode: 'table', cols: 0, fields: {'point', 'plate', 'customer', 'entry', 'exit', 'payment'});
+  HubView _view = _def;
+  bool _viewLoaded = false;
+
+  static String _st(VJson t) => vStr(t['status']);
+
   @override
   Widget build(BuildContext context) {
-    final rows = _rows;
-    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-      VHead(tx(context, 'التَذاكِر', 'Tickets'), subtitle: tx(context, 'ابحَث بِرَقم التَذكَرة أَو اللَوحة أَو العَميل أَو الكَرت', 'Search by ticket, plate, customer or card'), actions: [
-        SizedBox(
-          width: 240,
-          child: TextField(
-            controller: _q,
-            decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: tx(context, 'تَذكَرة، لَوحة، عَميل…', 'Ticket, plate, customer…'), isDense: true),
-            onSubmitted: (_) => _load(),
+    if (!_viewLoaded) {
+      _viewLoaded = true;
+      HubView.load(_def).then((v) {
+        if (mounted) setState(() => _view = v);
+      });
+    }
+    final all = _rows ?? const <VJson>[];
+    final rows = _rows?.where((t) => _chip.isEmpty || _st(t) == _chip).toList();
+    int n(String s) => all.where((t) => _st(t) == s).length;
+    final paid = all.where((t) => _st(t) != 'Void');
+    final total = paid.fold<num>(0, (s, t) => s + vNum(t['total']));
+    final stays = [
+      for (final t in all)
+        if (vTime(t['entry_time']) != null && vTime(t['exit_time']) != null) vTime(t['exit_time'])!.difference(vTime(t['entry_time'])!).inMinutes
+    ];
+    final avg = stays.isEmpty ? null : (stays.reduce((a, b) => a + b) / stays.length).round();
+    final show = _view.show;
+    return ListView(padding: const EdgeInsets.only(bottom: 28), children: [
+      HubHead(
+        title: tx(context, 'تَذاكِر الفاليه', 'Valet tickets'),
+        subtitle: tx(context, 'ابحَث بِرَقم التَذكَرة أَو اللَوحة أَو العَميل أَو الكَرت', 'Search by ticket, plate, customer or card'),
+        actions: [
+          SizedBox(
+            width: 280,
+            height: 40,
+            child: TextField(
+              controller: _q,
+              onSubmitted: (_) => _load(),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: tx(context, 'تَذكَرة، لَوحة، عَميل، كَرت…', 'Ticket, plate, customer, card…'),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+              ),
+            ),
           ),
-        ),
-        VPointFilter(points: _points, value: _point, onChanged: (v) {
-          _point = v;
-          _load();
-        }),
-        SizedBox(
-          width: 170,
-          child: DropdownButtonFormField<String>(
-            value: _status,
-            decoration: InputDecoration(labelText: tx(context, 'الحالة', 'Status'), isDense: true),
-            items: [
-              DropdownMenuItem(value: '', child: Text(tx(context, 'الكُلّ', 'All'))),
-              DropdownMenuItem(value: 'Active', child: Text(tx(context, 'نَشِطة', 'Active'))),
-              DropdownMenuItem(value: 'Check-Out', child: Text(tx(context, 'خُروج', 'Check-out'))),
-              DropdownMenuItem(value: 'Finish', child: Text(tx(context, 'مُنتَهية', 'Finished'))),
-              DropdownMenuItem(value: 'Void', child: Text(tx(context, 'مُلغاة', 'Void'))),
-            ],
-            onChanged: (v) {
-              _status = v ?? '';
-              _load();
+          VPointFilter(points: _points, value: _point, onChanged: (v) {
+            _point = v;
+            _load();
+          }),
+          HubButton(
+            icon: Icons.view_column_outlined,
+            label: tx(context, 'الأَعمِدة', 'Columns'),
+            onPressed: () async {
+              final v = await showHubView(context, _view, _def, fields: [
+                ('point', tx(context, 'النُقطة', 'Point')),
+                ('plate', tx(context, 'اللَوحة', 'Plate')),
+                ('customer', tx(context, 'العَميل / النَوع', 'Customer / type')),
+                ('entry', tx(context, 'الدُخول', 'Entry')),
+                ('exit', tx(context, 'الخُروج', 'Exit')),
+                ('payment', tx(context, 'الدَفع', 'Payment')),
+              ]);
+              if (v != null && mounted) setState(() => _view = v);
             },
           ),
-        ),
-        OutlinedButton.icon(onPressed: rows == null || rows.isEmpty ? null : _export, icon: const Icon(Icons.download), label: const Text('Excel')),
-      ]),
+          HubButton(icon: Icons.download, label: 'Excel', onPressed: rows == null || rows.isEmpty ? null : _export),
+        ],
+      ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
         child: VRange(from: _from, to: _to, onChanged: (a, b) {
           _from = a;
           _to = b;
           _load();
         }),
       ),
-      if (_busy) const Padding(padding: EdgeInsets.fromLTRB(16, 10, 16, 0), child: LinearProgressIndicator(minHeight: 2)),
+      HubKpis([
+        HubKpi(Icons.receipt_long_outlined, VF.n(all.length), tx(context, 'تَذكَرة في الفَترة', 'Tickets in the period')),
+        HubKpi(Icons.directions_car_filled_outlined, VF.n(n('Active')), tx(context, 'نَشِطة الآن', 'Active now')),
+        HubKpi(Icons.payments_outlined, VF.money(total), tx(context, 'الإجماليّ AED', 'Total AED')),
+        HubKpi(Icons.timer_outlined, avg == null ? '—' : (avg >= 60 ? '${avg ~/ 60}h ${avg % 60}m' : '$avg m'), tx(context, 'مُتَوَسِّط الإقامة', 'Average stay')),
+        HubKpi(Icons.block, VF.n(n('Void')), tx(context, 'مُلغاة', 'Void')),
+      ]),
+      HubChips(
+        value: _chip,
+        onChanged: (v) => setState(() => _chip = v),
+        items: [
+          ('', tx(context, 'الكُلّ', 'All'), all.length),
+          ('Active', tx(context, 'نَشِطة', 'Active'), n('Active')),
+          ('Check-Out', tx(context, 'خُروج', 'Check-out'), n('Check-Out')),
+          ('Finish', tx(context, 'مُنتَهية', 'Finished'), n('Finish')),
+          ('Void', tx(context, 'مُلغاة', 'Void'), n('Void')),
+        ],
+      ),
+      if (_busy) const Padding(padding: EdgeInsets.fromLTRB(20, 10, 20, 0), child: LinearProgressIndicator(minHeight: 2)),
       if (_err != null) Padding(padding: const EdgeInsets.all(16), child: Text(vErr(context, _err!), style: const TextStyle(color: VC.bad))),
-      if (rows != null)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: VPanel(
-            title: tx(context, '${rows.length} تَذكَرة', '${rows.length} ticket(s)'),
-            child: VTable(
-              empty: tx(context, 'لا تُوجَد تَذاكِر.', 'No ticket found.'),
-              columns: [
-                DataColumn(label: Text(tx(context, 'التَذكَرة', 'Ticket'))),
-                DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
-                DataColumn(label: Text(tx(context, 'اللَوحة', 'Plate'))),
-                DataColumn(label: Text(tx(context, 'العَميل / النَوع', 'Customer / type'))),
-                DataColumn(label: Text(tx(context, 'الدُخول', 'Entry'))),
-                DataColumn(label: Text(tx(context, 'الخُروج', 'Exit'))),
-                DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
-                DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
-                DataColumn(label: Text(tx(context, 'الدَفع', 'Payment'))),
-              ],
-              rows: [
-                for (final t in rows)
-                  DataRow(
-                    onSelectChanged: (_) async {
-                      if (await showValetTicket(context, vStr(t['id']))) _load();
-                    },
-                    cells: [
-                      DataCell(Text(VF.short(vStr(t['ticket_code'])), style: const TextStyle(fontWeight: FontWeight.w700))),
-                      DataCell(Text(vStr(t['point']))),
-                      DataCell(Text('${t['plate'] ?? '-'}  ${t['color'] ?? ''}')),
-                      DataCell(Text('${t['customer'] ?? '-'} · ${t['type'] ?? '-'}', overflow: TextOverflow.ellipsis)),
-                      DataCell(Text(VF.dt(vTime(t['entry_time'])))),
-                      DataCell(Text(VF.dt(vTime(t['exit_time'])))),
-                      DataCell(vStatusPill(context, vStr(t['status']), voidReason: t['void_reason'] as String?)),
-                      DataCell(Text(t['total'] == null ? '-' : VF.money(vNum(t['total'])))),
-                      DataCell(Text(vStr(t['payment']))),
-                    ],
-                  ),
-              ],
+      if (rows != null && _view.mode == 'cards')
+        HubGrid(view: _view, children: [
+          for (final t in rows)
+            HubCard(
+              strong: _st(t) == 'Active',
+              onTap: () async {
+                if (await showValetTicket(context, vStr(t['id']))) _load();
+              },
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Row(children: [
+                  Text('#${VF.short(vStr(t['ticket_code']))}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+                  const Spacer(),
+                  vStatusPill(context, _st(t), voidReason: t['void_reason'] as String?),
+                ]),
+                const SizedBox(height: 6),
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  if (show('plate')) _plate(vStr(t['plate'])),
+                  if (show('point')) hubTag(vStr(t['point']), icon: Icons.place_outlined),
+                  if (show('customer')) hubTag('${t['customer'] ?? '-'} · ${t['type'] ?? '-'}'),
+                ]),
+                const SizedBox(height: 8),
+                Row(children: [
+                  if (show('entry')) Text(VF.dt(vTime(t['entry_time'])), style: const TextStyle(color: VC.muted, fontSize: 12)),
+                  const Spacer(),
+                  Text(t['total'] == null ? '-' : VF.money(vNum(t['total'])), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                ]),
+              ]),
             ),
-          ),
-        ),
+        ])
+      else if (rows != null)
+        hubPanel(VTable(
+          dataRowMinHeight: _view.mode == 'compact' ? 32 : 46,
+          dataRowMaxHeight: _view.mode == 'compact' ? 36 : 56,
+          empty: tx(context, 'لا تُوجَد تَذاكِر.', 'No ticket found.'),
+          columns: [
+            DataColumn(label: Text(tx(context, 'التَذكَرة', 'Ticket'))),
+            if (show('point')) DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
+            if (show('plate')) DataColumn(label: Text(tx(context, 'اللَوحة', 'Plate'))),
+            if (show('customer')) DataColumn(label: Text(tx(context, 'العَميل / النَوع', 'Customer / type'))),
+            if (show('entry')) DataColumn(label: Text(tx(context, 'الدُخول', 'Entry'))),
+            if (show('exit')) DataColumn(label: Text(tx(context, 'الخُروج', 'Exit'))),
+            DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
+            DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
+            if (show('payment')) DataColumn(label: Text(tx(context, 'الدَفع', 'Payment'))),
+          ],
+          rows: [
+            for (final t in rows)
+              DataRow(
+                onSelectChanged: (_) async {
+                  if (await showValetTicket(context, vStr(t['id']))) _load();
+                },
+                cells: [
+                  DataCell(Text('#${VF.short(vStr(t['ticket_code']))}', style: const TextStyle(fontWeight: FontWeight.w800))),
+                  if (show('point')) DataCell(Text(vStr(t['point']))),
+                  if (show('plate')) DataCell(_plate(vStr(t['plate']), color: vStr(t['color']))),
+                  if (show('customer')) DataCell(Text('${t['customer'] ?? '-'} · ${t['type'] ?? '-'}', overflow: TextOverflow.ellipsis)),
+                  if (show('entry')) DataCell(Text(VF.dt(vTime(t['entry_time'])))),
+                  if (show('exit')) DataCell(Text(VF.dt(vTime(t['exit_time'])))),
+                  DataCell(vStatusPill(context, _st(t), voidReason: t['void_reason'] as String?)),
+                  DataCell(Text(t['total'] == null ? '-' : VF.money(vNum(t['total'])), style: const TextStyle(fontWeight: FontWeight.w800))),
+                  if (show('payment')) DataCell(Text(vStr(t['payment']))),
+                ],
+              ),
+          ],
+        )),
     ]);
   }
+
+  Widget _plate(String p, {String color = ''}) => Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+          decoration: BoxDecoration(border: Border.all(color: const Color(0xFF0B0C0E), width: 1.5), borderRadius: BorderRadius.circular(5)),
+          child: Text(p.isEmpty ? '-' : p, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, letterSpacing: .5)),
+        ),
+        if (color.isNotEmpty) ...[const SizedBox(width: 6), Text(color, style: const TextStyle(color: VC.muted, fontSize: 12))],
+      ]);
 }
 
 /// تَفاصيل التَذكَرة؛ تُعيد true لَو أُلغِيَت.

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'valet_admin.dart';
 import 'valet_key_boards_panel.dart';
 import 'valet_hourly.dart';
+import 'valet_hub_ui.dart';
 import 'valet_parking_screen.dart';
 import 'valet_pricing_rules.dart';
 import 'valet_ticket_parts.dart';
@@ -19,7 +20,27 @@ class ValetPointsScreen extends StatefulWidget {
 
 class _ValetPointsScreenState extends State<ValetPointsScreen> {
   String _q = '';
-  bool _valetOnly = true;
+  String _chip = 'all';
+  String _sort = 'cars';
+  static final _def = HubView('points', mode: 'cards', group: 'area', fields: {'area', 'device', 'stats', 'bar', 'actions'}, hideOff: true);
+  HubView _view = _def;
+
+  @override
+  void initState() {
+    super.initState();
+    HubView.load(_def).then((v) {
+      if (mounted) setState(() => _view = v);
+    });
+  }
+
+  bool _isValet(VJson p) => p['configured'] == true || p['terminal'] != null;
+  int _cars(VJson p) => vNum(p['active']).toInt();
+  int _warn(VJson p) => (p['terminal'] == null ? 1 : 0) + (p['area'] == null ? 1 : 0) + (vNum(p['prices']) == 0 ? 1 : 0);
+
+  Future<void> _open(VJson p, VoidCallback reload) async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ValetPointDetailScreen(pointId: vStr(p['id']), title: vStr(p['name']))));
+    reload();
+  }
 
   @override
   Widget build(BuildContext context) => ValetGate(
@@ -29,77 +50,240 @@ class _ValetPointsScreenState extends State<ValetPointsScreen> {
             return VPoints.get();
           },
           builder: (context, all, reload) {
+            final base = all.where((p) => !_view.hideOff || _isValet(p)).toList();
             final q = _q.toLowerCase();
-            final list = all.where((p) {
-              if (_valetOnly && p['configured'] != true && p['terminal'] == null) return false;
-              return q.isEmpty || '${p['code']} ${p['name']} ${p['area'] ?? ''}'.toLowerCase().contains(q);
-            }).toList();
-            return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-              VHead(tx(context, 'تَطبيق الفاليه — النِقاط', 'Valet app — points'),
-                  subtitle: tx(context, 'المَزايا وَالأَسعار وَالمَواقِف وَحِساب الجِهاز لِكُلّ نُقطة', 'Features, prices, parking and the device account of each point'),
-                  actions: [
-                    SizedBox(
-                      width: 240,
-                      child: TextField(
-                        decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: tx(context, 'بَحث', 'Search'), isDense: true),
-                        onChanged: (v) => setState(() => _q = v),
-                      ),
-                    ),
-                    FilterChip(
-                      label: Text(tx(context, 'نِقاط الفاليه فَقَط', 'Valet points only')),
-                      selected: _valetOnly,
-                      onSelected: (v) => setState(() => _valetOnly = v),
-                    ),
+            final areas = <String, int>{};
+            for (final p in base) {
+              final a = vStr(p['area']);
+              if (a.isNotEmpty) areas[a] = (areas[a] ?? 0) + 1;
+            }
+            bool chipOk(VJson p) => switch (_chip) {
+                  'all' => true,
+                  'live' => _cars(p) > 0,
+                  'setup' => _warn(p) > 0,
+                  'noarea' => p['area'] == null,
+                  _ => vStr(p['area']) == _chip,
+                };
+            final list = base.where((p) => chipOk(p) && (q.isEmpty || '${p['code']} ${p['name']} ${p['area'] ?? ''}'.toLowerCase().contains(q))).toList();
+            list.sort((a, b) => switch (_sort) {
+                  'name' => vStr(a['name']).toLowerCase().compareTo(vStr(b['name']).toLowerCase()),
+                  'code' => vStr(a['code']).compareTo(vStr(b['code'])),
+                  _ => _cars(b).compareTo(_cars(a)) != 0 ? _cars(b).compareTo(_cars(a)) : vStr(a['code']).compareTo(vStr(b['code'])),
+                });
+            final maxCars = base.fold<int>(1, (m, p) => _cars(p) > m ? _cars(p) : m);
+            final carsNow = base.fold<int>(0, (s, p) => s + _cars(p));
+            final live = base.where((p) => _cars(p) > 0).length;
+
+            Widget body;
+            if (_view.mode == 'cards') {
+              Map<String, List<VJson>> groups;
+              if (_view.group == 'area') {
+                groups = {};
+                for (final p in list) {
+                  groups.putIfAbsent(p['area'] == null ? '' : vStr(p['area']), () => []).add(p);
+                }
+              } else if (_view.group == 'status') {
+                groups = {};
+                for (final p in list) {
+                  groups.putIfAbsent(_cars(p) > 0 ? 'live' : (_warn(p) > 0 ? 'setup' : 'ready'), () => []).add(p);
+                }
+              } else {
+                groups = {'': list};
+              }
+              String gTitle(String k) => _view.group == 'area'
+                  ? (k.isEmpty ? tx(context, 'بِدون مَنطِقة', 'No area') : k)
+                  : switch (k) {
+                      'live' => tx(context, 'شَغّالة الآن', 'Live now'),
+                      'setup' => tx(context, 'تَحتاج إعداد', 'Needs setup'),
+                      'ready' => tx(context, 'جاهِزة', 'Ready'),
+                      _ => '',
+                    };
+              body = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                for (final e in groups.entries) ...[
+                  if (_view.group.isNotEmpty)
+                    hubGroupTitle(gTitle(e.key),
+                        tx(context, '· ${e.value.length} نُقطة · ${e.value.fold<int>(0, (s, p) => s + _cars(p))} سَيّارة الآن', '· ${e.value.length} points · ${e.value.fold<int>(0, (s, p) => s + _cars(p))} cars now')),
+                  HubGrid(view: _view, children: [for (final p in e.value) _card(p, maxCars, reload)]),
+                ],
+              ]);
+            } else {
+              final compact = _view.mode == 'compact';
+              body = hubPanel(VTable(dataRowMinHeight: compact ? 34 : 48, dataRowMaxHeight: compact ? 38 : 56, columns: [
+                DataColumn(label: Text(tx(context, 'الكود', 'Code'))),
+                DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
+                DataColumn(label: Text(tx(context, 'الحالة', 'Status'))),
+                if (_view.show('area')) DataColumn(label: Text(tx(context, 'المَنطِقة', 'Area'))),
+                if (_view.show('device')) DataColumn(label: Text(tx(context, 'حِساب الجِهاز', 'Device account'))),
+                if (_view.show('stats')) ...[
+                  DataColumn(label: Text(tx(context, 'العُمَلاء', 'Clients')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'الأَسعار', 'Prices')), numeric: true),
+                ],
+                DataColumn(label: Text(tx(context, 'سَيّارات الآن', 'Cars now')), numeric: true),
+                const DataColumn(label: Text('')),
+              ], rows: [
+                for (final p in list)
+                  DataRow(onSelectChanged: (_) => _open(p, reload), cells: [
+                    DataCell(Text(vStr(p['code']))),
+                    DataCell(Text(vStr(p['name']), style: const TextStyle(fontWeight: FontWeight.w700))),
+                    DataCell(_status(p)),
+                    if (_view.show('area')) DataCell(p['area'] == null ? hubTag(tx(context, 'بِدون مَنطِقة', 'No area'), missing: true) : hubTag(vStr(p['area']), icon: Icons.place_outlined)),
+                    if (_view.show('device'))
+                      DataCell(p['terminal'] == null ? hubTag(tx(context, 'بِدون جِهاز', 'No device'), missing: true) : hubTag(vStr(vMap(p['terminal'])['username']), icon: Icons.tablet_android)),
+                    if (_view.show('stats')) ...[
+                      DataCell(Text(vStr(p['clients']))),
+                      DataCell(Text(vStr(p['prices']), style: TextStyle(color: vNum(p['prices']) == 0 ? VC.bad : null, fontWeight: FontWeight.w700))),
+                    ],
+                    DataCell(Text('${_cars(p)}', style: const TextStyle(fontWeight: FontWeight.w800))),
+                    const DataCell(Icon(Icons.chevron_left)),
                   ]),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: VPanel(
-                  child: VTable(columns: [
-                    DataColumn(label: Text(tx(context, 'الكود', 'Code'))),
-                    DataColumn(label: Text(tx(context, 'النُقطة', 'Point'))),
-                    DataColumn(label: Text(tx(context, 'المَنطِقة', 'Area'))),
-                    DataColumn(label: Text(tx(context, 'حِساب الجِهاز', 'Device account'))),
-                    DataColumn(label: Text(tx(context, 'العُمَلاء', 'Clients')), numeric: true),
-                    DataColumn(label: Text(tx(context, 'الأَسعار', 'Prices')), numeric: true),
-                    DataColumn(label: Text(tx(context, 'سَيّارات الآن', 'Cars now')), numeric: true),
-                    const DataColumn(label: Text('')),
-                  ], rows: [
-                    for (final p in list)
-                      DataRow(
-                        onSelectChanged: (_) async {
-                          await Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => ValetPointDetailScreen(pointId: vStr(p['id']), title: vStr(p['name']))));
-                          reload();
-                        },
-                        cells: [
-                          DataCell(Text(vStr(p['code']))),
-                          DataCell(Text(vStr(p['name']), style: const TextStyle(fontWeight: FontWeight.w600))),
-                          DataCell(p['area'] == null
-                              ? Text(tx(context, 'بِلا مَنطِقة', 'No area'), style: const TextStyle(color: VC.warn))
-                              : VPill(vStr(p['area']), color: VC.info, icon: Icons.map_outlined)),
-                          DataCell(p['terminal'] == null
-                              ? VPill(tx(context, 'غَير مَوجود', 'Missing'), color: VC.bad)
-                              : VPill(vStr(vMap(p['terminal'])['username']), color: vBool(vMap(p['terminal'])['active']) ? VC.ok : VC.muted)),
-                          DataCell(Text(vStr(p['clients']))),
-                          DataCell(Text(vStr(p['prices']))),
-                          DataCell(Text(vStr(p['active']))),
-                          const DataCell(Icon(Icons.chevron_right)),
-                        ],
-                      ),
-                  ]),
-                ),
+              ]));
+            }
+
+            return ListView(padding: const EdgeInsets.only(bottom: 28), children: [
+              HubHead(
+                title: tx(context, 'تَطبيق الفاليه — النِقاط', 'Valet app — points'),
+                subtitle: tx(context, 'كُلّ نُقطة: الحالة، الجِهاز، المَنطِقة، العُمَلاء، الأَسعار وَالسَيّارات الآن', 'Each point: status, device, area, clients, prices and cars now'),
+                actions: [
+                  HubSearch(hint: tx(context, 'بَحث بِالكود أَو الاسم أَو المَنطِقة', 'Search code, name or area'), onChanged: (v) => setState(() => _q = v)),
+                  PopupMenuButton<String>(
+                    tooltip: tx(context, 'تَرتيب', 'Sort'),
+                    onSelected: (v) => setState(() => _sort = v),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'cars', child: Text(tx(context, 'الأَكثَر سَيّارات', 'Most cars'))),
+                      PopupMenuItem(value: 'name', child: Text(tx(context, 'الاسم', 'Name'))),
+                      PopupMenuItem(value: 'code', child: Text(tx(context, 'الكود', 'Code'))),
+                    ],
+                    child: IgnorePointer(
+                      child: HubButton(
+                          icon: Icons.swap_vert,
+                          label: switch (_sort) { 'name' => tx(context, 'الاسم', 'Name'), 'code' => tx(context, 'الكود', 'Code'), _ => tx(context, 'الأَكثَر سَيّارات', 'Most cars') },
+                          onPressed: () {}),
+                    ),
+                  ),
+                  HubButton(
+                    icon: Icons.tune_rounded,
+                    label: tx(context, 'العَرض', 'View'),
+                    onPressed: () async {
+                      final v = await showHubView(context, _view, _def,
+                          fields: [
+                            ('area', tx(context, 'المَنطِقة', 'Area')),
+                            ('device', tx(context, 'حِساب الجِهاز', 'Device account')),
+                            ('stats', tx(context, 'العُمَلاء وَالأَسعار', 'Clients and prices')),
+                            ('bar', tx(context, 'شَريط السَيّارات', 'Cars bar')),
+                            ('actions', tx(context, 'الأَزرار المُختَصَرة', 'Quick buttons')),
+                          ],
+                          groups: [('', tx(context, 'بِدون', 'None')), ('area', tx(context, 'المَنطِقة', 'Area')), ('status', tx(context, 'الحالة', 'Status'))],
+                          hideOffLabel: tx(context, 'إخفاء النِقاط اللي مِش فاليه', 'Hide non-valet points'));
+                      if (v != null && mounted) setState(() => _view = v);
+                    },
+                  ),
+                ],
               ),
+              HubKpis([
+                HubKpi(Icons.local_parking, '${base.length}', tx(context, 'نُقطة فاليه', 'Valet points')),
+                HubKpi(Icons.directions_car_filled_outlined, '$carsNow', tx(context, 'سَيّارة الآن · $live نُقطة شَغّالة', 'Cars now · $live live points')),
+                HubKpi(Icons.tablet_android, '${base.where((p) => p['terminal'] != null).length}/${base.length}', tx(context, 'لَها حِساب جِهاز', 'With device account')),
+                HubKpi(Icons.map_outlined, '${base.where((p) => p['area'] == null).length}', tx(context, 'بِدون مَنطِقة', 'No area')),
+                HubKpi(Icons.sell_outlined, '${base.where((p) => vNum(p['prices']) == 0).length}', tx(context, 'بِدون أَسعار', 'No prices')),
+              ]),
+              HubChips(
+                value: _chip,
+                onChanged: (v) => setState(() => _chip = v),
+                items: [
+                  ('all', tx(context, 'الكُلّ', 'All'), base.length),
+                  ('live', tx(context, 'شَغّالة الآن', 'Live now'), live),
+                  ('setup', tx(context, 'تَحتاج إعداد', 'Needs setup'), base.where((p) => _warn(p) > 0).length),
+                  for (final e in (areas.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))) (e.key, e.key, e.value),
+                  ('noarea', tx(context, 'بِدون مَنطِقة', 'No area'), base.where((p) => p['area'] == null).length),
+                ],
+              ),
+              if (list.isEmpty)
+                Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tx(context, 'لا تُوجَد نِقاط.', 'No point.'), style: const TextStyle(color: VC.muted))))
+              else
+                body,
             ]);
           },
         ),
       );
+
+  Widget _status(VJson p) {
+    final w = _warn(p);
+    if (_cars(p) > 0) return hubPill(tx(context, 'شَغّالة الآن', 'Live now'), kind: 'dark', pulse: true);
+    if (w == 0) return hubPill(tx(context, 'جاهِزة', 'Ready'), kind: 'ok');
+    return hubPill(tx(context, '$w تَنبيه', '$w alert(s)'), kind: 'bad');
+  }
+
+  Widget _card(VJson p, int maxCars, VoidCallback reload) {
+    final cars = _cars(p);
+    final big = _view.size == 'l', small = _view.size == 's';
+    Future<void> openTab(int tab) async {
+      await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ValetPointDetailScreen(pointId: vStr(p['id']), title: vStr(p['name']), initialTab: tab)));
+      reload();
+    }
+
+    return HubCard(
+      strong: cars > 0,
+      onTap: () => _open(p, reload),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(vStr(p['code']), style: const TextStyle(fontSize: 11.5, color: VC.muted, fontWeight: FontWeight.w600, letterSpacing: .5)),
+              Text(vStr(p['name']), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: big ? 17 : (small ? 14 : 15.5), fontWeight: FontWeight.w800, height: 1.3)),
+            ]),
+          ),
+          const SizedBox(width: 6),
+          _status(p),
+        ]),
+        if (_view.show('area') || _view.show('device')) ...[
+          const SizedBox(height: 9),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            if (_view.show('area'))
+              p['area'] == null ? hubTag(tx(context, 'بِدون مَنطِقة', 'No area'), missing: true) : hubTag(vStr(p['area']), icon: Icons.place_outlined),
+            if (_view.show('device'))
+              p['terminal'] == null
+                  ? hubTag(tx(context, 'بِدون جِهاز', 'No device'), missing: true)
+                  : hubTag(vStr(vMap(p['terminal'])['username']), icon: Icons.tablet_android),
+          ]),
+        ],
+        if (!small || _view.show('stats')) ...[
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(child: hubStat('$cars', tx(context, 'سَيّارات الآن', 'Cars now'))),
+            if (_view.show('stats')) ...[
+              Expanded(child: hubStat(vStr(p['clients']), tx(context, 'العُمَلاء', 'Clients'))),
+              Expanded(child: hubStat(vStr(p['prices']), tx(context, 'الأَسعار', 'Prices'), color: vNum(p['prices']) == 0 ? VC.bad : null)),
+            ],
+          ]),
+        ],
+        if (_view.show('bar')) ...[const SizedBox(height: 9), hubBar(cars / maxCars)],
+        if (_view.show('actions')) ...[
+          const SizedBox(height: 11),
+          Row(children: [
+            hubAction(tx(context, 'الأَسعار', 'Prices'), () => openTab(1)),
+            const SizedBox(width: 6),
+            hubAction(tx(context, 'المَزايا', 'Features'), () => openTab(0)),
+            const SizedBox(width: 6),
+            hubAction(tx(context, 'المَواقِف', 'Parking'), () => openTab(2)),
+            const Spacer(),
+            Text(tx(context, 'فَتح', 'Open'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+            const Icon(Icons.chevron_left, size: 18),
+          ]),
+        ],
+      ]),
+    );
+  }
 }
 
 // ================================================================ detail
 class ValetPointDetailScreen extends StatefulWidget {
-  const ValetPointDetailScreen({super.key, required this.pointId, required this.title});
+  const ValetPointDetailScreen({super.key, required this.pointId, required this.title, this.initialTab = 0});
   final String pointId;
   final String title;
+  final int initialTab;
 
   @override
   State<ValetPointDetailScreen> createState() => _ValetPointDetailScreenState();
@@ -135,6 +319,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     final d = _d;
     return DefaultTabController(
       length: 5,
+      initialIndex: widget.initialTab.clamp(0, 4),
       child: Scaffold(
         appBar: AppBar(
           title: Text(d == null ? widget.title : '${vMap(d['point'])['code']} · ${vMap(d['point'])['name']}'),

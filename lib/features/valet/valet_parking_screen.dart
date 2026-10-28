@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
 /// 🅿️ المَواقِف — تُنشَأ مُستَقِلّة ثُمّ تُربَط بِنُقطة أَو أَكثَر (مَوقِف مُشتَرَك بَين عِدّة نِقاط).
@@ -45,34 +46,77 @@ class _ParkingBodyState extends State<_ParkingBody> {
     }
   }
 
+  String _chip = 'all';
+  static final _def = HubView('parking', mode: 'cards', fields: {'ring', 'points', 'actions'});
+  HubView _view = _def;
+  bool _viewLoaded = false;
+
+  int _used(VJson a) => vNum(a['used']).toInt();
+  int _cap(VJson a) => vNum(a['capacity']).toInt();
+  double _fill(VJson a) => _cap(a) == 0 ? 0 : _used(a) / _cap(a);
+
+  Future<void> _edit2(VJson a) async {
+    final r = await showParkingAreaDialog(context, a);
+    if (r != null) _load();
+  }
+
+  Future<void> _delete(VJson a) async {
+    if (!await vConfirm(context, tx(context, 'حَذف المَوقِف', 'Delete area'), vStr(a['name']))) return;
+    if (!mounted) return;
+    final r = await vGuard(context, () => ValetAdmin.I.call('vva_parking_delete', {'p_id': a['id']}), ok: tx(context, 'تَمّ الحَذف.', 'Deleted.'));
+    if (r != null && mounted) setState(() => _areas = vList(r['areas']));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final all = _areas;
+    if (!_viewLoaded) {
+      _viewLoaded = true;
+      HubView.load(_def).then((v) {
+        if (mounted) setState(() => _view = v);
+      });
+    }
+    final all = _areas ?? const <VJson>[];
     final q = _q.toLowerCase();
-    final rows = all
+    bool chipOk(VJson a) => switch (_chip) {
+          'full' => _cap(a) > 0 && _fill(a) >= 0.9,
+          'free' => vList(a['points']).isEmpty,
+          'vip' => vBool(a['is_vip']),
+          'off' => !vBool(a['approved']),
+          _ => true,
+        };
+    final rows = _areas
         ?.where((a) =>
-            q.isEmpty ||
-            vStr(a['name']).toLowerCase().contains(q) ||
-            vList(a['points']).any((p) => '${p['code']} ${p['name']}'.toLowerCase().contains(q)))
+            chipOk(a) &&
+            (q.isEmpty ||
+                vStr(a['name']).toLowerCase().contains(q) ||
+                vList(a['points']).any((p) => '${p['code']} ${p['name']}'.toLowerCase().contains(q))))
         .toList();
-    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-      VHead(
-        tx(context, 'المَواقِف', 'Parking areas'),
-        subtitle: tx(context, 'المَوقِف يُنشَأ مَرّة واحِدة ثُمّ يُربَط بِنُقطة أَو أَكثَر؛ السَعة مُشتَرَكة بَين النِقاط المَربوطة',
-            'An area is created once and linked to one or more points; its capacity is shared by the linked points'),
+    final used = all.fold<int>(0, (s, a) => s + _used(a));
+    final cap = all.fold<int>(0, (s, a) => s + _cap(a));
+    return ListView(padding: const EdgeInsets.only(bottom: 28), children: [
+      HubHead(
+        title: tx(context, 'المَواقِف', 'Parking areas'),
+        subtitle: tx(context, 'كُلّ المَواقِف: السَعة، المَشغول الآن، وَالنِقاط المَربوطة (السَعة مُشتَرَكة بَينها)', 'All areas: capacity, used now and linked points (capacity shared by them)'),
         actions: [
-          SizedBox(
-            width: 220,
-            child: TextField(
-              decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search), hintText: tx(context, 'بَحث', 'Search')),
-              onChanged: (v) => setState(() => _q = v),
-            ),
+          HubSearch(hint: tx(context, 'بَحث بِالمَوقِف أَو النُقطة', 'Search area or point'), onChanged: (v) => setState(() => _q = v)),
+          HubButton(icon: Icons.refresh, label: tx(context, 'تَحديث', 'Refresh'), onPressed: _load),
+          HubButton(
+            icon: Icons.tune_rounded,
+            label: tx(context, 'العَرض', 'View'),
+            onPressed: () async {
+              final v = await showHubView(context, _view, _def, fields: [
+                ('ring', tx(context, 'دايرة الامتِلاء', 'Fill ring')),
+                ('points', tx(context, 'النِقاط المَربوطة', 'Linked points')),
+                ('actions', tx(context, 'الأَزرار', 'Buttons')),
+              ]);
+              if (v != null && mounted) setState(() => _view = v);
+            },
           ),
-          IconButton.filledTonal(onPressed: _load, icon: const Icon(Icons.refresh)),
           if (_edit)
-            FilledButton.icon(
-              icon: const Icon(Icons.add),
-              label: Text(tx(context, 'مَوقِف جَديد', 'New area')),
+            HubButton(
+              primary: true,
+              icon: Icons.add,
+              label: tx(context, 'مَوقِف جَديد', 'New area'),
               onPressed: () async {
                 final r = await showParkingAreaDialog(context, null);
                 if (r != null) _load();
@@ -80,10 +124,110 @@ class _ParkingBodyState extends State<_ParkingBody> {
             ),
         ],
       ),
+      HubKpis([
+        HubKpi(Icons.garage_outlined, '${all.length}', tx(context, 'مَوقِف', 'Areas')),
+        HubKpi(Icons.directions_car_filled_outlined, '$used', tx(context, 'سَيّارة الآن', 'Cars now')),
+        HubKpi(Icons.pie_chart_outline, cap == 0 ? '—' : '${(used * 100 / cap).round()}%', tx(context, 'امتِلاء عامّ', 'Overall fill')),
+        HubKpi(Icons.warning_amber_rounded, '${all.where((a) => _cap(a) > 0 && _fill(a) >= 0.9).length}', tx(context, 'فَوق 90%', 'Above 90%')),
+        HubKpi(Icons.link_off, '${all.where((a) => vList(a['points']).isEmpty).length}', tx(context, 'غَير مَربوط', 'Not linked')),
+      ]),
+      HubChips(
+        value: _chip,
+        onChanged: (v) => setState(() => _chip = v),
+        items: [
+          ('all', tx(context, 'الكُلّ', 'All'), all.length),
+          ('full', tx(context, 'شِبه مُمتَلِئ', 'Almost full'), all.where((a) => _cap(a) > 0 && _fill(a) >= 0.9).length),
+          ('free', tx(context, 'غَير مَربوط', 'Not linked'), all.where((a) => vList(a['points']).isEmpty).length),
+          ('vip', 'VIP', all.where((a) => vBool(a['is_vip'])).length),
+          ('off', tx(context, 'مُتَوَقِّف', 'Off'), all.where((a) => !vBool(a['approved'])).length),
+        ],
+      ),
       if (_err != null) Padding(padding: const EdgeInsets.all(16), child: Text(vErr(context, _err!), style: const TextStyle(color: VC.bad))),
       if (rows == null && _err == null) const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator())),
-      if (rows != null)
-        Padding(
+      if (rows != null && rows.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tx(context, 'لا تُوجَد مَواقِف.', 'No parking area.'), style: const TextStyle(color: VC.muted)))),
+      if (rows != null && rows.isNotEmpty)
+        if (_view.mode == 'cards') HubGrid(view: _view, children: [for (final a in rows) _card(a)]) else _table(rows),
+    ]);
+  }
+
+  Widget _card(VJson a) {
+    final f = _fill(a);
+    final full = _cap(a) > 0 && f >= 0.9;
+    final pts = vList(a['points']);
+    return HubCard(
+      onTap: _edit ? () => _edit2(a) : null,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Flexible(child: Text(vStr(a['name']), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5))),
+                if (vBool(a['is_vip'])) ...[const SizedBox(width: 6), hubPill('VIP', kind: 'dark')],
+              ]),
+              if (vStr(a['notes']).isNotEmpty) Text(vStr(a['notes']), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+          !vBool(a['approved'])
+              ? hubPill(tx(context, 'مُتَوَقِّف', 'Off'), kind: 'bad')
+              : pts.isEmpty
+                  ? hubPill(tx(context, 'غَير مَربوط', 'Not linked'))
+                  : full
+                      ? hubPill(tx(context, 'شِبه مُمتَلِئ', 'Almost full'), kind: 'warn')
+                      : hubPill(tx(context, 'مُستَخدَم', 'In use'), kind: 'ok'),
+        ]),
+        if (_view.show('ring')) ...[
+          const SizedBox(height: 12),
+          Row(children: [
+            SizedBox(
+              width: 70,
+              height: 70,
+              child: Stack(alignment: Alignment.center, children: [
+                SizedBox(
+                  width: 70,
+                  height: 70,
+                  child: CircularProgressIndicator(
+                      value: _cap(a) == 0 ? 0 : f.clamp(0, 1).toDouble(), strokeWidth: 7, backgroundColor: const Color(0xFFE2E8F0), color: full ? VC.bad : const Color(0xFF0B0C0E)),
+                ),
+                Text(_cap(a) == 0 ? '∞' : '${(f * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+              ]),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text.rich(TextSpan(children: [
+                  TextSpan(text: '${_used(a)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                  TextSpan(text: ' / ${_cap(a) == 0 ? '∞' : _cap(a)}', style: const TextStyle(fontSize: 14, color: VC.muted, fontWeight: FontWeight.w700)),
+                ])),
+                Text(
+                    _cap(a) == 0
+                        ? tx(context, 'مَشغول · بِدون حَدّ', 'Used · no limit')
+                        : tx(context, 'مَشغول / السَعة · فاضي ${_cap(a) - _used(a)}', 'Used / capacity · ${_cap(a) - _used(a)} free'),
+                    style: const TextStyle(color: VC.muted, fontSize: 12)),
+              ]),
+            ),
+          ]),
+        ],
+        if (_view.show('points')) ...[
+          const SizedBox(height: 11),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            for (final p in pts) hubTag(vStr(p['name']), icon: Icons.link),
+            if (pts.isEmpty) hubTag(tx(context, 'غَير مَربوط بِنُقطة', 'Not linked to a point'), missing: true),
+          ]),
+        ],
+        if (_view.show('actions') && _edit) ...[
+          const SizedBox(height: 11),
+          Row(children: [
+            hubAction(tx(context, 'تَعديل وَرَبط', 'Edit & link'), () => _edit2(a)),
+            const Spacer(),
+            hubAction(tx(context, 'حَذف', 'Delete'), () => _delete(a), color: VC.bad),
+          ]),
+        ],
+      ]),
+    );
+  }
+
+  Widget _table(List<VJson> rows) {
+    return         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: VPanel(
             child: VTable(
@@ -133,21 +277,14 @@ class _ParkingBodyState extends State<_ParkingBody> {
                             IconButton(
                               tooltip: tx(context, 'حَذف', 'Delete'),
                               icon: const Icon(Icons.delete_outline, color: VC.bad),
-                              onPressed: () async {
-                                if (!await vConfirm(context, tx(context, 'حَذف المَوقِف', 'Delete area'), vStr(a['name']))) return;
-                                if (!context.mounted) return;
-                                final r = await vGuard(context, () => ValetAdmin.I.call('vva_parking_delete', {'p_id': a['id']}),
-                                    ok: tx(context, 'تَمّ الحَذف.', 'Deleted.'));
-                                if (r != null && mounted) setState(() => _areas = vList(r['areas']));
-                              },
+                              onPressed: () => _delete(a),
                             ),
                           ])),
                   ]),
               ],
             ),
           ),
-        ),
-    ]);
+        );
   }
 }
 

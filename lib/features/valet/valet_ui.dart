@@ -380,10 +380,12 @@ class _VLoaderState<T> extends State<VLoader<T>> {
 
 /// جَدول يَملأ العَرض وَيَتَمَرَّر أُفُقيّاً عِند الحاجة.
 class VTable extends StatelessWidget {
-  const VTable({super.key, required this.columns, required this.rows, this.empty});
+  const VTable({super.key, required this.columns, required this.rows, this.empty, this.dataRowMinHeight = 40, this.dataRowMaxHeight = 58});
   final List<DataColumn> columns;
   final List<DataRow> rows;
   final String? empty;
+  final double dataRowMinHeight;
+  final double dataRowMaxHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -404,8 +406,8 @@ class VTable extends StatelessWidget {
             rows: rows,
             columnSpacing: 20,
             horizontalMargin: 10,
-            dataRowMinHeight: 40,
-            dataRowMaxHeight: 58,
+            dataRowMinHeight: dataRowMinHeight,
+            dataRowMaxHeight: dataRowMaxHeight,
             headingTextStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
           ),
         ),
@@ -452,7 +454,9 @@ class VRange extends StatelessWidget {
 /// قائِمة نِقاط الفاليه (مُخَزَّنة) لِلفَلاتِر.
 class VPoints {
   static List<VJson>? _list;
-  static Future<List<VJson>> get() async => _list ??= vList((await ValetAdmin.I.call('vva_points'))['points']);
+  /// Test / preview hook.
+  static Future<List<VJson>> Function()? debugLoad;
+  static Future<List<VJson>> get() async => _list ??= debugLoad != null ? await debugLoad!() : vList((await ValetAdmin.I.call('vva_points'))['points']);
   static void clear() => _list = null;
 }
 

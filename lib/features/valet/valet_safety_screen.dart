@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
+import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
 /// 🚗💥 حَوادِث الفاليه — كُلّ تَقارير النِقاط (مِن تَطبيق الفاليه)، مَفتوحة / مُغلَقة، وَالمُتابَعة (تَكلِفة، إجراء، إغلاق).
@@ -439,6 +440,16 @@ class _AssetsBody extends StatefulWidget {
 
 class _AssetsBodyState extends State<_AssetsBody> {
   String _filter = 'all';
+  static final _def = HubView('assets', mode: 'cards', fields: {'items', 'books', 'check', 'history'});
+  HubView _view = _def;
+
+  @override
+  void initState() {
+    super.initState();
+    HubView.load(_def).then((v) {
+      if (mounted) setState(() => _view = v);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -470,51 +481,54 @@ class _AssetsBodyState extends State<_AssetsBody> {
           return true;
         }).toList();
 
-        return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-          VHead(
-            tx(context, 'عُهَد النِقاط', 'Point assets'),
+        final items = points.fold<num>(0, (s, p) => s + _itemsOf(p).fold<num>(0, (a, i) => a + vNum(i['qty'])));
+        return ListView(padding: const EdgeInsets.only(bottom: 28), children: [
+          HubHead(
+            title: tx(context, 'عُهَد النِقاط', 'Point assets'),
             subtitle: tx(context, 'المُعَدّات وَحالَتها، آخِر جَرد، وَدَفاتِر التَذاكِر اليَدَويّة لِكُلّ نُقطة', 'Equipment and condition, last check and manual ticket books per point'),
             actions: [
-              OutlinedButton.icon(
-                onPressed: points.isEmpty ? null : () => _export(points),
-                icon: const Icon(Icons.download_outlined, size: 18),
-                label: const Text('Excel'),
+              HubButton(icon: Icons.refresh, label: tx(context, 'تَحديث', 'Refresh'), onPressed: reload),
+              HubButton(
+                icon: Icons.tune_rounded,
+                label: tx(context, 'العَرض', 'View'),
+                onPressed: () async {
+                  final v = await showHubView(context, _view, _def, modes: false, fields: [
+                    ('check', tx(context, 'آخِر جَرد', 'Last check')),
+                    ('items', tx(context, 'المُعَدّات', 'Equipment')),
+                    ('books', tx(context, 'دَفاتِر التَذاكِر', 'Ticket books')),
+                    ('history', tx(context, 'سِجِلّ الجَرد', 'Check history')),
+                  ]);
+                  if (v != null && mounted) setState(() => _view = v);
+                },
               ),
-              IconButton.filledTonal(onPressed: reload, icon: const Icon(Icons.refresh)),
+              HubButton(primary: true, icon: Icons.download_outlined, label: 'Excel', onPressed: points.isEmpty ? null : () => _export(points)),
             ],
           ),
+          HubKpis([
+            HubKpi(Icons.inventory_2_outlined, VF.n(items), tx(context, 'قِطعة عُهدة', 'Asset items')),
+            HubKpi(Icons.place_outlined, VF.n(points.length), tx(context, 'نُقطة', 'Points')),
+            HubKpi(Icons.report_problem_outlined, VF.n(withIssues), tx(context, 'بِها مُشكِلة', 'With issues')),
+            HubKpi(Icons.fact_check_outlined, VF.n(staleN), tx(context, 'لَم تُجرَد اليَوم', 'Not checked 24h')),
+            HubKpi(Icons.menu_book_outlined, VF.n(lowBooks), tx(context, 'دَفتَر قَرَّب يِخلَص', 'Book almost done')),
+          ]),
+          HubChips(
+            value: _filter,
+            onChanged: (v) => setState(() => _filter = v),
+            items: [
+              ('all', tx(context, 'كُلّ النِقاط', 'All points'), points.length),
+              ('issues', tx(context, 'بِها مُشكِلة', 'Issues'), withIssues),
+              ('stale', tx(context, 'لَم تُجرَد', 'Not checked'), staleN),
+              ('books', tx(context, 'دَفاتِر قَرَّبِت تِخلَص', 'Books almost done'), lowBooks),
+            ],
+          ),
+          if (shown.isEmpty)
+            Padding(padding: const EdgeInsets.all(30), child: Center(child: Text(tx(context, 'لا شَيء هُنا.', 'Nothing here.'), style: const TextStyle(color: VC.muted))))
+          else
+            HubGrid(view: _view, children: [for (final p in shown) _pointCard(context, p, stale(p), left(p))]),
+          if (_view.show('history'))
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Wrap(spacing: 10, runSpacing: 10, children: [
-                VKpi(tx(context, 'النِقاط', 'Points'), VF.n(points.length), icon: Icons.place_outlined, color: VC.info),
-                VKpi(tx(context, 'بِها مُشكِلة', 'With issues'), VF.n(withIssues), icon: Icons.report_problem_outlined, color: withIssues > 0 ? VC.bad : VC.ok),
-                VKpi(tx(context, 'لَم تُجرَد اليَوم', 'Not checked 24h'), VF.n(staleN), icon: Icons.fact_check_outlined, color: staleN > 0 ? VC.warn : VC.ok),
-                VKpi(tx(context, 'دَفتَر قارَب يَنتَهي', 'Book almost done'), VF.n(lowBooks), icon: Icons.menu_book_outlined, color: lowBooks > 0 ? VC.bad : VC.ok),
-              ]),
-              const SizedBox(height: 12),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: SegmentedButton<String>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: 'all', label: Text(tx(context, 'الكُلّ', 'All'))),
-                    ButtonSegment(value: 'issues', label: Text(tx(context, 'بِها مُشكِلة', 'Issues'))),
-                    ButtonSegment(value: 'stale', label: Text(tx(context, 'لَم تُجرَد', 'Not checked'))),
-                    ButtonSegment(value: 'books', label: Text(tx(context, 'دَفاتِر', 'Books'))),
-                  ],
-                  selected: {_filter},
-                  onSelectionChanged: (s) => setState(() => _filter = s.first),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (shown.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: Center(child: Text(tx(context, 'لا شَيء هُنا.', 'Nothing here.'), style: const TextStyle(color: VC.muted))),
-                )
-              else
-                Wrap(spacing: 12, runSpacing: 12, children: [for (final p in shown) _pointCard(context, p, stale(p), left(p))]),
               const SizedBox(height: 16),
               VPanel(
                 title: tx(context, 'سِجِلّ الجَرد (آخِر 100)', 'Check history (last 100)'),
@@ -557,12 +571,13 @@ class _AssetsBodyState extends State<_AssetsBody> {
     final issues = vNum(p['issues']).toInt();
     final t = vTime(p['checked_at']);
     return SizedBox(
-      width: 340,
       child: Card(
         margin: EdgeInsets.zero,
+        color: Colors.white,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: issues > 0 ? VC.bad.withValues(alpha: 0.5) : Colors.black12, width: issues > 0 ? 1.5 : 1),
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: issues > 0 ? VC.bad.withValues(alpha: 0.6) : const Color(0xFFE2E8F0), width: issues > 0 ? 1.5 : 1),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -576,6 +591,7 @@ class _AssetsBodyState extends State<_AssetsBody> {
               ),
               if (issues > 0) VPill(tx(context, '$issues مُشكِلة', '$issues issue${issues == 1 ? '' : 's'}'), color: VC.bad) else VPill(tx(context, 'سَليم', 'All good'), color: VC.ok),
             ]),
+            if (_view.show('check')) ...[
             const SizedBox(height: 8),
             Row(children: [
               Icon(Icons.fact_check_outlined, size: 15, color: stale ? VC.warn : VC.ok),
@@ -591,6 +607,8 @@ class _AssetsBodyState extends State<_AssetsBody> {
                 ),
               ),
             ]),
+            ],
+            if (_view.show('items')) ...[
             const Divider(height: 18),
             for (final i in items)
               Padding(
@@ -606,7 +624,8 @@ class _AssetsBodyState extends State<_AssetsBody> {
                   Text('× ${vNum(i['qty']).toInt()}', style: const TextStyle(fontWeight: FontWeight.w800)),
                 ]),
               ),
-            if (books.isNotEmpty) ...[
+            ],
+            if (books.isNotEmpty && _view.show('books')) ...[
               const Divider(height: 18),
               Builder(builder: (context) {
                 final b = books.first;

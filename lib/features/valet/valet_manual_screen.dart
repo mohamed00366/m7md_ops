@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'valet_admin.dart';
+import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
 /// 📝 التَذاكِر الوَرَقيّة — تُدخَل مِن تَطبيق الفاليه (المُشرِف) وَتُعتَمَد هُنا أَو في التَطبيق مِن شَخص تاني.
@@ -37,7 +38,7 @@ class _ManualBodyState extends State<_ManualBody> {
   Future<void> _load() async {
     setState(() => _busy = true);
     try {
-      final d = await ValetAdmin.I.call('vva_manual_entries', {'p_status': _status});
+      final d = await ValetAdmin.I.call('vva_manual_entries', {'p_status': 'all'});
       if (mounted) {
         setState(() {
           _rows = vList(d['entries']);
@@ -105,38 +106,43 @@ class _ManualBodyState extends State<_ManualBody> {
         _ => VPill(tx(context, 'مُنتَظِر', 'Waiting'), color: VC.warn, icon: Icons.hourglass_top),
       };
 
+  static num _amount(VJson m) => m['kind'] == 'ticket' ? vNum(m['amount']) : vNum(m['cash']) + vNum(m['card']) + vNum(m['credit']);
+
   @override
   Widget build(BuildContext context) {
-    final rows = _rows;
-    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-      VHead(tx(context, 'التَذاكِر الوَرَقيّة', 'Paper tickets'),
-          subtitle: tx(context, 'تُدخَل مِن تَطبيق الفاليه عِند تَعَطُّل الجِهاز أَو الكَهرَباء، وَيَعتَمِدها شَخص غَير الذي أَدخَلها.',
-              'Entered in the valet app when the device / power was down; approved by someone other than the person who entered them.'),
-          actions: [
-            SizedBox(
-              width: 200,
-              child: DropdownButtonFormField<String>(
-                value: _status,
-                decoration: InputDecoration(labelText: tx(context, 'الحالة', 'Status'), isDense: true),
-                items: [
-                  DropdownMenuItem(value: 'pending', child: Text(tx(context, 'مُنتَظِرة اعتِماد', 'Waiting approval'))),
-                  DropdownMenuItem(value: 'approved', child: Text(tx(context, 'مُعتَمَدة', 'Approved'))),
-                  DropdownMenuItem(value: 'rejected', child: Text(tx(context, 'مَرفوضة', 'Rejected'))),
-                  DropdownMenuItem(value: 'all', child: Text(tx(context, 'الكُلّ', 'All'))),
-                ],
-                onChanged: (v) {
-                  _status = v ?? 'pending';
-                  _load();
-                },
-              ),
-            ),
-            IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
-          ]),
+    final all = _rows ?? const <VJson>[];
+    String st(VJson m) => vStr(m['status']).isEmpty ? 'pending' : vStr(m['status']);
+    final rows = _rows?.where((m) => _status == 'all' || st(m) == _status).toList();
+    int n(String s) => all.where((m) => st(m) == s).length;
+    return ListView(padding: const EdgeInsets.only(bottom: 28), children: [
+      HubHead(
+        title: tx(context, 'اعتِماد المَبيعات اليَدَويّة', 'Manual sales approval'),
+        subtitle: tx(context, 'تَذاكِر وَرَقيّة أَو مَبيعات مِن غَير التَطبيق: يَعتَمِدها شَخص غَير اللي أَدخَلها، وَبَعدَها تَروح لِلوَرديّة وَOdoo.',
+            'Paper tickets or sales outside the app: approved by someone other than who entered them, then added to the shift and Odoo.'),
+        actions: [HubButton(icon: Icons.refresh, label: tx(context, 'تَحديث', 'Refresh'), onPressed: _load)],
+      ),
+      HubKpis([
+        HubKpi(Icons.hourglass_top, VF.n(n('pending')), tx(context, 'بانتِظار الاعتِماد', 'Waiting approval')),
+        HubKpi(Icons.check_circle_outline, VF.n(n('approved')), tx(context, 'مُعتَمَدة', 'Approved')),
+        HubKpi(Icons.payments_outlined, VF.money(all.where((m) => st(m) == 'approved').fold<num>(0, (s, m) => s + _amount(m))), tx(context, 'إجماليّ المُعتَمَد AED', 'Approved total AED')),
+        HubKpi(Icons.cancel_outlined, VF.n(n('rejected')), tx(context, 'مَرفوضة', 'Rejected')),
+        HubKpi(Icons.dashboard_outlined, VF.n(all.where((m) => m['source'] == 'dashboard').length), tx(context, 'مِن الداشبورد', 'From the dashboard')),
+      ]),
+      HubChips(
+        value: _status,
+        onChanged: (v) => setState(() => _status = v),
+        items: [
+          ('pending', tx(context, 'بانتِظار الاعتِماد', 'Waiting approval'), n('pending')),
+          ('approved', tx(context, 'مُعتَمَدة', 'Approved'), n('approved')),
+          ('rejected', tx(context, 'مَرفوضة', 'Rejected'), n('rejected')),
+          ('all', tx(context, 'الكُلّ', 'All'), all.length),
+        ],
+      ),
       if (_busy) const Padding(padding: EdgeInsets.fromLTRB(16, 10, 16, 0), child: LinearProgressIndicator(minHeight: 2)),
       if (_err != null) Padding(padding: const EdgeInsets.all(16), child: Text(vErr(context, _err!), style: const TextStyle(color: VC.bad))),
       if (rows != null)
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
           child: VPanel(
             title: tx(context, '${rows.length} إدخال', '${rows.length} entr${rows.length == 1 ? 'y' : 'ies'}'),
             child: VTable(

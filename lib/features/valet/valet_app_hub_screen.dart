@@ -43,7 +43,8 @@ class ValetAppHubScreen extends StatelessWidget {
                   child: TabBar(
                     isScrollable: true,
                     tabAlignment: TabAlignment.start,
-                    indicatorColor: VC.gold,
+                    indicatorColor: const Color(0xFF0B0C0E),
+                    labelColor: const Color(0xFF0B0C0E),
                     tabs: [for (final (icon, ar, en, _) in tabs) Tab(icon: Icon(icon, size: 20), text: tx(context, ar, en), iconMargin: const EdgeInsets.only(bottom: 2))],
                   ),
                 ),
@@ -77,7 +78,8 @@ class _ManualTabs extends StatelessWidget {
         TabBar(
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          indicatorColor: VC.gold,
+          indicatorColor: const Color(0xFF0B0C0E),
+                    labelColor: const Color(0xFF0B0C0E),
           tabs: [for (final (icon, ar, en, _) in tabs) Tab(icon: Icon(icon, size: 18), text: tx(context, ar, en), iconMargin: const EdgeInsets.only(bottom: 2))],
         ),
         const Divider(height: 1),

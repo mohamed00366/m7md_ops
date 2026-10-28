@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
 /// 🧾 مَبيعات يَدَويّة — مَوقِع وَقَف فيه السيستم: فاتورة / عِدّة فَواتير / إجمالي يَوم، كاش + كارت (رَقم المُوافَقة) + آجِل عَلى العَميل.
@@ -193,6 +194,34 @@ class _SalesBodyState extends State<_SalesBody> {
           ),
         );
 
+  /// Steps strip: point & shift → invoices & payment → photos & send.
+  Widget _steps() {
+    final step = _point == null ? 0 : (_files.isEmpty ? 1 : 2);
+    Widget one(int i, String ar, String en) => Expanded(
+          child: Row(children: [
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: i <= step ? const Color(0xFF0B0C0E) : const Color(0xFFE2E8F0),
+              child: Text('${i + 1}', style: TextStyle(color: i <= step ? Colors.white : VC.muted, fontWeight: FontWeight.w800, fontSize: 12.5)),
+            ),
+            const SizedBox(width: 8),
+            Flexible(child: Text(tx(context, ar, en), style: TextStyle(fontWeight: FontWeight.w700, color: i <= step ? null : VC.muted))),
+          ]),
+        );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE2E8F0))),
+        child: Row(children: [
+          one(0, 'النُقطة وَالوَرديّة', 'Point & shift'),
+          one(1, 'الفَواتير وَالدَفع', 'Invoices & payment'),
+          one(2, 'الصُوَر وَالإرسال', 'Photos & send'),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pm = {
@@ -202,11 +231,13 @@ class _SalesBodyState extends State<_SalesBody> {
       'Free': tx(context, 'مَجّانيّ', 'Free'),
     };
     return ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-      VHead(tx(context, 'مَبيعات يَدَويّة', 'Manual sales'),
+      HubHead(
+          title: tx(context, 'مَبيعات يَدَويّة', 'Manual sales'),
           subtitle: tx(context, 'لِمَوقِع وَقَف فيه السيستم وَما طَلَّعش فَواتير. تَروح لِلاعتِماد مِن شَخص تاني، وَبَعدَها تَدخُل وَرديّة اليَوم وَOdoo.',
               'For a site where the system was down and no invoices came out. Approved by someone else, then added to the shift of that day and to Odoo.')),
+      _steps(),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
         child: VPanel(
           child: Wrap(spacing: 16, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [
             SizedBox(

@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
+import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
 /// 🎟️ القَسائِم — QR / سيريال يُباع لِفُندُق أَو شَرِكة أَو عَميل: خَصم (مَبلَغ / سِعر نِهائيّ / نِسبة) عَلى نُقطة أَو أَكثَر أَو كُلّ النِقاط،
@@ -168,28 +169,59 @@ class _VouchersBodyState extends State<_VouchersBody> {
     if (r != null) _load();
   }
 
+  String _chip = 'all';
+  static final _def = HubView('vouchers', mode: 'cards', fields: {'usage', 'where', 'actions'});
+  HubView _view = _def;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (identical(_view, _def)) {
+      HubView.load(_def).then((v) {
+        if (mounted) setState(() => _view = v);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final q = _q.toLowerCase();
-    final rows = _rows?.where((b) => q.isEmpty || '${b['name']} ${b['buyer']} ${b['prefix']}'.toLowerCase().contains(q)).toList();
     final today = DateTime.now().toIso8601String().substring(0, 10);
-    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
-      VHead(
-        tx(context, 'القَسائِم (QR / سيريال)', 'Vouchers (QR / serial)'),
-        subtitle: tx(context, 'تُنشَأ مَجموعة قَسائِم بِخَصم ثابِت أَو سِعر ثابِت أَو نِسبة، لِنُقطة أَو أَكثَر، مِن تاريخ وَلِمُدّة – وَتُستَخدَم في شاشة الدَفع بِالتَطبيق',
-            'Create a batch with an amount off, a fixed price or a percent, for one or more points, from a date for a period – used on the app payment screen'),
+    final soon = DateTime.now().add(const Duration(days: 7)).toIso8601String().substring(0, 10);
+    final all = _rows ?? const <VJson>[];
+    bool expired(VJson b) => vStr(b['valid_to']).compareTo(today) < 0;
+    bool live(VJson b) => vBool(b['active']) && !expired(b);
+    bool chipOk(VJson b) => switch (_chip) {
+          'live' => live(b),
+          'soon' => live(b) && vStr(b['valid_to']).compareTo(soon) <= 0,
+          'branch' => vStr(b['site_names']).isNotEmpty,
+          'ended' => !live(b),
+          _ => true,
+        };
+    final rows = _rows?.where((b) => chipOk(b) && (q.isEmpty || '${b['name']} ${b['buyer']} ${b['prefix']}'.toLowerCase().contains(q))).toList();
+    return ListView(padding: const EdgeInsets.only(bottom: 28), children: [
+      HubHead(
+        title: tx(context, 'القَسائِم (QR / سيريال)', 'Vouchers (QR / serial)'),
+        subtitle: tx(context, 'مَجموعات أَكواد الخَصم: الخَصم، النِقاط أَو الفُروع، المُدّة وَالاستِخدام', 'Discount code batches: discount, points or branches, period and use'),
         actions: [
-          SizedBox(
-            width: 220,
-            child: TextField(
-              decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search), hintText: tx(context, 'بَحث', 'Search')),
-              onChanged: (v) => setState(() => _q = v),
-            ),
+          HubSearch(hint: tx(context, 'بَحث بِالاسم أَو المُشتَري', 'Search name or buyer'), onChanged: (v) => setState(() => _q = v)),
+          HubButton(icon: Icons.refresh, label: tx(context, 'تَحديث', 'Refresh'), onPressed: _load),
+          HubButton(
+            icon: Icons.tune_rounded,
+            label: tx(context, 'العَرض', 'View'),
+            onPressed: () async {
+              final v = await showHubView(context, _view, _def, fields: [
+                ('usage', tx(context, 'الاستِخدام', 'Usage')),
+                ('where', tx(context, 'النِقاط / الفُروع', 'Points / branches')),
+                ('actions', tx(context, 'الأَزرار', 'Buttons')),
+              ]);
+              if (v != null && mounted) setState(() => _view = v);
+            },
           ),
-          IconButton.filledTonal(onPressed: _load, icon: const Icon(Icons.refresh)),
-          FilledButton.icon(
-            icon: const Icon(Icons.add),
-            label: Text(tx(context, 'قَسائِم جَديدة', 'New vouchers')),
+          HubButton(
+            primary: true,
+            icon: Icons.add,
+            label: tx(context, 'قَسائِم جَديدة', 'New vouchers'),
             onPressed: () async {
               final r = await _showCreateDialog(context);
               if (r != null) _load();
@@ -197,10 +229,113 @@ class _VouchersBodyState extends State<_VouchersBody> {
           ),
         ],
       ),
+      HubKpis([
+        HubKpi(Icons.confirmation_number_outlined, '${all.where(live).length}', tx(context, 'مَجموعة فَعّالة', 'Live batches')),
+        HubKpi(Icons.qr_code_2, VF.n(all.fold<num>(0, (s, b) => s + vNum(b['count']))), tx(context, 'كود', 'Codes')),
+        HubKpi(Icons.check_circle_outline, VF.n(all.fold<num>(0, (s, b) => s + vNum(b['uses']))), tx(context, 'استِخدام', 'Uses')),
+        HubKpi(Icons.payments_outlined, VF.money(all.fold<num>(0, (s, b) => s + vNum(b['discount_total']))), tx(context, 'إجمالي الخَصم AED', 'Discount given AED')),
+        HubKpi(Icons.storefront_outlined, '${all.where((b) => vStr(b['site_names']).isNotEmpty).length}', tx(context, 'مَجموعات خاصّة بِفُروع', 'Branch-only batches')),
+      ]),
+      HubChips(
+        value: _chip,
+        onChanged: (v) => setState(() => _chip = v),
+        items: [
+          ('all', tx(context, 'الكُلّ', 'All'), all.length),
+          ('live', tx(context, 'فَعّالة', 'Live'), all.where(live).length),
+          ('soon', tx(context, 'تَنتَهي خِلال أُسبوع', 'Ending this week'), all.where((b) => live(b) && vStr(b['valid_to']).compareTo(soon) <= 0).length),
+          ('branch', tx(context, 'خاصّة بِفَرع', 'Branch only'), all.where((b) => vStr(b['site_names']).isNotEmpty).length),
+          ('ended', tx(context, 'مُنتَهية / مُتَوَقِّفة', 'Ended / off'), all.where((b) => !live(b)).length),
+        ],
+      ),
       if (_err != null) Padding(padding: const EdgeInsets.all(16), child: Text(vErr(context, _err!), style: const TextStyle(color: VC.bad))),
       if (rows == null && _err == null) const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator())),
-      if (rows != null)
-        Padding(
+      if (rows != null && rows.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Center(child: Text(tx(context, 'لا تُوجَد قَسائِم.', 'No vouchers.'), style: const TextStyle(color: VC.muted)))),
+      if (rows != null && rows.isNotEmpty)
+        if (_view.mode == 'cards')
+          HubGrid(view: _view, children: [for (final b in rows) _card(b, live(b), expired(b))])
+        else
+          _table(rows, today),
+    ]);
+  }
+
+  Widget _card(VJson b, bool live, bool expired) {
+    final total = vNum(b['count']) * (vNum(b['uses_per_code']) > 0 ? vNum(b['uses_per_code']) : 1);
+    final used = vNum(b['uses']);
+    final v = vNum(b['value']);
+    final money = v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+    final (big, small) = switch (vStr(b['kind'])) {
+      'amount' => (money, tx(context, 'دِرهَم خَصم', 'AED off')),
+      'price' => (money, tx(context, 'سِعر نِهائيّ', 'final price')),
+      _ => ('$money%', vNum(b['max']) > 0 ? tx(context, 'حَتّى ${vNum(b['max']).toStringAsFixed(0)} دِرهَم', 'up to ${vNum(b['max']).toStringAsFixed(0)} AED') : tx(context, 'خَصم', 'off')),
+    };
+    return HubCard(
+      onTap: () async {
+        final codes = await _codes(b);
+        if (codes != null && mounted) await _showCodes(context, b, codes);
+        _load();
+      },
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(vStr(b['name']), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
+              Text([if (vStr(b['buyer']).isNotEmpty) vStr(b['buyer']), if (b['sale_price'] != null) '${VF.money(vNum(b['sale_price']))} AED'].join(' · '),
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+          Switch(value: vBool(b['active']), activeTrackColor: const Color(0xFF0B0C0E), onChanged: (x) => _active(b, x)),
+        ]),
+        const SizedBox(height: 8),
+        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Text(big, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, height: 1)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(small, style: const TextStyle(color: VC.muted, fontSize: 12))),
+          live ? hubPill(tx(context, 'فَعّالة', 'Live'), kind: 'ok') : hubPill(expired ? tx(context, 'انتَهَت', 'Ended') : tx(context, 'مُتَوَقِّفة', 'Off'), kind: expired ? 'mut' : 'bad'),
+        ]),
+        const SizedBox(height: 10),
+        LayoutBuilder(
+            builder: (_, c) => Row(children: [
+                  for (var i = 0; i < (c.maxWidth / 10).floor(); i++)
+                    Container(width: 5, height: 1.6, margin: const EdgeInsets.only(left: 5), color: const Color(0xFFE2E8F0)),
+                ])),
+        const SizedBox(height: 8),
+        if (_view.show('usage')) ...[
+          Row(children: [
+            Text(tx(context, 'استُخدِم ${VF.n(used)} / ${VF.n(total)}', 'Used ${VF.n(used)} / ${VF.n(total)}'), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+            const Spacer(),
+            Text('${_d(b['valid_from'])} → ${_d(b['valid_to'])}', style: TextStyle(fontSize: 12, color: expired ? VC.bad : VC.muted)),
+          ]),
+          const SizedBox(height: 7),
+          hubBar(total == 0 ? 0 : used / total),
+        ],
+        if (_view.show('where')) ...[
+          const SizedBox(height: 10),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            hubTag(vStr(b['point_names']).isEmpty ? tx(context, 'كُلّ النِقاط', 'All points') : vStr(b['point_names']), icon: Icons.place_outlined),
+            if (vStr(b['site_names']).isNotEmpty) hubTag(vStr(b['site_names']), icon: Icons.storefront_outlined),
+            hubTag('${vStr(b['prefix'])}-···· · ${vNum(b['count']).toInt()}', icon: Icons.qr_code_2),
+          ]),
+        ],
+        if (_view.show('actions')) ...[
+          const SizedBox(height: 10),
+          Row(children: [
+            hubAction(tx(context, 'الأَكواد', 'Codes'), () async {
+              final codes = await _codes(b);
+              if (codes != null && mounted) await _showCodes(context, b, codes);
+              _load();
+            }),
+            const SizedBox(width: 6),
+            hubAction('PDF', () => _pdf(b)),
+            const SizedBox(width: 6),
+            hubAction('Excel', () => _excel(b)),
+          ]),
+        ],
+      ]),
+    );
+  }
+
+  Widget _table(List<VJson> rows, String today) {
+    return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: VPanel(
             child: VTable(
@@ -252,7 +387,7 @@ class _VouchersBodyState extends State<_VouchersBody> {
                         icon: const Icon(Icons.qr_code_2),
                         onPressed: () async {
                           final codes = await _codes(b);
-                          if (codes != null && context.mounted) await _showCodes(context, b, codes);
+                          if (codes != null && mounted) await _showCodes(context, b, codes);
                           _load();
                         },
                       ),
@@ -263,8 +398,7 @@ class _VouchersBodyState extends State<_VouchersBody> {
               ],
             ),
           ),
-        ),
-    ]);
+        );
   }
 }
 

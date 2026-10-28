@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_hub_ui.dart';
 import 'valet_member_cards_panel.dart';
 import 'valet_network_data.dart';
 import 'valet_ui.dart';
@@ -35,6 +36,16 @@ class _BodyState extends State<_Body> {
   static const _vat = 0.05;
 
   String? _sel; // selected type (Types tab)
+  static final _def = HubView('memberships', mode: 'cards', fields: {'price', 'members', 'bar', 'actions'});
+  HubView _view = _def;
+
+  @override
+  void initState() {
+    super.initState();
+    HubView.load(_def).then((v) {
+      if (mounted) setState(() => _view = v);
+    });
+  }
   int _mKey = 0; // reload the members of the selected type
 
   Future<VJson> _loadAll() async {
@@ -75,20 +86,58 @@ class _BodyState extends State<_Body> {
         return DefaultTabController(
           length: 4,
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                VKpi(tx(context, 'أَنواع فَعّالة', 'Active types'), VF.n(types.where((t) => vBool(t['is_active'])).length), icon: Icons.style_outlined, color: VC.gold),
-                VKpi(tx(context, 'مُشتَرِكون فَعّالون', 'Active members'), VF.n(vNum(mc['active'])), icon: Icons.card_membership, color: VC.ok),
-                VKpi(tx(context, 'كُروت مُتاحة', 'Cards available'), VF.n(vNum(cc['available'])), icon: Icons.credit_card, color: VC.info),
-                VKpi(tx(context, 'تَنتَهي خِلال أُسبوع', 'Ending this week'), VF.n(vNum(mc['ending'])), icon: Icons.event_busy_outlined, color: vNum(mc['ending']) > 0 ? VC.warn : null),
-                IconButton.filledTonal(tooltip: tx(context, 'تَحديث', 'Refresh'), onPressed: reload, icon: const Icon(Icons.refresh)),
-              ]),
+            HubHead(
+              title: tx(context, 'الاشتِراكات', 'Memberships'),
+              subtitle: tx(context, 'أَنواع الاشتِراكات، المُشتَرِكين، الكُروت المَطبوعة وَالنِقاط', 'Membership types, members, printed cards and points'),
+              actions: [
+                HubButton(icon: Icons.refresh, label: tx(context, 'تَحديث', 'Refresh'), onPressed: reload),
+                HubButton(
+                  icon: Icons.tune_rounded,
+                  label: tx(context, 'العَرض', 'View'),
+                  onPressed: () async {
+                    final v = await showHubView(context, _view, _def,
+                        modes: false,
+                        fields: [
+                          ('price', tx(context, 'السِعر', 'Price')),
+                          ('members', tx(context, 'المُشتَرِكين', 'Members')),
+                          ('bar', tx(context, 'الشَريط', 'Bar')),
+                          ('actions', tx(context, 'الأَزرار', 'Buttons')),
+                        ]);
+                    if (v != null && mounted) setState(() => _view = v);
+                  },
+                ),
+                HubButton(
+                  icon: _view.mode == 'cards' ? Icons.view_sidebar_outlined : Icons.grid_view_rounded,
+                  label: _view.mode == 'cards' ? tx(context, 'قائِمة + تَفاصيل', 'List + details') : tx(context, 'كُروت', 'Cards'),
+                  onPressed: () {
+                    setState(() => _view.mode = _view.mode == 'cards' ? 'split' : 'cards');
+                    _view.save();
+                  },
+                ),
+                if (edit)
+                  HubButton(
+                    primary: true,
+                    icon: Icons.add,
+                    label: tx(context, 'نَوع جَديد', 'New type'),
+                    onPressed: () async {
+                      if (await _form(context, null) == true) reload();
+                    },
+                  ),
+              ],
             ),
+            HubKpis([
+              HubKpi(Icons.style_outlined, VF.n(types.where((t) => vBool(t['is_active'])).length), tx(context, 'أَنواع فَعّالة', 'Active types')),
+              HubKpi(Icons.card_membership, VF.n(vNum(mc['active'])), tx(context, 'مُشتَرِك فَعّال', 'Active members')),
+              HubKpi(Icons.people_outline, VF.n(vNum(mc['total'])), tx(context, 'كُلّ المُشتَرِكين', 'All members')),
+              HubKpi(Icons.credit_card, VF.n(vNum(cc['available'])), tx(context, 'كارت مُتاح', 'Cards available')),
+              HubKpi(Icons.event_busy_outlined, VF.n(vNum(mc['ending'])), tx(context, 'تَنتَهي خِلال أُسبوع', 'Ending this week')),
+            ]),
+            const SizedBox(height: 10),
             TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
-              indicatorColor: VC.gold,
+              indicatorColor: const Color(0xFF0B0C0E),
+              labelColor: const Color(0xFF0B0C0E),
               tabs: [
                 Tab(icon: const Icon(Icons.style_outlined, size: 18), iconMargin: const EdgeInsets.only(bottom: 2), text: tx(context, 'الأَنواع (${types.length})', 'Types (${types.length})')),
                 Tab(icon: const Icon(Icons.people_outline, size: 18), iconMargin: const EdgeInsets.only(bottom: 2), text: tx(context, 'المُشتَرِكون (${VF.n(vNum(mc['total']))})', 'Members (${VF.n(vNum(mc['total']))})')),
@@ -113,6 +162,7 @@ class _BodyState extends State<_Body> {
 
   // ---------------------------------------------------------------- Types tab: list ▸ detail
   Widget _typesTab(BuildContext context, List<VJson> types, bool edit, Future<void> Function() reload) {
+    if (_view.mode == 'cards') return _typeCards(context, types, edit, reload);
     final t = types.where((x) => vStr(x['id']) == _sel).firstOrNull;
     Future<void> newType() async {
       if (await _form(context, null) == true) reload();
@@ -124,7 +174,7 @@ class _BodyState extends State<_Body> {
       return Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: Material(
-          color: on ? VC.gold.withValues(alpha: 0.14) : Colors.transparent,
+          color: on ? const Color(0xFF0B0C0E).withValues(alpha: 0.07) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
@@ -135,7 +185,7 @@ class _BodyState extends State<_Body> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(children: [
-                Icon(_covIcon(vStr(x['coverage'])), size: 18, color: on ? VC.gold : VC.muted),
+                Icon(_covIcon(vStr(x['coverage'])), size: 18, color: on ? const Color(0xFF0B0C0E) : VC.muted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -202,6 +252,75 @@ class _BodyState extends State<_Body> {
         Expanded(child: detail),
       ]);
     });
+  }
+
+  /// Types as cards (tap = open the type in "list + details").
+  Widget _typeCards(BuildContext context, List<VJson> types, bool edit, Future<void> Function() reload) {
+    if (types.isEmpty) return Center(child: Text(tx(context, 'لا تُوجَد أَنواع بَعد.', 'No types yet.'), style: const TextStyle(color: VC.muted)));
+    final maxM = types.fold<num>(1, (m, x) => vNum(x['active_members']) > m ? vNum(x['active_members']) : m);
+    void open(VJson x) => setState(() {
+          _sel = vStr(x['id']);
+          _mKey++;
+          _view.mode = 'split';
+        });
+    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+      HubGrid(view: _view, children: [
+        for (final x in types)
+          HubCard(
+            onTap: () => open(x),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(vStr(x['name']), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
+                    const SizedBox(height: 2),
+                    Row(children: [
+                      Icon(_covIcon(vStr(x['coverage'])), size: 14, color: VC.muted),
+                      const SizedBox(width: 4),
+                      Flexible(child: Text(_covShort(context, vStr(x['coverage'])), style: const TextStyle(color: VC.muted, fontSize: 12.5))),
+                    ]),
+                  ]),
+                ),
+                !vBool(x['is_active'])
+                    ? hubPill(tx(context, 'مُتَوَقِّف', 'Off'), kind: 'bad')
+                    : vBool(x['sell_in_app'])
+                        ? hubPill(tx(context, 'يُباع في التَطبيق', 'Sold in the app'), kind: 'ok')
+                        : hubPill(tx(context, 'المَكتَب فَقَط', 'Office only')),
+              ]),
+              if (_view.show('price')) ...[
+                const SizedBox(height: 12),
+                vNum(x['price']) == 0
+                    ? Text(tx(context, 'مَجّانيّ', 'Free'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800))
+                    : Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                        Text(VF.money(vNum(x['price']) * (1 + _vat)), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, height: 1)),
+                        const SizedBox(width: 6),
+                        Text(tx(context, 'AED شَهريّاً', 'AED monthly'), style: const TextStyle(color: VC.muted, fontSize: 12)),
+                      ]),
+              ],
+              if (_view.show('members')) ...[
+                const SizedBox(height: 10),
+                Row(children: [
+                  const Icon(Icons.people_outline, size: 16),
+                  const SizedBox(width: 4),
+                  Text(tx(context, '${x['active_members']} مُشتَرِك فَعّال', '${x['active_members']} active members'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+                ]),
+              ],
+              if (_view.show('bar')) ...[const SizedBox(height: 8), hubBar(vNum(x['active_members']) / maxM)],
+              if (_view.show('actions')) ...[
+                const SizedBox(height: 11),
+                Row(children: [
+                  hubAction(tx(context, 'المُشتَرِكين وَالتَفاصيل', 'Members & details'), () => open(x)),
+                  const SizedBox(width: 6),
+                  if (edit)
+                    hubAction(tx(context, 'تَعديل', 'Edit'), () async {
+                      if (await _form(context, x) == true) reload();
+                    }),
+                ]),
+              ],
+            ]),
+          ),
+      ]),
+    ]);
   }
 
   Widget _typeDetail(BuildContext context, VJson t, bool edit, Future<void> Function() reload) {
