@@ -12,7 +12,10 @@ import 'valet_ui.dart';
 /// 📇 كروت NFC (DB 311) — سجل كروت التذاكر المرقّمة لكل نقطة، وطريقة ربط الكارت بالتكت «أوبشن» للنقطة:
 /// ① مسح الكارت (الطريقة الحالية) · ② ربط تلقائي بالترتيب · ③ بدون كروت — مع فترة الانتظار والكارت الضايع.
 class ValetCardsScreen extends StatefulWidget {
-  const ValetCardsScreen({super.key});
+  const ValetCardsScreen({super.key, this.pointId});
+
+  /// Opened inside a point (point screen → tab): only this point, no point chips.
+  final String? pointId;
 
   /// Test hook (screenshots).
   static Future<VJson> Function()? debugLoad;
@@ -32,7 +35,7 @@ String cardUrl(String code) => 'https://vip-valet-uae.app/RequestCar?ticket=${Ur
 class _ValetCardsScreenState extends State<ValetCardsScreen> {
   VJson? _d;
   Object? _err;
-  String? _point;
+  late String? _point = widget.pointId;
   VJson _set = {};
   bool _dirty = false;
 
@@ -283,7 +286,7 @@ class _ValetCardsScreenState extends State<ValetCardsScreen> {
         HubKpi(Icons.hourglass_top, '$waiting', tx(context, 'في فترة الانتظار', 'Waiting time')),
         HubKpi(Icons.report_gmailerrorred, '$lost', tx(context, 'ضايع', 'Lost')),
       ]),
-      HubChips(
+      if (widget.pointId == null) HubChips(
         items: [for (final p in pts) (vStr(p['id']), '${vStr(p['name'])}${vNum(p['cards']) > 0 ? ' · ${vNum(p['cards']).toInt()}' : ''}', null)],
         value: _point ?? '',
         onChanged: (v) {

@@ -10,7 +10,10 @@ import 'valet_ui.dart';
 /// تنبيهات (تكتات ورا بعض بسرعة، تكت من غير علامة عربية حقيقية، نفس اللوحة مرتين، إعادة طباعة،
 /// فرق مكنة الكارت، تكتات كارت آخر الشيفت)، كارت لكل موظف، وإعادة تشغيل الشيفت خطوة بخطوة.
 class ValetStaffAnalyticsScreen extends StatefulWidget {
-  const ValetStaffAnalyticsScreen({super.key});
+  const ValetStaffAnalyticsScreen({super.key, this.pointId});
+
+  /// Opened inside a point (point screen → tab): only this point, no point chips.
+  final String? pointId;
 
   /// Test hook (screenshots).
   static Future<VJson> Function()? debugLoad;
@@ -26,7 +29,7 @@ const _muted = Color(0xFF64748B);
 class _ValetStaffAnalyticsScreenState extends State<ValetStaffAnalyticsScreen> {
   VJson? _d;
   Object? _err;
-  String _point = ''; // '' = all points
+  late String _point = widget.pointId ?? ''; // '' = all points
   int _days = 7;
   String _kind = 'all';
   VJson _set = {};
@@ -173,12 +176,18 @@ class _ValetStaffAnalyticsScreenState extends State<ValetStaffAnalyticsScreen> {
         subtitle: tx(context, 'الموظف بيستخدم التطبيق إزاي: الضغطات، الطباعة، سرعة الإدخال، التكتات المشكوك فيها وقفل الشيفت',
             'How the staff use the app: taps, prints, entry speed, doubtful tickets and shift close'),
         actions: [
+          if (widget.pointId != null)
+            HubButton(
+              label: tx(context, 'كل النقاط', 'All points'),
+              icon: Icons.public,
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => Scaffold(appBar: AppBar(title: Text(tx(context, 'تحليل الموظفين — كل النقاط', 'Staff analysis — all points'))), body: const ValetStaffAnalyticsScreen())))),
           if (_loading) const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
           HubButton(label: 'Excel', icon: Icons.table_view, onPressed: alerts.isEmpty && emps.isEmpty ? null : _export),
           HubButton(label: tx(context, 'تحديث', 'Refresh'), icon: Icons.refresh, onPressed: _load),
         ],
       ),
-      HubChips(
+      if (widget.pointId == null) HubChips(
         items: [
           ('', tx(context, 'كل النقاط', 'All points'), null),
           for (final p in pts) (vStr(p['id']), vStr(p['name']), null),

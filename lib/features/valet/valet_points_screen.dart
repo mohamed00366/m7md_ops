@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_cards_screen.dart';
+import 'valet_link_screen.dart';
+import 'valet_staff_analytics_screen.dart';
 import 'valet_key_boards_panel.dart';
 import 'valet_hourly.dart';
 import 'valet_hub_ui.dart';
@@ -317,9 +320,18 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final d = _d;
+    final id = widget.pointId;
+    // pages of the valet app that belong to one point (customer link, NFC cards, staff analysis)
+    final extra = <(String, String, Widget)>[
+      if (ValetAdmin.I.can(ValetAdmin.permSettings)) ('لِينك العَميل', 'Customer link', ValetLinkScreen(key: ValueKey('link$id'), pointId: id)),
+      if (ValetAdmin.I.can(ValetAdmin.permSettings)) ('كُروت NFC', 'NFC cards', ValetCardsScreen(key: ValueKey('cards$id'), pointId: id)),
+      if (ValetAdmin.I.can(ValetAdmin.permReports))
+        ('تَحليل المُوظَّفين', 'Staff analysis', ValetStaffAnalyticsScreen(key: ValueKey('staff$id'), pointId: id)),
+    ];
+    final n = 5 + extra.length;
     return DefaultTabController(
-      length: 5,
-      initialIndex: widget.initialTab.clamp(0, 4),
+      length: n,
+      initialIndex: widget.initialTab.clamp(0, n - 1),
       child: Scaffold(
         appBar: AppBar(
           title: Text(d == null ? widget.title : '${vMap(d['point'])['code']} · ${vMap(d['point'])['name']}'),
@@ -335,11 +347,12 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             Tab(text: tx(context, 'المَواقِف', 'Parking')),
             Tab(text: tx(context, 'حِساب الجِهاز', 'Device account')),
             Tab(text: tx(context, 'المُعِدّات وَالمَكَن وَالدَفاتِر', 'Equipment, machines & books')),
+            for (final (ar, en, _) in extra) Tab(text: tx(context, ar, en)),
           ]),
         ),
         body: d == null
             ? Center(child: _err != null ? Text(vErr(context, _err!)) : const CircularProgressIndicator())
-            : TabBarView(children: [_features(d), _prices(d), _parking(d), _terminal(d), _equipment(d)]),
+            : TabBarView(children: [_features(d), _prices(d), _parking(d), _terminal(d), _equipment(d), for (final (_, _, w) in extra) w]),
       ),
     );
   }

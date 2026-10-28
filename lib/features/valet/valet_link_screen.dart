@@ -12,7 +12,10 @@ import 'valet_ui.dart';
 /// الخطوات مع الشرح، رسائل كل خطوة بالعربي والإنجليزي، البيانات الظاهرة، والإعدادات — للكل أو لنقطة.
 /// الرسالة الفارغة = النص الافتراضي للصفحة.
 class ValetLinkScreen extends StatefulWidget {
-  const ValetLinkScreen({super.key});
+  const ValetLinkScreen({super.key, this.pointId});
+
+  /// Opened inside a point (point screen → tab): only this point, no point chips.
+  final String? pointId;
 
   /// Test hook (screenshots): data instead of the server.
   static Future<VJson> Function()? debugLoad;
@@ -186,7 +189,7 @@ const _showLabels = <(String, String, String?)>[
 class _ValetLinkScreenState extends State<ValetLinkScreen> {
   VJson? _data;
   Object? _err;
-  String? _point; // null = all points (default)
+  late String? _point = widget.pointId; // null = all points (default)
   int _step = 2;
   String _lang = 'ar';
   String _theme = 'light';
@@ -337,6 +340,12 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
         subtitle: tx(context, 'كل ما يراه العميل عند فتح اللينك وطلب السيارة: الخطوات، الرسائل، البيانات، والإعدادات — لكل النقاط أو لنقطة',
             'Everything the customer sees on the link: steps, messages, data and settings — for all points or one point'),
         actions: [
+          if (widget.pointId != null)
+            HubButton(
+              label: tx(context, 'كل النقاط', 'All points'),
+              icon: Icons.public,
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => Scaffold(appBar: AppBar(title: Text(tx(context, 'لينك العميل — الافتراضي لكل النقاط', 'Customer link — default for all points'))), body: const ValetLinkScreen())))),
           HubButton(label: tx(context, 'رجوع للافتراضي', 'Reset'), icon: Icons.restart_alt, onPressed: _saving ? null : _resetPoint),
           HubButton(
               label: tx(context, 'فتح صفحة تجريبية', 'Open demo page'),
@@ -362,7 +371,7 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
         HubKpi(Icons.cancel_outlined, '${vNum(st['cancelled']).toInt()}', tx(context, 'ألغاها العميل', 'Cancelled')),
         HubKpi(Icons.u_turn_left, '${vNum(st['returned']).toInt()}', tx(context, 'رجعت للبركنج', 'Returned')),
       ]),
-      HubChips(
+      if (widget.pointId == null) HubChips(
         items: [
           ('', tx(context, 'كل النقاط (الافتراضي)', 'All points (default)'), null),
           for (final p in points) (vStr(p['id']), '${p['own'] == true ? '✎ ' : ''}${vStr(p['name'])}', null),
