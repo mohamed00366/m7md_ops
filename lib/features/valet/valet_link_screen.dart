@@ -65,126 +65,137 @@ const Map<String, (String, String)> _defaults = {
   'noCancel': ('لا يمكن إلغاء الطلب بعد خروج السائق بالسيارة', 'The request cannot be cancelled after the driver left with your car'),
 };
 
-/// Label of each message + whether it can be switched off (alerts / fixed note).
-const Map<String, (String, bool)> _labels = {
-  'requestBtn': ('زر الطلب', false),
-  'noteHint': ('مثال ملاحظة العميل', false),
-  'offTitle': ('عنوان «الطلب متوقف»', false),
-  'offText': ('نص «الطلب متوقف»', false),
-  'pTitleA': ('العنوان', false),
-  'pSubA': ('السطر تحت العنوان', false),
-  'pTitleB': ('العنوان', false),
-  'pSubB': ('السطر تحت العنوان', false),
-  'nApproved': ('التنبيه على الموبايل (صوت + إشعار)', true),
-  'ruleText': ('ملاحظة الإرجاع (ثابتة تحت العداد)', true),
-  'pSubBk': ('السطر بعد استلام الكي راك للمفتاح', false),
-  'nKey': ('تنبيه استلام المفتاح', true),
-  'pTitleC': ('عنوان «السائق في الطريق»', false),
-  'pSubC': ('السطر تحت العنوان', false),
-  'nOut': ('تنبيه خروج السائق', true),
-  'delayTitle': ('عنوان رسالة الاعتذار', false),
-  'delayText': ('نص رسالة الاعتذار', false),
-  'nDelay': ('تنبيه زيادة الوقت', true),
-  'pTitle3': ('العنوان', false),
-  'readySub': ('السطر في شريط «جاهزة»', false),
-  'nReady': ('تنبيه «السيارة جاهزة»', true),
-  'nSoon': ('تذكير قبل انتهاء مهلة الاستلام بدقيقتين', true),
-  'retTitle': ('العنوان', false),
-  'retText': ('النص', false),
-  'nReturned': ('التنبيه', true),
-  'cxTitle': ('العنوان بعد الإلغاء', false),
-  'cxText': ('النص بعد الإلغاء', false),
-  'cancelHint': ('الملاحظة تحت زر الإلغاء', false),
-  'noCancel': ('عند منع الإلغاء (السائق خرج)', false),
+/// Label of each message (Arabic, English) + whether it can be switched off (alerts / fixed note).
+const Map<String, (String, String, bool)> _labels = {
+  'requestBtn': ('زر الطلب', 'Request button', false),
+  'noteHint': ('مثال ملاحظة العميل', 'Customer note example', false),
+  'offTitle': ('عنوان «الطلب متوقف»', '"Requests paused" title', false),
+  'offText': ('نص «الطلب متوقف»', '"Requests paused" text', false),
+  'pTitleA': ('العنوان', 'Title', false),
+  'pSubA': ('السطر تحت العنوان', 'Line under the title', false),
+  'pTitleB': ('العنوان', 'Title', false),
+  'pSubB': ('السطر تحت العنوان', 'Line under the title', false),
+  'nApproved': ('التنبيه على الموبايل (صوت + إشعار)', 'Phone alert (sound + notification)', true),
+  'ruleText': ('ملاحظة الإرجاع (ثابتة تحت العداد)', 'Return note (fixed under the countdown)', true),
+  'pSubBk': ('السطر بعد استلام الكي راك للمفتاح', 'Line after the key rack received the key', false),
+  'nKey': ('تنبيه استلام المفتاح', 'Key received alert', true),
+  'pTitleC': ('عنوان «السائق في الطريق»', '"Driver on the way" title', false),
+  'pSubC': ('السطر تحت العنوان', 'Line under the title', false),
+  'nOut': ('تنبيه خروج السائق', 'Driver out alert', true),
+  'delayTitle': ('عنوان رسالة الاعتذار', 'Apology message title', false),
+  'delayText': ('نص رسالة الاعتذار', 'Apology message text', false),
+  'nDelay': ('تنبيه زيادة الوقت', 'Extra time alert', true),
+  'pTitle3': ('العنوان', 'Title', false),
+  'readySub': ('السطر في شريط «جاهزة»', 'Line in the "ready" bar', false),
+  'nReady': ('تنبيه «السيارة جاهزة»', '"Car ready" alert', true),
+  'nSoon': ('تذكير قبل انتهاء مهلة الاستلام بدقيقتين', 'Reminder 2 min before the pick-up time ends', true),
+  'retTitle': ('العنوان', 'Title', false),
+  'retText': ('النص', 'Text', false),
+  'nReturned': ('التنبيه', 'Alert', true),
+  'cxTitle': ('العنوان بعد الإلغاء', 'Title after cancelling', false),
+  'cxText': ('النص بعد الإلغاء', 'Text after cancelling', false),
+  'cancelHint': ('الملاحظة تحت زر الإلغاء', 'Note under the cancel button', false),
+  'noCancel': ('عند منع الإلغاء (السائق خرج)', 'When cancelling is blocked (driver left)', false),
 };
+
+/// A text in Arabic and English.
+typedef _T = (String, String);
 
 class _Step {
   const _Step(this.n, this.title, this.sub, this.preview, this.keys, this.who, this.flow, {this.red = false});
   final String n;
-  final String title;
-  final String sub;
+  final _T title;
+  final _T sub;
   final String preview;
   final List<String> keys;
-  final List<(String, String)> who;
-  final List<String> flow;
+  final List<(_T, _T)> who;
+  final List<_T> flow;
   final bool red;
 }
 
+const _who = ('من', 'Who');
+const _presses = ('من يضغط', 'Who taps');
+const _sees = ('العميل يرى', 'Customer sees');
+const _staff = ('الموظف', 'Staff');
+const _keyRack = ('الكي راك', 'Key rack');
+
 const _steps = <_Step>[
-  _Step('1', 'فتح اللينك', 'NFC أو QR', 'none', ['requestBtn', 'noteHint', 'offTitle', 'offText'], [
-    ('من', 'العميل يمسح QR التذكرة أو يقرب كرت NFC'),
-    ('العميل يرى', 'بيانات السيارة · المبلغ المستحق · كود الخصم · زر «اطلب سيارتي»'),
-    ('الموظف', 'لا شيء بعد'),
+  _Step('1', ('فتح اللينك', 'Open the link'), ('NFC أو QR', 'NFC or QR'), 'none', ['requestBtn', 'noteHint', 'offTitle', 'offText'], [
+    (_who, ('العميل يمسح QR التذكرة أو يقرب كرت NFC', 'The customer scans the ticket QR or taps the NFC card')),
+    (_sees, ('بيانات السيارة · المبلغ المستحق · كود الخصم · زر «اطلب سيارتي»', 'Car details · amount due · discount code · "Request my car" button')),
+    (_staff, ('لا شيء بعد', 'Nothing yet')),
   ], [
-    'اللينك خاص بتذكرة واحدة ولا يُظهر إلا آخر 3 أرقام من اللوحة.',
-    'كود الخصم غير مربوط بعميل: أول من يستخدمه يأخذه، ومرة واحدة فقط.',
-    'لو أوقفت «صفحة الطلب مفعّلة» يظهر نص «الطلب متوقف» بدل الزر.',
+    ('اللينك خاص بتذكرة واحدة ولا يُظهر إلا آخر 3 أرقام من اللوحة.', 'The link belongs to one ticket and shows only the last 3 digits of the plate.'),
+    ('كود الخصم غير مربوط بعميل: أول من يستخدمه يأخذه، ومرة واحدة فقط.', 'A discount code is not tied to a customer: the first one to use it gets it, once only.'),
+    ('لو أوقفت «صفحة الطلب مفعّلة» يظهر نص «الطلب متوقف» بدل الزر.', 'If "Request page on" is off, the "requests paused" text shows instead of the button.'),
   ]),
-  _Step('2', 'طلب السيارة', 'العميل + تعليق', 'requested', ['pTitleA', 'pSubA'], [
-    ('من يضغط', 'العميل · «اطلب سيارتي» مع ملاحظة اختيارية'),
-    ('العميل يرى', '«تم إرسال طلبك» + زر الإلغاء'),
-    ('الموظف', 'تنبيه بصوت على البورد + تعليق العميل + زر Approve'),
-    ('الكي راك', 'لا شيء قبل موافقة الفاليه'),
+  _Step('2', ('طلب السيارة', 'Car request'), ('العميل + تعليق', 'Customer + note'), 'requested', ['pTitleA', 'pSubA'], [
+    (_presses, ('العميل · «اطلب سيارتي» مع ملاحظة اختيارية', 'Customer · "Request my car" with an optional note')),
+    (_sees, ('«تم إرسال طلبك» + زر الإلغاء', '"Request sent" + cancel button')),
+    (_staff, ('تنبيه بصوت على البورد + تعليق العميل + زر Approve', 'Sound alert on the board + customer note + Approve button')),
+    (_keyRack, ('لا شيء قبل موافقة الفاليه', 'Nothing before the valet approves')),
   ], [
-    'أول ضغطة تُشغّل التنبيهات على موبايل العميل (صوت · اهتزاز · إشعار).',
-    'الضغط مرة ثانية لا يكرر الطلب.',
+    ('أول ضغطة تُشغّل التنبيهات على موبايل العميل (صوت · اهتزاز · إشعار).', 'The first tap turns on the alerts on the customer phone (sound · vibration · notification).'),
+    ('الضغط مرة ثانية لا يكرر الطلب.', 'Tapping again does not repeat the request.'),
   ]),
-  _Step('3', 'موافقة الفاليه', 'وقت + ملاحظة', 'approved', ['pTitleB', 'pSubB', 'nApproved', 'ruleText'], [
-    ('من يضغط', 'موظف الفاليه · زر Approve على التكت'),
-    ('يختار', 'دقائق التسليم · ملاحظة للعميل · إرسال للكي راك'),
-    ('العميل يرى', '«تم تأكيد طلبك» + العداد التنازلي + ملاحظة الفاليه + ملاحظة الإرجاع'),
-    ('الكي راك', 'يصله الطلب تلقائياً مع رقم المفتاح والعداد'),
+  _Step('3', ('موافقة الفاليه', 'Valet approval'), ('وقت + ملاحظة', 'Time + note'), 'approved', ['pTitleB', 'pSubB', 'nApproved', 'ruleText'], [
+    (_presses, ('موظف الفاليه · زر Approve على التكت', 'Valet staff · Approve button on the ticket')),
+    (('يختار', 'Chooses'), ('دقائق التسليم · ملاحظة للعميل · إرسال للكي راك', 'Delivery minutes · note to the customer · send to the key rack')),
+    (_sees, ('«تم تأكيد طلبك» + العداد التنازلي + ملاحظة الفاليه + ملاحظة الإرجاع', '"Request confirmed" + countdown + valet note + return note')),
+    (_keyRack, ('يصله الطلب تلقائياً مع رقم المفتاح والعداد', 'Gets the request automatically with the key number and the countdown')),
   ], [
-    'التنبيه يتوقف على البورد ويبدأ العداد على التكت.',
-    'لو انتهى الوقت: «قاربنا على الوصول» للعميل و«LATE» للموظف.',
+    ('التنبيه يتوقف على البورد ويبدأ العداد على التكت.', 'The alert stops on the board and the countdown starts on the ticket.'),
+    ('لو انتهى الوقت: «قاربنا على الوصول» للعميل و«LATE» للموظف.', 'When the time runs out: "almost there" for the customer and "LATE" for the staff.'),
   ]),
-  _Step('4', 'الكي راك', 'استلام ← السائق', 'driver_out', ['pSubBk', 'nKey', 'pTitleC', 'pSubC', 'nOut'], [
-    ('من يضغط', 'الكي راك · «Request received» ثم «Driver out»'),
-    ('الموظف', 'مراحل الكي راك على التكت: Key rack → Received → Driver out'),
-    ('العميل يرى', '«تم استلام مفتاحك» ثم «سيارتك في الطريق إليك»'),
+  _Step('4', ('الكي راك', 'Key rack'), ('استلام ← السائق', 'Received → driver'), 'driver_out', ['pSubBk', 'nKey', 'pTitleC', 'pSubC', 'nOut'], [
+    (_presses, ('الكي راك · «Request received» ثم «Driver out»', 'Key rack · "Request received" then "Driver out"')),
+    (_staff, ('مراحل الكي راك على التكت: Key rack → Received → Driver out', 'Key rack stages on the ticket: Key rack → Received → Driver out')),
+    (_sees, ('«تم استلام مفتاحك» ثم «سيارتك في الطريق إليك»', '"Your key was received" then "Your car is on its way"')),
   ], [
-    'بعد «Driver out» يختفي زر الإلغاء من صفحة العميل.',
+    ('بعد «Driver out» يختفي زر الإلغاء من صفحة العميل.', 'After "Driver out" the cancel button disappears from the customer page.'),
   ]),
-  _Step('5', 'زيادة الوقت', 'رسالة اعتذار', 'delay', ['delayTitle', 'delayText', 'nDelay'], [
-    ('من يضغط', 'موظف الفاليه · «+ Time» ويختار الدقائق والسبب'),
-    ('العميل يرى', 'رسالة الاعتذار + وقت التسليم الجديد'),
-    ('الكي راك', 'العداد يتحدث تلقائياً'),
+  _Step('5', ('زيادة الوقت', 'Extra time'), ('رسالة اعتذار', 'Apology message'), 'delay', ['delayTitle', 'delayText', 'nDelay'], [
+    (_presses, ('موظف الفاليه · «+ Time» ويختار الدقائق والسبب', 'Valet staff · "+ Time" and picks the minutes and the reason')),
+    (_sees, ('رسالة الاعتذار + وقت التسليم الجديد', 'The apology message + the new delivery time')),
+    (_keyRack, ('العداد يتحدث تلقائياً', 'The countdown updates automatically')),
   ], [
-    '{n} = الدقائق المضافة · {r} = السبب (من قائمة الأسباب في الإعدادات).',
+    ('{n} = الدقائق المضافة · {r} = السبب (من قائمة الأسباب في الإعدادات).', '{n} = minutes added · {r} = the reason (from the reasons list in the settings).'),
   ]),
-  _Step('6', 'السيارة جاهزة', 'Received / Ready', 'ready', ['pTitle3', 'readySub', 'nReady', 'nSoon'], [
-    ('من يضغط', 'الفاليه · «Received» (مع كي راك) أو «Ready»'),
-    ('العميل يرى', '«سيارتك جاهزة» + عداد مهلة الاستلام'),
-    ('الموظف', 'العداد يتحول إلى «WAITING FOR THE CUSTOMER»'),
+  _Step('6', ('السيارة جاهزة', 'Car ready'), ('Received / Ready', 'Received / Ready'), 'ready', ['pTitle3', 'readySub', 'nReady', 'nSoon'], [
+    (_presses, ('الفاليه · «Received» (مع كي راك) أو «Ready»', 'Valet · "Received" (with key rack) or "Ready"')),
+    (_sees, ('«سيارتك جاهزة» + عداد مهلة الاستلام', '"Your car is ready" + pick-up countdown')),
+    (_staff, ('العداد يتحول إلى «WAITING FOR THE CUSTOMER»', 'The countdown turns into "WAITING FOR THE CUSTOMER"')),
   ], [
-    'مهلة الاستلام من الإعدادات، وتذكير للعميل قبل انتهائها بدقيقتين.',
+    ('مهلة الاستلام من الإعدادات، وتذكير للعميل قبل انتهائها بدقيقتين.', 'The pick-up time comes from the settings, with a reminder to the customer 2 min before it ends.'),
   ]),
-  _Step('7', 'رجعت للبركنج', 'العميل تأخر', 'returned', ['retTitle', 'retText', 'nReturned'], [
-    ('من يضغط', 'الفاليه · «Back to parking»'),
-    ('العميل يرى', '«تمت إعادة سيارتك إلى البركنج» والطلب من الصفحة مقفول'),
-    ('الكي راك', 'لو المفتاح طلع: «BRING KEY BACK»'),
+  _Step('7', ('رجعت للبركنج', 'Back to parking'), ('العميل تأخر', 'Customer late'), 'returned', ['retTitle', 'retText', 'nReturned'], [
+    (_presses, ('الفاليه · «Back to parking»', 'Valet · "Back to parking"')),
+    (_sees, ('«تمت إعادة سيارتك إلى البركنج» والطلب من الصفحة مقفول', '"Your car was returned to the parking" and requests from the page are closed')),
+    (_keyRack, ('لو المفتاح طلع: «BRING KEY BACK»', 'If the key was out: "BRING KEY BACK"')),
   ], [
-    'العميل يستلم من مكتب الفاليه. «Repark» من قائمة التكت يفتح الطلب من جديد.',
+    ('العميل يستلم من مكتب الفاليه. «Repark» من قائمة التكت يفتح الطلب من جديد.', 'The customer collects at the valet desk. "Repark" in the ticket menu opens requests again.'),
   ], red: true),
-  _Step('✕', 'إلغاء العميل', 'قبل خروج السائق', 'cancelled', ['cxTitle', 'cxText', 'cancelHint', 'noCancel'], [
-    ('من يضغط', 'العميل · «إلغاء الطلب» (ضغطتين للتأكيد)'),
-    ('الموظف', 'رسالة «Customer cancelled» والتنبيه يتوقف'),
-    ('الكي راك', 'الطلب يتلغى لو المفتاح لم يخرج'),
+  _Step('✕', ('إلغاء العميل', 'Customer cancels'), ('قبل خروج السائق', 'Before the driver leaves'), 'cancelled', ['cxTitle', 'cxText', 'cancelHint', 'noCancel'], [
+    (_presses, ('العميل · «إلغاء الطلب» (ضغطتين للتأكيد)', 'Customer · "Cancel request" (two taps to confirm)')),
+    (_staff, ('رسالة «Customer cancelled» والتنبيه يتوقف', '"Customer cancelled" message and the alert stops')),
+    (_keyRack, ('الطلب يتلغى لو المفتاح لم يخرج', 'The request is cancelled if the key is not out')),
   ], [
-    'حتى متى يُسمح بالإلغاء: من الإعدادات.',
+    ('حتى متى يُسمح بالإلغاء: من الإعدادات.', 'Until when cancelling is allowed: from the settings.'),
   ], red: true),
 ];
 
-const _showLabels = <(String, String, String?)>[
-  ('ticket_no', 'رقم التذكرة', null),
-  ('plate', 'رقم اللوحة', 'آخر 3 أرقام فقط'),
-  ('color', 'اللون', null),
-  ('location', 'الموقع', null),
-  ('parked_at', 'وقت الإيقاف', null),
-  ('price', 'المبلغ المستحق', 'نفس حساب التطبيق'),
-  ('price_lines', 'تفاصيل السعر', 'المدة · المبيت · الخصم'),
-  ('reply', 'ملاحظة الفاليه للعميل', null),
+const _showLabels = <(String, _T, _T?)>[
+  ('ticket_no', ('رقم التذكرة', 'Ticket number'), null),
+  ('plate', ('رقم اللوحة', 'Plate number'), ('آخر 3 أرقام فقط', 'Last 3 digits only')),
+  ('color', ('اللون', 'Colour'), null),
+  ('location', ('الموقع', 'Location'), null),
+  ('parked_at', ('وقت الإيقاف', 'Parked at'), null),
+  ('price', ('المبلغ المستحق', 'Amount due'), ('نفس حساب التطبيق', 'Same calculation as the app')),
+  ('price_lines', ('تفاصيل السعر', 'Price details'), ('المدة · المبيت · الخصم', 'Duration · overnight · discount')),
+  ('reply', ('ملاحظة الفاليه للعميل', 'Valet note to the customer'), null),
 ];
+
+String _t(BuildContext c, _T t) => tx(c, t.$1, t.$2);
 
 class _ValetLinkScreenState extends State<ValetLinkScreen> {
   VJson? _data;
@@ -440,8 +451,8 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
             child: Text(s.n, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: on ? _ink : (s.red ? const Color(0xFF991B1B) : _ink))),
           ),
           const SizedBox(height: 6),
-          Text(s.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: on ? Colors.white : _ink)),
-          Text(s.sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5, color: on ? const Color(0xFF9CA3AF) : _muted)),
+          Text(_t(context, s.title), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: on ? Colors.white : _ink)),
+          Text(_t(context, s.sub), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5, color: on ? const Color(0xFF9CA3AF) : _muted)),
         ]),
       ),
     );
@@ -477,20 +488,20 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
     return HubCard(
       padding: const EdgeInsets.all(18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _title('${tx(context, 'الخطوة', 'Step')} ${s.n} · ${s.title}', tx(context, 'شرح الخطوة', 'How it works')),
+        _title('${tx(context, 'الخطوة', 'Step')} ${s.n} · ${_t(context, s.title)}', tx(context, 'شرح الخطوة', 'How it works')),
         for (final (k, v) in s.who)
           Padding(
             padding: const EdgeInsets.only(bottom: 9),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SizedBox(width: 92, child: Text(k, style: const TextStyle(color: _muted, fontWeight: FontWeight.w700, fontSize: 12.5))),
-              Expanded(child: Text(v, style: const TextStyle(fontSize: 13.5, height: 1.45))),
+              SizedBox(width: 92, child: Text(_t(context, k), style: const TextStyle(color: _muted, fontWeight: FontWeight.w700, fontSize: 12.5))),
+              Expanded(child: Text(_t(context, v), style: const TextStyle(fontSize: 13.5, height: 1.45))),
             ]),
           ),
         const Divider(height: 18),
         for (var i = 0; i < s.flow.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
-            child: Text('${i + 1}. ${s.flow[i]}', style: const TextStyle(fontSize: 13, color: Color(0xFF334155), height: 1.55)),
+            child: Text('${i + 1}. ${_t(context, s.flow[i])}', style: const TextStyle(fontSize: 13, color: Color(0xFF334155), height: 1.55)),
           ),
       ]),
     );
@@ -504,8 +515,8 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
         _title(tx(context, 'رسائل هذه الخطوة', 'Messages of this step'), tx(context, 'الفارغ = النص الافتراضي', 'Empty = built-in text')),
         for (final k in s.keys) _MessageEditor(
           key: ValueKey('${_point ?? ''}|$k'),
-          label: _labels[k]?.$1 ?? k,
-          canSwitch: _labels[k]?.$2 ?? false,
+          label: _labels[k] == null ? k : tx(context, _labels[k]!.$1, _labels[k]!.$2),
+          canSwitch: _labels[k]?.$3 ?? false,
           on: _msgOn(k),
           onSwitch: (v) => _setMsg(k, 'on', v ? null : false),
           ar: _msg(k, 'ar'),
@@ -516,8 +527,8 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
         ),
         Wrap(spacing: 6, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
           Text(tx(context, 'متغيرات:', 'Variables:'), style: const TextStyle(color: _muted, fontSize: 12)),
-          for (final (v, l) in const [('{n}', 'الدقائق'), ('{time}', 'وقت التسليم'), ('{r}', 'سبب التأخير'), ('{ticket}', 'رقم التذكرة'), ('{point}', 'الموقع')])
-            hubTag('$v $l'),
+          for (final (v, l) in const [('{n}', ('الدقائق', 'minutes')), ('{time}', ('وقت التسليم', 'delivery time')), ('{r}', ('سبب التأخير', 'delay reason')), ('{ticket}', ('رقم التذكرة', 'ticket no.')), ('{point}', ('الموقع', 'location'))])
+            hubTag('$v ${_t(context, l)}'),
         ]),
       ]),
     );
@@ -733,7 +744,7 @@ class _ValetLinkScreenState extends State<ValetLinkScreen> {
       padding: const EdgeInsets.all(18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _title(tx(context, 'البيانات الظاهرة للعميل', 'Data the customer sees')),
-        for (final (k, l, sub) in _showLabels) _row(l, Switch(activeTrackColor: _ink, value: s[k] != false, onChanged: (v) => _setShow(k, v)), sub: sub),
+        for (final (k, l, sub) in _showLabels) _row(_t(context, l), Switch(activeTrackColor: _ink, value: s[k] != false, onChanged: (v) => _setShow(k, v)), sub: sub == null ? null : _t(context, sub)),
       ]),
     );
   }
@@ -875,23 +886,27 @@ class _MessageEditorState extends State<_MessageEditor> {
             if (widget.canSwitch) Switch(activeTrackColor: _ink, value: widget.on, onChanged: widget.onSwitch),
           ]),
           const SizedBox(height: 4),
-          TextField(
-            controller: _ar,
-            textDirection: TextDirection.rtl,
-            minLines: 1,
-            maxLines: 4,
-            decoration: _dec(widget.hintAr),
-            onChanged: (v) => widget.onChanged('ar', v),
-          ),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _en,
-            textDirection: TextDirection.ltr,
-            minLines: 1,
-            maxLines: 4,
-            decoration: _dec(widget.hintEn),
-            onChanged: (v) => widget.onChanged('en', v),
-          ),
+          // the customer sees the message in his language: both are edited; the one of the dashboard language comes first
+          ...() {
+            final arField = TextField(
+              controller: _ar,
+              textDirection: TextDirection.rtl,
+              minLines: 1,
+              maxLines: 4,
+              decoration: _dec(widget.hintAr).copyWith(prefixText: 'AR  ', prefixStyle: const TextStyle(color: _muted, fontWeight: FontWeight.w800, fontSize: 11)),
+              onChanged: (v) => widget.onChanged('ar', v),
+            );
+            final enField = TextField(
+              controller: _en,
+              textDirection: TextDirection.ltr,
+              minLines: 1,
+              maxLines: 4,
+              decoration: _dec(widget.hintEn).copyWith(prefixText: 'EN  ', prefixStyle: const TextStyle(color: _muted, fontWeight: FontWeight.w800, fontSize: 11)),
+              onChanged: (v) => widget.onChanged('en', v),
+            );
+            final enFirst = tx(context, 'ar', 'en') == 'en';
+            return [enFirst ? enField : arField, const SizedBox(height: 6), enFirst ? arField : enField];
+          }(),
         ]),
       ),
     );
