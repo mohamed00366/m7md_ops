@@ -12,7 +12,11 @@ alter table public.valet_point_settings
   add column if not exists card_split text not null default 'shared',
   add column if not exists card_split_rule text not null default 'block',
   add column if not exists hook_split text not null default 'shared',
-  add column if not exists card_order text not null default 'lowest';
+  add column if not exists card_order text not null default 'lowest',
+  add column if not exists ticket_numbering text not null default 'point';
+do $$ begin
+  alter table public.valet_point_settings add constraint valet_point_settings_ticket_numbering_chk check (ticket_numbering in ('point', 'device'));
+exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.valet_point_settings add constraint valet_point_settings_card_order_chk check (card_order in ('lowest', 'rotate'));
 exception when duplicate_object then null; end $$;
@@ -269,7 +273,7 @@ begin
  v_acc := public.vva__auth(p_token, 'valet.dashboard.view');
  select * into s from public.valet_point_settings where point_id = p_point;
  return jsonb_build_object('ok', true, 'error', null,
-   'card_split', s.card_split, 'card_rule', s.card_split_rule, 'hook_split', s.hook_split, 'card_order', s.card_order,
+   'card_split', s.card_split, 'card_rule', s.card_split_rule, 'hook_split', s.hook_split, 'card_order', s.card_order, 'ticket_numbering', s.ticket_numbering,
    'cooldown_on', s.card_cooldown_on, 'cooldown_min', s.card_cooldown_min,
    'max_card', (select max(card_no) from public.valet_ticket_cards where point_id = p_point and status <> 'replaced'),
    'devices', coalesce((select jsonb_agg(jsonb_build_object('id', d.id, 'code', d.short_code,
@@ -301,7 +305,8 @@ declare v_acc uuid; e jsonb; v_bad text; o jsonb := coalesce(p_options, '{}'::js
 begin
  v_acc := public.vva__auth(p_token, 'valet.settings.manage');
  if coalesce(o->>'card_split', 'shared') not in ('shared', 'device') or coalesce(o->>'card_rule', 'block') not in ('block', 'warn')
-    or coalesce(o->>'hook_split', 'shared') not in ('shared', 'device') or coalesce(o->>'card_order', 'lowest') not in ('lowest', 'rotate') then return public.vv__err('Unknown option.'); end if;
+    or coalesce(o->>'hook_split', 'shared') not in ('shared', 'device') or coalesce(o->>'card_order', 'lowest') not in ('lowest', 'rotate')
+    or coalesce(o->>'ticket_numbering', 'point') not in ('point', 'device') then return public.vv__err('Unknown option.'); end if;
  if jsonb_typeof(p_ranges) = 'array' then
    for e in select * from jsonb_array_elements(p_ranges) loop
      if not exists (select 1 from public.valet_devices d where d.id = (e->>'device')::uuid and d.point_id = p_point) then
@@ -342,7 +347,8 @@ begin
    card_split = coalesce(o->>'card_split', card_split),
    card_split_rule = coalesce(o->>'card_rule', card_split_rule),
    hook_split = coalesce(o->>'hook_split', hook_split),
-   card_order = coalesce(o->>'card_order', card_order)
+   card_order = coalesce(o->>'card_order', card_order),
+   ticket_numbering = coalesce(o->>'ticket_numbering', ticket_numbering)
  where point_id = p_point;
  perform public.vva__log(v_acc, 'device_ranges', p_point::text, jsonb_build_object('options', o, 'ranges', p_ranges));
  return public.vva_device_ranges(p_token, p_point);

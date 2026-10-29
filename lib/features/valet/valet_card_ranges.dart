@@ -31,6 +31,7 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
   String _rule = 'block';
   String _hookSplit = 'shared';
   String _order = 'lowest';
+  String _ticketNo = 'point';
   final Map<String, _Ctl> _ctl = {};
   bool _dirty = false;
 
@@ -69,6 +70,7 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
       _rule = vStr(d['card_rule']) == 'warn' ? 'warn' : 'block';
       _hookSplit = vStr(d['hook_split']) == 'device' ? 'device' : 'shared';
       _order = vStr(d['card_order']) == 'rotate' ? 'rotate' : 'lowest';
+      _ticketNo = vStr(d['ticket_numbering']) == 'device' ? 'device' : 'point';
       _dirty = false;
     });
   }
@@ -133,7 +135,7 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
         context,
         () => ValetAdmin.I.call('vva_device_ranges_save', {
               'p_point': widget.pointId,
-              'p_options': {'card_split': _cardSplit, 'card_rule': _rule, 'hook_split': _hookSplit, 'card_order': _order},
+              'p_options': {'card_split': _cardSplit, 'card_rule': _rule, 'hook_split': _hookSplit, 'card_order': _order, 'ticket_numbering': _ticketNo},
               'p_ranges': ranges,
             }),
         ok: tx(context, 'تم حفظ أرقام التابلتات', 'Numbers per tablet saved'));
@@ -189,6 +191,28 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
                       'A card that came back waits its waiting time${d['cooldown_on'] == false ? ' (off now)' : ' (${vNum(d['cooldown_min']).toInt()} min)'}, then goes to the next car at once: card 2 free → after the wait the next ticket takes 2.')
                   : tx(context, 'الكروت بتمشي بالدور بعد آخر كارت اتدّى (17، 18، 19 …) وبترجع للأول في الآخر.',
                       'Cards go in turn after the last one given (17, 18, 19 …) and start again at the end.'),
+              style: const TextStyle(color: _muted, fontSize: 12)),
+        ),
+        const SizedBox(height: 8),
+        Row(children: [
+          SizedBox(width: 130, child: Text(tx(context, 'رقم التكت', 'Ticket number'), style: const TextStyle(fontWeight: FontWeight.w700))),
+          Expanded(
+            child: SegmentedButton<String>(
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: 'point', label: Text(tx(context, 'واحد للنقطة (0056)', 'One for the point (0056)'))),
+                ButtonSegment(value: 'device', label: Text(tx(context, 'رقم التابلت قبله (2-0056)', 'Tablet number first (2-0056)'))),
+              ],
+              selected: {_ticketNo},
+              onSelectionChanged: widget.edit ? (v) => _set(() => _ticketNo = v.first) : null,
+            ),
+          ),
+        ]),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 130, top: 4),
+          child: Text(
+              tx(context, 'كل تابلت يعدّ لوحده ورقمه (#) يتطبع قبل رقم التكت. التكتات القديمة أرقامها زي ما هي.',
+                  'Each tablet counts on its own and its number (#) is printed before the ticket number. Old tickets keep their numbers.'),
               style: const TextStyle(color: _muted, fontSize: 12)),
         ),
         const SizedBox(height: 8),
