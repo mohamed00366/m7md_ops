@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
 import 'valet_card_design.dart';
+import 'valet_card_ranges.dart';
 import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 
@@ -309,6 +310,11 @@ class _ValetCardsScreenState extends State<ValetCardsScreen> {
             cards: cards,
             edit: ValetAdmin.I.can(ValetAdmin.permSettings),
           ),
+        ),
+      if (_point != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: CardRangesPanel(key: ValueKey('ranges$_point'), pointId: _point!, edit: ValetAdmin.I.can(ValetAdmin.permSettings)),
         ),
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
