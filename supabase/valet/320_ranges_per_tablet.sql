@@ -2,14 +2,20 @@
 --   * cards: 'shared' (one order for the point, as before) or 'device' (each tablet only its card numbers, e.g. 1 – 50 / 51 – 100);
 --   * key hooks: 'shared' (lowest free hook of the board / point, as before) or 'device' (two or more tablets on the SAME key
 --     board, each with its hook numbers, e.g. tablet 1 hooks 1 – 40, tablet 2 hooks 41 – 80);
---   * a card of another tablet: 'block' (refused) or 'warn' (the valet confirms).
+--   * a card of another tablet: 'block' (refused) or 'warn' (the valet confirms);
+--   * auto card order: 'lowest' = the lowest free card number (a card that came back is given again as soon as its waiting
+--     time is over, e.g. card 2 after 5 min) · 'rotate' = in turn after the last card given (17, 18, 19 …).
 -- The tablet of a request = valet_sessions.device_id (published by vv_session as "vv.device", like the board in 298).
 -- Needs 319 (card holds).
 
 alter table public.valet_point_settings
   add column if not exists card_split text not null default 'shared',
   add column if not exists card_split_rule text not null default 'block',
-  add column if not exists hook_split text not null default 'shared';
+  add column if not exists hook_split text not null default 'shared',
+  add column if not exists card_order text not null default 'lowest';
+do $$ begin
+  alter table public.valet_point_settings add constraint valet_point_settings_card_order_chk check (card_order in ('lowest', 'rotate'));
+exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.valet_point_settings add constraint valet_point_settings_card_split_chk check (card_split in ('shared', 'device'));
 exception when duplicate_object then null; end $$;
@@ -133,7 +139,7 @@ create or replace function public.vv_card_next(p_token text, p_skip integer defa
  set search_path to 'public', 'extensions'
 as $function$
 declare v_s public.valet_sessions; v_err text; v_from int; c record; v_st jsonb; v_me text := md5(coalesce(p_token, ''));
-        v_r public.valet_device_ranges; v_split text;
+        v_r public.valet_device_ranges; v_split text; v_order text;
 begin
  v_s := public.vv_session(p_token);
  v_err := public.vv__need_point(v_s, true);
@@ -144,12 +150,13 @@ begin
    insert into public.valet_card_holds (point_id, card_no, holder, until) values (v_s.point_id, p_skip, 'missing', now() + interval '30 minutes')
    on conflict (point_id, card_no) do update set holder = 'missing', until = excluded.until;
  end if;
- select coalesce(card_next_no, 1), card_split into v_from, v_split from public.valet_point_settings where point_id = v_s.point_id;
+ select coalesce(card_next_no, 1), card_split, card_order into v_from, v_split, v_order from public.valet_point_settings where point_id = v_s.point_id;
  v_r := public.vv__device_range(v_s.point_id, 'card');
  if v_split = 'device' and v_r.id is null then
    return public.vv__err('This tablet has no card numbers. Set the cards of each tablet in the dashboard (NFC cards → numbers per tablet).');
  end if;
  if v_r.id is not null then v_from := coalesce(v_r.next_no, v_r.from_no); end if;
+ if v_order = 'lowest' then v_from := 0; end if;   -- from the smallest number (cards in their waiting time are skipped)
  if not exists (select 1 from public.valet_ticket_cards where point_id = v_s.point_id and status = 'ready') then
    return public.vv__err('No cards are registered for this point. Add cards in the dashboard (NFC cards).');
  end if;
@@ -262,7 +269,8 @@ begin
  v_acc := public.vva__auth(p_token, 'valet.dashboard.view');
  select * into s from public.valet_point_settings where point_id = p_point;
  return jsonb_build_object('ok', true, 'error', null,
-   'card_split', s.card_split, 'card_rule', s.card_split_rule, 'hook_split', s.hook_split,
+   'card_split', s.card_split, 'card_rule', s.card_split_rule, 'hook_split', s.hook_split, 'card_order', s.card_order,
+   'cooldown_on', s.card_cooldown_on, 'cooldown_min', s.card_cooldown_min,
    'max_card', (select max(card_no) from public.valet_ticket_cards where point_id = p_point and status <> 'replaced'),
    'devices', coalesce((select jsonb_agg(jsonb_build_object('id', d.id, 'code', d.short_code,
        'name', coalesce(d.serial_label, d.model, 'Tablet ' || d.short_code), 'status', d.status, 'last_seen', d.last_seen_at,
@@ -293,7 +301,7 @@ declare v_acc uuid; e jsonb; v_bad text; o jsonb := coalesce(p_options, '{}'::js
 begin
  v_acc := public.vva__auth(p_token, 'valet.settings.manage');
  if coalesce(o->>'card_split', 'shared') not in ('shared', 'device') or coalesce(o->>'card_rule', 'block') not in ('block', 'warn')
-    or coalesce(o->>'hook_split', 'shared') not in ('shared', 'device') then return public.vv__err('Unknown option.'); end if;
+    or coalesce(o->>'hook_split', 'shared') not in ('shared', 'device') or coalesce(o->>'card_order', 'lowest') not in ('lowest', 'rotate') then return public.vv__err('Unknown option.'); end if;
  if jsonb_typeof(p_ranges) = 'array' then
    for e in select * from jsonb_array_elements(p_ranges) loop
      if not exists (select 1 from public.valet_devices d where d.id = (e->>'device')::uuid and d.point_id = p_point) then
@@ -333,7 +341,8 @@ begin
  update public.valet_point_settings set
    card_split = coalesce(o->>'card_split', card_split),
    card_split_rule = coalesce(o->>'card_rule', card_split_rule),
-   hook_split = coalesce(o->>'hook_split', hook_split)
+   hook_split = coalesce(o->>'hook_split', hook_split),
+   card_order = coalesce(o->>'card_order', card_order)
  where point_id = p_point;
  perform public.vva__log(v_acc, 'device_ranges', p_point::text, jsonb_build_object('options', o, 'ranges', p_ranges));
  return public.vva_device_ranges(p_token, p_point);

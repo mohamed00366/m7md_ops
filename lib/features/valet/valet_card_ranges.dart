@@ -30,6 +30,7 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
   String _cardSplit = 'shared';
   String _rule = 'block';
   String _hookSplit = 'shared';
+  String _order = 'lowest';
   final Map<String, _Ctl> _ctl = {};
   bool _dirty = false;
 
@@ -67,6 +68,7 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
       _cardSplit = vStr(d['card_split']) == 'device' ? 'device' : 'shared';
       _rule = vStr(d['card_rule']) == 'warn' ? 'warn' : 'block';
       _hookSplit = vStr(d['hook_split']) == 'device' ? 'device' : 'shared';
+      _order = vStr(d['card_order']) == 'rotate' ? 'rotate' : 'lowest';
       _dirty = false;
     });
   }
@@ -131,7 +133,7 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
         context,
         () => ValetAdmin.I.call('vva_device_ranges_save', {
               'p_point': widget.pointId,
-              'p_options': {'card_split': _cardSplit, 'card_rule': _rule, 'hook_split': _hookSplit},
+              'p_options': {'card_split': _cardSplit, 'card_rule': _rule, 'hook_split': _hookSplit, 'card_order': _order},
               'p_ranges': ranges,
             }),
         ok: tx(context, 'تم حفظ أرقام التابلتات', 'Numbers per tablet saved'));
@@ -164,6 +166,32 @@ class _CardRangesPanelState extends State<CardRangesPanel> {
                 'When a point has more than one tablet — even on the same key board — each tablet may get its own cards and hooks, e.g. tablet 1 cards 1 – 50 and hooks 1 – 40, tablet 2 cards 51 – 100 and hooks 41 – 80.'),
             style: const TextStyle(color: _muted, fontSize: 12.5)),
         const SizedBox(height: 12),
+        Row(children: [
+          SizedBox(width: 130, child: Text(tx(context, 'الكارت التلقائي', 'Auto card'), style: const TextStyle(fontWeight: FontWeight.w700))),
+          Expanded(
+            child: SegmentedButton<String>(
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: 'lowest', label: Text(tx(context, 'أصغر كارت فاضي', 'Lowest free card'))),
+                ButtonSegment(value: 'rotate', label: Text(tx(context, 'بالدور لقدّام', 'In turn'))),
+              ],
+              selected: {_order},
+              onSelectionChanged: widget.edit ? (v) => _set(() => _order = v.first) : null,
+            ),
+          ),
+        ]),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 130, top: 4),
+          child: Text(
+              _order == 'lowest'
+                  ? tx(context,
+                      'الكارت اللي رجع يستنى فترة الانتظار${d['cooldown_on'] == false ? ' (مقفولة دلوقتي)' : ' (${vNum(d['cooldown_min']).toInt()} دقايق)'} وبعدها يتدّي للعربية الجديدة على طول: كارت 2 فضي → بعد الفترة التكت الجاي ياخد 2.',
+                      'A card that came back waits its waiting time${d['cooldown_on'] == false ? ' (off now)' : ' (${vNum(d['cooldown_min']).toInt()} min)'}, then goes to the next car at once: card 2 free → after the wait the next ticket takes 2.')
+                  : tx(context, 'الكروت بتمشي بالدور بعد آخر كارت اتدّى (17، 18، 19 …) وبترجع للأول في الآخر.',
+                      'Cards go in turn after the last one given (17, 18, 19 …) and start again at the end.'),
+              style: const TextStyle(color: _muted, fontSize: 12)),
+        ),
+        const SizedBox(height: 8),
         _option(tx(context, 'الكروت', 'Cards'), _cardSplit, (v) => _set(() => _cardSplit = v),
             tx(context, 'ترتيب واحد للنقطة', 'One order for the point'), tx(context, 'كل تابلت كروته', 'Each tablet its cards')),
         const SizedBox(height: 8),
