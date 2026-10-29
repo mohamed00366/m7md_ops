@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  archive: ^3.6.1
   flutter_localizations:
     sdk: flutter
 
@@ -140,3 +141,4 @@ flutter:
     #   - assets/m7_logo_light.png
     #   - assets/m7_logo_dark.png
     - assets/models/
+    - assets/excel/

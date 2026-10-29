@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'valet_admin.dart';
 import 'valet_credits_screen.dart';
+import 'valet_excel_link_panel.dart';
 import 'valet_numbering_screen.dart';
 import 'valet_odoo_analytic.dart';
 import 'valet_ui.dart';
@@ -302,7 +303,7 @@ class _OdooBodyState extends State<_OdooBody> {
     final rows = _rows ?? const <VJson>[];
     final errors = vNum(_stats['error']).toInt();
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _header(context),
         const ValetOdooAlerts(),
@@ -321,6 +322,7 @@ class _OdooBodyState extends State<_OdooBody> {
                 iconMargin: const EdgeInsets.only(bottom: 2),
                 text: errors > 0 ? tx(context, 'سِجِلّ الإرسال · $errors خَطَأ', 'Send log · $errors errors') : tx(context, 'سِجِلّ الإرسال', 'Send log')),
             Tab(icon: const Icon(Icons.pin_outlined, size: 18), iconMargin: const EdgeInsets.only(bottom: 2), text: tx(context, 'تَرقيم المَبيعات', 'Sale numbering')),
+            Tab(icon: const Icon(Icons.grid_on_outlined, size: 18), iconMargin: const EdgeInsets.only(bottom: 2), text: tx(context, 'لينك إكسل حي', 'Excel live link')),
           ],
         ),
         const Divider(height: 1),
@@ -343,6 +345,7 @@ class _OdooBodyState extends State<_OdooBody> {
               ),
               const Expanded(child: ValetNumberingScreen(embedded: true)),
             ]),
+            const OdooExcelLinkPanel(),
           ]),
         ),
       ]),
