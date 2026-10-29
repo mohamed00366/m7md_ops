@@ -6,6 +6,7 @@ import 'valet_link_screen.dart';
 import 'valet_staff_analytics_screen.dart';
 import 'valet_voice_screen.dart';
 import 'valet_site_count_screen.dart';
+import 'valet_visits_screen.dart';
 import 'valet_key_boards_panel.dart';
 import 'valet_hourly.dart';
 import 'valet_hub_ui.dart';
@@ -329,6 +330,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       if (ValetAdmin.I.can(ValetAdmin.permSettings)) ('كُروت NFC', 'NFC cards', ValetCardsScreen(key: ValueKey('cards$id'), pointId: id)),
       if (ValetAdmin.I.can(ValetAdmin.permSettings)) ('الأَوامِر الصَوتيّة', 'Voice commands', ValetVoiceScreen(key: ValueKey('voice$id'), pointId: id)),
       ('جَرد المَوقِع', 'Site count', ValetSiteCountScreen(key: ValueKey('count$id'), pointId: id)),
+      ('زِيارات المُشرِفين', 'Supervisor visits', ValetVisitsScreen(key: ValueKey('visits$id'), pointId: id)),
       if (ValetAdmin.I.can(ValetAdmin.permReports))
         ('تَحليل المُوظَّفين', 'Staff analysis', ValetStaffAnalyticsScreen(key: ValueKey('staff$id'), pointId: id)),
     ];
