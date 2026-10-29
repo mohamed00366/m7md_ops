@@ -695,6 +695,7 @@ class _ValetAiScreenState extends State<ValetAiScreen> {
           ]),
         ),
       ),
+      const Padding(padding: EdgeInsets.fromLTRB(20, 14, 20, 0), child: _AgentOptions()),
       // ---------------- app guide (DB 318)
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -866,6 +867,82 @@ Widget questionCard(BuildContext c, VJson q) {
       const SizedBox(height: 4),
       Text(vStr(q['answer']).isEmpty ? tx(c, '(ماوصلش رد)', '(no answer)') : '💬 ${vStr(q['answer'])}',
           textDirection: rtl ? TextDirection.rtl : TextDirection.ltr, style: const TextStyle(color: _muted, height: 1.4)),
+      for (final x in vList(q['actions']))
+        Text('▶ ${vStr(x['do'])} ${[x['page'], x['ticket'], x['query'], x['text'], x['method'], x['received']].where((e) => e != null && '$e'.isNotEmpty).join(' · ')}',
+            textDirection: TextDirection.ltr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
     ]),
   );
+}
+
+
+/// DB 323: the assistant may act in the app (pages, tickets, payment …) – on / off and when it asks before.
+class _AgentOptions extends StatefulWidget {
+  const _AgentOptions();
+
+  @override
+  State<_AgentOptions> createState() => _AgentOptionsState();
+}
+
+class _AgentOptionsState extends State<_AgentOptions> {
+  bool? _on;
+  String _confirm = 'money';
+
+  @override
+  void initState() {
+    super.initState();
+    ValetAdmin.I.call('vva_ai_agent_get', {}).then((d) {
+      if (mounted) {
+        setState(() {
+          _on = d['agent_on'] != false;
+          _confirm = vStr(d['agent_confirm']) == 'always' ? 'always' : 'money';
+        });
+      }
+    }).catchError((_) {});
+  }
+
+  Future<void> _save() async {
+    await vGuard(context, () => ValetAdmin.I.call('vva_ai_agent_settings', {'p_settings': {'agent_on': _on, 'agent_confirm': _confirm}}),
+        ok: tx(context, 'تم الحفظ', 'Saved'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_on == null) return const SizedBox.shrink();
+    return HubCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          const Icon(Icons.smart_toy_outlined),
+          const SizedBox(width: 8),
+          Expanded(child: Text(tx(context, 'المساعد بينفّذ في التطبيق', 'The assistant acts in the app'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15))),
+        ]),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _on!,
+          onChanged: (v) {
+            setState(() => _on = v);
+            _save();
+          },
+          title: Text(tx(context, 'ينفّذ الأوامر', 'Runs commands'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(
+              tx(context, 'يفتح الصفحات، يدوّر على التكتات، يعمل تكت جديد، يفتح الدفع، يجهّز العربية … مقفول = يرد بس',
+                  'Opens pages, finds tickets, makes a new ticket, opens the payment, car ready … Off = answers only'),
+              style: const TextStyle(fontSize: 12)),
+        ),
+        Text(tx(context, 'يسأل قبل التنفيذ', 'Asks before doing'), style: const TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 6),
+        SegmentedButton<String>(
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(value: 'money', label: Text(tx(context, 'الفلوس واللي مش بيرجع بس', 'Money and not-undoable only'))),
+            ButtonSegment(value: 'always', label: Text(tx(context, 'كل أمر', 'Every command'))),
+          ],
+          selected: {_confirm},
+          onSelectionChanged: (v) {
+            setState(() => _confirm = v.first);
+            _save();
+          },
+        ),
+      ]),
+    );
+  }
 }
