@@ -118,7 +118,7 @@ class _OdooExcelLinkPanelState extends State<OdooExcelLinkPanel> {
         );
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       opt('all', Icons.receipt_long_outlined, 'كل الفواتير (فاتورة في كل صف)', 'Every invoice (one invoice per row)',
-          'كل التاريخ · شيتات Cash / Card / Free … وملخص · الشيت آخره ~ مليون صف', 'All history · Cash / Card / Free … sheets and a summary · a sheet holds ~1 million rows'),
+          'كل التاريخ · شيت واحد «All invoices» تعمل عليه معادلاتك · الشيت آخره ~ مليون صف', 'All history · one sheet "All invoices" for your own formulas · a sheet holds ~1 million rows'),
       opt('period', Icons.date_range, 'فواتير فترة معينة', 'Invoices of a period',
           _period == null ? 'اختار من – إلى (الفترة بتتحفظ جوه الملف)' : 'من ${_ymd(_period!.start)} إلى ${_ymd(_period!.end)}',
           _period == null ? 'Pick from – to (the period is kept in the file)' : 'From ${_ymd(_period!.start)} to ${_ymd(_period!.end)}'),
@@ -240,8 +240,8 @@ class _OdooExcelLinkPanelState extends State<OdooExcelLinkPanel> {
               ('1. نزّل الملف من «تنزيل ملف الإكسل» واحفظه عندك (أو على OneDrive / SharePoint).', '1. Download the file with "Download the Excel file" and keep it (or on OneDrive / SharePoint).'),
               ('2. أول مرة: «Enable content»، ولو سأل عن اللينك اختار Anonymous ← Connect.', '2. The first time: "Enable content", and if it asks about the link choose Anonymous → Connect.'),
               ('3. بيتحدث لوحده لما يتفتح وكل كام دقيقة وهو مفتوح · Data ← Refresh All للتحديث دلوقتي.', '3. It refreshes on open and every few minutes while open · Data → Refresh All to refresh now.'),
-              ('الشيتات: كل الفواتير · Cash · Card · Free · Unpaid · Credit notes · فواتير مش فاليه · ملخص شهري ويومي.', 'Sheets: All invoices · Cash · Card · Free · Unpaid · Credit notes · Other invoices (not valet) · Summary per month and per day.'),
-              ('محتاج Excel 365 / 2021 أو أحدث (شيتات الفلترة بتستخدم FILTER).', 'Needs Excel 365 / 2021 or newer (the filtered sheets use FILTER).'),
+              ('شيت واحد: «All invoices» (في ملف الإجماليات: «Totals»). الجدول اسمه Invoices (أو Totals) — اعمل معادلاتك في شيتات جديدة: =SUMIFS(Invoices[Total], Invoices[Payment method], "Cash") وبتتحدث مع كل تحديث.',
+                  'One sheet: "All invoices" (in the totals file: "Totals"). The table is called Invoices (or Totals) — put your formulas on new sheets: =SUMIFS(Invoices[Total], Invoices[Payment method], "Cash") and they follow every refresh.'),
               ('Data Model (ملايين الصفوف، مرة واحدة): Data ← Queries & Connections ← كليك يمين على الكويري ← Load To… ← PivotTable Report + «Add this data to the Data Model» ← OK.',
                   'Data Model (millions of rows, once): Data → Queries & Connections → right click the query → Load To… → PivotTable Report + "Add this data to the Data Model" → OK.'),
             ])

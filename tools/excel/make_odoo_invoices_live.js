@@ -164,7 +164,8 @@ function sheetXml(rows, opts = {}) {
     about[2] = [{ t: 'What it is' }, { t: 'Totals of the Odoo customer invoices: one row per day × type × journal × status × payment method × point × area × client, with the number of invoices and the amounts. Read only.' }];
     about[5] = [{ t: 'Sheets' }, { t: 'Totals (the data) · Summary (per month and per day) · use PivotTables on the Totals table for any other view.' }];
   }
-  const all = [...sheets, ['Summary', summary], ['About', about]];
+  // only the data sheet by default (the owner writes his own formulas); EXTRA=1 adds the filtered sheets + summary + about
+  const all = process.env.EXTRA === '1' ? [...sheets, ['Summary', summary], ['About', about]] : [];
   let rels = await zip.file('xl/_rels/workbook.xml.rels').async('string');
   let ct = await zip.file('[Content_Types].xml').async('string');
   let maxSheetId = Math.max(...[...wb.matchAll(/sheetId="(\d+)"/g)].map((m) => +m[1]));
@@ -181,10 +182,12 @@ function sheetXml(rows, opts = {}) {
   });
   wb = wb.replace('</sheets>', sheetTags + '</sheets>');
   // dynamic arrays metadata
-  zip.file('xl/metadata.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  if (all.length) zip.file('xl/metadata.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <metadata xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xda="http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray"><metadataTypes count="1"><metadataType name="XLDAPR" minSupportedVersion="120000" copy="1" pasteAll="1" pasteValues="1" merge="1" splitFirst="1" rowColShift="1" clearFormats="1" clearComments="1" assign="1" coerce="1" cellMeta="1"/></metadataTypes><futureMetadata name="XLDAPR" count="1"><bk><extLst><ext uri="{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}"><xda:dynamicArrayProperties fDynamic="1" fCollapsed="0"/></ext></extLst></bk></futureMetadata><cellMetadata count="1"><bk><rc t="1" v="0"/></bk></cellMetadata></metadata>`);
-  rels = rels.replace('</Relationships>', `<Relationship Id="rId${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sheetMetadata" Target="metadata.xml"/></Relationships>`);
-  ct = ct.replace('</Types>', `<Override PartName="/xl/metadata.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheetMetadata+xml"/></Types>`);
+  if (all.length) {
+    rels = rels.replace('</Relationships>', `<Relationship Id="rId${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sheetMetadata" Target="metadata.xml"/></Relationships>`);
+    ct = ct.replace('</Types>', `<Override PartName="/xl/metadata.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheetMetadata+xml"/></Types>`);
+  }
   // recalc on open (formulas)
   if (/<calcPr[^>]*\/>/.test(wb)) wb = wb.replace(/<calcPr([^>]*)\/>/, (m, a) => `<calcPr${a.replace(/ fullCalcOnLoad="\d"/, '')} fullCalcOnLoad="1"/>`);
   else wb = wb.replace('</workbook>', '<calcPr fullCalcOnLoad="1"/></workbook>');
