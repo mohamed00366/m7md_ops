@@ -494,7 +494,7 @@ class ValetVisitSupervisors extends StatefulWidget {
 class _ValetVisitSupervisorsState extends State<ValetVisitSupervisors> {
   VJson? _d;
   final _q = TextEditingController();
-  List _found = [];
+  String _filter = '';
 
   @override
   void initState() {
@@ -513,10 +513,14 @@ class _ValetVisitSupervisorsState extends State<ValetVisitSupervisors> {
     if (mounted) setState(() => _d = d);
   }
 
-  Future<void> _search(String v) async {
-    if (v.trim().length < 2) return setState(() => _found = []);
-    final d = await ValetAdmin.I.call('vva_visit_supervisors', {'p_search': v.trim()});
-    if (mounted) setState(() => _found = vList(d['employees']));
+  static String _norm(String v) => v.toLowerCase().replaceAll(RegExp(r'[^a-z0-9\u0600-\u06ff]'), '');
+
+  /// every employee (DB 327), filtered as you type: name, code (dashes / spaces ignored) or job
+  List<VJson> _employees() {
+    final all = vList(_d?['employees']);
+    final f = _norm(_filter);
+    if (f.isEmpty) return all;
+    return all.where((e) => _norm('${vStr(e['name'])} ${vStr(e['code'])} ${vStr(e['job'])}').contains(f)).toList();
   }
 
   Future<void> _set(String emp, {bool active = true, bool all = true, List<String> points = const [], bool remove = false}) async {
@@ -572,84 +576,120 @@ class _ValetVisitSupervisorsState extends State<ValetVisitSupervisors> {
     final sups = vList(d['supervisors']);
     final ids = {for (final s in sups) vStr(s['employee_id'])};
     final canEdit = ValetAdmin.I.can(ValetAdmin.permSettings);
-    return ListView(padding: const EdgeInsets.all(20), children: [
-      Text(
-          tx(context, 'الموظفين دول بس يظهر لهم «Site visit» لما يدخلوا على تابلت الموقع (بالكارت أو الباسورد). الباقي بيفتح شيفت عادي.',
-              'Only these employees see "Site visit" when they sign in on a site tablet (card or password). Everyone else opens a shift as usual.'),
-          style: const TextStyle(color: _muted)),
-      const SizedBox(height: 12),
-      if (canEdit)
-        HubCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+    final emps = _employees();
+    final total = vList(d['employees']).length;
+    return CustomScrollView(slivers: [
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        sliver: SliverList(
+          delegate: SliverChildListDelegate([
+            Text(
+                tx(context, 'الموظفين دول بس يظهر لهم «Site visit» لما يدخلوا على تابلت الموقع (بالكارت أو الباسورد). الباقي بيفتح شيفت عادي.',
+                    'Only these employees see "Site visit" when they sign in on a site tablet (card or password). Everyone else opens a shift as usual.'),
+                style: const TextStyle(color: _muted)),
+            const SizedBox(height: 12),
+            Text(tx(context, 'المشرفين (${sups.length})', 'Supervisors (${sups.length})'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 8),
+            if (sups.isEmpty)
+              HubCard(child: Text(tx(context, 'مفيش مشرفين لسه — اختار من الموظفين تحت.', 'No supervisors yet — pick from the employees below.'), style: const TextStyle(color: _muted)))
+            else
+              for (final s in sups) _supCard(s, canEdit),
+            const SizedBox(height: 18),
+            Row(children: [
+              Expanded(
+                  child: Text(tx(context, 'كل الموظفين (${emps.length} من $total)', 'All employees (${emps.length} of $total)'),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
+            ]),
+            const SizedBox(height: 8),
             TextField(
               controller: _q,
-              onChanged: _search,
+              onChanged: (v) => setState(() => _filter = v),
               decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.person_search),
-                  hintText: tx(context, 'دوّر على موظف بالاسم أو الكود أو الوظيفة', 'Search an employee by name, code or job'),
+                  suffixIcon: _filter.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => setState(() {
+                                _q.clear();
+                                _filter = '';
+                              })),
+                  hintText: tx(context, 'فلتر بالاسم أو الكود (V119) أو الوظيفة', 'Filter by name, code (V119) or job'),
                   border: const OutlineInputBorder(),
                   isDense: true),
             ),
-            for (final e in _found)
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text(vStr(e['name']), style: const TextStyle(fontWeight: FontWeight.w700)),
-                subtitle: Text([vStr(e['code']), vStr(e['job'])].where((x) => x.isNotEmpty).join(' · ')),
-                trailing: ids.contains(vStr(e['id']))
-                    ? hubPill(tx(context, 'مضاف', 'Added'), kind: 'ok')
-                    : FilledButton.tonalIcon(
-                        onPressed: () async {
-                          await _set(vStr(e['id']));
-                          _q.clear();
-                          setState(() => _found = []);
-                        },
-                        icon: const Icon(Icons.add),
-                        label: Text(tx(context, 'إضافة', 'Add'))),
+            const SizedBox(height: 8),
+            if (emps.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(tx(context, 'مفيش موظف بالاسم ده', 'No employee matches'), style: const TextStyle(color: _muted)),
               ),
           ]),
         ),
-      const SizedBox(height: 14),
-      if (sups.isEmpty)
-        HubCard(child: Text(tx(context, 'مفيش مشرفين لسه.', 'No supervisors yet.'), style: const TextStyle(color: _muted)))
-      else
-        for (final s in sups)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: HubCard(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: Row(children: [
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(vStr(s['name']), style: TextStyle(fontWeight: FontWeight.w800, color: s['active'] == false ? _muted : null)),
-                    Text(
-                        [
-                          if (vStr(s['code']).isNotEmpty) vStr(s['code']),
-                          if (vStr(s['job']).isNotEmpty) vStr(s['job']),
-                          s['all_points'] == true ? tx(context, 'كل النقاط', 'All points') : (vStr(s['point_names']).isEmpty ? tx(context, 'مفيش نقاط', 'no points') : vStr(s['point_names'])),
-                          tx(context, '${vNum(s['visits_30d']).toInt()} زيارة في 30 يوم', '${vNum(s['visits_30d']).toInt()} visits in 30 days'),
-                          if (s['last'] != null) tx(context, 'آخر زيارة ${_time(s['last'])}', 'last ${_time(s['last'])}'),
-                        ].join(' · '),
-                        style: const TextStyle(fontSize: 12.5, color: _muted)),
-                  ]),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, i) {
+              final e = emps[i];
+              final on = ids.contains(vStr(e['id']));
+              return Container(
+                decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0)))),
+                child: ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 6),
+                  title: Text(vStr(e['name']), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  subtitle: Text([vStr(e['code']), vStr(e['job'])].where((x) => x.isNotEmpty).join(' · ')),
+                  trailing: on
+                      ? hubPill(tx(context, 'مشرف ✓', 'Supervisor ✓'), kind: 'ok')
+                      : (canEdit
+                          ? FilledButton.tonalIcon(onPressed: () => _set(vStr(e['id'])), icon: const Icon(Icons.add), label: Text(tx(context, 'مشرف', 'Supervisor')))
+                          : null),
                 ),
-                if (canEdit) ...[
-                  IconButton(tooltip: tx(context, 'النقاط', 'Points'), icon: const Icon(Icons.place_outlined), onPressed: () => _pickPoints(s)),
-                  Switch(
-                    value: s['active'] != false,
-                    onChanged: (v) => _set(vStr(s['employee_id']), active: v, all: s['all_points'] == true, points: [for (final p in (s['points'] as List? ?? const [])) '$p']),
-                  ),
-                  IconButton(
-                    tooltip: tx(context, 'شيل من القائمة', 'Remove'),
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => _set(vStr(s['employee_id']), remove: true),
-                  ),
-                ],
-              ]),
-            ),
+              );
+            },
+            childCount: emps.length,
           ),
+        ),
+      ),
     ]);
   }
+
+  Widget _supCard(VJson s, bool canEdit) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: HubCard(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Row(children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(vStr(s['name']), style: TextStyle(fontWeight: FontWeight.w800, color: s['active'] == false ? _muted : null)),
+                Text(
+                    [
+                      if (vStr(s['code']).isNotEmpty) vStr(s['code']),
+                      if (vStr(s['job']).isNotEmpty) vStr(s['job']),
+                      s['all_points'] == true ? tx(context, 'كل النقاط', 'All points') : (vStr(s['point_names']).isEmpty ? tx(context, 'مفيش نقاط', 'no points') : vStr(s['point_names'])),
+                      tx(context, '${vNum(s['visits_30d']).toInt()} زيارة في 30 يوم', '${vNum(s['visits_30d']).toInt()} visits in 30 days'),
+                      if (s['last'] != null) tx(context, 'آخر زيارة ${_time(s['last'])}', 'last ${_time(s['last'])}'),
+                    ].join(' · '),
+                    style: const TextStyle(fontSize: 12.5, color: _muted)),
+              ]),
+            ),
+            if (canEdit) ...[
+              IconButton(tooltip: tx(context, 'النقاط', 'Points'), icon: const Icon(Icons.place_outlined), onPressed: () => _pickPoints(s)),
+              Switch(
+                value: s['active'] != false,
+                onChanged: (v) => _set(vStr(s['employee_id']), active: v, all: s['all_points'] == true, points: [for (final p in (s['points'] as List? ?? const [])) '$p']),
+              ),
+              IconButton(
+                tooltip: tx(context, 'شيل من القائمة', 'Remove'),
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => _set(vStr(s['employee_id']), remove: true),
+              ),
+            ],
+          ]),
+        ),
+      );
 }
 
 // ---------------------------------------------------------------------------------------------- all points
