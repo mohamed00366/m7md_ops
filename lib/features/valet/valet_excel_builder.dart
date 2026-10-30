@@ -7,8 +7,11 @@ import 'package:archive/archive.dart';
 /// the private token goes into the Power Query of the file (DataMashup → Formulas/Section1.m) and the refresh
 /// minutes into the connection. Pure function (no Flutter), so it can be tested on its own.
 const kExcelTokenPlaceholder = 'XLTOKEN_PLACEHOLDER_0000000000000000';
+const kExcelFromPlaceholder = 'XLFROM_PLACEHOLDER';
+const kExcelToPlaceholder = 'XLTO_PLACEHOLDER';
 
-Uint8List buildOdooExcel(Uint8List template, {required String token, required int refreshMin}) {
+/// [from] / [to] (yyyy-mm-dd, empty = no limit) – the period of the "every invoice" file (DB 326).
+Uint8List buildOdooExcel(Uint8List template, {required String token, required int refreshMin, String from = '', String to = ''}) {
   final xlsx = ZipDecoder().decodeBytes(template);
   final out = Archive();
   for (final f in xlsx.files) {
@@ -16,7 +19,7 @@ Uint8List buildOdooExcel(Uint8List template, {required String token, required in
     var bytes = Uint8List.fromList(f.content as List<int>);
     if (f.name.startsWith('customXml/item') && !f.name.contains('Props')) {
       final text = _readXml(bytes);
-      if (text.contains('DataMashup')) bytes = _writeUtf16(_swapMashup(text, token));
+      if (text.contains('DataMashup')) bytes = _writeUtf16(_swapMashup(text, token, from, to));
     } else if (f.name == 'xl/connections.xml') {
       var s = utf8.decode(bytes);
       s = s.replaceAll(RegExp(r' interval="\d+"'), '');
@@ -28,7 +31,7 @@ Uint8List buildOdooExcel(Uint8List template, {required String token, required in
   return Uint8List.fromList(ZipEncoder().encode(out)!);
 }
 
-String _swapMashup(String xml, String token) {
+String _swapMashup(String xml, String token, String from, String to) {
   final m = RegExp(r'(<DataMashup[^>]*>)([^<]+)(</DataMashup>)').firstMatch(xml);
   if (m == null) throw StateError('The Excel template has no query.');
   final bin = base64Decode(m.group(2)!.trim());
@@ -47,7 +50,7 @@ String _swapMashup(String xml, String token) {
       final code = utf8.decode(b, allowMalformed: true);
       if (code.contains(kExcelTokenPlaceholder)) {
         found = true;
-        b = Uint8List.fromList(utf8.encode(code.replaceAll(kExcelTokenPlaceholder, token)));
+        b = Uint8List.fromList(utf8.encode(code.replaceAll(kExcelTokenPlaceholder, token).replaceAll(kExcelFromPlaceholder, from).replaceAll(kExcelToPlaceholder, to)));
       }
     }
     newInner.addFile(ArchiveFile(f.name, b.length, b));

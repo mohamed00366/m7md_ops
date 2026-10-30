@@ -65,21 +65,72 @@ class _OdooExcelLinkPanelState extends State<OdooExcelLinkPanel> {
     }
   }
 
+  String _kind = 'all'; // all | period | totals – which file is downloaded (option)
+  DateTimeRange? _period;
+
+  String _ymd(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
   Future<void> _download() async {
     final d = _d;
     if (d == null) return;
+    if (_kind == 'period' && _period == null) {
+      await _pickPeriod();
+      if (_period == null) return;
+    }
     try {
-      final t = await rootBundle.load('assets/excel/odoo_invoices_live.xlsx');
-      final bytes = buildOdooExcel(t.buffer.asUint8List(), token: vStr(d['token']), refreshMin: vNum(_set['refresh_min']).toInt());
+      final totals = _kind == 'totals';
+      final t = await rootBundle.load(totals ? 'assets/excel/odoo_invoice_totals_live.xlsx' : 'assets/excel/odoo_invoices_live.xlsx');
+      final p = _kind == 'period' ? _period : null;
+      final bytes = buildOdooExcel(t.buffer.asUint8List(),
+          token: vStr(d['token']), refreshMin: vNum(_set['refresh_min']).toInt(), from: p == null ? '' : _ymd(p.start), to: p == null ? '' : _ymd(p.end));
+      final name = totals ? 'Odoo-invoice-totals-live.xlsx' : (p == null ? 'Odoo-invoices-live.xlsx' : 'Odoo-invoices-${_ymd(p.start)}-to-${_ymd(p.end)}.xlsx');
       final blob = html.Blob([Uint8List.fromList(bytes)], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       final url = html.Url.createObjectUrlFromBlob(blob);
       html.AnchorElement(href: url)
-        ..download = 'Odoo-invoices-live.xlsx'
+        ..download = name
         ..click();
       html.Url.revokeObjectUrl(url);
     } catch (e) {
       if (mounted) vToast(context, '${tx(context, 'ما قدرتش أعمل الملف', 'Could not build the file')}: $e', error: true);
     }
+  }
+
+  Future<void> _pickPeriod() async {
+    final now = DateTime.now();
+    final r = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      initialDateRange: _period ?? DateTimeRange(start: DateTime(now.year, now.month, 1), end: now),
+    );
+    if (r != null && mounted) setState(() => _period = r);
+  }
+
+  Widget _fileKind() {
+    Widget opt(String k, IconData icon, String ar, String en, String subAr, String subEn) => RadioListTile<String>(
+          contentPadding: EdgeInsets.zero,
+          value: k,
+          groupValue: _kind,
+          onChanged: (v) => setState(() => _kind = v ?? 'all'),
+          secondary: Icon(icon),
+          title: Text(tx(context, ar, en), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(tx(context, subAr, subEn), style: const TextStyle(fontSize: 12)),
+        );
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      opt('all', Icons.receipt_long_outlined, 'كل الفواتير (فاتورة في كل صف)', 'Every invoice (one invoice per row)',
+          'كل التاريخ · شيتات Cash / Card / Free … وملخص · الشيت آخره ~ مليون صف', 'All history · Cash / Card / Free … sheets and a summary · a sheet holds ~1 million rows'),
+      opt('period', Icons.date_range, 'فواتير فترة معينة', 'Invoices of a period',
+          _period == null ? 'اختار من – إلى (الفترة بتتحفظ جوه الملف)' : 'من ${_ymd(_period!.start)} إلى ${_ymd(_period!.end)}',
+          _period == null ? 'Pick from – to (the period is kept in the file)' : 'From ${_ymd(_period!.start)} to ${_ymd(_period!.end)}'),
+      if (_kind == 'period')
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton.icon(onPressed: _pickPeriod, icon: const Icon(Icons.edit_calendar), label: Text(tx(context, 'اختار الفترة', 'Pick the period'))),
+        ),
+      opt('totals', Icons.functions, 'إجماليات (للملايين من الفواتير)', 'Totals (for millions of invoices)',
+          'صف لكل يوم × نوع × دفتر × حالة × طريقة دفع × نقطة × منطقة × عميل، فيه عدد الفواتير والمبالغ — صغير على طول',
+          'One row per day × type × journal × status × payment method × point × area × client, with the number of invoices and the amounts — always small'),
+    ]);
   }
 
   Future<void> _newToken() async {
@@ -162,6 +213,22 @@ class _OdooExcelLinkPanelState extends State<OdooExcelLinkPanel> {
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: HubCard(strong: true, child: Text(err, style: const TextStyle(color: _bad, fontWeight: FontWeight.w700))),
         ),
+      // which file
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        child: HubCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              const Icon(Icons.description_outlined),
+              const SizedBox(width: 8),
+              Expanded(child: Text(tx(context, 'نوع الملف', 'Which file'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15))),
+              FilledButton.icon(onPressed: _download, icon: const Icon(Icons.download), label: Text(tx(context, 'تنزيل', 'Download'))),
+            ]),
+            const SizedBox(height: 4),
+            _fileKind(),
+          ]),
+        ),
+      ),
       // how to use
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -175,6 +242,8 @@ class _OdooExcelLinkPanelState extends State<OdooExcelLinkPanel> {
               ('3. بيتحدث لوحده لما يتفتح وكل كام دقيقة وهو مفتوح · Data ← Refresh All للتحديث دلوقتي.', '3. It refreshes on open and every few minutes while open · Data → Refresh All to refresh now.'),
               ('الشيتات: كل الفواتير · Cash · Card · Free · Unpaid · Credit notes · فواتير مش فاليه · ملخص شهري ويومي.', 'Sheets: All invoices · Cash · Card · Free · Unpaid · Credit notes · Other invoices (not valet) · Summary per month and per day.'),
               ('محتاج Excel 365 / 2021 أو أحدث (شيتات الفلترة بتستخدم FILTER).', 'Needs Excel 365 / 2021 or newer (the filtered sheets use FILTER).'),
+              ('Data Model (ملايين الصفوف، مرة واحدة): Data ← Queries & Connections ← كليك يمين على الكويري ← Load To… ← PivotTable Report + «Add this data to the Data Model» ← OK.',
+                  'Data Model (millions of rows, once): Data → Queries & Connections → right click the query → Load To… → PivotTable Report + "Add this data to the Data Model" → OK.'),
             ])
               Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(tx(context, ar, en), style: const TextStyle(fontSize: 13, height: 1.45))),
           ]),

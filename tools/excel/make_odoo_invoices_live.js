@@ -9,17 +9,23 @@ const TOKEN = process.argv[2] || 'XLTOKEN_PLACEHOLDER_0000000000000000';
 const REFRESH = Number(process.argv[3] || 5);
 const OUT = process.argv[4] || 'out.xlsx';
 const KEY = 'sb_publishable_mpGl1t33_k36OPXVYeflHA_HVTonx_V';
-const COLS = ['Invoice','Type','Journal','Status','Invoice date','Due date','Customer','Reference','Untaxed','VAT','Total','Amount due','Payment status','Payment method','Paid via','Paid on','Valet','Ticket','Point','Area','Client','Currency','Created','Updated','Odoo ID'];
-const TYPES = {'Invoice date':'type date','Due date':'type date','Paid on':'type date','Untaxed':'type number','VAT':'type number','Total':'type number','Amount due':'type number','Created':'type datetime','Updated':'type datetime','Odoo ID':'Int64.Type'};
+const MODE = process.env.MODE || 'detail';   // detail | totals
+const TOT = MODE === 'totals';
+const COLS = TOT ? ['Date','Type','Journal','Status','Payment method','Valet','Point','Area','Client','Invoices','Untaxed','VAT','Total','Amount due'] : ['Invoice','Type','Journal','Status','Invoice date','Due date','Customer','Reference','Untaxed','VAT','Total','Amount due','Payment status','Payment method','Paid via','Paid on','Valet','Ticket','Point','Area','Client','Currency','Created','Updated','Odoo ID'];
+const TYPES = TOT ? {'Date':'type date','Invoices':'Int64.Type','Untaxed':'type number','VAT':'type number','Total':'type number','Amount due':'type number'} : {'Invoice date':'type date','Due date':'type date','Paid on':'type date','Untaxed':'type number','VAT':'type number','Total':'type number','Amount due':'type number','Created':'type datetime','Updated':'type datetime','Odoo ID':'Int64.Type'};
 
 const mashup = `let
     Base = "https://weftpekmmesgfhdawutj.supabase.co/rest/v1/rpc/",
     Key = "${KEY}",
     Token = "${TOKEN}",
     Get = (fn as text, extra as record) => Json.Document(Web.Contents(Base, [RelativePath = fn, Query = Record.Combine({[apikey = Key, p_token = Token], extra}), Headers = [Accept = "application/json"], Timeout = #duration(0, 0, 2, 0)])),
-    Info = Get("vx_odoo_invoices_info", []),
+${TOT ? `    Info = Get("vx_odoo_totals_info", []),
+    Rows = List.Combine(List.Transform(Info[months], each Get("vx_odoo_totals_month", [p_month = _]))),` : `    From = "XLFROM_PLACEHOLDER",
+    To = "XLTO_PLACEHOLDER",
+    Period = Record.Combine({if From = "" then [] else [p_from = From], if To = "" then [] else [p_to = To]}),
+    Info = Get("vx_odoo_invoices_info", Period),
     Pages = List.Numbers(0, Number.RoundUp(Info[count] / Info[page_size])),
-    Rows = List.Combine(List.Transform(Pages, each Get("vx_odoo_invoices_page", [p_page = Text.From(_)]))),
+    Rows = List.Combine(List.Transform(Pages, each Get("vx_odoo_invoices_page", Record.Combine({[p_page = Text.From(_)], Period})))),`}
     Columns = {${COLS.map(c => `"${c}"`).join(', ')}},
     Table = Table.FromRecords(Rows, Columns, MissingField.UseNull),
     Typed = Table.TransformColumnTypes(Table, {${Object.entries(TYPES).map(([c, t]) => `{"${c}", ${t}}`).join(', ')}}, "en-US")
@@ -53,10 +59,10 @@ function sheetXml(rows, opts = {}) {
 
 (async () => {
   const seed = process.env.SEED ? JSON.parse(fs.readFileSync(process.env.SEED, 'utf8')) : [];
-  for (const r of seed) for (const c of ['Invoice date', 'Due date', 'Paid on']) if (r[c]) r[c] = Math.round((Date.parse(r[c] + 'T00:00:00Z') - Date.UTC(1899, 11, 30)) / 86400000);
+  for (const r of seed) for (const c of ['Invoice date', 'Due date', 'Paid on', 'Date']) if (r[c]) r[c] = Math.round((Date.parse(r[c] + 'T00:00:00Z') - Date.UTC(1899, 11, 30)) / 86400000);
   const grid = { data: [COLS, ...(seed.length ? seed.map((r) => COLS.map((c) => (r[c] === null || r[c] === undefined ? '' : r[c]))) : [COLS.map(() => '')])], config: { promoteHeaders: true, adjustColumnNames: false } };
-  const blob = await generateSingleQueryWorkbook({ queryMashup: mashup, refreshOnOpen: true, queryName: 'Invoices' }, grid, {
-    docProps: { title: 'Odoo invoices – live', createdBy: 'VIP Valet', description: 'Live copy of the Odoo customer invoices (refreshes itself)' },
+  const blob = await generateSingleQueryWorkbook({ queryMashup: mashup, refreshOnOpen: true, queryName: TOT ? 'Totals' : 'Invoices' }, grid, {
+    docProps: { title: TOT ? 'Odoo invoice totals – live' : 'Odoo invoices – live', createdBy: 'VIP Valet', description: 'Live copy of the Odoo customer invoices (refreshes itself)' },
     templateSettings: { sheetName: 'Sheet1' },
   });
   const buf = Buffer.from(await blob.arrayBuffer());
@@ -64,9 +70,9 @@ function sheetXml(rows, opts = {}) {
   const names = Object.keys(zip.files);
   // ---- the query table sheet: rename to "All invoices", table to "Invoices"
   let wb = await zip.file('xl/workbook.xml').async('string');
-  wb = wb.replace(/<sheet name="Sheet1"/, '<sheet name="All invoices"').replace(/>Sheet1!/g, ">'All invoices'!");
+  wb = wb.replace(/<sheet name="Sheet1"/, `<sheet name="${TOT ? 'Totals' : 'All invoices'}"`).replace(/>Sheet1!/g, TOT ? '>Totals!' : ">'All invoices'!");
   let app = await zip.file('docProps/app.xml').async('string');
-  zip.file('docProps/app.xml', app.replace('>Sheet1<', '>All invoices<'));
+  zip.file('docProps/app.xml', app.replace('>Sheet1<', TOT ? '>Totals<' : '>All invoices<'));
   const tableFile = names.find((n) => /^xl\/tables\/table\d+\.xml$/.test(n));
   let table = await zip.file(tableFile).async('string');
   // ---- refresh every N minutes (connection) + on open
@@ -93,18 +99,19 @@ function sheetXml(rows, opts = {}) {
   // ---- the data sheet: numbers as numbers (not t="1"), dates with a date format
   const sheetFile = 'xl/worksheets/sheet1.xml';
   let sh = await zip.file(sheetFile).async('string');
-  const dateCols = ['Invoice date', 'Due date', 'Paid on'].map((c) => colLetter(COLS.indexOf(c)));
+  const dateCols = ['Invoice date', 'Due date', 'Paid on', 'Date'].filter((c) => COLS.includes(c)).map((c) => colLetter(COLS.indexOf(c)));
   const moneyCols = ['Untaxed', 'VAT', 'Total', 'Amount due'].map((c) => colLetter(COLS.indexOf(c)));
   sh = sh.replace(/<c r="([A-Z]+)(\d+)" t="1">/g, (m, col, row) => (row === '1' ? m : `<c r="${col}${row}"${dateCols.includes(col) ? ` s="${S.date}"` : moneyCols.includes(col) ? ` s="${S.money}"` : ''}>`));
   zip.file(sheetFile, sh);
 
   // ---- extra sheets
-  const T = 'Invoices';
+  const T = TOT ? 'Totals' : 'Invoices';
+  const DT = TOT ? 'Date' : 'Invoice date';
   const filt = (cond, label) => [
     [{ f: `_xlfn._xlws.FILTER(${T}[#Headers],TRUE)`, dyn: true, s: S.bold }],
     [{ f: `_xlfn._xlws.FILTER(${T},${cond},"No ${label} invoices yet")`, dyn: true }],
   ];
-  const sheets = [
+  const sheets = TOT ? [] : [
     ['Cash', filt(`${T}[Payment method]="Cash"`, 'cash')],
     ['Card', filt(`${T}[Payment method]="Card"`, 'card')],
     ['Free', filt(`${T}[Payment method]="Free"`, 'free')],
@@ -115,7 +122,7 @@ function sheetXml(rows, opts = {}) {
   // summary: by month and by day (last 31 days), posted only
   const methods = ['Cash', 'Card', 'Free', 'Split', 'Bank / other', 'Unpaid'];
   const sum = (dateCond, m) => `SUMIFS(${T}[Total],${T}[Status],"Posted",${T}[Payment method],"${m}",${dateCond})`;
-  const cnt = (dateCond) => `COUNTIFS(${T}[Status],"Posted",${dateCond})`;
+  const cnt = (dateCond) => (TOT ? `SUMIFS(${T}[Invoices],${T}[Status],"Posted",${dateCond})` : `COUNTIFS(${T}[Status],"Posted",${dateCond})`);
   const summary = [];
   summary.push([{ t: 'Odoo invoices – summary (posted invoices, AED, credit notes are negative)', s: S.title }]);
   summary.push([{ t: 'Last refresh of this file:' }, { f: 'NOW()', s: S.date }]);
@@ -125,14 +132,14 @@ function sheetXml(rows, opts = {}) {
   for (let i = 0; i < 24; i++) {
     const r = summary.length + 1;
     const d = `DATE(YEAR(TODAY()),MONTH(TODAY())-${i},1)`;
-    const cond = `${T}[Invoice date],">="&A${r},${T}[Invoice date],"<"&EDATE(A${r},1)`;
+    const cond = `${T}[${DT}],">="&A${r},${T}[${DT}],"<"&EDATE(A${r},1)`;
     summary.push([{ f: d, s: S.date }, ...methods.map((m) => ({ f: sum(cond, m), s: S.money })), { f: `SUMIFS(${T}[Total],${T}[Status],"Posted",${cond})`, s: S.money }, { f: cnt(cond) }]);
   }
   summary.push(null);
   summary.push([{ t: 'Day', s: S.bold }, ...methods.map((m) => ({ t: m, s: S.bold })), { t: 'Total', s: S.bold }, { t: 'Invoices', s: S.bold }]);
   for (let i = 0; i < 31; i++) {
     const r = summary.length + 1;
-    const cond = `${T}[Invoice date],A${r}`;
+    const cond = `${T}[${DT}],A${r}`;
     summary.push([{ f: `TODAY()-${i}`, s: S.date }, ...methods.map((m) => ({ f: sum(cond, m), s: S.money })), { f: `SUMIFS(${T}[Total],${T}[Status],"Posted",${cond})`, s: S.money }, { f: cnt(cond) }]);
   }
   void mStart;
@@ -146,7 +153,17 @@ function sheetXml(rows, opts = {}) {
     [{ t: 'Payment method' }, { t: 'From the journal the payment was registered in (Cash / Card / Bank), Free = 0 AED, Split = more than one, Unpaid / Draft / Cancelled.' }],
     [{ t: 'Valet columns' }, { t: 'Ticket, point, area and client come from the valet system (valet invoices only).' }],
     [{ t: 'Link' }, { t: 'Private. If the link is renewed in the dashboard, this file stops and a new one must be downloaded.' }],
+    null,
+    [{ t: 'Millions of rows', s: S.bold }, { t: 'A sheet holds about 1 million rows. To keep every invoice anyway, load the query into the Data Model (once):' }],
+    [{ t: '' }, { t: `1. Data → Queries & Connections → right click "${TOT ? 'Totals' : 'Invoices'}" → Load To…` }],
+    [{ t: '' }, { t: '2. Choose "PivotTable Report" (or "Only Create Connection") and tick "Add this data to the Data Model" → OK (Excel asks to delete the sheet table: yes).' }],
+    [{ t: '' }, { t: '3. The PivotTable reads the Data Model (millions of rows) and refreshes with the query. The filtered sheets and the Summary need the sheet table, so use the PivotTable instead.' }],
+    [{ t: '' }, { t: 'Or download the "Totals" file (one row per day / point / payment method) or a "Period" file from the dashboard – they stay small.' }],
   ];
+  if (TOT) {
+    about[2] = [{ t: 'What it is' }, { t: 'Totals of the Odoo customer invoices: one row per day × type × journal × status × payment method × point × area × client, with the number of invoices and the amounts. Read only.' }];
+    about[5] = [{ t: 'Sheets' }, { t: 'Totals (the data) · Summary (per month and per day) · use PivotTables on the Totals table for any other view.' }];
+  }
   const all = [...sheets, ['Summary', summary], ['About', about]];
   let rels = await zip.file('xl/_rels/workbook.xml.rels').async('string');
   let ct = await zip.file('[Content_Types].xml').async('string');
