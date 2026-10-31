@@ -271,6 +271,12 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
             subAr: 'الأضرار والصور والملاحظات متتغيرش من التابلت إلا من المشرف · كل تعديل بيتسجل (مين وإمتى وكان إيه)',
             subEn: 'Damages, photos and notes cannot be changed on the tablet except by a supervisor · every change is logged', canEdit: canEdit),
       ]),
+      // DB 333: valet touches on the tablet
+      _card(tx(context, 'لمسات الفاليه في التطبيق', 'Valet touches in the app'), [
+        _sw('nt_valet_touches', true, 'لمسات الفاليه', 'Valet touches',
+            subAr: 'تاج المفتاح · خط قطع التكت · خطوط المواقف في الشريط · البورد الفاضي وعربية التحميل', subEn: 'Key tag · ticket tear line · parking bays in the bar · empty board and loading car',
+            canEdit: canEdit),
+      ]),
       // DB 331: Late / Absent on the Team page of the app (from the roster of the week)
       _card(tx(context, 'صفحة الفريق في التطبيق (متأخر / غايب)', 'Team page in the app (late / absent)'), [
         _sw('nt_team_late', true, 'اعرض المتأخر والغايب من الروستر', 'Show late and absent from the roster',
@@ -412,6 +418,150 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
         _seg(tx(context, 'لغة التكت', 'Ticket language'), vStr(_terms['langs']).isEmpty ? 'both' : vStr(_terms['langs']),
             [('en', 'EN'), ('ar', 'AR'), ('both', tx(context, 'الاتنين', 'Both'))], canEdit ? (v) => _setT('langs', v) : null),
       ]),
+      // DB 332: the assistant's chat history (all points)
+      _card(tx(context, 'المساعد (M7 Assistant) – الهيستوري (كل النقاط)', 'Assistant – chat history (all points)'), [
+        _seg(tx(context, 'الشات يعرض آخر', 'The chat shows the last'), '${_terms['assistant_keep_days'] ?? 0}',
+            [('7', tx(context, '7 أيام', '7 days')), ('30', '30'), ('90', '90'), ('0', tx(context, 'من غير حد', 'No limit'))],
+            canEdit ? (v) => _setT('assistant_keep_days', int.parse(v)) : null),
+        Text(tx(context, 'الرسايل الأقدم بتستخبى من الموظف ومش بتتمسح', 'Older messages are hidden from the employee, not deleted'),
+            style: const TextStyle(fontSize: 12, color: _muted)),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          value: _terms['assistant_clear'] != false,
+          onChanged: canEdit ? (v) => _setT('assistant_clear', v) : null,
+          title: Text(tx(context, 'الموظف يقدر يمسح الشات بتاعه', 'The employee can clear his chat'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(tx(context, 'بيستخبى منه في كل المواقع · المكتب لسه شايفه (متعلّم «اتمسح»)', 'Hidden from him on every site · the office still sees it (marked «cleared»)'),
+              style: const TextStyle(fontSize: 12, color: _muted)),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          value: _terms['assistant_supervisor'] != false,
+          onChanged: canEdit ? (v) => _setT('assistant_supervisor', v) : null,
+          title: Text(tx(context, 'المشرف يشوف محادثات الموظفين', 'The supervisor can read the chats of the staff'), style: const TextStyle(fontWeight: FontWeight.w700)),
+        ),
+        if (_terms['assistant_supervisor'] != false)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              onPressed: () => showDialog<void>(context: context, builder: (_) => _ChatsDialog(pointId: widget.pointId)),
+              icon: const Icon(Icons.forum_outlined),
+              label: Text(tx(context, 'افتح المحادثات', 'Open the chats')),
+            ),
+          ),
+      ]),
     ]);
+  }
+}
+
+/// DB 332: the chats of the staff with the assistant (people of this point → messages of one person).
+class _ChatsDialog extends StatefulWidget {
+  const _ChatsDialog({required this.pointId});
+  final String pointId;
+
+  @override
+  State<_ChatsDialog> createState() => _ChatsDialogState();
+}
+
+class _ChatsDialogState extends State<_ChatsDialog> {
+  List<VJson>? _people;
+  List<VJson>? _msgs;
+  VJson? _who;
+  bool _all = false;
+  Object? _err;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPeople();
+  }
+
+  Future<void> _loadPeople() async {
+    setState(() {
+      _people = null;
+      _err = null;
+    });
+    try {
+      final d = await ValetAdmin.I.call('vva_assistant_chats', {'p_point': _all ? null : widget.pointId});
+      if (mounted) setState(() => _people = [for (final x in (d['people'] as List? ?? const [])) if (x is Map) Map<String, dynamic>.from(x)]);
+    } catch (e) {
+      if (mounted) setState(() => _err = e);
+    }
+  }
+
+  Future<void> _open(VJson p) async {
+    setState(() {
+      _who = p;
+      _msgs = null;
+    });
+    try {
+      final d = await ValetAdmin.I.call('vva_assistant_chats', {'p_employee': p['employee_id']});
+      if (mounted) setState(() => _msgs = [for (final x in (d['messages'] as List? ?? const [])) if (x is Map) Map<String, dynamic>.from(x)]);
+    } catch (e) {
+      if (mounted) setState(() => _err = e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final who = _who;
+    return AlertDialog(
+      title: Row(children: [
+        if (who != null) IconButton(onPressed: () => setState(() => _who = null), icon: const Icon(Icons.arrow_back)),
+        Expanded(child: Text(who == null ? tx(context, 'محادثات المساعد', 'Assistant chats') : vStr(who['name']).isEmpty ? vStr(who['code']) : vStr(who['name']))),
+        if (who == null)
+          FilterChip(label: Text(tx(context, 'كل النقاط', 'All points')), selected: _all, onSelected: (v) {
+            _all = v;
+            _loadPeople();
+          }),
+      ]),
+      content: SizedBox(
+        width: 560,
+        height: 520,
+        child: _err != null
+            ? Center(child: Text('$_err'))
+            : who == null
+                ? (_people == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : _people!.isEmpty
+                        ? Center(child: Text(tx(context, 'مفيش محادثات', 'No chats')))
+                        : ListView(children: [
+                            for (final p in _people!)
+                              ListTile(
+                                leading: const Icon(Icons.person_outline),
+                                title: Text(vStr(p['name']).isEmpty ? vStr(p['code']) : vStr(p['name'])),
+                                subtitle: Text('${p['messages']} · ${VF.dt(vTime(p['last_at']))}${(p['cleared'] ?? 0) > 0 ? ' · ${p['cleared']} ${tx(context, 'اتمسحت', 'cleared')}' : ''}'),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () => _open(p),
+                              ),
+                          ]))
+                : (_msgs == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView(children: [
+                        for (final m in _msgs!)
+                          Align(
+                            alignment: m['role'] == 'user' ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              constraints: const BoxConstraints(maxWidth: 420),
+                              decoration: BoxDecoration(
+                                color: m['role'] == 'user' ? const Color(0xFF111214) : const Color(0xFFF1F2F4),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(vStr(m['text']), style: TextStyle(color: m['role'] == 'user' ? Colors.white : Colors.black87)),
+                                const SizedBox(height: 3),
+                                Text(
+                                    '${VF.dt(vTime(m['at']))} · ${vStr(m['point'])}${m['cleared'] == true ? ' · ${tx(context, 'اتمسحت', 'cleared')}' : ''}',
+                                    style: TextStyle(fontSize: 10.5, color: m['role'] == 'user' ? Colors.white60 : Colors.black45)),
+                              ]),
+                            ),
+                          ),
+                      ])),
+      ),
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(tx(context, 'قفل', 'Close')))],
+    );
   }
 }
