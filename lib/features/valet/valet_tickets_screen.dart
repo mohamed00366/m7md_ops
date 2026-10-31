@@ -6,6 +6,7 @@ import 'valet_credits_screen.dart';
 import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
 import 'valet_ticket_condition.dart';
+import 'valet_complaint_pdf.dart';
 
 /// 🎫 تَذاكِر الفاليه — بَحث، تَفاصيل، وَإلغاء (بِسَبَب مَكتوب).
 class ValetTicketsScreen extends StatelessWidget {
@@ -296,6 +297,12 @@ Future<bool> showValetTicket(BuildContext context, String id) async {
               Row(children: [
                 Expanded(child: Text('${tx(ctx, 'تَذكَرة', 'Ticket')} ${VF.short(vStr(t['ticket_code']))}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800))),
                 vStatusPill(ctx, vStr(t['ticket_status']), voidReason: t['void_reason'] as String?),
+                // DB 330: complaint file – drawing, damages, photos with times, notes, staff, changes
+                IconButton(
+                  tooltip: tx(ctx, 'ملف شكوى PDF', 'Complaint file (PDF)'),
+                  onPressed: () => vGuard(ctx, () => valetComplaintPdf(ctx, t, log)),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                ),
                 IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close)),
               ]),
               Text(vStr(t['ticket_code']), style: const TextStyle(color: VC.muted)),

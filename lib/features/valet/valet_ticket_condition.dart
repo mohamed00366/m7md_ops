@@ -19,7 +19,8 @@ class ValetTicketCondition extends StatelessWidget {
     final notes = [for (final n in (t['note_items'] as List? ?? const [])) if (n is Map) Map<String, dynamic>.from(n)];
     final photos = [for (final p in (t['photos'] as List? ?? const [])) if (p is Map) Map<String, dynamic>.from(p)];
     final noDamage = t['no_damage_confirmed'] == true;
-    if (sel.isEmpty && notes.isEmpty && photos.isEmpty && !noDamage) return const SizedBox.shrink();
+    final edits = [for (final e in (t['edit_log'] as List? ?? const [])) if (e is Map) Map<String, dynamic>.from(e)];
+    if (sel.isEmpty && notes.isEmpty && photos.isEmpty && !noDamage && edits.isEmpty) return const SizedBox.shrink();
     Widget chip(String text, Color c, {IconData? icon, VoidCallback? onTap}) => InkWell(
           onTap: onTap,
           child: Container(
@@ -94,6 +95,13 @@ class ValetTicketCondition extends StatelessWidget {
               ]),
             ),
         ]),
+      ],
+      if (edits.isNotEmpty) ...[
+        const SizedBox(height: 10),
+        Text(tx(context, 'تعديلات بعد عمل التكت', 'Changes after the ticket was made'), style: const TextStyle(fontWeight: FontWeight.w700)),
+        for (final e in edits)
+          Text('${VF.dt(vTime(e['at']))} · ${e['by_name'] ?? '-'} · ${(e['fields'] as List? ?? const []).join(', ')}',
+              style: const TextStyle(fontSize: 12, color: Color(0xFFB45309))),
       ],
       if (t['create_seconds'] != null || t['plate_source'] != null) ...[
         const SizedBox(height: 8),
