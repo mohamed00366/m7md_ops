@@ -108,6 +108,18 @@
   main.is-progress #vCancel, main.is-progress #noCancel { order: -1; }
   main .foot { order: 9; }
   .pad { padding: 16px; }
+  /* DB 329: car at check-in (marks only), valet notes, this point, important */
+  .nt-h { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+  .nt-h small { margin-inline-start: auto; font-weight: 700; font-size: 12px; color: var(--t3); }
+  .nt-h small.red { color: #E11D48; }
+  .nt-car { border-radius: 16px; background: var(--field); border: 1px solid var(--edge); padding: 6px 4px; direction: ltr; }
+  .nt-car svg { display: block; width: 100%; height: auto; }
+  .nt-foot { font-size: 11.5px; color: var(--t3); margin-top: 8px; display: flex; gap: 6px; align-items: center; }
+  .nt-note { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 14px; background: var(--field); border: 1px solid var(--edge); font-weight: 700; font-size: 13.5px; margin-top: 6px; }
+  .nt-text { font-size: 13.5px; font-weight: 600; line-height: 1.55; color: var(--t2); }
+  .nt-imp { border-inline-start: 4px solid #E11D48; }
+  .nt-imp .nt-h { color: #E11D48; }
+
 
   /* boarding-pass ticket */
   .pass { background: var(--hero); border-radius: 26px; position: relative; }
@@ -437,6 +449,25 @@
 
   <div class="toast" id="toast" role="alert" aria-live="assertive"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="toastText"></span></div>
 
+  <!-- DB 329: the car at check-in (marks only) · valet notes · this point · important -->
+  <section id="vCond" class="card pad" hidden aria-labelledby="ntCondT">
+    <div class="nt-h" id="ntCondT"><span data-i18n="ntCond">Your car at check-in</span><small class="red" id="ntMarked"></small></div>
+    <div class="nt-car" id="ntCar"></div>
+    <div class="nt-foot" data-i18n="ntCondFoot">Marked by the valet at check-in · same as your printed ticket</div>
+  </section>
+  <section id="vNtNotes" class="card pad" hidden>
+    <div class="nt-h" data-i18n="ntNotes">Notes from the valet</div>
+    <div id="ntNoteList"></div>
+  </section>
+  <section id="vNtPoint" class="card pad" hidden>
+    <div class="nt-h" data-i18n="ntPoint">This point</div>
+    <div class="nt-text" id="ntPointText"></div>
+  </section>
+  <section id="vNtImp" class="card pad nt-imp" hidden>
+    <div class="nt-h" data-i18n="ntImp">Important</div>
+    <div class="nt-text" id="ntImpText"></div>
+  </section>
+
   <!-- DISCOUNT CODE -->
   <section id="vVoucher" class="card pad" hidden aria-labelledby="vcTitle">
     <label class="field-label" id="vcTitle" for="vcInput"><span data-i18n="vcLabel">Discount code</span> <small data-i18n="optional">(optional)</small></label>
@@ -515,6 +546,8 @@ var TIME_ZONE = 'Asia/Dubai';
       liveReq: 'Your car has been requested.', liveBrought: 'Your car is on its way.', liveReady: 'Your car is ready.',
       switchTo: 'عرض الصفحة بالعربية', switchLabel: 'عربي', switchLang: 'ar',
       vcLabel: 'Discount code', vcApply: 'Apply', vcHint: 'Type the code or scan its QR. The discount is taken off when you pay.',
+      ntCond: 'Your car at check-in', ntMarked: '{n} marked', ntCondFoot: 'Marked by the valet at check-in · same as your printed ticket',
+      ntNotes: 'Notes from the valet', ntPoint: 'This point', ntImp: 'Important',
       vcScanHint: 'Point the camera at the QR code', vcClose: 'Close', vcAdded: 'Code {c} added',
       vcOff: '{v} AED off', vcPct: '{v}% off', vcPrice: 'You pay {v} AED', vcMax: ' (up to {m} AED)', vcAtPay: 'The discount is taken off when you pay.',
       vcRemove: 'Remove code', vcBranch: 'This code is for {b}. Please visit {b} and have your ticket validated there to get the discount.',
@@ -581,6 +614,8 @@ var TIME_ZONE = 'Asia/Dubai';
       liveReq: 'تم طلب سيارتك.', liveBrought: 'سيارتك في الطريق.', liveReady: 'سيارتك جاهزة.',
       switchTo: 'View this page in English', switchLabel: 'English', switchLang: 'en',
       vcLabel: 'كود الخصم', vcApply: 'تطبيق', vcHint: 'اكتب الكود أو امسح رمز QR الخاص به. يُخصم المبلغ عند الدفع.',
+      ntCond: 'سيارتك عند الاستلام', ntMarked: '{n} علامات', ntCondFoot: 'حددها الفاليه عند الاستلام · مثل تذكرتك المطبوعة',
+      ntNotes: 'ملاحظات الفاليه', ntPoint: 'هذا الموقع', ntImp: 'هام',
       vcScanHint: 'وجّه الكاميرا إلى رمز QR', vcClose: 'إغلاق', vcAdded: 'تمت إضافة الكود {c}',
       vcOff: 'خصم {v} درهم', vcPct: 'خصم {v}%', vcPrice: 'تدفع {v} درهم فقط', vcMax: ' (حتى {m} درهم)', vcAtPay: 'يُخصم المبلغ عند الدفع.',
       vcRemove: 'إزالة الكود', vcBranch: 'هذا الكود خاص بـ {b}. يرجى زيارة {b} وعمل فاليديشن لتذكرتك هناك للاستفادة من الخصم.',
@@ -1039,10 +1074,75 @@ var TIME_ZONE = 'Asia/Dubai';
     setText('cancelHint', LINK && LINK.cancel_until === 'approved' ? tr('cancelHintA') : tr('cancelHint'));
     if (ticket) renderVoucher();
     if (ticket) renderTicket();
+    renderNt();
     if (view === 'msg') renderMsg();
     if (view === 'progress') renderProgress();
     if (view === 'progress') renderCancel();
     if (view === 'active') setText('reqBtnText', submitting ? tr('sending') : tr('requestBtn'));
+  }
+
+
+  /* ------------------------------ 329: car at check-in · notes · point text · important ------------------------------ */
+  var NT_PTS = [[26,128,474],[27,128,546],[28,480,474],[29,480,546],[18,204,436],[19,233,422],[14,236,447,1],[10,261,435],[11,290,436],[12,334,436],[20,352,432],[21,376,423],[15,373,447,1],[13,405,436],[1,128,509],[2,207,509],[3,315,509],[4,410,509],[5,480,509],[22,204,586],[23,233,573],[17,236,598,1],[6,261,586],[7,290,587],[8,334,587],[24,352,583],[25,376,574],[16,373,598,1],[9,405,586]];
+  function ntCarSvg(marks, bumper3) {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+      (!document.documentElement.getAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var st = dark ? '#AEB4BD' : '#2B2F36', body = dark ? '#2E333B' : '#FFFFFF', gl = dark ? '#3E5874' : '#B9D3EF', tire = dark ? '#0B0C0E' : '#1D2026', rim = dark ? '#8B9099' : '#C9CDD3';
+    function side(ty) {
+      var w = '';
+      [148, 285].forEach(function (cx) { w += '<circle cx="' + cx + '" cy="41" r="13.5" fill="' + tire + '"/><circle cx="' + cx + '" cy="41" r="8" fill="' + rim + '"/><circle cx="' + cx + '" cy="41" r="3" fill="' + tire + '"/>'; });
+      return '<g transform="translate(0,' + ty + ')"><path d="M100 34 Q100 26 108 24 L140 20 L162 6 Q168 3 180 3 L250 3 Q262 3 272 8 L296 20 L326 23 Q335 25 335 33 L335 38 Q335 41 331 41 L100 41 Z" fill="' + body + '" stroke="' + st + '" stroke-width="1.4"/>' +
+        '<path d="M150 19 L166 7 L211 6 L211 19 Z M215 6 L250 6 Q258 6 266 10 L283 19 L215 19 Z" fill="' + gl + '" stroke="' + st + '" stroke-width=".8"/>' +
+        '<path d="M165 19 L165 39 M213 6 L213 39 M262 19 L262 39" stroke="' + st + '" stroke-width=".8" opacity=".6"/>' +
+        '<rect x="101" y="27" width="9" height="4" rx="2" fill="#F5C84B"/><rect x="328" y="26" width="6" height="5" rx="2" fill="#E11D48"/>' +
+        '<path d="M131 40 a17 17 0 0 1 34 0 M268 40 a17 17 0 0 1 34 0" fill="' + body + '" stroke="' + st + '"/>' + w + '</g>';
+    }
+    var set = {};
+    (marks || []).forEach(function (m) { set[String(m.p)] = true; });
+    var s = '<svg viewBox="8 0 422 225" role="img" aria-label="car">' + side(6) + side(157) +
+      '<rect x="14" y="66" width="10" height="24" rx="3" fill="' + tire + '"/><rect x="14" y="130" width="10" height="24" rx="3" fill="' + tire + '"/>' +
+      '<rect x="22" y="58" width="40" height="104" rx="12" fill="' + body + '" stroke="' + st + '" stroke-width="1.4"/><rect x="38" y="74" width="18" height="72" rx="5" fill="' + gl + '" stroke="' + st + '" stroke-width=".8"/>' +
+      '<rect x="24" y="62" width="8" height="18" rx="3" fill="#F5C84B"/><rect x="24" y="140" width="8" height="18" rx="3" fill="#F5C84B"/>' +
+      [[128, 62], [268, 62], [128, 146], [268, 146]].map(function (a) { return '<rect x="' + a[0] + '" y="' + a[1] + '" width="36" height="10" rx="4" fill="' + tire + '"/>'; }).join('') +
+      '<path d="M94 70 L336 70 Q358 72 358 94 L358 124 Q358 146 336 148 L94 148 Q72 146 72 124 L72 94 Q72 72 94 70 Z" fill="' + body + '" stroke="' + st + '" stroke-width="1.4"/>' +
+      '<path d="M142 78 L168 85 L168 133 L142 140 Q133 109 142 78 Z M270 85 L292 80 Q300 109 292 138 L270 133 Z" fill="' + gl + '" stroke="' + st + '" stroke-width=".8"/>' +
+      '<rect x="170" y="85" width="98" height="48" rx="9" fill="none" stroke="' + st + '" stroke-width=".8"/>' +
+      '<rect x="73" y="76" width="7" height="14" rx="3" fill="#F5C84B"/><rect x="73" y="128" width="7" height="14" rx="3" fill="#F5C84B"/><rect x="351" y="76" width="6" height="16" rx="2" fill="#E11D48"/><rect x="351" y="126" width="6" height="16" rx="2" fill="#E11D48"/>' +
+      '<rect x="408" y="66" width="10" height="24" rx="3" fill="' + tire + '"/><rect x="408" y="130" width="10" height="24" rx="3" fill="' + tire + '"/>' +
+      '<rect x="370" y="58" width="40" height="104" rx="12" fill="' + body + '" stroke="' + st + '" stroke-width="1.4"/><rect x="376" y="80" width="16" height="60" rx="5" fill="' + gl + '" stroke="' + st + '" stroke-width=".8"/>' +
+      '<rect x="401" y="62" width="7" height="22" rx="3" fill="#E11D48"/><rect x="401" y="136" width="7" height="22" rx="3" fill="#E11D48"/>';
+    NT_PTS.forEach(function (q) {
+      var n = q[0]; if (!bumper3 && n > 25) return;
+      var X = q[1] - 88, Y = q[2] - 400, on = !!set[String(n)];
+      s += on
+        ? '<circle cx="' + X + '" cy="' + Y + '" r="15" fill="rgba(225,29,72,.18)"/><circle cx="' + X + '" cy="' + Y + '" r="9.5" fill="#E11D48" stroke="#fff" stroke-width="1.8"/><text x="' + X + '" y="' + (Y + 3.3) + '" text-anchor="middle" font-size="9" font-weight="900" font-family="Inter,sans-serif" fill="#fff">' + n + '</text>'
+        : '<circle cx="' + X + '" cy="' + Y + '" r="' + (q[3] ? 8 : 7) + '" fill="' + (dark ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.92)') + '" stroke="' + (dark ? 'rgba(255,255,255,.45)' : 'rgba(30,34,40,.45)') + '" stroke-width="1.1"/><text x="' + X + '" y="' + (Y + 2.8) + '" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Inter,sans-serif" fill="' + (dark ? '#E9ECF0' : '#3A3F47') + '">' + n + '</text>';
+    });
+    return s + '</svg>';
+  }
+  function ntIcon(name) {
+    var p = { key_off: 'M2 2l20 20M7 15a4 4 0 1 1 4-6h9v4h-2v2h-3', key: 'M7 15a4 4 0 1 1 4-6h9v4h-2v2h-3v-2h-4', work: 'M4 8h16v11H4zM9 8V5h6v3' }[name] || 'M5 4h14v16H5zM8 9h8M8 13h6';
+    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + p + '"/></svg>';
+  }
+  function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function renderNt() {
+    var on = !!ticket && (view === 'active' || view === 'progress' || view === 'returned');
+    var nt = on && ticket.nt ? ticket.nt : null;
+    var marks = nt && nt.marks ? nt.marks : [];
+    show('vCond', !!nt && nt.drawing !== false && marks.length > 0);
+    if (nt && marks.length) {
+      $('ntCar').innerHTML = ntCarSvg(marks, nt.bumper3 !== false);
+      setText('ntMarked', '● ' + tr('ntMarked', { n: marks.length }));
+    }
+    var notes = nt && nt.notes ? nt.notes : [];
+    show('vNtNotes', notes.length > 0);
+    if (notes.length) $('ntNoteList').innerHTML = notes.map(function (n) {
+      return '<div class="nt-note">' + ntIcon(n.icon) + '<span>' + esc(lang === 'ar' && n.text_ar ? n.text_ar : n.text) + '</span></div>';
+    }).join('');
+    var pt = nt && nt.point_text ? (lang === 'ar' ? (nt.point_text.ar || nt.point_text.en) : (nt.point_text.en || nt.point_text.ar)) : '';
+    show('vNtPoint', !!pt); setText('ntPointText', pt || '');
+    var im = nt && nt.terms ? (lang === 'ar' ? (nt.terms.ar || nt.terms.en) : (nt.terms.en || nt.terms.ar)) : '';
+    show('vNtImp', !!im); setText('ntImpText', im || '');
   }
 
   function statusText(t) {
@@ -1620,7 +1720,8 @@ var TIME_ZONE = 'Asia/Dubai';
     var pay = { mode: 'TICKET', ticket_price: 142.86, total_price: 150, customer_name: 'Visitor', ticket_type: 'VALET 150 AED', site_id: 'v', visitor_id: 'v',
       entry_time: iso(n - 158 * 60000), vat_rate: 0.05, point_name: 'Demo', settings: { free_minutes: 5 }, branch_pricing: [], special_days: [], prices: [] };
     var b = { short_no: '0060', plate: '**315', color: 'Black', point_name: 'M7 NEXUS Demo', entry_time: pay.entry_time, status: 'Active', now: iso(n),
-      pickup_min: 10, eta_added: 0, pay: pay, link: LINK, car_request_status: 'ordered', request_note: lang === 'ar' ? 'أنا عند المدخل الرئيسي' : 'I am at the main entrance' };
+      pickup_min: 10, eta_added: 0, pay: pay, link: LINK,
+      nt: { drawing: true, bumper3: true, marks: [{ p: '3' }, { p: '11' }, { p: '26' }], notes: [{ text: 'Key with customer', text_ar: 'المفتاح مع العميل', icon: 'key_off' }], point_text: { en: 'Car collection after 11 pm from Gate 3.', ar: 'استلام السيارة بعد 11 مساءً من البوابة 3.' }, terms: { en: 'We are not responsible for any mechanical fault or for any belongings left inside the car.', ar: 'الشركة غير مسؤولة عن أي عطل ميكانيكي أو عن أي متعلقات داخل السيارة.' } }, car_request_status: 'ordered', request_note: lang === 'ar' ? 'أنا عند المدخل الرئيسي' : 'I am at the main entrance' };
     var reply = lang === 'ar' ? 'سيارتك عند البوابة B' : 'Your car will be at gate B';
     var x = {
       none: { req: 'none', car_request_status: 'pending', can_request: true },

@@ -5,6 +5,7 @@ import 'valet_admin.dart';
 import 'valet_credits_screen.dart';
 import 'valet_hub_ui.dart';
 import 'valet_ui.dart';
+import 'valet_ticket_condition.dart';
 
 /// 🎫 تَذاكِر الفاليه — بَحث، تَفاصيل، وَإلغاء (بِسَبَب مَكتوب).
 class ValetTicketsScreen extends StatelessWidget {
@@ -324,6 +325,7 @@ Future<bool> showValetTicket(BuildContext context, String id) async {
                     child: Image.network(vStr(t['photo_url']), height: 170, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox()),
                   ),
                 ),
+              ValetTicketCondition(t: t), // DB 329
               if (log.isNotEmpty) ...[
                 const Divider(height: 22),
                 Text(tx(ctx, 'إجراءات مِن الداشبورد', 'Dashboard actions'), style: const TextStyle(fontWeight: FontWeight.w700)),

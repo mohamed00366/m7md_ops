@@ -8,6 +8,7 @@ import 'valet_voice_screen.dart';
 import 'valet_site_count_screen.dart';
 import 'valet_visits_screen.dart';
 import 'valet_bottom_bar_screen.dart';
+import 'valet_new_ticket_screen.dart';
 import 'valet_key_boards_panel.dart';
 import 'valet_hourly.dart';
 import 'valet_hub_ui.dart';
@@ -333,6 +334,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       ('جَرد المَوقِع', 'Site count', ValetSiteCountScreen(key: ValueKey('count$id'), pointId: id)),
       ('زِيارات المُشرِفين', 'Supervisor visits', ValetVisitsScreen(key: ValueKey('visits$id'), pointId: id)),
       ('الشَريط السُفليّ', 'Bottom bar', ValetBottomBarScreen(key: ValueKey('bar$id'), pointId: id)),
+      ('تَكت جَديد وَالطِباعة', 'New ticket & print', ValetNewTicketScreen(key: ValueKey('nt$id'), pointId: id)),
       if (ValetAdmin.I.can(ValetAdmin.permReports))
         ('تَحليل المُوظَّفين', 'Staff analysis', ValetStaffAnalyticsScreen(key: ValueKey('staff$id'), pointId: id)),
     ];
