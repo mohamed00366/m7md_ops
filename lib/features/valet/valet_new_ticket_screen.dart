@@ -271,6 +271,15 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
             subAr: 'الأضرار والصور والملاحظات متتغيرش من التابلت إلا من المشرف · كل تعديل بيتسجل (مين وإمتى وكان إيه)',
             subEn: 'Damages, photos and notes cannot be changed on the tablet except by a supervisor · every change is logged', canEdit: canEdit),
       ]),
+      // DB 331: Late / Absent on the Team page of the app (from the roster of the week)
+      _card(tx(context, 'صفحة الفريق في التطبيق (متأخر / غايب)', 'Team page in the app (late / absent)'), [
+        _sw('nt_team_late', true, 'اعرض المتأخر والغايب من الروستر', 'Show late and absent from the roster',
+            subAr: 'مقفول = داخل · خرج النهارده · الساعات (القديم)', subEn: 'Off = In · Out today · Hours (old)', canEdit: canEdit),
+        _seg(tx(context, 'متأخر بعد (دقيقة من بداية الشيفت)', 'Late after (minutes from the start)'), '${_s!['nt_team_late_min'] ?? 15}',
+            [('5', '5'), ('10', '10'), ('15', '15'), ('30', '30')], canEdit ? (v) => _set('nt_team_late_min', int.parse(v)) : null),
+        _seg(tx(context, 'غايب بعد (دقيقة من غير حضور)', 'Absent after (minutes with no check-in)'), '${_s!['nt_team_absent_min'] ?? 60}',
+            [('30', '30'), ('60', '60'), ('120', '120'), ('240', '240')], canEdit ? (v) => _set('nt_team_absent_min', int.parse(v)) : null),
+      ]),
       _card(tx(context, 'التكت المطبوع ولينك العميل', 'Printed ticket & customer link'), [
         _sw('nt_print_drawing', true, 'رسمة العربية بالعلامات على التكت', 'The car drawing with the marks on the ticket',
             subAr: 'علامات بس — من غير أسماء ولا شرح', subEn: 'Marks only — no names, no explanation', canEdit: canEdit),
