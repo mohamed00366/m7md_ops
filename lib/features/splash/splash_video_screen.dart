@@ -197,19 +197,20 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
             // - فيديو portrait عَلى شاشة عَريضة → أَشرِطة سَوداء عَلى الجانِبَين
             // - فيديو landscape عَلى شاشة طَويلة → أَشرِطة سَوداء فَوق وَتَحت
             // - الفيديو يَظهَر دائِماً بِنِسبَتِه الأَصلِيّة بِدون قَطع
-            Center(
-              child: _initialized && _videoController != null
-                  ? FittedBox(
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        width: _videoController!.value.size.width,
-                        height: _videoController!.value.size.height,
-                        child: VideoPlayer(_videoController!),
-                      ),
-                    )
-                  : const CircularProgressIndicator(color: Colors.white),
-            ),
+            // the real box size is worked out here (no FittedBox): on the web the video is an HTML element, and a
+            // scaled FittedBox left it at its natural size, pushed to the right edge and cut
+            _initialized && _videoController != null
+                ? LayoutBuilder(builder: (context, box) {
+                    final vs = _videoController!.value.size;
+                    final ar = vs.width > 0 && vs.height > 0 ? vs.width / vs.height : 9 / 16;
+                    var w = box.maxWidth, h = w / ar;
+                    if (h > box.maxHeight) {
+                      h = box.maxHeight;
+                      w = h * ar;
+                    }
+                    return Center(child: ClipRect(child: SizedBox(width: w, height: h, child: VideoPlayer(_videoController!))));
+                  })
+                : const Center(child: CircularProgressIndicator(color: Colors.white)),
 
             // 🔊 زِرّ تَفعيل الصَوت
             if (_initialized && _muted)
