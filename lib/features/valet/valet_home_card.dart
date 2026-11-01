@@ -20,6 +20,9 @@ class _ValetHomeCardState extends State<ValetHomeCard> {
   VJson? _d;
   Timer? _timer;
 
+  /// DB 336: how many things are left hanging (shown as a red pill; the list is on the Live page).
+  int _pending = 0;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +41,11 @@ class _ValetHomeCardState extends State<ValetHomeCard> {
       final d = await ValetAdmin.I.call('vva_live');
       if (mounted) setState(() => _d = d);
     } catch (_) {}
+    try {
+      final p = await ValetAdmin.I.call('vva_pending');
+      final n = vList(p['shifts']).length + vNum(p['tickets_count']).toInt() + vList(p['keys']).length + vList(p['requests']).length;
+      if (mounted) setState(() => _pending = n);
+    } catch (_) {/* old server */}
   }
 
   @override
@@ -76,6 +84,10 @@ class _ValetHomeCardState extends State<ValetHomeCard> {
                 const Icon(Icons.local_parking, color: VC.gold),
                 const SizedBox(width: 8),
                 Expanded(child: Text(tx(context, 'الفاليه الآن', 'Valet now'), style: const TextStyle(fontWeight: FontWeight.w700))),
+                if (_pending > 0) ...[
+                  VPill(tx(context, '$_pending مُعَلَّق', '$_pending pending'), color: VC.bad, icon: Icons.hourglass_bottom),
+                  const SizedBox(width: 6),
+                ],
                 if (late > 0) VPill(tx(context, '$late طَلَب مُتَأَخِّر', '$late late request(s)'), color: VC.bad, icon: Icons.notifications_active),
                 const Icon(Icons.chevron_right),
               ]),

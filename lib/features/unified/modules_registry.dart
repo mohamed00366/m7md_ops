@@ -81,6 +81,7 @@ import '../valet/valet_clients_screen.dart';
 import '../valet/valet_keyrack_screen.dart';
 import '../valet/valet_live_screen.dart';
 import '../valet/valet_shifts_screen.dart';
+import '../valet/valet_credits_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_safety_screen.dart';
 import 'app_module.dart';
@@ -354,6 +355,19 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetAccidentsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
+        ),
+        AppModule(
+          key: 'valet_credits',
+          titleAr: 'الإشعارات الدائِنة',
+          titleEn: 'Credit notes',
+          icon: Icons.receipt_long_outlined,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetCreditsScreen(),
           groupKey: 'valet_ops',
           groupTitleAr: 'التَشغيل',
           groupTitleEn: 'Operations',

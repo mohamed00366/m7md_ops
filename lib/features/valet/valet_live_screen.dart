@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'valet_admin.dart';
+import 'valet_pending_panel.dart';
 import 'valet_ui.dart';
 
 /// 📡 المُراقَبة الحَيّة لِكُلّ نِقاط الفاليه — تَحديث كُلّ 15 ثانِية.
@@ -42,6 +43,8 @@ class ValetLiveScreen extends StatelessWidget {
                       icon: Icons.payments_outlined, color: VC.ok, note: 'AED'),
                 ]),
               ),
+              // DB 336: what is left hanging (shifts, tickets, keys, car requests, credit notes)
+              const ValetPendingPanel(),
               if (idle.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
