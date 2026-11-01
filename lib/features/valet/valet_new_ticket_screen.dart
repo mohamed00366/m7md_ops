@@ -13,7 +13,9 @@ class ValetNewTicketScreen extends StatefulWidget {
 
   /// DB 335: 'print' = only the printed-ticket texts (inside the Printing tab) · 'ticket' = everything else
   /// (the New ticket tab, with a line to the Printing tab) · 'all' = every card ·
-  /// 'global' = only the cards for all points (IMPORTANT text, photos, assistant history) — Valet settings page.
+  /// 'global' = only the cards for all points (IMPORTANT text, photos, assistant history) — Valet settings page ·
+  /// 'shift' = close-shift cash count and team late / absent (point page, Shift & team) · 'ticket_only' = 'ticket'
+  /// without those two (new point page).
   final String part;
 
   @override
@@ -247,6 +249,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
         title: switch (widget.part) {
           'print' => tx(context, 'نصوص التكت ولينك العميل', 'Ticket texts and customer link'),
           'global' => tx(context, 'التكت والصور والمساعد — لكل النقاط', 'Ticket, photos and assistant — all points'),
+          'shift' => tx(context, 'قفل الشيفت والفريق', 'Close shift and team'),
           _ => tx(context, 'تطبيق الفاليه — تكت جديد', 'Valet app — New ticket'),
         },
         subtitle: tx(context, 'كل حاجة اختيار: الشكل القديم والطريقة القديمة فاضلين', 'Everything is an option: the old page and the old ways stay'),
@@ -254,7 +257,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
           if (canEdit) HubButton(label: tx(context, 'حفظ', 'Save'), icon: Icons.save_outlined, onPressed: _dirty || _termsDirty ? _save : null),
         ],
       ),
-      if (widget.part == 'ticket')
+      if (widget.part == 'ticket' || widget.part == 'ticket_only')
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: Text(
@@ -262,7 +265,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
                   '🖨 The printed ticket moved to the "Printing" tab · the IMPORTANT text, car photos and assistant (all points) are in "Valet settings".'),
               style: const TextStyle(color: _muted, fontWeight: FontWeight.w600)),
         ),
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'شاشة إنشاء التكت', 'New ticket screen'), [
+      if (const {'all', 'ticket', 'ticket_only'}.contains(widget.part)) _card(tx(context, 'شاشة إنشاء التكت', 'New ticket screen'), [
         _seg(tx(context, 'الشكل', 'Layout'), _str('nt_layout', 'one'),
             [('one', tx(context, 'شاشة واحدة', 'One screen')), ('classic', tx(context, 'القديمة', 'Classic'))], canEdit ? (v) => _set('nt_layout', v) : null),
         _sw('nt_bar_save', true, 'Save & Print والإجمالي في الشريط تحت', 'Save & Print and the total in the bottom bar',
@@ -270,7 +273,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
         _sw('nt_prev_visit', true, 'العربية جت قبل كده', 'This car came before',
             subAr: 'لو اللوحة اتسجلت قبل كده الفاليه يشوف أضرار آخر زيارة (للموظفين بس)', subEn: 'The valet sees the damages of the last visit (staff only)', canEdit: canEdit),
       ]),
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'الكاميرا', 'Camera'), [
+      if (const {'all', 'ticket', 'ticket_only'}.contains(widget.part)) _card(tx(context, 'الكاميرا', 'Camera'), [
         Text(tx(context, 'الكاميرا بتشتغل لو «صورة على التكت» مفتوحة في مزايا النقطة', 'The camera works when "Photo on the ticket" is on in the point features'),
             style: const TextStyle(fontSize: 12, color: _muted)),
         _sw('nt_camera_first', true, 'الكاميرا تفتح الأول', 'Open the camera first', canEdit: canEdit),
@@ -282,7 +285,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
         _sw('nt_match_plate', true, 'يتأكد إن لوحة الخلف هي نفس الأمام', 'Check the back plate is the same as the front', canEdit: canEdit),
         _sw('nt_ai_colour_type', true, 'يقرا اللون والنوع من الصورة', 'Read the colour and type from the photo', subAr: 'مقفول = اللوحة بس', subEn: 'Off = plate only', canEdit: canEdit),
       ]),
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'حالة العربية', 'Vehicle condition'), [
+      if (const {'all', 'ticket', 'ticket_only'}.contains(widget.part)) _card(tx(context, 'حالة العربية', 'Vehicle condition'), [
         _seg(tx(context, 'طريقة التعليم', 'How to mark'), _str('nt_cond_mode', 'wheel'),
             [('wheel', tx(context, 'العجلة السريعة', 'Quick wheel')), ('tap', tx(context, 'لمسة (القديم)', 'One tap (old)'))], canEdit ? (v) => _set('nt_cond_mode', v) : null),
         _sw('nt_bumper3', true, '3 علامات على كل صدام', '3 points on each bumper', subAr: 'قدام 26 · 1 · 27 — ورا 28 · 5 · 29', subEn: 'Front 26 · 1 · 27 — rear 28 · 5 · 29', canEdit: canEdit),
@@ -296,19 +299,19 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
             subEn: 'Damages, photos and notes cannot be changed on the tablet except by a supervisor · every change is logged', canEdit: canEdit),
       ]),
       // DB 333: valet touches on the tablet
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'لمسات الفاليه في التطبيق', 'Valet touches in the app'), [
+      if (const {'all', 'ticket', 'ticket_only'}.contains(widget.part)) _card(tx(context, 'لمسات الفاليه في التطبيق', 'Valet touches in the app'), [
         _sw('nt_valet_touches', true, 'لمسات الفاليه', 'Valet touches',
             subAr: 'تاج المفتاح · خط قطع التكت · خطوط المواقف في الشريط · البورد الفاضي وعربية التحميل', subEn: 'Key tag · ticket tear line · parking bays in the bar · empty board and loading car',
             canEdit: canEdit),
       ]),
       // DB 334: Close shift – expected cash shown before the count (off = blind count)
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'قفل الشيفت (عدّ الكاش)', 'Close shift (cash count)'), [
+      if (const {'all', 'ticket', 'shift'}.contains(widget.part)) _card(tx(context, 'قفل الشيفت (عدّ الكاش)', 'Close shift (cash count)'), [
         _sw('nt_cash_show_expected', false, 'اعرض الكاش المتوقع قبل العدّ', 'Show the expected cash before the count',
             subAr: 'مقفول = عدّ أعمى (القديم): الموظف يعدّ الأول والمتوقع يظهر بعد القفل', subEn: 'Off = blind count (old): the closer counts first, the expected cash shows after closing',
             canEdit: canEdit),
       ]),
       // DB 331: Late / Absent on the Team page of the app (from the roster of the week)
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'صفحة الفريق في التطبيق (متأخر / غايب)', 'Team page in the app (late / absent)'), [
+      if (const {'all', 'ticket', 'shift'}.contains(widget.part)) _card(tx(context, 'صفحة الفريق في التطبيق (متأخر / غايب)', 'Team page in the app (late / absent)'), [
         _sw('nt_team_late', true, 'اعرض المتأخر والغايب من الروستر', 'Show late and absent from the roster',
             subAr: 'مقفول = داخل · خرج النهارده · الساعات (القديم)', subEn: 'Off = In · Out today · Hours (old)', canEdit: canEdit),
         _seg(tx(context, 'متأخر بعد (دقيقة من بداية الشيفت)', 'Late after (minutes from the start)'), '${_s!['nt_team_late_min'] ?? 15}',
@@ -316,7 +319,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
         _seg(tx(context, 'غايب بعد (دقيقة من غير حضور)', 'Absent after (minutes with no check-in)'), '${_s!['nt_team_absent_min'] ?? 60}',
             [('30', '30'), ('60', '60'), ('120', '120'), ('240', '240')], canEdit ? (v) => _set('nt_team_absent_min', int.parse(v)) : null),
       ]),
-      if (widget.part != 'ticket' && widget.part != 'global') _card(tx(context, 'التكت المطبوع ولينك العميل', 'Printed ticket & customer link'), [
+      if (const {'all', 'print'}.contains(widget.part)) _card(tx(context, 'التكت المطبوع ولينك العميل', 'Printed ticket & customer link'), [
         _sw('nt_print_drawing', true, 'رسمة العربية بالعلامات على التكت', 'The car drawing with the marks on the ticket',
             subAr: 'علامات بس — من غير أسماء ولا شرح', subEn: 'Marks only — no names, no explanation', canEdit: canEdit),
         _sw('nt_print_no_damage', false, 'اطبع الرسمة لو مفيش ضرر', 'Print the drawing when there is no damage', subAr: 'مع «NO DAMAGE»', subEn: 'With «NO DAMAGE»', canEdit: canEdit),
@@ -346,7 +349,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
           decoration: const InputDecoration(labelText: 'AR', hintText: 'استلام السيارة بعد 11 مساءً من البوابة 3'),
         ),
       ]),
-      if (widget.part != 'print' && widget.part != 'global') _card(tx(context, 'الملاحظات السريعة', 'Quick notes'), [
+      if (const {'all', 'ticket', 'ticket_only'}.contains(widget.part)) _card(tx(context, 'الملاحظات السريعة', 'Quick notes'), [
         _sw('nt_notes_row', true, 'سطر الملاحظات في صفحة التكت', 'Notes row on New ticket', canEdit: canEdit),
         _sw('nt_free_note', true, 'الفاليه يكتب ملاحظة بإيده', 'The valet can write his own note', canEdit: canEdit),
         _sw('nt_note_vis_change', true, 'الفاليه يغيّر مين يشوف الملاحظة', 'The valet can change who sees a note', subAr: 'مقفول = دايماً الافتراضي', subEn: 'Off = always the default', canEdit: canEdit),
@@ -398,7 +401,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
         Text(tx(context, '☑ الأولى = تتطبع على التكت · ☑ التانية = تظهر في لينك العميل · المفتاح = شغالة', '☑ first = printed · ☑ second = on the customer link · switch = active'),
             style: const TextStyle(fontSize: 11.5, color: _muted)),
       ]),
-      if (widget.part != 'ticket') _card(tx(context, 'نص «هام» وآخر التكت — لكل النقاط', 'IMPORTANT text and footer — all points'), [
+      if (const {'all', 'print', 'global'}.contains(widget.part)) _card(tx(context, 'نص «هام» وآخر التكت — لكل النقاط', 'IMPORTANT text and footer — all points'), [
         TextField(controller: _tEn, enabled: canEdit, maxLines: 2, onChanged: (_) => setState(() => _termsDirty = true), decoration: const InputDecoration(labelText: 'IMPORTANT · EN')),
         const SizedBox(height: 8),
         TextField(
@@ -449,7 +452,7 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
             [('en', 'EN'), ('ar', 'AR'), ('both', tx(context, 'الاتنين', 'Both'))], canEdit ? (v) => _setT('langs', v) : null),
       ]),
       // DB 332: the assistant's chat history (all points)
-      if (widget.part != 'print' && widget.part != 'ticket') _card(tx(context, 'المساعد (M7 Assistant) – الهيستوري (كل النقاط)', 'Assistant – chat history (all points)'), [
+      if (const {'all', 'global'}.contains(widget.part)) _card(tx(context, 'المساعد (M7 Assistant) – الهيستوري (كل النقاط)', 'Assistant – chat history (all points)'), [
         _seg(tx(context, 'الشات يعرض آخر', 'The chat shows the last'), '${_terms['assistant_keep_days'] ?? 0}',
             [('7', tx(context, '7 أيام', '7 days')), ('30', '30'), ('90', '90'), ('0', tx(context, 'من غير حد', 'No limit'))],
             canEdit ? (v) => _setT('assistant_keep_days', int.parse(v)) : null),

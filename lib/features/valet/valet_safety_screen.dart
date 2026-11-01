@@ -7,18 +7,24 @@ import 'valet_ui.dart';
 
 /// 🚗💥 حَوادِث الفاليه — كُلّ تَقارير النِقاط (مِن تَطبيق الفاليه)، مَفتوحة / مُغلَقة، وَالمُتابَعة (تَكلِفة، إجراء، إغلاق).
 class ValetAccidentsScreen extends StatelessWidget {
-  const ValetAccidentsScreen({super.key});
+  const ValetAccidentsScreen({super.key, this.pointId});
+
+  /// Merge plan phase 3: inside a point's page = only that point.
+  final String? pointId;
 
   @override
-  Widget build(BuildContext context) => const ValetGate(perm: ValetAdmin.permReports, child: _AccidentsBody());
+  Widget build(BuildContext context) => ValetGate(perm: ValetAdmin.permReports, child: _AccidentsBody(pointId: pointId));
 }
 
 /// 📦 عُهَد النِقاط — المُعَدّات وَحالَتها وَآخِر جَرد لِكُلّ نُقطة، دَفاتِر التَذاكِر اليَدَويّة، وَسِجِلّ الجَرد.
 class ValetAssetsScreen extends StatelessWidget {
-  const ValetAssetsScreen({super.key});
+  const ValetAssetsScreen({super.key, this.pointId});
+
+  /// Merge plan phase 3: inside a point's page = only that point.
+  final String? pointId;
 
   @override
-  Widget build(BuildContext context) => const ValetGate(perm: ValetAdmin.permReports, child: _AssetsBody());
+  Widget build(BuildContext context) => ValetGate(perm: ValetAdmin.permReports, child: _AssetsBody(pointId: pointId));
 }
 
 const _red = Color(0xFFA32D2D);
@@ -51,7 +57,8 @@ List<String> _strs(dynamic v) => ((v as List?) ?? const []).map((e) => '$e').toL
 // ================================================================== accidents
 
 class _AccidentsBody extends StatefulWidget {
-  const _AccidentsBody();
+  const _AccidentsBody({this.pointId});
+  final String? pointId;
 
   @override
   State<_AccidentsBody> createState() => _AccidentsBodyState();
@@ -60,7 +67,7 @@ class _AccidentsBody extends StatefulWidget {
 class _AccidentsBodyState extends State<_AccidentsBody> {
   late DateTime _from;
   late DateTime _to;
-  String? _point;
+  late String? _point = widget.pointId;
   String _status = 'all';
   String _q = '';
   List<VJson>? _rows;
@@ -157,7 +164,8 @@ class _AccidentsBodyState extends State<_AccidentsBody> {
                 _load();
               },
             ),
-            VPointFilter(
+            if (widget.pointId == null)
+              VPointFilter(
               points: _points,
               value: _point,
               onChanged: (v) {
@@ -432,7 +440,8 @@ List<VJson> _itemsOf(VJson p) {
 }
 
 class _AssetsBody extends StatefulWidget {
-  const _AssetsBody();
+  const _AssetsBody({this.pointId});
+  final String? pointId;
 
   @override
   State<_AssetsBody> createState() => _AssetsBodyState();
@@ -456,7 +465,7 @@ class _AssetsBodyState extends State<_AssetsBody> {
     return VLoader<VJson>(
       load: () => ValetAdmin.I.call('vva_assets'),
       builder: (context, d, reload) {
-        final points = vList(d['points']);
+        final points = vList(d['points']).where((p) => widget.pointId == null || vStr(p['id']) == widget.pointId || vStr(p['point_id']) == widget.pointId).toList();
         final checks = vList(d['checks']);
         final now = DateTime.now();
         bool stale(VJson p) {

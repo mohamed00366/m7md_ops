@@ -17,6 +17,8 @@ import 'valet_pricing_rules.dart';
 import 'valet_ticket_parts.dart';
 import 'valet_printing_layout.dart';
 import 'valet_ui.dart';
+import 'valet_safety_screen.dart';
+import '../../shared/menu_style.dart';
 
 /// 🏪 تَطبيق الفاليه — إعدادات كُلّ نُقطة: المَزايا، الأَسعار، VIP، العُضويّات،
 /// المَواقِف، حِساب الجِهاز، المُعِدّات وَدَفاتِر التَذاكِر.
@@ -323,8 +325,128 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     if (d != null && mounted) setState(() => _d = d);
   }
 
+  /// Merge plan phase 3 (new menu): the point page in 6 groups, each with its own small tabs. A jump to another tab
+  /// (e.g. "moved to the Prices tab") remounts the tabs on that place.
+  (int, int)? _goto;
+  int _gen = 0;
+  static const _oldKeys = ['features', 'prices', 'parking', 'terminal', 'equipment', 'printing'];
+
+  void _jump(BuildContext context, String key) {
+    if (!MenuLayout.isNew) {
+      final i = _oldKeys.indexOf(key);
+      if (i >= 0) DefaultTabController.of(context).animateTo(i);
+      return;
+    }
+    final g = _groups(_d!);
+    for (var i = 0; i < g.length; i++) {
+      final j = g[i].$3.indexWhere((t) => t.$1 == key);
+      if (j >= 0) {
+        setState(() {
+          _goto = (i, j);
+          _gen++;
+        });
+        return;
+      }
+    }
+  }
+
+  List<(String, String, List<(String, String, String, Widget)>)> _groups(VJson d) {
+    final id = widget.pointId;
+    final set = ValetAdmin.I.can(ValetAdmin.permSettings), rep = ValetAdmin.I.can(ValetAdmin.permReports);
+    return [
+      ('التَشغيل', 'Operations', [
+        ('features', 'المَزايا', 'Features', _features(d)),
+        ('parking', 'المَواقِف', 'Parking', _parking(d)),
+        ('equipment', 'المُعِدّات وَالمَكَن وَالدَفاتِر', 'Equipment, machines & books', _equipment(d)),
+        ('terminal', 'حِساب الجِهاز', 'Device account', _terminal(d)),
+      ]),
+      ('الأَسعار', 'Prices', [('prices', 'الأَسعار وَالفُروع', 'Prices and branches', _prices(d))]),
+      ('الوَرديّة وَالفَريق', 'Shift & team', [
+        ('shift', 'قَفل الشيفت وَالفَريق', 'Close shift and team', ValetNewTicketScreen(key: ValueKey('ntsh$id'), pointId: id, part: 'shift')),
+        ('visits', 'زِيارات المُشرِفين', 'Supervisor visits', ValetVisitsScreen(key: ValueKey('visits$id'), pointId: id)),
+        ('count', 'جَرد المَوقِع', 'Site count', ValetSiteCountScreen(key: ValueKey('count$id'), pointId: id)),
+      ]),
+      ('التَكت وَالطِباعة', 'Ticket & printing', [
+        ('printing', 'الطِباعة', 'Printing', _features(d, printing: true)),
+        ('ticket', 'تَكت جَديد', 'New ticket', ValetNewTicketScreen(key: ValueKey('nt$id'), pointId: id, part: 'ticket_only')),
+        ('bar', 'الشَريط السُفليّ', 'Bottom bar', ValetBottomBarScreen(key: ValueKey('bar$id'), pointId: id)),
+        if (set) ('voice', 'الأَوامِر الصَوتيّة', 'Voice commands', ValetVoiceScreen(key: ValueKey('voice$id'), pointId: id)),
+      ]),
+      if (set)
+        ('العَميل وَالكُروت', 'Customer & cards', [
+          ('link', 'لِينك العَميل', 'Customer link', ValetLinkScreen(key: ValueKey('link$id'), pointId: id)),
+          ('cards', 'كُروت NFC', 'NFC cards', ValetCardsScreen(key: ValueKey('cards$id'), pointId: id)),
+        ]),
+      if (rep)
+        ('المُتابَعة', 'Follow-up', [
+          ('staff', 'تَحليل المُوظَّفين', 'Staff analysis', ValetStaffAnalyticsScreen(key: ValueKey('staff$id'), pointId: id)),
+          ('accidents', 'حَوادِث النُقطة', 'Accidents', ValetAccidentsScreen(key: ValueKey('acc$id'), pointId: id)),
+          ('assets', 'عُهدة النُقطة', 'Assets', ValetAssetsScreen(key: ValueKey('assets$id'), pointId: id)),
+        ]),
+    ];
+  }
+
+  /// Where an old tab number (from the points list: Features / Prices / Parking) opens in the groups.
+  (int, int) _startOf(List<(String, String, List<(String, String, String, Widget)>)> g) {
+    final k = widget.initialTab < _oldKeys.length ? _oldKeys[widget.initialTab] : 'features';
+    for (var i = 0; i < g.length; i++) {
+      final j = g[i].$3.indexWhere((t) => t.$1 == k);
+      if (j >= 0) return (i, j);
+    }
+    return (0, 0);
+  }
+
+  Widget _newLayout(BuildContext context) {
+    final d = _d;
+    final title = Text(d == null ? widget.title : '${vMap(d['point'])['code']} · ${vMap(d['point'])['name']}');
+    if (d == null) {
+      return Scaffold(appBar: AppBar(title: title), body: Center(child: _err != null ? Text(vErr(context, _err!)) : const CircularProgressIndicator()));
+    }
+    final g = _groups(d);
+    final (gi, si) = _goto ?? _startOf(g);
+    return DefaultTabController(
+      key: ValueKey('g$_gen'),
+      length: g.length,
+      initialIndex: gi.clamp(0, g.length - 1),
+      child: Scaffold(
+        appBar: AppBar(
+          title: title,
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: VC.gold,
+            tabs: [for (final (ar, en, _) in g) Tab(text: tx(context, ar, en))],
+          ),
+        ),
+        body: TabBarView(children: [
+          for (var i = 0; i < g.length; i++)
+            g[i].$3.length == 1
+                ? g[i].$3.first.$4
+                : DefaultTabController(
+                    length: g[i].$3.length,
+                    initialIndex: i == gi ? si.clamp(0, g[i].$3.length - 1) : 0,
+                    child: Column(children: [
+                      Material(
+                        color: Theme.of(context).colorScheme.surface,
+                        child: TabBar(
+                          isScrollable: true,
+                          tabAlignment: TabAlignment.start,
+                          tabs: [for (final (_, ar, en, _) in g[i].$3) Tab(text: tx(context, ar, en))],
+                        ),
+                      ),
+                      Expanded(child: TabBarView(children: [for (final (_, _, _, w) in g[i].$3) w])),
+                    ]),
+                  ),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (MenuLayout.isNew) return _newLayout(context);
     final d = _d;
     final id = widget.pointId;
     // pages of the valet app that belong to one point (customer link, NFC cards, staff analysis)
@@ -1165,7 +1287,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                     'Site hours, overnight, lost ticket, free minutes and special days moved to the "Prices" tab (for the point and for each branch).'),
                 style: const TextStyle(color: VC.muted)),
           ),
-          TextButton(onPressed: () => DefaultTabController.of(context).animateTo(1), child: Text(tx(context, 'الأَسعار', 'Prices'))),
+          TextButton(onPressed: () => _jump(context, 'prices'), child: Text(tx(context, 'الأَسعار', 'Prices'))),
         ]),
       ),
       _branchesPanel(d),
@@ -1180,7 +1302,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
                     'Everything printed (the ticket parts, payment receipt, membership receipt, shift report, key rack report) and its settings moved to the "Printing" tab – one page with a preview.'),
                 style: const TextStyle(color: VC.muted)),
           ),
-          TextButton(onPressed: () => DefaultTabController.of(context).animateTo(5), child: Text(tx(context, 'الطِباعة', 'Printing'))),
+          TextButton(onPressed: () => _jump(context, 'printing'), child: Text(tx(context, 'الطِباعة', 'Printing'))),
         ]),
       ),
     ]);
