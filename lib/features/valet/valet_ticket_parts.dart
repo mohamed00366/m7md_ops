@@ -86,7 +86,7 @@ const Set<String> kBigItems = {'number', 'plate_big'};
 String ticketSizeOf(Map<String, dynamic> part, String key) {
   final own = '${((part['sizes'] as Map?) ?? const {})[key] ?? ''}';
   if (kTicketSizes.containsKey(own)) return own;
-  if (kBigItems.contains(key)) return 'xl';
+  if (kBigItems.contains(key) || (part['id'] == 'member' && key == 'code')) return 'xl';
   if (key.startsWith('text:') && ((part['texts'] as Map?)?[key] as Map?)?['big'] == true) return 'xl';
   final f = '${part['font'] ?? 'm'}';
   return kTicketSizes.containsKey(f) ? f : 'm';
@@ -192,7 +192,7 @@ class PrintDoc {
   final String defaultTitle;
   final (String, String) name;
 
-  Map<String, dynamic> defaults() => {'id': id, 'title': defaultTitle, 'enabled': true, 'footer': '', 'items': defaultItems};
+  Map<String, dynamic> defaults() => {'id': id, 'title': defaultTitle, 'enabled': true, 'footer': '', 'items': defaultItems, if (id == 'keyrack') 'header': false};
 }
 
 const kDocTicket = PrintDoc('ticket', kTicketItems, kItemLabels, [], 'TICKET', ('جُزء التَذكَرة', 'Ticket part'));
@@ -243,6 +243,62 @@ const kDocShift = PrintDoc(
     ],
     'CLOSING SHIFT REPORT',
     ('تَقرير الوَرديّة', 'Shift report'));
+
+/// DB 335: membership receipt lines (vip_valet Receipts.membership).
+const Map<String, (String, String)> kMemberItems = {
+  'code': ('رَقم العُضويّة (كَبير)', 'Member code (big)'),
+  'name': ('الاسم', 'Name'),
+  'phone': ('التَليفون', 'Phone'),
+  'customer': ('العَميل', 'Customer'),
+  'from': ('مِن', 'From'),
+  'to': ('إلى', 'To'),
+  'price': ('السِعر وَالضَريبة وَالإجماليّ', 'Price, VAT and total'),
+  'payment': ('طَريقة الدَفع', 'Payment mode'),
+  'thanks': ('شُكراً', 'Thank you'),
+  ...kCommonItems,
+};
+
+const Map<String, String> kMemberLabels = {
+  'code': 'MEMBER',
+  'name': 'Name',
+  'phone': 'Phone',
+  'customer': 'Customer',
+  'from': 'From',
+  'to': 'To',
+  'price': 'Price|VAT|Total',
+  'payment': 'Payment',
+  'thanks': 'Thank you!',
+};
+
+const kDocMember = PrintDoc('member', kMemberItems, kMemberLabels,
+    ['code', 'divider', 'name', 'phone', 'customer', 'from', 'to', 'divider', 'price', 'payment', 'divider', 'thanks'], 'NEW MEMBERSHIP',
+    ('فاتورة المُشتَرِكين', 'Membership receipt'));
+
+/// DB 335: key rack report lines (vip_valet Receipts.keyrackReport).
+const Map<String, (String, String)> kKeyrackItems = {
+  'period': ('الفَترة (الوَرديّة / اليَوم، مِن، إلى، المُشَغِّل)', 'Period (shift / day, from, to, operator)'),
+  'totals': ('التَذاكِر المُنتَهية / VIP / المَفاتيح / الطَلَبات', 'Finished / VIP / keys on rack / requests'),
+  'times': ('مُتَوَسِّط الرَدّ وَالمُدّة وَأَطوَل مُدّة', 'Average response, duration, longest stay'),
+  'by_parking': ('حَسَب المَوقِف', 'By parking'),
+  'by_driver_in': ('حَسَب سائِق الاستِلام', 'By driver in'),
+  'by_driver_out': ('حَسَب سائِق التَسليم', 'By driver out'),
+  'printed': ('وَقت الطِباعة', 'Printed at'),
+  ...kCommonItems,
+};
+
+const Map<String, String> kKeyrackLabels = {
+  'period': 'Shift|Day|From|To|now|Operator',
+  'totals': 'Finished tickets|  of which VIP|Keys still on rack|Key requests',
+  'times': 'Avg response|Avg duration|Longest stay',
+  'by_parking': 'By parking',
+  'by_driver_in': 'By driver in',
+  'by_driver_out': 'By driver out',
+  'printed': 'Printed',
+};
+
+const kDocKeyrack = PrintDoc('keyrack', kKeyrackItems, kKeyrackLabels,
+    ['point_name', 'part_title', 'period', 'divider', 'totals', 'times', 'by_parking', 'by_driver_in', 'by_driver_out', 'divider', 'printed'],
+    'Key rack report', ('تَقرير الكي راك', 'Key rack report'));
 
 /// Layout of the payment receipt / shift report (null = default).
 Map<String, dynamic> docLayoutOf(dynamic v, PrintDoc doc) =>
@@ -373,6 +429,8 @@ class TicketPartsPanel extends StatefulWidget {
       this.pointName = '',
       this.receiptLayout,
       this.shiftLayout,
+      this.memberLayout,
+      this.keyrackLayout,
       this.onSaveLayout});
 
   final dynamic value;
@@ -380,6 +438,10 @@ class TicketPartsPanel extends StatefulWidget {
   /// valet_point_settings.receipt_layout / shift_layout (null = default).
   final dynamic receiptLayout;
   final dynamic shiftLayout;
+
+  /// DB 335: valet_point_settings.member_layout / keyrack_layout (null = default).
+  final dynamic memberLayout;
+  final dynamic keyrackLayout;
 
   /// Saves a layout: column ('receipt_layout' / 'shift_layout') and value (null = back to default).
   final Future<void> Function(String column, Map<String, dynamic>? layout)? onSaveLayout;
@@ -503,7 +565,7 @@ class _TicketPartsPanelState extends State<TicketPartsPanel> {
           height: 30,
           alignment: Alignment.center,
           decoration: BoxDecoration(color: VC.info.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
-          child: Icon(doc.id == 'receipt' ? Icons.receipt_long_outlined : Icons.summarize_outlined, size: 18),
+          child: Icon(switch (doc.id) { 'receipt' => Icons.receipt_long_outlined, 'member' => Icons.card_membership_outlined, 'keyrack' => Icons.key_outlined, _ => Icons.summarize_outlined }, size: 18),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -703,7 +765,7 @@ class _TicketPartsPanelState extends State<TicketPartsPanel> {
           ),
         if (widget.onSaveLayout != null) ...[
           const SizedBox(height: 14),
-          Text(tx(context, 'فاتورة الدَفع وَتَقرير الوَرديّة', 'Payment receipt and shift report'),
+          Text(tx(context, 'الفَواتير وَالتَقارير', 'Receipts and reports'),
               style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 2),
           Text(
@@ -716,6 +778,9 @@ class _TicketPartsPanelState extends State<TicketPartsPanel> {
           const SizedBox(height: 6),
           _docRow(kDocReceipt, widget.receiptLayout, 'receipt_layout'),
           _docRow(kDocShift, widget.shiftLayout, 'shift_layout'),
+          // DB 335 (app 2.5.51 or later; older apps print the old fixed lines)
+          _docRow(kDocMember, widget.memberLayout, 'member_layout'),
+          _docRow(kDocKeyrack, widget.keyrackLayout, 'keyrack_layout'),
         ],
       ]),
     );
@@ -1310,6 +1375,72 @@ class TicketPreview extends StatelessWidget {
               ..add(pair(k, wd(k, 1, 'Change'), '20.00'));
           case 'thanks':
             out.add(c(lb(k), k, b: true));
+          default:
+            return false;
+        }
+        return true;
+      }
+      if (doc.id == 'member') {
+        switch (k) {
+          case 'code':
+            out.add(c('SITEME-000003', k, b: true));
+          case 'name':
+            out.add(pair(k, lb(k), 'Ahmed Saeed'));
+          case 'phone':
+            out.add(pair(k, lb(k), '0501234567'));
+          case 'customer':
+            out.add(pair(k, lb(k), 'Dubai Mall'));
+          case 'from':
+            out.add(pair(k, lb(k), '01/11/2026'));
+          case 'to':
+            out.add(pair(k, lb(k), '30/11/2026'));
+          case 'price':
+            out
+              ..add(pair(k, wd(k, 0, 'Price'), '476.19'))
+              ..add(pair(k, '${wd(k, 1, 'VAT')} 5%', '23.81'))
+              ..add(pair(k, wd(k, 2, 'Total'), '500.00 AED', b: true));
+          case 'payment':
+            out.add(pair(k, lb(k), 'Cash'));
+          case 'thanks':
+            out.add(c(lb(k), k, b: true));
+          default:
+            return false;
+        }
+        return true;
+      }
+      if (doc.id == 'keyrack') {
+        switch (k) {
+          case 'period':
+            out
+              ..add(c('${wd(k, 0, 'Shift')} KS-0042', k))
+              ..add(c('${wd(k, 2, 'From')} 01/11/2026 06:00', k))
+              ..add(c('${wd(k, 3, 'To')} ${wd(k, 4, 'now')}', k))
+              ..add(c('${wd(k, 5, 'Operator')}: Mohamed Ali', k));
+          case 'totals':
+            out
+              ..add(pair(k, wd(k, 0, 'Finished tickets'), '48', b: true))
+              ..add(pair(k, wd(k, 1, '  of which VIP'), '6'))
+              ..add(pair(k, wd(k, 2, 'Keys still on rack'), '12'))
+              ..add(pair(k, wd(k, 3, 'Key requests'), '30'));
+          case 'times':
+            out
+              ..add(pair(k, wd(k, 0, 'Avg response'), '4m'))
+              ..add(pair(k, wd(k, 1, 'Avg duration'), '1h 40m'))
+              ..add(pair(k, wd(k, 2, 'Longest stay'), '6h 10m'));
+          case 'by_parking' || 'by_driver_in' || 'by_driver_out':
+            final rows = switch (k) {
+              'by_parking' => const [('Emaar', '20'), ('Emaar2', '18')],
+              'by_driver_in' => const [('Omar Hassan', '25'), ('Ali Raza', '23')],
+              _ => const [('Rakesh Kumar', '30'), ('Omar Hassan', '18')],
+            };
+            out
+              ..add(dash())
+              ..add(Text(lb(k), style: st(k, b: true)));
+            for (final (a, b) in rows) {
+              out.add(pair(k, a, b));
+            }
+          case 'printed':
+            out.add(c('${lb(k)} 01/11/2026 14:05', k));
           default:
             return false;
         }

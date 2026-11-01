@@ -15,6 +15,7 @@ import 'valet_hub_ui.dart';
 import 'valet_parking_screen.dart';
 import 'valet_pricing_rules.dart';
 import 'valet_ticket_parts.dart';
+import 'valet_printing_layout.dart';
 import 'valet_ui.dart';
 
 /// 🏪 تَطبيق الفاليه — إعدادات كُلّ نُقطة: المَزايا، الأَسعار، VIP، العُضويّات،
@@ -334,11 +335,11 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       ('جَرد المَوقِع', 'Site count', ValetSiteCountScreen(key: ValueKey('count$id'), pointId: id)),
       ('زِيارات المُشرِفين', 'Supervisor visits', ValetVisitsScreen(key: ValueKey('visits$id'), pointId: id)),
       ('الشَريط السُفليّ', 'Bottom bar', ValetBottomBarScreen(key: ValueKey('bar$id'), pointId: id)),
-      ('تَكت جَديد وَالطِباعة', 'New ticket & print', ValetNewTicketScreen(key: ValueKey('nt$id'), pointId: id)),
+      ('تَكت جَديد', 'New ticket', ValetNewTicketScreen(key: ValueKey('nt$id'), pointId: id, part: 'ticket')),
       if (ValetAdmin.I.can(ValetAdmin.permReports))
         ('تَحليل المُوظَّفين', 'Staff analysis', ValetStaffAnalyticsScreen(key: ValueKey('staff$id'), pointId: id)),
     ];
-    final n = 5 + extra.length;
+    final n = 6 + extra.length;
     return DefaultTabController(
       length: n,
       initialIndex: widget.initialTab.clamp(0, n - 1),
@@ -357,12 +358,13 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
             Tab(text: tx(context, 'المَواقِف', 'Parking')),
             Tab(text: tx(context, 'حِساب الجِهاز', 'Device account')),
             Tab(text: tx(context, 'المُعِدّات وَالمَكَن وَالدَفاتِر', 'Equipment, machines & books')),
+            Tab(text: tx(context, 'الطِباعة', 'Printing')),
             for (final (ar, en, _) in extra) Tab(text: tx(context, ar, en)),
           ]),
         ),
         body: d == null
             ? Center(child: _err != null ? Text(vErr(context, _err!)) : const CircularProgressIndicator())
-            : TabBarView(children: [_features(d), _prices(d), _parking(d), _terminal(d), _equipment(d), for (final (_, _, w) in extra) w]),
+            : TabBarView(children: [_features(d), _prices(d), _parking(d), _terminal(d), _equipment(d), _features(d, printing: true), for (final (_, _, w) in extra) w]),
       ),
     );
   }
@@ -515,10 +517,12 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
     'paid_with_app_or_keyrack': Icons.point_of_sale_outlined,
   };
 
-  Widget _features(VJson d) {
+  /// [printing] = the Printing tab (DB 335): every print setting in one page with a live preview; else the Features tab
+  /// without them (a line points to the Printing tab).
+  Widget _features(VJson d, {bool printing = false}) {
     final s = vMap(d['settings']);
     void toggle(String k, bool v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
-    void toggleValue(String k, Object v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
+    void toggleValue(String k, Object? v) => _save('vva_point_settings_save', {'p_point': widget.pointId, 'p_data': {k: v}});
     final flags = {for (final f in _flags(context)) f.$1: f};
     Widget sw(String k, {bool enabled = true, String? lockAr, String? lockEn}) {
       final f = flags[k]!;
@@ -934,6 +938,71 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ]),
         );
 
+    if (printing) {
+      // paper width for the point: each device decides (old) / 58 / 80 mm
+      final paper = s['paper_mm'] == null ? 'device' : '${vNum(s['paper_mm']).toInt()}';
+      Widget paperPicker() => SizedBox(
+            width: 470,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tx(context, 'مَقاس وَرَق الطابِعة', 'Printer paper width'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(tx(context, 'كُلّ جِهاز يُحَدِّد = القَديم (إعداد الطابِعة في التابلت). 58 مم: Sunmi / Landi وَأَغلَب الطابِعات المَحمولة · 80 مم: طابِعات الكاشير الكَبيرة.',
+                        'Each device decides = the old way (the printer setting on the tablet). 58 mm: Sunmi / Landi and most mobile printers · 80 mm: big counter printers.'),
+                    style: const TextStyle(color: VC.muted, fontSize: 12)),
+                const SizedBox(height: 6),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(value: 'device', icon: const Icon(Icons.tablet_android_outlined), label: Text(tx(context, 'كُلّ جِهاز', 'Each device'))),
+                    const ButtonSegment(value: '58', label: Text('58 mm')),
+                    const ButtonSegment(value: '80', label: Text('80 mm')),
+                  ],
+                  selected: {paper},
+                  onSelectionChanged: !_edit ? null : (v) => toggleValue('paper_mm', v.first == 'device' ? null : int.parse(v.first)) ,
+                ),
+              ]),
+            ),
+          );
+      final list = [
+        section(Icons.print_outlined, '1 · الطِباعة في التَطبيق', '1 · Printing in the app',
+            'إمتى المُوَظَّف يِطبَع، إعادة الطِباعة، وَمَقاس الوَرَق.', 'When the staff print, printing again, and the paper width.', [
+          sw('require_print'),
+          reprintPicker(),
+          paperPicker(),
+        ]),
+        section(Icons.receipt_long_outlined, '2 · الوَرَقة عَلى الشاشة', '2 · Paper on the screen',
+          'عِند الطِباعة تَظهَر الوَرَقة عَلى الشاشة وَهي تَخرُج مِن الطابِعة، بِنَفس شَكل الوَرَقة المَطبوعة، لِعَدد الثَواني المُختار (لِكُلّ نَوع). تَظهَر حَتّى بِدون طابِعة لِيُصَوِّرها العَميل، وَمِن لَوحة التَذاكِر: "Show ticket".',
+          'On printing, the paper appears on the screen coming out of the printer, the same as the printed one, for the chosen seconds (per kind). It also appears without a printer so the customer can take a photo, and from the board: "Show ticket".', [
+        previewRow('preview_ticket_secs', Icons.confirmation_number_outlined, 'التَذكَرة', 'Ticket'),
+        previewRow('preview_receipt_secs', Icons.receipt_outlined, 'فاتورة الدَفع', 'Payment receipt'),
+        previewRow('preview_member_secs', Icons.card_membership_outlined, 'فاتورة المُشتَرِكين', 'Membership receipt'),
+        previewRow('preview_shift_secs', Icons.summarize_outlined, 'تَقرير الوَرديّة', 'Shift report'),
+        sw('preview_sound'),
+      ]),
+        TicketPartsPanel(
+          value: s['ticket_parts'],
+          edit: _edit,
+          pointId: widget.pointId,
+          pointName: '${vMap(d['point'])['name'] ?? ''}',
+          receiptLayout: s['receipt_layout'],
+          shiftLayout: s['shift_layout'],
+          memberLayout: s['member_layout'],
+          keyrackLayout: s['keyrack_layout'],
+          onSaveLayout: (column, layout) => _save('vva_point_settings_save', {
+            'p_point': widget.pointId,
+            'p_data': {column: layout},
+          }),
+          onSave: (parts) => _save('vva_point_settings_save', {
+            'p_point': widget.pointId,
+            'p_data': {'ticket_parts': parts},
+          }),
+        ),
+        ValetNewTicketScreen(key: ValueKey('ntp${widget.pointId}'), pointId: widget.pointId, part: 'print'),
+      ];
+      return PrintingLayout(settings: s, pointId: widget.pointId, pointName: '${vMap(d['point'])['name'] ?? ''}', children: list);
+    }
+
     return _page([
       // in the order the app is used: sign in → open the shift → add a ticket → before payment → payment → …
       devicesSection(),
@@ -953,7 +1022,6 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       section(Icons.add_box_outlined, '3 · إضافة تَذكَرة', '3 · Add ticket',
           'ما يَظهَر لِلمُوَظَّف عِند استِلام السَيّارة، وَطَريقة قِراءة الكُروت وَاختيار السائِق.',
           'What the staff fill in when receiving a car, how cards are read and how the driver is picked.', [
-        sw('require_print'),
         sw('show_hotel_pick'),
         sw('photo_in_out'),
         sw('nfc_qr_in_out'),
@@ -961,17 +1029,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         sw('price_group_customer'),
         sw('dropdown_parkingcar'),
       ]),
-      section(Icons.receipt_long_outlined, '4 · الوَرَقة عَلى الشاشة', '4 · Paper on the screen',
-          'عِند الطِباعة تَظهَر الوَرَقة عَلى الشاشة وَهي تَخرُج مِن الطابِعة، بِنَفس شَكل الوَرَقة المَطبوعة، لِعَدد الثَواني المُختار (لِكُلّ نَوع). تَظهَر حَتّى بِدون طابِعة لِيُصَوِّرها العَميل، وَمِن لَوحة التَذاكِر: "Show ticket".',
-          'On printing, the paper appears on the screen coming out of the printer, the same as the printed one, for the chosen seconds (per kind). It also appears without a printer so the customer can take a photo, and from the board: "Show ticket".', [
-        previewRow('preview_ticket_secs', Icons.confirmation_number_outlined, 'التَذكَرة', 'Ticket'),
-        previewRow('preview_receipt_secs', Icons.receipt_outlined, 'فاتورة الدَفع', 'Payment receipt'),
-        previewRow('preview_member_secs', Icons.card_membership_outlined, 'فاتورة المُشتَرِكين', 'Membership receipt'),
-        previewRow('preview_shift_secs', Icons.summarize_outlined, 'تَقرير الوَرديّة', 'Shift report'),
-        sw('preview_sound'),
-        reprintPicker(),
-      ]),
-      section(Icons.rule_rounded, '5 · الصَفّ وَالمَوقِف وَالتَسليم', '5 · Driver in, parking, driver out',
+      section(Icons.rule_rounded, '4 · الصَفّ وَالمَوقِف وَالتَسليم', '4 · Driver in, parking, driver out',
           'إظهار أَو إخفاء كُلّ زِرّ في التَطبيق، وَهَل هو إجباريّ قَبل الدَفع. المَخفيّ لا يَكون إجباريّاً.',
           'Show or hide each button in the app, and whether it is required before payment. A hidden one is never required.', [
         sw('show_driver_in'),
@@ -981,7 +1039,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         sw('show_driver_out'),
         sw('drivers_out', enabled: vBool(s['show_driver_out']), lockAr: 'الزِرّ مَخفيّ', lockEn: 'The button is hidden'),
       ]),
-      section(Icons.point_of_sale_outlined, '6 · الدَفع وَالخُروج', '6 · Payment and check-out',
+      section(Icons.point_of_sale_outlined, '5 · الدَفع وَالخُروج', '5 · Payment and check-out',
           'أَزرار شاشة الدَفع، وَالبَحث عَن التَذكَرة، وَرَقم المُوافَقة لِلكارت.', 'Payment screen buttons, finding the ticket and the card approval number.', [
         sw('color_states'),
         sw('prepay_enabled'),
@@ -1061,22 +1119,22 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         findPicker(),
         approvalPicker(),
       ]),
-      section(Icons.person_pin_circle_outlined, '7 · العُمَلاء', '7 · Customers',
+      section(Icons.person_pin_circle_outlined, '6 · العُمَلاء', '6 · Customers',
           'ما يَستَطيع عَميل السَيّارة فِعله مِن هاتِفه.', 'What the car owner can do from their phone.', [
         sw('car_request'),
       ]),
-      section(Icons.schedule_rounded, '8 · الحُضور وَالانصِراف', '8 · Check-in and check-out',
+      section(Icons.schedule_rounded, '7 · الحُضور وَالانصِراف', '7 · Check-in and check-out',
           'حُضور وَانصِراف السائِقين في النُقطة.', 'Drivers checking in and out at the point.', [
         sw('dropdown_time_in_out'),
       ]),
-      section(Icons.key_outlined, '9 · تَطبيق المَفاتيح', '9 · Key rack',
+      section(Icons.key_outlined, '8 · تَطبيق المَفاتيح', '8 · Key rack',
           'مُتَحَكِّم المَفاتيح وَالدَفع عِنده. الدَفع عِنده يَعمَل فَقَط مَعَ تَشغيل تَطبيق المَفاتيح.',
           'The key controller and paying at the key rack. Paying there works only when the key rack app is on.', [
         sw('key_rack_w_sites_or_allow'),
         sw('paid_with_app_or_keyrack', enabled: vBool(s['key_rack_w_sites_or_allow']),
             lockAr: 'شَغِّل تَطبيق المَفاتيح أَوَّلاً.', lockEn: 'Turn the key rack app on first.'),
       ]),
-      section(Icons.card_membership_outlined, '10 · العُضويّات', '10 · Memberships',
+      section(Icons.card_membership_outlined, '9 · العُضويّات', '9 · Memberships',
           'صَفحة المُشتَرِكين وَزِرّ المُشتَرِكين في شاشة التَذكَرة: تَطبيق الفاليه ← الاشتِراكات ← تَبويب "النِقاط". رَقم المُوافَقة لِلعُضويّات في القِسم 6.',
           'Members page and the member button on the ticket screen: Valet app → Memberships → "Points" tab. The membership approval number is in section 6.', [
         SizedBox(
@@ -1090,7 +1148,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
           ),
         ),
       ]),
-      section(Icons.supervisor_account_outlined, '11 · المُشرِف', '11 · Supervisor',
+      section(Icons.supervisor_account_outlined, '10 · المُشرِف', '10 · Supervisor',
           'ما يَراه المُشرِف الذي فَتَح الوَرديّة في التَطبيق.', 'What the supervisor who opened the shift sees in the app.', [
         sw('staff_eval'),
         sw('supervisor_roster'),
@@ -1111,21 +1169,19 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ]),
       ),
       _branchesPanel(d),
-      TicketPartsPanel(
-        value: s['ticket_parts'],
-        edit: _edit,
-        pointId: widget.pointId,
-        pointName: '${vMap(d['point'])['name'] ?? ''}',
-        receiptLayout: s['receipt_layout'],
-        shiftLayout: s['shift_layout'],
-        onSaveLayout: (column, layout) => _save('vva_point_settings_save', {
-          'p_point': widget.pointId,
-          'p_data': {column: layout},
-        }),
-        onSave: (parts) => _save('vva_point_settings_save', {
-          'p_point': widget.pointId,
-          'p_data': {'ticket_parts': parts},
-        }),
+      VPanel(
+        title: tx(context, 'الطِباعة', 'Printing'),
+        child: Row(children: [
+          const Icon(Icons.print_outlined, color: VC.gold),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+                tx(context, 'كُلّ ما يُطبَع (التَذكَرة بِأَجزائها، فاتورة الدَفع، فاتورة المُشتَرِكين، تَقرير الوَرديّة، تَقرير الكي راك) وَإعداداته اِتنَقَلَت لِتَبويب "الطِباعة" – صَفحة واحِدة مَعَ مُعايَنة.',
+                    'Everything printed (the ticket parts, payment receipt, membership receipt, shift report, key rack report) and its settings moved to the "Printing" tab – one page with a preview.'),
+                style: const TextStyle(color: VC.muted)),
+          ),
+          TextButton(onPressed: () => DefaultTabController.of(context).animateTo(5), child: Text(tx(context, 'الطِباعة', 'Printing'))),
+        ]),
       ),
     ]);
   }
