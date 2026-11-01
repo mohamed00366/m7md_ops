@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'valet_admin.dart';
 import 'valet_pricing_rules.dart';
 import 'valet_ui.dart';
+import '../../shared/menu_style.dart';
+import 'valet_points_screen.dart';
 
 /// 🤝 تَطبيق العُمَلاء — مَن يَتَحَقَّق مِن التَذاكِر، في أَيّ نِقاط، بِأَيّ حُدود وَخَصم، وَحِساباتهم.
 class ValetClientsScreen extends StatefulWidget {
@@ -420,6 +422,22 @@ class _ValetClientDetailScreenState extends State<ValetClientDetailScreen> {
                           'نَفس إعدادات تَسعير النُقطة: مَواعيد المَوقِع، المَبيت، التِكِت المَفقود، الدَقائِق المَجّانيّة، التِكِت يِتحاسِب بِأَنهي يَوم، وَالأَيّام الخاصّة. تِتطَبَّق لَمّا الفَرع يِعمِل فاليديشن، وَأَيّ خانة "زي النُقطة" تاخُد قيمة النُقطة.',
                           'The same settings as the point pricing: site hours, overnight, lost ticket, free minutes, which day prices the ticket, and special days. They apply once this branch validates a ticket; anything "Same as point" uses the point\'s value.'),
                       style: const TextStyle(color: VC.muted, fontSize: 12.5)),
+                  if (MenuLayout.isNew) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: Text(tx(context, 'عَرض بَس هِنا · عَدِّل في صَفحة النُقطة ← الأَسعار', 'View only here · edit in the point page → Prices')),
+                        onPressed: () {
+                          final pid = _pricePoint ?? vStr(points.first['id']);
+                          final pt = points.firstWhere((x) => vStr(x['id']) == pid, orElse: () => points.first);
+                          Navigator.of(context).push(MaterialPageRoute<void>(
+                              builder: (_) => ValetPointDetailScreen(pointId: pid, title: vStr(pt['name']), initialTab: 1)));
+                        },
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   Wrap(spacing: 8, runSpacing: 8, children: [
                     for (final p in points)
@@ -441,7 +459,8 @@ class _ValetClientDetailScreenState extends State<ValetClientDetailScreen> {
                   {'id': widget.siteId, 'name': vStr(c['name']), 'system_kind': null},
                 ],
                 fixedSite: widget.siteId,
-                edit: ValetAdmin.I.can(ValetAdmin.permSettings),
+                // merge plan phase 4: the new menu edits branch prices in the point page (Prices) only
+                edit: ValetAdmin.I.can(ValetAdmin.permSettings) && !MenuLayout.isNew,
                 onSavePoint: (_) async {},
               ),
               const SizedBox(height: 14),

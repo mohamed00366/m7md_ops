@@ -7,6 +7,8 @@ import 'valet_excel_link_panel.dart';
 import 'valet_numbering_screen.dart';
 import 'valet_odoo_analytic.dart';
 import 'valet_ui.dart';
+import 'valet_settings_screen.dart';
+import '../../shared/menu_style.dart';
 
 /// 🧮 الرَبط مَعَ بَرنامِج الحِسابات (Odoo) — كُلّ تِكِت يُدفَع (Check-out) يَصِل إلى Odoo فاتورة عَميل تِلقائيّاً خِلال دَقيقة.
 class ValetOdooScreen extends StatelessWidget {
@@ -343,7 +345,7 @@ class _OdooBodyState extends State<_OdooBody> {
                         'Our own sale number: S for paid and Z for zero (two separate series). It goes to Odoo with the invoice as the "Payment reference". Before switching it on, approve every tablet in "Tablets" – a tablet not approved cannot take payments while numbering is on.'),
                     style: const TextStyle(fontSize: 13)),
               ),
-              const Expanded(child: ValetNumberingScreen(embedded: true)),
+              Expanded(child: MenuLayout.isNew ? const ValetNumberingMoved() : const ValetNumberingScreen(embedded: true)),
             ]),
             const OdooExcelLinkPanel(),
           ]),

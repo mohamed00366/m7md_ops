@@ -56,3 +56,45 @@ class ValetSettingsScreen extends StatelessWidget {
     );
   }
 }
+
+/// Merge plan phase 4: in the new menu the valet sale numbering is edited in one place (Valet settings ▸ Numbering);
+/// the old places show this card with a button.
+class ValetNumberingMoved extends StatelessWidget {
+  const ValetNumberingMoved({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // no access to Valet settings: the numbering stays editable here (as before)
+    if (!ValetAdmin.I.can(ValetAdmin.permSettings)) return const ValetNumberingScreen(embedded: true);
+    return _card(context);
+  }
+
+  Widget _card(BuildContext context) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Card(
+            margin: const EdgeInsets.all(16),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.format_list_numbered, size: 36, color: VC.gold),
+                const SizedBox(height: 8),
+                Text(tx(context, 'تَرقيم المَبيعات (الفاليه) بِيِتعَدِّل مِن مَكان واحِد', 'The valet sale numbering is edited in one place'),
+                    textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                const SizedBox(height: 4),
+                Text(tx(context, 'إعدادات الفاليه (كُلّ النِقاط) ← التَرقيم', 'Valet settings (all points) → Numbering'),
+                    textAlign: TextAlign.center, style: const TextStyle(color: VC.muted)),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  icon: const Icon(Icons.open_in_new),
+                  label: Text(tx(context, 'افتَح التَرقيم', 'Open numbering')),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                          appBar: AppBar(title: Text(tx(context, 'إعدادات الفاليه', 'Valet settings'))), body: const ValetSettingsScreen(initialTab: 5)))),
+                ),
+              ]),
+            ),
+          ),
+        ),
+      );
+}

@@ -1,3 +1,5 @@
+import '../../shared/menu_style.dart';
+import '../valet/valet_settings_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_strings.dart';
@@ -1851,7 +1853,8 @@ class _NumberingTab extends StatelessWidget {
           ],
         ),
         const Divider(height: 1),
-        const Expanded(child: TabBarView(children: [ManagerNumbering(), ValetNumberingScreen(embedded: true)])),
+        // merge plan phase 4: the new menu edits the valet numbering in Valet settings only
+        Expanded(child: TabBarView(children: [const ManagerNumbering(), MenuLayout.isNew ? const ValetNumberingMoved() : const ValetNumberingScreen(embedded: true)])),
       ]),
     );
   }
