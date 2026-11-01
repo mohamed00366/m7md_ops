@@ -1,4 +1,5 @@
 import '../../shared/arabic_search.dart';
+import '../../shared/menu_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,11 +40,13 @@ class _UnifiedHomeState extends State<UnifiedHome> {
       _activeKey = widget.initialModuleKey!;
     }
     MockRepository().addListener(_onChange);
+    MenuLayout.notifier.addListener(_onChange);
   }
 
   @override
   void dispose() {
     MockRepository().removeListener(_onChange);
+    MenuLayout.notifier.removeListener(_onChange);
     super.dispose();
   }
 
@@ -136,7 +139,8 @@ class _UnifiedHomeState extends State<UnifiedHome> {
         ],
       ),
       drawer: _UnifiedDrawer(
-        modules: visibleModules,
+        // merge plan: the new menu leaves out the entries that are tabs of another page now
+        modules: menuEntries(visibleModules, (m) => m.key),
         activeKey: _activeKey,
         onSelect: _openModule,
       ),

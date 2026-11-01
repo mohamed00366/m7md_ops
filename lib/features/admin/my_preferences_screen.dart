@@ -1,3 +1,4 @@
+import '../../shared/menu_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -68,6 +69,34 @@ class _MyPreferencesScreenState extends State<MyPreferencesScreen> {
             children: [
               // === Sync toggle ===
               _buildSyncCard(isAr),
+              const SizedBox(height: 16),
+              // merge plan: new menu (pages joined) / old menu (every entry as before) — this device
+              ValueListenableBuilder<bool>(
+                valueListenable: MenuLayout.notifier,
+                builder: (context, isNew, _) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(isAr ? '🧭 شَكل القائِمة' : '🧭 Menu layout', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                      const SizedBox(height: 4),
+                      Text(
+                          isAr
+                              ? 'الجَديد: الصَفَحات المُتَكَرِّرة اتجَمَعت (مَثَلاً كُلّ التَقارير في «مَركَز التَقارير»). القَديم: كُلّ بُند زَيّ ما كان.'
+                              : 'New: repeated pages are joined (e.g. every report in the Reports center). Old: every entry as before.',
+                          style: const TextStyle(fontSize: 12.5, color: Colors.grey)),
+                      const SizedBox(height: 8),
+                      SegmentedButton<bool>(
+                        segments: [
+                          ButtonSegment(value: true, icon: const Icon(Icons.auto_awesome_mosaic_outlined), label: Text(isAr ? 'الجَديد' : 'New')),
+                          ButtonSegment(value: false, icon: const Icon(Icons.history), label: Text(isAr ? 'القَديم' : 'Old')),
+                        ],
+                        selected: {isNew},
+                        onSelectionChanged: (v) => MenuLayout.set(v.first),
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
 
               // === Current preferences ===

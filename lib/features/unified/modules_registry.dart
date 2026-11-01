@@ -1,3 +1,5 @@
+import '../../shared/menu_style.dart';
+import '../reports/reports_center_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -394,7 +396,7 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           // جُزء مِن مَركَز التَقارير المُوَحَّد (يَفتَح عَلى تَصنيف الفاليه)
-          builder: (_) => const ReportsHubScreen(initialCategory: 'valet'),
+          builder: (_) => MenuLayout.isNew ? const ReportsCenterScreen() : const ReportsHubScreen(initialCategory: 'valet'),
           groupKey: 'valet_rep',
           groupTitleAr: 'التَقارير',
           groupTitleEn: 'Reports',
@@ -757,7 +759,8 @@ class ModulesRegistry {
           color: ModuleCategory.reports.color(),
           category: ModuleCategory.reports,
           requiredPermission: P.reportsView,
-          builder: (_) => const ManagerReports(),
+          // merge plan: the new menu opens the one Reports center (the old menu keeps the old page)
+          builder: (_) => MenuLayout.isNew ? const ReportsCenterScreen(initialTab: 2) : const ManagerReports(),
         ),
         // 🚫 forms_submissions_report نُقِلَ إلى FORMS كَـ forms_inbox
 

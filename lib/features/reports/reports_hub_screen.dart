@@ -23,7 +23,10 @@ import 'reports_service.dart';
 import 'smart_filters.dart';
 
 class ReportsHubScreen extends StatefulWidget {
-  const ReportsHubScreen({super.key, this.initialCategory = 'all'});
+  const ReportsHubScreen({super.key, this.initialCategory = 'all', this.embedded = false});
+
+  /// Inside the Reports center: no own bar and no valet cards (the center has a Valet tab).
+  final bool embedded;
 
   /// 'valet' يَفتَح المَركَز عَلى تَقارير الفاليه / العُمَلاء / الكي راك.
   final String initialCategory;
@@ -43,13 +46,16 @@ class _ReportsHubScreenState extends State<ReportsHubScreen> {
       value: SmartFilters.instance,
       child: Consumer<SmartFilters>(
         builder: (ctx, filters, _) => Scaffold(
-          appBar: M7AppBar(
-              title: isAr ? '📊 التَقارير وَالتَحليلات' : '📊 Reports & Analytics'),
+          appBar: widget.embedded
+              ? null
+              : M7AppBar(title: isAr ? '📊 التَقارير وَالتَحليلات' : '📊 Reports & Analytics'),
           body: ListView(
             padding: const EdgeInsets.all(12),
             children: [
-              const ValetReportCards(),
-              const SizedBox(height: 16),
+              if (!widget.embedded) ...[
+                const ValetReportCards(),
+                const SizedBox(height: 16),
+              ],
               _filterBar(filters, isAr),
               const SizedBox(height: 12),
               _aggregatedSection(isAr),

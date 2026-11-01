@@ -1,3 +1,4 @@
+import '../../shared/menu_style.dart';
 import '../valet/valet_home_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -72,7 +73,7 @@ class _SmartHomeState extends State<SmartHome> {
     );
     // الموديولات المتاحة (عدا smart_home نفسها)
     final availableModules =
-        modules.where((m) => m.key != 'smart_home').toList();
+        menuEntries(modules, (m) => m.key).where((m) => m.key != 'smart_home').toList();
     // 🆕 Session 24: المُثبَّتة أوّلاً
     availableModules.sort((a, b) {
       final ap = _pins.contains(a.key) ? 0 : 1;

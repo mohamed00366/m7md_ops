@@ -1,3 +1,4 @@
+import 'shared/menu_style.dart';
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -73,6 +74,7 @@ Future<void> main() async {
   await Future.wait([
     localeProvider.load(),
     themeProvider.load(),
+    MenuLayout.load(), // merge plan: new / old menu (this device)
   ]);
 
   // 🆕 رَبط UserPreferencesService بِالـproviders:

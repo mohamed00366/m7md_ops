@@ -30,7 +30,10 @@ import 'reports/other_reports.dart';
 /// - العَمَليّات (Rosters/Attendance/Forms)
 /// - النِظام (Accounts/RBAC)
 class ManagerReports extends StatefulWidget {
-  const ManagerReports({super.key});
+  const ManagerReports({super.key, this.embedded = false});
+
+  /// Inside the Reports center: no own bar and no valet cards (the center has a Valet tab).
+  final bool embedded;
 
   @override
   State<ManagerReports> createState() => _ManagerReportsState();
@@ -278,16 +281,20 @@ class _ManagerReportsState extends State<ManagerReports> {
     }
 
     return Scaffold(
-      appBar: M7AppBar(
-        title: isAr ? 'مَركَز التَقارير' : 'Reports Center',
-        subtitle: '${visibleReports.length} ${isAr ? "تَقرير" : "reports"}',
-      ),
+      appBar: widget.embedded
+          ? null
+          : M7AppBar(
+              title: isAr ? 'مَركَز التَقارير' : 'Reports Center',
+              subtitle: '${visibleReports.length} ${isAr ? "تَقرير" : "reports"}',
+            ),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
           // ===== تَقارير الفاليه / تَطبيق العُمَلاء / الكي راك (أَوَّل شَيء) =====
-          const ValetReportCards(),
-          const SizedBox(height: 16),
+          if (!widget.embedded) ...[
+            const ValetReportCards(),
+            const SizedBox(height: 16),
+          ],
           // ===== شَريط إحصائيّات =====
           M7StatsBanner(stats: [
             M7Stat(
