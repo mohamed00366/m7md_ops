@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/theme/app_theme.dart';
 import 'valet_admin.dart';
 import 'valet_ui.dart';
 
@@ -93,9 +94,15 @@ class HubButton extends StatelessWidget {
     return SizedBox(
       height: 40,
       child: primary
-          ? FilledButton(style: FilledButton.styleFrom(backgroundColor: _ink, foregroundColor: Colors.white, shape: shape), onPressed: onPressed, child: child)
+          // disabled colours set here too: in the dark dashboard the theme's would be white on the white button
+          ? FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: _ink, foregroundColor: Colors.white, disabledBackgroundColor: const Color(0xFFCBD5E1), disabledForegroundColor: const Color(0xFF64748B), shape: shape),
+              onPressed: onPressed,
+              child: child)
           : OutlinedButton(
-              style: OutlinedButton.styleFrom(foregroundColor: _ink, backgroundColor: Colors.white, side: const BorderSide(color: _line), shape: shape),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: _ink, backgroundColor: Colors.white, disabledForegroundColor: const Color(0xFF94A3B8), side: const BorderSide(color: _line), shape: shape),
               onPressed: onPressed,
               child: child),
     );
@@ -224,9 +231,19 @@ class HubCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: strong ? _ink : _line, width: strong ? 1.5 : 1)),
         clipBehavior: Clip.antiAlias,
         elevation: 0,
-        child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
+        // the card is always white (black & white design): in the dark dashboard its words, switches and
+        // segments use the light theme, so nothing is white on white
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: padding,
+            child: Theme.of(context).brightness == Brightness.dark ? Theme(data: _lightTheme, child: DefaultTextStyle.merge(style: const TextStyle(color: _ink), child: child)) : child,
+          ),
+        ),
       );
 }
+
+final ThemeData _lightTheme = AppTheme.light();
 
 /// Small status pill: kinds dark / ok / bad / warn / mut / info.
 Widget hubPill(String text, {String kind = 'mut', bool pulse = false}) {

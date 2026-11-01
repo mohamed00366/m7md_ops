@@ -102,10 +102,15 @@ class ValetAdmin extends ChangeNotifier {
   Future<Map<String, dynamic>> call(String fn, [Map<String, dynamic> args = const {}]) =>
       _rpc(fn, {'p_token': _token, ...args});
 
+  /// Tests: replaces the server call (screen pictures with sample data).
+  @visibleForTesting
+  static Future<dynamic> Function(String fn, Map<String, dynamic> params)? transport;
+
   Future<Map<String, dynamic>> _rpc(String fn, Map<String, dynamic> params) async {
     dynamic r;
     try {
-      r = await _c.rpc(fn, params: params).timeout(const Duration(seconds: 40));
+      final t = transport;
+      r = t != null ? await t(fn, params) : await _c.rpc(fn, params: params).timeout(const Duration(seconds: 40));
     } on PostgrestException catch (e) {
       final msg = e.message;
       if (msg.contains('SESSION_EXPIRED')) {
