@@ -277,6 +277,12 @@ class _ValetNewTicketScreenState extends State<ValetNewTicketScreen> {
             subAr: 'تاج المفتاح · خط قطع التكت · خطوط المواقف في الشريط · البورد الفاضي وعربية التحميل', subEn: 'Key tag · ticket tear line · parking bays in the bar · empty board and loading car',
             canEdit: canEdit),
       ]),
+      // DB 334: Close shift – expected cash shown before the count (off = blind count)
+      _card(tx(context, 'قفل الشيفت (عدّ الكاش)', 'Close shift (cash count)'), [
+        _sw('nt_cash_show_expected', false, 'اعرض الكاش المتوقع قبل العدّ', 'Show the expected cash before the count',
+            subAr: 'مقفول = عدّ أعمى (القديم): الموظف يعدّ الأول والمتوقع يظهر بعد القفل', subEn: 'Off = blind count (old): the closer counts first, the expected cash shows after closing',
+            canEdit: canEdit),
+      ]),
       // DB 331: Late / Absent on the Team page of the app (from the roster of the week)
       _card(tx(context, 'صفحة الفريق في التطبيق (متأخر / غايب)', 'Team page in the app (late / absent)'), [
         _sw('nt_team_late', true, 'اعرض المتأخر والغايب من الروستر', 'Show late and absent from the roster',
