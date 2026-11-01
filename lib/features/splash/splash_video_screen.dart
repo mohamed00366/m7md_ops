@@ -2,6 +2,7 @@
 // 🎬 Splash Video Screen — فيديو + صَوت مُنفَصِل (اختِياريّ)
 // =============================================================================
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
@@ -197,19 +198,18 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
             // - فيديو portrait عَلى شاشة عَريضة → أَشرِطة سَوداء عَلى الجانِبَين
             // - فيديو landscape عَلى شاشة طَويلة → أَشرِطة سَوداء فَوق وَتَحت
             // - الفيديو يَظهَر دائِماً بِنِسبَتِه الأَصلِيّة بِدون قَطع
-            // the real box size is worked out here (no FittedBox): on the web the video is an HTML element, and a
-            // scaled FittedBox left it at its natural size, pushed to the right edge and cut
+            // on the web the video is an HTML <video> element: given the full screen it letterboxes itself and stays
+            // centered (a FittedBox left it at its natural size on the right; a ClipRect hid it). Elsewhere: a box of
+            // the video's own shape, centered.
             _initialized && _videoController != null
-                ? LayoutBuilder(builder: (context, box) {
-                    final vs = _videoController!.value.size;
-                    final ar = vs.width > 0 && vs.height > 0 ? vs.width / vs.height : 9 / 16;
-                    var w = box.maxWidth, h = w / ar;
-                    if (h > box.maxHeight) {
-                      h = box.maxHeight;
-                      w = h * ar;
-                    }
-                    return Center(child: ClipRect(child: SizedBox(width: w, height: h, child: VideoPlayer(_videoController!))));
-                  })
+                ? (kIsWeb
+                    ? SizedBox.expand(child: VideoPlayer(_videoController!))
+                    : Center(
+                        child: AspectRatio(
+                          aspectRatio: _videoController!.value.aspectRatio > 0 ? _videoController!.value.aspectRatio : 9 / 16,
+                          child: VideoPlayer(_videoController!),
+                        ),
+                      ))
                 : const Center(child: CircularProgressIndicator(color: Colors.white)),
 
             // 🔊 زِرّ تَفعيل الصَوت
