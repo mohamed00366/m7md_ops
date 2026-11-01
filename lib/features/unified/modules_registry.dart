@@ -1,4 +1,5 @@
 import '../../shared/menu_style.dart';
+import '../hr/driver_tips_screen.dart';
 import '../reports/reports_center_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -218,6 +219,17 @@ class ModulesRegistry {
           category: ModuleCategory.hr,
           requiredPermission: P.employeesView,
           builder: (_) => const HrOnPointTrainingScreen(),
+        ),
+        // merge plan phase 5: the driver tips page was built but not reachable
+        AppModule(
+          key: 'driver_tips',
+          titleAr: 'بَقاشيش السائِقين',
+          titleEn: 'Driver tips',
+          icon: Icons.volunteer_activism_outlined,
+          color: ModuleCategory.hr.color(),
+          category: ModuleCategory.hr,
+          requiredPermission: P.tipsView,
+          builder: (_) => const DriverTipsScreen(),
         ),
         AppModule(
           key: 'evaluations_center',

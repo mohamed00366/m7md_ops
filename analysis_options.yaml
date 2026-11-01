@@ -4,6 +4,8 @@ analyzer:
   exclude:
     # مَشروع فَرعيّ مُنفَصِل (لَه pubspec.yaml خاصّ بِه)
     - worker_flutter/**
+    # unused screens kept for reference (not built)
+    - archive/**
     # مُجَلَّدات مُولَّدة وَ Build
     - build/**
     - "**/*.g.dart"
