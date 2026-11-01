@@ -1,3 +1,4 @@
+import 'arabic_search.dart';
 import 'package:flutter/material.dart';
 
 import '../core/l10n/app_strings.dart';
@@ -273,16 +274,16 @@ class _LauncherDialogState extends State<_LauncherDialog> {
       return groups;
     }
 
-    final q = query.toLowerCase();
+    final q = searchNorm(query.trim());
     final groups = <_ResultGroup>[];
 
     // 🆕 Session 13: الأوامر السريعة (تطابق بالكلمات المفتاحيّة)
     final actions = _quickActions().where((a) {
       // ابحث في العنوان وكلمات مفتاحيّة
-      if (a.titleAr.toLowerCase().contains(q)) return true;
-      if (a.titleEn.toLowerCase().contains(q)) return true;
-      if (a.subtitleAr.toLowerCase().contains(q)) return true;
-      if (a.subtitleEn.toLowerCase().contains(q)) return true;
+      if (searchNorm(a.titleAr).contains(q)) return true;
+      if (searchNorm(a.titleEn).contains(q)) return true;
+      if (searchNorm(a.subtitleAr).contains(q)) return true;
+      if (searchNorm(a.subtitleEn).contains(q)) return true;
       return false;
     }).toList();
     if (actions.isNotEmpty) {
@@ -296,8 +297,8 @@ class _LauncherDialogState extends State<_LauncherDialog> {
     // ===== Employees =====
     final emps = repo.employees
         .where((e) =>
-            e.fullName.toLowerCase().contains(q) ||
-            e.code.toLowerCase().contains(q))
+            searchNorm(e.fullName).contains(q) ||
+            searchNorm(e.code).contains(q))
         .take(8)
         .toList();
     if (emps.isNotEmpty) {
@@ -311,8 +312,8 @@ class _LauncherDialogState extends State<_LauncherDialog> {
     // ===== Job Titles =====
     final jts = repo.jobTitles
         .where((j) =>
-            j.nameAr.toLowerCase().contains(q) ||
-            j.nameEn.toLowerCase().contains(q))
+            searchNorm(j.nameAr).contains(q) ||
+            searchNorm(j.nameEn).contains(q))
         .take(8)
         .toList();
     if (jts.isNotEmpty) {
@@ -326,8 +327,8 @@ class _LauncherDialogState extends State<_LauncherDialog> {
     // ===== Departments =====
     final depts = repo.departments
         .where((d) =>
-            d.nameAr.toLowerCase().contains(q) ||
-            d.nameEn.toLowerCase().contains(q))
+            searchNorm(d.nameAr).contains(q) ||
+            searchNorm(d.nameEn).contains(q))
         .take(8)
         .toList();
     if (depts.isNotEmpty) {
@@ -341,9 +342,9 @@ class _LauncherDialogState extends State<_LauncherDialog> {
     // ===== Form Templates =====
     final forms = repo.formTemplates
         .where((t) =>
-            t.code.toLowerCase().contains(q) ||
-            t.nameAr.toLowerCase().contains(q) ||
-            t.nameEn.toLowerCase().contains(q))
+            searchNorm(t.code).contains(q) ||
+            searchNorm(t.nameAr).contains(q) ||
+            searchNorm(t.nameEn).contains(q))
         .take(5)
         .toList();
     if (forms.isNotEmpty) {

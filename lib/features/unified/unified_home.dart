@@ -1,3 +1,4 @@
+import '../../shared/arabic_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -199,10 +200,10 @@ class _UnifiedDrawerState extends State<_UnifiedDrawer> {
   /// تَطبيق فِلتر البَحث على قائِمة الموديولات
   List<AppModule> _filtered(bool isAr) {
     if (_query.trim().isEmpty) return widget.modules;
-    final q = _query.toLowerCase();
+    final q = searchNorm(_query.trim());
     return widget.modules.where((m) {
-      final ar = m.titleAr.toLowerCase();
-      final en = m.titleEn.toLowerCase();
+      final ar = searchNorm(m.titleAr);
+      final en = searchNorm(m.titleEn);
       final key = m.key.toLowerCase();
       // طابِق على كُلّ اللُغات بِغَضّ النَظَر عَن لُغة الواجِهة
       return ar.contains(q) || en.contains(q) || key.contains(q);
