@@ -84,6 +84,7 @@ import '../valet/valet_keyrack_screen.dart';
 import '../valet/valet_live_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_credits_screen.dart';
+import '../valet/valet_settings_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_safety_screen.dart';
 import 'app_module.dart';
@@ -318,6 +319,20 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetDashboardView,
           builder: (_) => const ValetAppHubScreen(),
+          groupKey: 'valet_apps',
+          groupTitleAr: 'التَطبيقات وَالمَواقِع',
+          groupTitleEn: 'Apps & sites',
+        ),
+        // merge plan, phase 2: settings for all points in one page
+        AppModule(
+          key: 'valet_settings',
+          titleAr: 'إعدادات الفاليه (كُلّ النِقاط)',
+          titleEn: 'Valet settings (all points)',
+          icon: Icons.tune,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetSettingsManage,
+          builder: (_) => const ValetSettingsScreen(),
           groupKey: 'valet_apps',
           groupTitleAr: 'التَطبيقات وَالمَواقِع',
           groupTitleEn: 'Apps & sites',

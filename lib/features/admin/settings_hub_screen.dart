@@ -60,6 +60,7 @@ import 'roster_employee_filter_settings_screen.dart';
 import 'roster_settings_screen.dart';
 import '../../core/services/app_module_settings.dart';
 import '../valet/valet_odoo_screen.dart';
+import '../valet/valet_settings_screen.dart';
 import 'system_health_screen.dart';
 import 'workflow_builder_screen.dart';
 
@@ -469,6 +470,18 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
             'Deadline (Sat) + review day (Sun) + work start (Mon) + alerts',
         builder: (_) => const RosterDeadlineSettingsScreen(),
         requiredPermission: P.settingsRosterDeadlineView,
+      ),
+      // merge plan, phase 2: Valet settings for all points
+      _SettingEntry(
+        category: catSystemTools,
+        icon: Icons.local_parking,
+        color: const Color(0xFFC9A227),
+        titleAr: 'إعدادات الفاليه (كُلّ النِقاط)',
+        titleEn: 'Valet settings (all points)',
+        descAr: 'لِينك العَميل الافتِراضيّ، التَكت وَالصُوَر، المُساعِد الذَكيّ، تَحليل المُوَظَّفين، التَنبيهات، التَرقيم وَOdoo',
+        descEn: 'Default customer link, ticket and photos, smart assistant, staff analysis, alerts, numbering and Odoo',
+        builder: (_) => const ValetSettingsScreen(),
+        requiredPermission: P.valetSettingsManage,
       ),
       // 🆕 LogViewer — أداة مطوّرين
       // 🧮 الرَبط مَعَ بَرنامِج الحِسابات (Odoo)
