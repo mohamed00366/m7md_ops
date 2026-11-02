@@ -71,7 +71,7 @@ class _ValetRtaPointScreenState extends State<ValetRtaPointScreen> {
         title: Text(index == null ? tx(ctx, 'زون RTA جَديد', 'New RTA zone') : tx(ctx, 'تَعديل الزون', 'Edit zone')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           TextField(controller: code, textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(labelText: tx(ctx, 'كود المِنطِقة (مِن اللافِتة البُرتُقاليّة)', 'Zone code (from the orange sign)'), hintText: '365A')),
+              decoration: InputDecoration(labelText: tx(ctx, 'كود المِنطِقة (مِن اللافِتة البُرتُقاليّة)', 'Zone code (from the orange sign)'), hintText: '317AP')),
           TextField(controller: rate, keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(labelText: tx(ctx, 'السِعر لِلساعة (دِرهَم)', 'Price per hour (AED)'), hintText: '4')),
           TextField(controller: note, decoration: InputDecoration(labelText: tx(ctx, 'مُلاحَظة (اختياريّ)', 'Note (optional)'), hintText: tx(ctx, 'قُدّام المَدخَل', 'In front of the entrance'))),
@@ -116,15 +116,15 @@ class _ValetRtaPointScreenState extends State<ValetRtaPointScreen> {
   }
 
   String _example() {
-    final z = _zones.isEmpty ? '365A' : vStr(_zones.first['code']);
+    final z = _zones.isEmpty ? '317AP' : vStr(_zones.first['code']);
     final h = vNum(_s?['rta_hours_default'] ?? 1).toInt();
-    final t = vStr(_s?['rta_template']).isEmpty ? '{zone} {plate} {hours}' : vStr(_s?['rta_template']);
+    final t = vStr(_s?['rta_template']).isEmpty ? '{plate} {zone}{hours}' : vStr(_s?['rta_template']);
     return t
         .replaceAll('{zone}', z)
-        .replaceAll('{plate_spaced}', 'B 45120')
-        .replaceAll('{plate}', 'B45120')
-        .replaceAll('{code}', 'B')
-        .replaceAll('{number}', '45120')
+        .replaceAll('{plate_spaced}', 'CC 57843')
+        .replaceAll('{plate}', 'CC57843')
+        .replaceAll('{code}', 'CC')
+        .replaceAll('{number}', '57843')
         .replaceAll('{hours}', '$h');
   }
 
@@ -257,8 +257,8 @@ class _ValetRtaPointScreenState extends State<ValetRtaPointScreen> {
           ),
           row('رَقَم الإرسال', 'SMS number', OutlinedButton(onPressed: !_edit ? null : () => _text('rta_number', 'رَقَم الإرسال', 'SMS number', '7275'), child: Text(vStr(s['rta_number']).isEmpty ? '7275' : vStr(s['rta_number'])))),
           row('شَكل الرِسالة', 'Message template',
-              OutlinedButton(onPressed: !_edit ? null : () => _text('rta_template', 'شَكل الرِسالة', 'Message template', '{zone} {plate} {hours}'), child: Text(vStr(s['rta_template']).isEmpty ? '{zone} {plate} {hours}' : vStr(s['rta_template']))),
-              noteAr: 'الافتِراضيّ: كود المِنطِقة ثُمّ رَقَم العَربيّة ثُمّ الساعات', noteEn: 'Default: zone code, then the plate, then the hours'),
+              OutlinedButton(onPressed: !_edit ? null : () => _text('rta_template', 'شَكل الرِسالة', 'Message template', '{plate} {zone}{hours}'), child: Text(vStr(s['rta_template']).isEmpty ? '{plate} {zone}{hours}' : vStr(s['rta_template']))),
+              noteAr: 'الافتِراضيّ: رَقَم العَربيّة، مَسافة، كود المِنطِقة وَبَعده عَدَد الساعات (CC57843 317AP1)', noteEn: 'Default: the plate, a space, the zone code and right after it the hours (CC57843 317AP1)'),
           row('عَدَد الساعات الافتِراضيّ', 'Default hours', seg<int>('rta_hours_default', const [(1, '1', '1'), (2, '2', '2'), (3, '3', '3'), (4, '4', '4')])),
           row('أَقصى ساعات يِختارها المُوَظَّف', 'Most hours the staff can choose', seg<int>('rta_hours_max', const [(3, '3', '3'), (5, '5', '5'), (8, '8', '8'), (12, '12', '12')])),
         ]),
