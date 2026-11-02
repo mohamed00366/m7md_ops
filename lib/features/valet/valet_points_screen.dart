@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'valet_rta_screen.dart';
 import 'valet_admin.dart';
 import 'valet_cards_screen.dart';
 import 'valet_link_screen.dart';
@@ -360,7 +361,11 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
         ('equipment', 'المُعِدّات وَالمَكَن وَالدَفاتِر', 'Equipment, machines & books', _equipment(d)),
         ('terminal', 'حِساب الجِهاز', 'Device account', _terminal(d)),
       ]),
-      ('الأَسعار', 'Prices', [('prices', 'الأَسعار وَالفُروع', 'Prices and branches', _prices(d))]),
+      ('الأَسعار', 'Prices', [
+        ('prices', 'الأَسعار وَالفُروع', 'Prices and branches', _prices(d)),
+        // DB 337: RTA parking fees (mParking SMS) – an option of the point
+        ('rta', 'مَواقِف RTA', 'RTA parking', ValetRtaPointScreen(key: ValueKey('rta$id'), pointId: id)),
+      ]),
       ('الوَرديّة وَالفَريق', 'Shift & team', [
         ('shift', 'قَفل الشيفت وَالفَريق', 'Close shift and team', ValetNewTicketScreen(key: ValueKey('ntsh$id'), pointId: id, part: 'shift')),
         ('visits', 'زِيارات المُشرِفين', 'Supervisor visits', ValetVisitsScreen(key: ValueKey('visits$id'), pointId: id)),
@@ -458,6 +463,7 @@ class _ValetPointDetailScreenState extends State<ValetPointDetailScreen> {
       ('زِيارات المُشرِفين', 'Supervisor visits', ValetVisitsScreen(key: ValueKey('visits$id'), pointId: id)),
       ('الشَريط السُفليّ', 'Bottom bar', ValetBottomBarScreen(key: ValueKey('bar$id'), pointId: id)),
       ('تَكت جَديد', 'New ticket', ValetNewTicketScreen(key: ValueKey('nt$id'), pointId: id, part: 'ticket')),
+      ('مَواقِف RTA', 'RTA parking', ValetRtaPointScreen(key: ValueKey('rta$id'), pointId: id)),
       if (ValetAdmin.I.can(ValetAdmin.permReports))
         ('تَحليل المُوظَّفين', 'Staff analysis', ValetStaffAnalyticsScreen(key: ValueKey('staff$id'), pointId: id)),
     ];
