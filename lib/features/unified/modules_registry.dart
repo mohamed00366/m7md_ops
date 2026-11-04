@@ -86,6 +86,7 @@ import '../valet/valet_live_screen.dart';
 import '../valet/valet_shifts_screen.dart';
 import '../valet/valet_credits_screen.dart';
 import '../valet/valet_rta_screen.dart';
+import '../valet/valet_fleet_screen.dart';
 import '../valet/valet_settings_screen.dart';
 import '../valet/valet_contracts_screen.dart';
 import '../valet/valet_safety_screen.dart';
@@ -385,6 +386,19 @@ class ModulesRegistry {
           category: ModuleCategory.valet,
           requiredPermission: P.valetReportsView,
           builder: (_) => const ValetAccidentsScreen(),
+          groupKey: 'valet_ops',
+          groupTitleAr: 'التَشغيل',
+          groupTitleEn: 'Operations',
+        ),
+        AppModule(
+          key: 'valet_fleet',
+          titleAr: 'أَجهِزة الشَرِكة (رَسايل وَمُكالَمات)',
+          titleEn: 'VIP Fleet (SMS and calls)',
+          icon: Icons.phone_android,
+          color: ModuleCategory.valet.color(),
+          category: ModuleCategory.valet,
+          requiredPermission: P.valetReportsView,
+          builder: (_) => const ValetFleetScreen(),
           groupKey: 'valet_ops',
           groupTitleAr: 'التَشغيل',
           groupTitleEn: 'Operations',

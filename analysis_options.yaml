@@ -6,6 +6,9 @@ analyzer:
     - worker_flutter/**
     # unused screens kept for reference (not built)
     - archive/**
+    # VIP Fleet phone app (own pubspec)
+    - fleet_app/**
+    - fleet_app/**
     # مُجَلَّدات مُولَّدة وَ Build
     - build/**
     - "**/*.g.dart"
