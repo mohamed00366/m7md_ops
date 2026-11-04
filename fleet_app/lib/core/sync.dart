@@ -11,8 +11,9 @@ import 'api.dart';
 import 'demo.dart';
 import 'report.dart';
 import 'store.dart';
+import 'update.dart';
 
-const kAppVersion = '1.0.4';
+const kAppVersion = '1.0.5';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {
@@ -54,11 +55,11 @@ String callHash(int ms, String number, String type, int duration) => sha1.conver
 
 /// Result of one sync (shown on the home page and in the log).
 class SyncResult {
-  SyncResult({this.newSms = 0, this.newCalls = 0, this.upSms = 0, this.upCalls = 0, this.error = '', this.mail = ''});
-  int newSms, newCalls, upSms, upCalls;
+  SyncResult({this.newSms = 0, this.newCalls = 0, this.upSms = 0, this.upCalls = 0, this.error = '', this.mail = '', this.cleaned = 0});
+  int newSms, newCalls, upSms, upCalls, cleaned;
   String error, mail;
   @override
-  String toString() => error.isNotEmpty ? error : 'SMS +$newSms (up $upSms) · calls +$newCalls (up $upCalls)${mail.isEmpty ? '' : ' · $mail'}';
+  String toString() => error.isNotEmpty ? error : 'SMS +$newSms (up $upSms) · calls +$newCalls (up $upCalls)${cleaned > 0 ? ' · cleaned $cleaned old' : ''}${mail.isEmpty ? '' : ' · $mail'}';
 }
 
 /// Reads the SMS of the watched numbers and the call log, keeps them on the device, uploads what is new, writes the
@@ -83,6 +84,8 @@ class FleetSync {
       h['sms'] = await Permission.sms.isGranted;
       h['calls'] = await VipCalls.granted();
       h['battery'] = await Permission.ignoreBatteryOptimizations.isGranted;
+      h['owner'] = await VipDevice.owner();
+      h['build'] = kAppBuild;
       try {
         h['admin'] = await _native.invokeMethod<bool>('adminActive') ?? false;
       } catch (_) {/* background: not known */}
@@ -102,6 +105,8 @@ class FleetSync {
       final p = await Prefs.get();
       await p.reload();
       if (p.deviceKey.isEmpty) return res..error = 'No device key yet.';
+      // Device Owner (1.0.5): the permissions are given and removing is blocked, every run (cheap)
+      if (!FleetDemo.on && await VipDevice.owner()) await VipDevice.ownerSetup();
       // 1) the switches of the dashboard (the last ones are used when off line)
       var cfg = p.config;
       try {
@@ -206,6 +211,19 @@ class FleetSync {
         }
       }
 
+      // 4b) clean-up (1.0.5, set per device in the dashboard): uploaded records older than N days leave the device, once a day
+      final cl = cfg['cleanup'] is Map ? (cfg['cleanup'] as Map) : const {};
+      final lastCl = p.lastCleanup;
+      if (cl['on'] == true && (lastCl == null || DateTime.now().difference(lastCl).inHours >= 20)) {
+        try {
+          final n = await db.cleanup(((cl['days'] as num?)?.toInt() ?? 90).clamp(7, 3650));
+          await p.setLastCleanup(DateTime.now());
+          if (n > 0) res.cleaned = n;
+        } catch (e) {
+          debugPrint('cleanup: $e');
+        }
+      }
+
       // 5) Excel on the device + the daily e-mail
       final name = '${cfg['name'] ?? 'device'}';
       if (!FleetDemo.on && p.excelOn && (res.newSms > 0 || res.newCalls > 0 || reason == 'manual')) {
@@ -228,7 +246,11 @@ class FleetSync {
         res.mail = e == null ? 'e-mail sent' : 'e-mail: $e';
       }
       if (newCmd) {
-        final done = cmd['kind'] == 'resend'
+        final release = cmd['kind'] == 'owner_release';
+        final released = release && await VipDevice.ownerRelease();
+        final done = release
+            ? (released ? 'Device Owner released: the app can be removed normally now.' : 'Could not release Device Owner.')
+            : cmd['kind'] == 'resend'
             ? 'Read again from ${(cmd['days'] as num?)?.toInt() == 0 ? 'the start' : '${cmd['days']} days'}: ${res.newSms} new SMS, ${res.upSms} sent, ${res.upCalls} calls sent${res.error.isEmpty ? '' : ' · ${res.error}'}'
             : 'Synced: ${res.upSms} SMS, ${res.upCalls} calls sent${res.error.isEmpty ? '' : ' · ${res.error}'}';
         try {
@@ -238,6 +260,12 @@ class FleetSync {
       }
       await p.setLastSync(DateTime.now());
       await p.setLastError(res.error);
+      // 6) a newer version from the dashboard: a Device Owner installs it by itself (others see "Update" on the screen)
+      final up = AppUpdate.of(cfg);
+      if (up != null && !FleetDemo.on && reason != 'manual' && reason != 'open') {
+        final m = await FleetUpdater.silent(p, up);
+        if (m != null) res.mail = res.mail.isEmpty ? m : '${res.mail} · $m';
+      }
       return res;
     } catch (e) {
       res.error = '$e';

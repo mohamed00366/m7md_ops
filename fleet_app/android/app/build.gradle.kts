@@ -62,6 +62,8 @@ kotlin {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // 1.0.5: "Scan QR" of the device key (Google code scanner: no camera permission for the app)
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 }
 
 flutter {

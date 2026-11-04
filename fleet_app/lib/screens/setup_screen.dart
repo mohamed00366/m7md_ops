@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/api.dart';
 import '../core/auth.dart';
@@ -22,6 +24,24 @@ class _SetupScreenState extends State<SetupScreen> {
   final _p2 = TextEditingController();
   String _error = '';
   bool _busy = false;
+
+  /// 1.0.5: the QR of the key on the dashboard (Google code scanner – no camera permission needed).
+  Future<void> _scan() async {
+    try {
+      final v = await const MethodChannel('vip_fleet/native').invokeMethod<String>('scanQr') ?? '';
+      final m = RegExp(r'VF-[A-Z0-9-]+', caseSensitive: false).firstMatch(v);
+      if (m != null) {
+        setState(() {
+          _key.text = m.group(0)!.toUpperCase();
+          _error = '';
+        });
+      } else if (v.isNotEmpty) {
+        setState(() => _error = 'This QR is not a device key.');
+      }
+    } catch (e) {
+      setState(() => _error = 'The scanner did not open ($e). Type the key instead.');
+    }
+  }
 
   Future<void> _save() async {
     final key = _key.text.trim().toUpperCase();
@@ -65,6 +85,13 @@ class _SetupScreenState extends State<SetupScreen> {
             textAlign: TextAlign.center, style: TextStyle(color: FleetColors.muted)),
         const SizedBox(height: 20),
         field(_key, 'Device key', hint: 'VF-…  (dashboard ▸ Company devices ▸ New device)'),
+        if (!kIsWeb)
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(46)),
+            onPressed: _scan,
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Scan the QR from the dashboard'),
+          ),
         const Divider(height: 28),
         const Text('Main login', style: TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),

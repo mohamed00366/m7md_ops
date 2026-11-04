@@ -6,6 +6,7 @@ import 'package:vip_fleet/core/report.dart';
 import 'package:vip_fleet/core/rta.dart';
 import 'package:vip_fleet/core/store.dart';
 import 'package:vip_fleet/core/sync.dart';
+import 'package:vip_fleet/core/update.dart';
 
 const confirm = 'Plate-DXB CC 57843\nINV-971242636\nValid-317AP,C,D,CP,DP\nFee-AED6.30\ninc.Vat-5%\nTnxFee-AED0.30\nExp-14/10/26 09:39AM';
 
@@ -102,5 +103,32 @@ void main() {
     expect('${rta.rows[2][8]?.value}', '6.6');
     expect('${x.tables['Daily summary']!.rows[1][3]?.value}', '1');
     expect('${x.tables['Calls']!.rows[1][5]?.value}', '1:15');
+  });
+
+  test('1.0.5: update only when newer, the right file for the phone', () {
+    expect(AppUpdate.of(const {}), isNull);
+    expect(AppUpdate.of({'update': {'build': kAppBuild, 'arm64': 'a', 'mode': 'notify'}}), isNull);
+    final u = AppUpdate.of({'update': {'version': '9.9', 'build': kAppBuild + 1, 'arm64': 'a64', 'arm32': 'a32', 'mode': 'force'}})!;
+    expect(u.force, isTrue);
+    expect(u.urlFor(['arm64-v8a', 'armeabi-v7a']), 'a64');
+    expect(u.urlFor(['armeabi-v7a']), 'a32');
+    expect(AppUpdate.of({'update': {'build': kAppBuild + 1, 'arm64': '', 'arm32': '', 'mode': 'notify'}}), isNull);
+  });
+
+  test('1.0.5: clean-up removes only uploaded old records', () async {
+    LocalDb.memory = true;
+    final db = await LocalDb.open();
+    final old = DateTime.now().subtract(const Duration(days: 120));
+    await db.addSms([
+      SmsRow(hash: 'c-old-up', ts: old, direction: 'in', address: '7275', body: 'a'),
+      SmsRow(hash: 'c-old-wait', ts: old, direction: 'in', address: '7275', body: 'b'),
+      SmsRow(hash: 'c-new-up', ts: DateTime.now(), direction: 'in', address: '7275', body: 'c'),
+    ]);
+    await db.markSms(['c-old-up', 'c-new-up']);
+    final n = await db.cleanup(90);
+    expect(n, 1);
+    final left = (await db.sms()).map((r) => r.hash).toSet();
+    expect(left.containsAll({'c-old-wait', 'c-new-up'}), isTrue);
+    expect(left.contains('c-old-up'), isFalse);
   });
 }

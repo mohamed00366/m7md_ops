@@ -38,3 +38,26 @@ class VipCalls {
     ];
   }
 }
+
+/// Device Owner and app update (a plugin, so it works from the 15-minute background job too).
+class VipDevice {
+  static const _ch = MethodChannel('vip_calls');
+
+  static Future<T?> _call<T>(String m, [Map<String, dynamic>? a]) async {
+    try {
+      return await _ch.invokeMethod<T>(m, a);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<List<String>> abis() async => [for (final x in (await _call<List<dynamic>>('abis')) ?? const []) '$x'];
+  static Future<bool> owner() async => await _call<bool>('owner') ?? false;
+  static Future<Map<String, dynamic>> ownerSetup() async => (await _call<Map<dynamic, dynamic>>('ownerSetup'))?.cast<String, dynamic>() ?? const {};
+  static Future<bool> ownerRelease() async => await _call<bool>('ownerRelease') ?? false;
+  static Future<bool> canInstall() async => await _call<bool>('canInstall') ?? false;
+  static Future<bool> installSettings() async => await _call<bool>('installSettings') ?? false;
+
+  /// 'silent' (Device Owner), 'screen' (Android asks), or an error.
+  static Future<String> install(String path) async => await _call<String>('install', {'path': path}) ?? 'error';
+}

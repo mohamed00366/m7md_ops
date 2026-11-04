@@ -11,6 +11,7 @@ import '../core/report.dart';
 import '../core/rta.dart';
 import '../core/store.dart';
 import '../core/sync.dart';
+import '../core/update.dart';
 import '../main.dart';
 import 'settings_screen.dart';
 
@@ -30,6 +31,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _last = '';
   List<SmsRow> _recent = const [];
   bool _demoAdmin = false;
+  bool _owner = false;
+  double? _upProgress;
+  String _upMsg = '';
+  int _forceShown = 0;
 
   void _set(VoidCallback f) => setState(f);
 
@@ -68,13 +73,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final recent = await db.sms(limit: 30);
     final sms = FleetDemo.on || await Permission.sms.isGranted, calls = FleetDemo.on || await VipCalls.granted();
     final battery = FleetDemo.on || await Permission.ignoreBatteryOptimizations.isGranted;
+    final owner = !FleetDemo.on && await VipDevice.owner();
     if (!mounted) return;
     setState(() {
       _p = p;
       _sms = sms;
       _calls = calls;
       _battery = battery;
-      _admin = admin;
+      _admin = admin || owner;
+      _owner = owner;
       _counts = c;
       _recent = recent;
     });
@@ -90,7 +97,70 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _last = r.toString();
     });
     await _refresh();
+    _maybeForce();
   }
+
+  /// "Must update" from the dashboard: asked every time the app is opened (recording goes on meanwhile).
+  void _maybeForce() {
+    final u = AppUpdate.of(_p?.config ?? const {});
+    if (u == null || !u.force || _forceShown == u.build || !mounted) return;
+    _forceShown = u.build;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text('Update to ${u.version}'),
+        content: Text('The company asks every device to update.${u.notes.isEmpty ? '' : '\n\n${u.notes}'}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Later')),
+          FilledButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _update(u);
+              },
+              child: const Text('Update')),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _update(AppUpdate u) async {
+    if (FleetDemo.on) return;
+    setState(() {
+      _upProgress = 0;
+      _upMsg = '';
+    });
+    final e = await FleetUpdater.run(u, progress: (v) {
+      if (mounted) setState(() => _upProgress = v);
+    });
+    if (!mounted) return;
+    setState(() {
+      _upProgress = null;
+      _upMsg = e ?? (_owner ? 'Installing… the app restarts by itself.' : 'Press Install on the Android screen.');
+    });
+  }
+
+  Widget _updateCard(AppUpdate u) => Card(
+        color: u.force ? const Color(0xFFFFEDED) : const Color(0xFFFFF8E1),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Icon(Icons.system_update, color: u.force ? FleetColors.bad : FleetColors.warn),
+              const SizedBox(width: 10),
+              Expanded(child: Text('New version ${u.version}${u.force ? ' – please update' : ''}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))),
+            ]),
+            if (u.notes.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(u.notes)),
+            Text('This device: $kAppVersion', style: const TextStyle(color: FleetColors.muted, fontSize: 12.5)),
+            const SizedBox(height: 8),
+            if (_upProgress != null)
+              LinearProgressIndicator(value: _upProgress == 0 ? null : _upProgress)
+            else
+              FilledButton.icon(onPressed: () => _update(u), icon: const Icon(Icons.download), label: const Text('Update')),
+            if (_upMsg.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(_upMsg, style: const TextStyle(fontSize: 12.5))),
+          ]),
+        ),
+      );
 
   Future<void> _askSms() async {
     final s = await Permission.sms.request();
@@ -202,6 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         onRefresh: () => _sync(),
         child: ListView(padding: const EdgeInsets.all(16), children: [
           if (FleetDemo.on) _demoPanel(),
+          if (AppUpdate.of(cfg) case final u?) _updateCard(u),
           if (cfg['active'] == false)
             const Card(
               color: Color(0xFFFFEDED),
@@ -239,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   await Permission.ignoreBatteryOptimizations.request();
                   await _refresh();
                 }),
-                perm(Icons.shield_outlined, 'Protection', _admin ? 'The app cannot be removed' : 'Stops the app being removed', _admin,
+                perm(Icons.shield_outlined, 'Protection', _owner ? 'Device Owner: cannot be removed, permissions given' : _admin ? 'The app cannot be removed' : 'Stops the app being removed', _admin,
                     () async {
                   if (FleetDemo.on) {
                     setState(() => _demoAdmin = true);

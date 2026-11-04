@@ -11,6 +11,9 @@ import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
 class MainActivity : FlutterActivity() {
     private var callsResult: MethodChannel.Result? = null
@@ -62,6 +65,18 @@ class MainActivity : FlutterActivity() {
                     } else {
                         callsResult = result
                         requestPermissions(arrayOf(Manifest.permission.READ_CALL_LOG, Manifest.permission.READ_PHONE_STATE), CALLS_CODE)
+                    }
+                }
+                // the device key from the QR on the dashboard ("" when cancelled)
+                "scanQr" -> {
+                    try {
+                        val o = GmsBarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
+                        GmsBarcodeScanning.getClient(this, o).startScan()
+                            .addOnSuccessListener { b -> result.success(b.rawValue ?: "") }
+                            .addOnCanceledListener { result.success("") }
+                            .addOnFailureListener { e -> result.error("scan", e.message, null) }
+                    } catch (e: Exception) {
+                        result.error("scan", e.message, null)
                     }
                 }
                 "appSettings" -> {

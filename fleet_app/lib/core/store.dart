@@ -57,6 +57,16 @@ class Prefs {
   Future<void> setLockedUntil(DateTime? v) => v == null ? _p.remove('locked_until') : _p.setString('locked_until', v.toIso8601String());
 
   // ---------------------------------------------------------------- Excel / email options (on the device)
+  // 1.0.5: the clean-up once a day; the last update tried in the background (build, time)
+  DateTime? get lastCleanup => _t('last_cleanup');
+  Future<void> setLastCleanup(DateTime v) => _p.setString('last_cleanup', v.toIso8601String());
+  int get updateTriedBuild => _p.getInt('update_tried_build') ?? 0;
+  DateTime? get updateTriedAt => _t('update_tried_at');
+  Future<void> setUpdateTried(int build) async {
+    await _p.setInt('update_tried_build', build);
+    await _p.setString('update_tried_at', DateTime.now().toIso8601String());
+  }
+
   bool get excelOn => _p.getBool('excel_on') ?? true;
   Future<void> setExcelOn(bool v) => _p.setBool('excel_on', v);
   bool get uploadOn => _p.getBool('upload_on') ?? true; // the device side of "upload" (the dashboard has its own switch)
@@ -254,6 +264,25 @@ class LocalDb {
     }
     await d.update('sms', {'uploaded': 0});
     await d.update('calls', {'uploaded': 0});
+  }
+
+  /// Clean-up: records already uploaded and older than [days] leave the device (they stay on the server).
+  /// What is not uploaded yet is never removed. Returns how many were removed.
+  Future<int> cleanup(int days) async {
+    final cut = DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch;
+    final d = db;
+    if (d == null) {
+      var n = 0;
+      for (final m in [_sms, _calls]) {
+        final old = m.entries.where((e) => e.value['uploaded'] == 1 && (e.value['ts'] as int) < cut).map((e) => e.key).toList();
+        n += old.length;
+        old.forEach(m.remove);
+      }
+      return n;
+    }
+    final a = await d.delete('sms', where: 'uploaded = 1 and ts < ?', whereArgs: [cut]);
+    final b = await d.delete('calls', where: 'uploaded = 1 and ts < ?', whereArgs: [cut]);
+    return a + b;
   }
 
   Future<void> markSms(Iterable<String> hashes) => _mark('sms', _sms, hashes);

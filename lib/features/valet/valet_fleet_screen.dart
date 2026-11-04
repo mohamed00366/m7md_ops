@@ -16,8 +16,8 @@ class ValetFleetScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ValetGate(
         child: DefaultTabController(
-          length: 4,
-          initialIndex: initialTab.clamp(0, 3),
+          length: 6,
+          initialIndex: initialTab.clamp(0, 5),
           child: Column(children: [
             Material(
               color: Theme.of(context).colorScheme.surface,
@@ -26,9 +26,11 @@ class ValetFleetScreen extends StatelessWidget {
                 Tab(icon: const Icon(Icons.sms_outlined, size: 18), text: tx(context, 'الرَسايل', 'Messages')),
                 Tab(icon: const Icon(Icons.call_outlined, size: 18), text: tx(context, 'المُكالَمات', 'Calls')),
                 Tab(icon: const Icon(Icons.calendar_month_outlined, size: 18), text: tx(context, 'مُلَخَّص يَوميّ', 'Daily summary')),
+                Tab(icon: const Icon(Icons.insights_outlined, size: 18), text: tx(context, 'تَقرير شَهريّ', 'Monthly report')),
+                Tab(icon: const Icon(Icons.person_search_outlined, size: 18), text: tx(context, 'بَحث بِالرَقَم', 'Search a number')),
               ]),
             ),
-            const Expanded(child: TabBarView(children: [_Devices(), _Log(kind: 'sms'), _Log(kind: 'calls'), _Log(kind: 'daily')])),
+            const Expanded(child: TabBarView(children: [_Devices(), _Log(kind: 'sms'), _Log(kind: 'calls'), _Log(kind: 'daily'), _Month(), _Search()])),
           ]),
         ),
       );
@@ -45,6 +47,7 @@ class _Devices extends StatefulWidget {
 class _DevicesState extends State<_Devices> {
   List<VJson>? _items;
   VJson? _alerts;
+  VJson _latest = const {};
   List<VJson> _points = const [];
   Object? _err;
   bool get _edit => ValetAdmin.I.can(ValetAdmin.permSettings);
@@ -61,7 +64,12 @@ class _DevicesState extends State<_Devices> {
   Future<void> _load() async {
     try {
       final r = await ValetAdmin.I.call('vva_fleet_devices');
-      if (mounted) setState(() => _items = vList(r['items']));
+      if (mounted) {
+        setState(() {
+          _items = vList(r['items']);
+          _latest = vMap(r['latest']);
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => _err = e);
     }
@@ -128,6 +136,21 @@ class _DevicesState extends State<_Devices> {
                       tx(ctx, 'الجِهاز ده بِيِبعَت مُلَخَّص اليوم لِكُلّ الشَرِكة مَع إيميله اليَوميّ (لازِم الإيميل يِكون شَغّال في التَطبيق عَليه).',
                           'This device adds the summary of the whole company to its daily e-mail (its e-mail must be on in the app).'),
                       style: const TextStyle(color: VC.muted, fontSize: 12)),
+                  if (v.containsKey('monthly_email')) ...[
+                    const Divider(),
+                    Text(tx(ctx, 'التَقرير الشَهريّ', 'Monthly report'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                    sw('monthly_email', 'تَقرير الشَهر اللي فات في إيميل يوم 1', 'Last month in the e-mail of the 1st'),
+                    const SizedBox(height: 4),
+                    Text(tx(ctx, 'مُكالَمة فايتة تِعتِبِر «ما اترَدّش عَلَيها» لَو مَفيش رَدّ خِلال:', 'A missed call counts as "not called back" with no call within:'),
+                        style: const TextStyle(fontSize: 12.5)),
+                    const SizedBox(height: 4),
+                    SegmentedButton<int>(
+                      showSelectedIcon: false,
+                      segments: [for (final h in const [1, 2, 4, 8, 24]) ButtonSegment(value: h, label: Text(tx(ctx, '$h س', '$h h')))],
+                      selected: {const [1, 2, 4, 8, 24].contains(v['missed_hours']) ? v['missed_hours'] as int : 2},
+                      onSelectionChanged: (x) => set(() => v['missed_hours'] = x.first),
+                    ),
+                  ],
                 ]),
               ),
             ),
@@ -142,6 +165,146 @@ class _DevicesState extends State<_Devices> {
     if (ok != true || !mounted) return;
     final r = await vGuard(context, () => ValetAdmin.I.call('vva_fleet_alerts_save', {'p_data': v}), ok: tx(context, 'تَمّ الحِفظ.', 'Saved.'));
     if (r != null && mounted) setState(() => _alerts = r);
+  }
+
+  /// DB 343: the newest VIP Settings for the devices (links of the files, and whether it is a must).
+  Future<void> _updateSettings() async {
+    final st = vMap(_alerts?['settings']);
+    if (!st.containsKey('update_mode')) return;
+    final ver = TextEditingController(text: vStr(st['app_version']));
+    final build = TextEditingController(text: st['app_build'] == null ? '' : '${st['app_build']}');
+    final a64 = TextEditingController(text: vStr(st['apk_arm64']));
+    final a32 = TextEditingController(text: vStr(st['apk_arm32']));
+    final notes = TextEditingController(text: vStr(st['update_notes']));
+    var mode = vStr(st['update_mode']).isEmpty ? 'off' : vStr(st['update_mode']);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text(tx(ctx, 'تَحديث تَطبيق VIP Settings', 'VIP Settings app update')),
+          content: SizedBox(
+            width: 480,
+            child: SingleChildScrollView(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                SegmentedButton<String>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: 'off', label: Text(tx(ctx, 'مَقفول', 'Off'))),
+                    ButtonSegment(value: 'notify', label: Text(tx(ctx, 'تَنبيه «حَدِّث»', 'Show "Update"'))),
+                    ButtonSegment(value: 'force', label: Text(tx(ctx, 'لازِم يِتحَدِّث', 'Must update'))),
+                  ],
+                  selected: {mode},
+                  onSelectionChanged: (x) => set(() => mode = x.first),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                    tx(ctx, 'الأَجهِزة اللي عَليها إصدار أَقدَم بِيِظهَرلَها زُرار «حَدِّث». الـ Device Owner بِيِتحَدِّث لِوَحده مِن غير ما يِسأَل.',
+                        'Devices with an older version see an "Update" button. A Device Owner updates by itself.'),
+                    style: const TextStyle(color: VC.muted, fontSize: 12)),
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(child: TextField(controller: ver, decoration: InputDecoration(labelText: tx(ctx, 'الإصدار', 'Version'), hintText: '1.0.5'))),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                      width: 120,
+                      child: TextField(
+                          controller: build,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          decoration: InputDecoration(labelText: tx(ctx, 'رَقَم البِناء', 'Build'), hintText: '6'))),
+                ]),
+                const SizedBox(height: 8),
+                TextField(controller: a64, decoration: InputDecoration(labelText: tx(ctx, 'رابِط arm64 (الأَجهِزة الحَديثة)', 'arm64 link (newer devices)'))),
+                const SizedBox(height: 8),
+                TextField(controller: a32, decoration: InputDecoration(labelText: tx(ctx, 'رابِط armeabi-v7a (الأَجهِزة القَديمة)', 'armeabi-v7a link (older devices)'))),
+                const SizedBox(height: 8),
+                TextField(controller: notes, maxLines: 2, decoration: InputDecoration(labelText: tx(ctx, 'إيه الجَديد (يِظهَر عَلى الجِهاز)', 'What is new (shown on the device)'))),
+              ]),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'حِفظ', 'Save'))),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final r = await vGuard(
+        context,
+        () => ValetAdmin.I.call('vva_fleet_alerts_save', {
+              'p_data': {'update_mode': mode, 'app_version': ver.text.trim(), 'app_build': build.text.trim(), 'apk_arm64': a64.text.trim(), 'apk_arm32': a32.text.trim(), 'update_notes': notes.text.trim()}
+            }),
+        ok: tx(context, 'تَمّ الحِفظ.', 'Saved.'));
+    if (r != null && mounted) {
+      setState(() => _alerts = r);
+      await _load();
+    }
+  }
+
+  /// DB 343: clean-up of the device – uploaded records older than N days leave the device (they stay here).
+  Future<void> _cleanup(VJson d) async {
+    var on = vBool(d['cleanup_on']);
+    var days = vNum(d['cleanup_days']).toInt();
+    if (days < 7) days = 90;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text(tx(ctx, 'تَنظيف الجِهاز · ${d['name']}', 'Device clean-up · ${d['name']}')),
+          content: SizedBox(
+            width: 440,
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(tx(ctx, 'امسَح السِجِلّات القَديمة مِن الجِهاز', 'Remove old records from the device')),
+                value: on,
+                onChanged: (x) => set(() => on = x),
+              ),
+              SegmentedButton<int>(
+                showSelectedIcon: false,
+                segments: [for (final n in const [30, 60, 90, 180, 365]) ButtonSegment(value: n, label: Text(tx(ctx, '$n يوم', '$n d')))],
+                selected: {const [30, 60, 90, 180, 365].contains(days) ? days : 90},
+                onSelectionChanged: on ? (x) => set(() => days = x.first) : null,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                  tx(ctx, 'بِيِتمِسِح بَسّ اللي اترَفَع لِلسيرفَر وَعَدّى عَلَيه المُدّة دي. اللي لِسّه ما اترَفَعش عُمره ما يِتمِسِح، وَكُلّه بِيِفضَل هِنا في الداشبورد. مَرّة في اليوم.',
+                      'Only what reached the server and is older than this. What is not uploaded is never removed; everything stays here in the dashboard. Once a day.'),
+                  style: const TextStyle(color: VC.muted, fontSize: 12)),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'حِفظ', 'Save'))),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await vGuard(context, () => ValetAdmin.I.call('vva_fleet_device_opts', {'p_id': d['id'], 'p_data': {'cleanup_on': on, 'cleanup_days': days}}),
+        ok: tx(context, 'تَمّ الحِفظ.', 'Saved.'));
+    await _load();
+  }
+
+  /// DB 343: the device stops being Device Owner (then it can be removed like any app).
+  Future<void> _release(VJson d) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tx(ctx, 'فَكّ الـ Device Owner', 'Release Device Owner')),
+        content: Text(tx(ctx, '«${d['name']}» هَيِبطَل Device Owner في أَوِّل فَحص، وَبَعدها التَطبيق يِتشال عادي. التَسجيل بِيِكَمِّل. مُتَأَكِّد؟',
+            '"${d['name']}" stops being Device Owner at its next check; then the app can be removed normally. Recording goes on. Sure?')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'لا', 'No'))),
+          FilledButton(style: FilledButton.styleFrom(backgroundColor: VC.bad), onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'فُكّ', 'Release'))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await vGuard(context, () => ValetAdmin.I.call('vva_fleet_command', {'p_id': d['id'], 'p_cmd': 'owner_release', 'p_days': 0}),
+        ok: tx(context, 'اتبَعَت لِلجِهاز.', 'Sent to the device.'));
+    await _load();
   }
 
   Future<VJson?> _save(String? id, Map<String, dynamic> data, {bool newKey = false}) async {
@@ -323,6 +486,11 @@ class _DevicesState extends State<_Devices> {
           actions: [
             if (_edit && _alerts != null)
               IconButton.filledTonal(tooltip: tx(context, 'التَنبيهات وَالمُلَخَّص', 'Alerts and summary'), onPressed: _alertSettings, icon: const Icon(Icons.notifications_active_outlined)),
+            if (_edit && vMap(_alerts?['settings']).containsKey('update_mode'))
+              IconButton.filledTonal(
+                  tooltip: tx(context, 'تَحديث التَطبيق', 'App update'),
+                  onPressed: _updateSettings,
+                  icon: Badge(isLabelVisible: vStr(_latest['mode']) != 'off' && _latest['build'] != null, child: const Icon(Icons.system_update_outlined))),
             if (_edit) FilledButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: Text(tx(context, 'جِهاز جَديد', 'Add device'))),
             IconButton.filledTonal(tooltip: tx(context, 'تَحديث', 'Refresh'), onPressed: _load, icon: const Icon(Icons.refresh)),
           ],
@@ -376,11 +544,15 @@ class _DevicesState extends State<_Devices> {
             onSelected: (v) => switch (v) {
               'edit' => _editDevice(d),
               'key' => _newKey(d),
+              'clean' => _cleanup(d),
+              'release' => _release(d),
               _ => _stop(d),
             },
             itemBuilder: (_) => [
               PopupMenuItem(value: 'edit', child: Text(tx(context, 'تَعديل · الأَرقام المُراقَبة', 'Edit · watched numbers'))),
               PopupMenuItem(value: 'key', child: Text(tx(context, 'مِفتاح جَديد', 'New key'))),
+              if (d.containsKey('cleanup_on')) PopupMenuItem(value: 'clean', child: Text(tx(context, 'تَنظيف الجِهاز', 'Device clean-up'))),
+              if (vMap(d['health'])['owner'] == true) PopupMenuItem(value: 'release', child: Text(tx(context, 'فَكّ الـ Device Owner', 'Release Device Owner'))),
               PopupMenuItem(value: 'stop', child: Text(tx(context, 'إيقاف الجِهاز', 'Stop the device'), style: const TextStyle(color: VC.bad))),
             ],
           ),
@@ -401,6 +573,7 @@ class _DevicesState extends State<_Devices> {
             '${tx(context, 'آخِر ظُهور', 'Last seen')}: ${VF.dt(seen)} · ${tx(context, 'آخِر رَفع', 'Last upload')}: ${VF.dt(vTime(d['last_upload']))}',
             [vStr(d['model']), if (vStr(d['app_version']).isNotEmpty) 'v${d['app_version']}', if (vStr(d['holder']).isNotEmpty) vStr(d['holder']),
               if (vStr(d['key_hint']).isNotEmpty) '${tx(context, 'المِفتاح', 'key')} …${d['key_hint']}'].where((x) => x.isNotEmpty).join(' · '),
+            if (vBool(d['cleanup_on'])) tx(context, 'تَنظيف: اللي اترَفَع وَأَقدَم مِن ${d['cleanup_days']} يوم بِيِتمِسِح مِن الجِهاز', 'Clean-up: uploaded records older than ${d['cleanup_days']} days leave the device'),
             if (vStr(d['note']).isNotEmpty) vStr(d['note']),
           ].where((x) => x.trim().isNotEmpty).join('\n'),
           style: const TextStyle(color: VC.muted, fontSize: 12.5, height: 1.5),
@@ -427,6 +600,9 @@ class _DevicesState extends State<_Devices> {
         if (vBool(d['log_calls'])) pill(h['calls'] as bool?, 'سِجِلّ المُكالَمات', 'Call log'),
         pill(h['admin'] as bool?, 'الحِماية', 'Protection'),
         pill(h['battery'] as bool?, 'شَغّال مَع تَوفير البَطّاريّة', 'Kept running'),
+        if (h['owner'] == true) const VPill('Device Owner', color: VC.ok, icon: Icons.verified_user_outlined),
+        if (_latest['build'] != null && vNum(h['build']) < vNum(_latest['build']))
+          VPill(tx(context, 'إصدار قَديم v${d['app_version']} ← ${_latest['version']}', 'Old v${d['app_version']} → ${_latest['version']}'), color: VC.warn, icon: Icons.system_update_outlined),
         if (vNum(h['waiting']) > 0) VPill(tx(context, '${h['waiting']} مُستَنّي رَفع', '${h['waiting']} waiting upload'), color: VC.warn),
         if (vStr(h['error']).isNotEmpty) Tooltip(message: vStr(h['error']), child: VPill(tx(context, 'آخِر خَطَأ', 'Last error'), color: VC.bad, icon: Icons.error_outline)),
       ]),
@@ -708,5 +884,327 @@ class _LogState extends State<_Log> {
           ),
       ]),
     );
+  }
+}
+
+// ================================================================ monthly report (DB 343)
+class _Month extends StatefulWidget {
+  const _Month();
+
+  @override
+  State<_Month> createState() => _MonthState();
+}
+
+class _MonthState extends State<_Month> {
+  late DateTime _m;
+  String? _device;
+  List<VJson> _devices = const [];
+  VJson? _d;
+  Object? _err;
+
+  @override
+  void initState() {
+    super.initState();
+    final n = DateTime.now();
+    _m = DateTime(n.year, n.month);
+    ValetAdmin.I.call('vva_fleet_devices').then((r) {
+      if (mounted) setState(() => _devices = vList(r['items']));
+    }).catchError((_) {});
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _err = null;
+      _d = null;
+    });
+    try {
+      final d = await ValetAdmin.I.call('vva_fleet_month', {'p_month': VF.iso(_m), 'p_device': _device});
+      if (mounted) setState(() => _d = d);
+    } catch (e) {
+      if (mounted) setState(() => _err = e);
+    }
+  }
+
+  void _move(int k) {
+    setState(() => _m = DateTime(_m.year, _m.month + k));
+    _load();
+  }
+
+  Future<void> _export() async {
+    final d = _d;
+    if (d == null) return;
+    await vExport(context, 'vip_lines_${vStr(d['month'])}', [
+      ExcelSheet(
+        name: 'Lines',
+        headers: const ['Device', 'Point', 'SMS sent', 'SMS received', 'Calls out', 'Calls in', 'Missed', 'Not called back', 'Talk (min)'],
+        rows: [
+          for (final x in vList(d['devices']))
+            [vStr(x['name']), vStr(x['point']), vNum(x['sms_out']), vNum(x['sms_in']), vNum(x['calls_out']), vNum(x['calls_in']), vNum(x['missed']), vNum(x['not_called_back']), vNum(x['talk_min'])],
+        ],
+      ),
+      ExcelSheet(
+        name: 'Top numbers',
+        headers: const ['Number', 'Name', 'SMS', 'Calls', 'Total'],
+        rows: [for (final x in vList(d['top'])) [vStr(x['number']), vStr(x['name']), vNum(x['sms']), vNum(x['calls']), vNum(x['total'])]],
+      ),
+      ExcelSheet(
+        name: 'Not called back',
+        headers: const ['Time', 'Device', 'Number', 'Name', 'Type'],
+        rows: [for (final x in vList(d['missed_list'])) [vTime(x['at']), vStr(x['device']), vStr(x['number']), vStr(x['name']), vStr(x['type'])]],
+      ),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final d = _d;
+    final devs = vList(d?['devices']);
+    num sum(String k) => devs.fold<num>(0, (a, x) => a + vNum(x[k]));
+    final now = DateTime.now();
+    final last = _m.year == now.year && _m.month == now.month;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            IconButton.filledTonal(tooltip: tx(context, 'الشَهر اللي فات', 'Previous month'), onPressed: () => _move(-1), icon: Icon(rtl ? Icons.chevron_right : Icons.chevron_left)),
+            Text('${_m.month.toString().padLeft(2, '0')}/${_m.year}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+            IconButton.filledTonal(tooltip: tx(context, 'الشَهر اللي بَعده', 'Next month'), onPressed: last ? null : () => _move(1), icon: Icon(rtl ? Icons.chevron_left : Icons.chevron_right)),
+            DropdownButton<String?>(
+              value: _devices.any((x) => vStr(x['id']) == _device) ? _device : null,
+              hint: Text(tx(context, 'كُلّ الأَجهِزة', 'All devices')),
+              items: [
+                DropdownMenuItem<String?>(value: null, child: Text(tx(context, 'كُلّ الأَجهِزة', 'All devices'))),
+                for (final x in _devices) DropdownMenuItem<String?>(value: vStr(x['id']), child: Text(vStr(x['name']))),
+              ],
+              onChanged: (v) {
+                setState(() => _device = v);
+                _load();
+              },
+            ),
+            IconButton.filledTonal(tooltip: 'Excel', onPressed: d == null ? null : _export, icon: const Icon(Icons.download)),
+          ]),
+        ),
+        if (_err != null) Padding(padding: const EdgeInsets.all(16), child: Text(vErr(context, _err!), style: const TextStyle(color: VC.bad))),
+        if (d == null && _err == null) const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator())),
+        if (d != null) ...[
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(spacing: 10, runSpacing: 10, children: [
+              VKpi(tx(context, 'رَسايل', 'SMS'), VF.n(sum('sms_out') + sum('sms_in')), icon: Icons.sms_outlined, color: VC.info,
+                  note: tx(context, '${VF.n(sum('sms_out'))} صادِر · ${VF.n(sum('sms_in'))} وارِد', '${VF.n(sum('sms_out'))} out · ${VF.n(sum('sms_in'))} in')),
+              VKpi(tx(context, 'مُكالَمات', 'Calls'), VF.n(sum('calls_out') + sum('calls_in')), icon: Icons.call_outlined, color: VC.ok,
+                  note: tx(context, '${VF.n(sum('calls_out'))} صادِر · ${VF.n(sum('calls_in'))} وارِد', '${VF.n(sum('calls_out'))} out · ${VF.n(sum('calls_in'))} in')),
+              VKpi(tx(context, 'فايتة', 'Missed'), VF.n(sum('missed')), icon: Icons.phone_missed_outlined, color: VC.warn),
+              VKpi(tx(context, 'ما اترَدّش عَلَيها', 'Not called back'), VF.n(sum('not_called_back')), icon: Icons.phone_callback_outlined, color: VC.bad,
+                  note: tx(context, 'مَفيش رَدّ خِلال ${d['missed_hours']} س', 'no call within ${d['missed_hours']} h')),
+              VKpi(tx(context, 'دَقايق كَلام', 'Talk minutes'), VF.n(sum('talk_min')), icon: Icons.timer_outlined),
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: VPanel(
+              title: tx(context, 'كُلّ خَطّ', 'Each line'),
+              child: VTable(
+                empty: tx(context, 'مَفيش أَجهِزة', 'No devices'),
+                columns: [
+                  DataColumn(label: Text(tx(context, 'الجِهاز', 'Device'))),
+                  DataColumn(label: Text(tx(context, 'رَسايل صادِر', 'SMS out')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'رَسايل وارِد', 'SMS in')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'مُكالَمات صادِر', 'Calls out')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'مُكالَمات وارِد', 'Calls in')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'فايتة', 'Missed')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'ما اترَدّش', 'Not called back')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'دَقايق', 'Minutes')), numeric: true),
+                ],
+                rows: [
+                  for (final x in devs)
+                    DataRow(cells: [
+                      DataCell(Text('${x['name']}${vStr(x['point']).isEmpty ? '' : ' · ${x['point']}'}')),
+                      DataCell(Text(VF.n(vNum(x['sms_out'])))),
+                      DataCell(Text(VF.n(vNum(x['sms_in'])))),
+                      DataCell(Text(VF.n(vNum(x['calls_out'])))),
+                      DataCell(Text(VF.n(vNum(x['calls_in'])))),
+                      DataCell(Text(VF.n(vNum(x['missed'])))),
+                      DataCell(vNum(x['not_called_back']) > 0 ? VPill(VF.n(vNum(x['not_called_back'])), color: VC.bad) : const Text('0')),
+                      DataCell(Text(VF.n(vNum(x['talk_min'])))),
+                    ]),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: VPanel(
+              title: tx(context, 'أَكتَر 10 أَرقام', 'Top 10 numbers'),
+              child: VTable(
+                empty: tx(context, 'مَفيش', 'None'),
+                columns: [
+                  DataColumn(label: Text(tx(context, 'الرَقَم', 'Number'))),
+                  DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
+                  const DataColumn(label: Text('SMS'), numeric: true),
+                  DataColumn(label: Text(tx(context, 'مُكالَمات', 'Calls')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
+                ],
+                rows: [
+                  for (final x in vList(d['top']))
+                    DataRow(cells: [
+                      DataCell(Text(vStr(x['number']), textDirection: TextDirection.ltr)),
+                      DataCell(Text(vStr(x['name']))),
+                      DataCell(Text(VF.n(vNum(x['sms'])))),
+                      DataCell(Text(VF.n(vNum(x['calls'])))),
+                      DataCell(Text(VF.n(vNum(x['total'])), style: const TextStyle(fontWeight: FontWeight.w800))),
+                    ]),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: VPanel(
+              title: tx(context, 'مُكالَمات فايتة ما اترَدّش عَلَيها (${vList(d['missed_list']).length})', 'Missed calls not called back (${vList(d['missed_list']).length})'),
+              child: VTable(
+                empty: tx(context, 'كُلّه اترَدّ عَلَيه 👍', 'All called back 👍'),
+                columns: [
+                  DataColumn(label: Text(tx(context, 'الوَقت', 'Time'))),
+                  DataColumn(label: Text(tx(context, 'الجِهاز', 'Device'))),
+                  DataColumn(label: Text(tx(context, 'الرَقَم', 'Number'))),
+                  DataColumn(label: Text(tx(context, 'الاسم', 'Name'))),
+                ],
+                rows: [
+                  for (final x in vList(d['missed_list']))
+                    DataRow(cells: [
+                      DataCell(Text(VF.dt(vTime(x['at'])))),
+                      DataCell(Text(vStr(x['device']))),
+                      DataCell(Text(vStr(x['number']), textDirection: TextDirection.ltr)),
+                      DataCell(Text(vStr(x['name']))),
+                    ]),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ]),
+    );
+  }
+}
+
+// ================================================================ one number over all devices (DB 343)
+class _Search extends StatefulWidget {
+  const _Search();
+
+  @override
+  State<_Search> createState() => _SearchState();
+}
+
+class _SearchState extends State<_Search> {
+  final _q = TextEditingController();
+  List<VJson>? _items;
+  String _msg = '';
+  bool _busy = false;
+
+  Future<void> _go() async {
+    final q = _q.text.trim();
+    if (q.isEmpty) return;
+    setState(() {
+      _busy = true;
+      _msg = '';
+    });
+    try {
+      final r = await ValetAdmin.I.call('vva_fleet_search', {'p_q': q, 'p_limit': 500});
+      if (!mounted) return;
+      setState(() {
+        if (r['ok'] == false) {
+          _items = null;
+          _msg = tx(context, 'اكتِب 4 أَرقام عَلى الأَقَلّ', 'Type at least 4 digits');
+        } else {
+          _items = vList(r['items']);
+        }
+      });
+    } catch (e) {
+      if (mounted) setState(() => _msg = vErr(context, e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _items;
+    final sms = items?.where((x) => x['kind'] == 'sms').length ?? 0;
+    final devs = items?.map((x) => vStr(x['device'])).toSet().length ?? 0;
+    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        child: Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          SizedBox(
+            width: 300,
+            child: TextField(
+              controller: _q,
+              autofocus: true,
+              textDirection: TextDirection.ltr,
+              decoration: InputDecoration(
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: tx(context, 'رَقَم العَميل (أَو آخِره)', 'Customer number (or its end)'),
+                  hintText: '0501234567 · 1234567'),
+              onSubmitted: (_) => _go(),
+            ),
+          ),
+          FilledButton.icon(onPressed: _busy ? null : _go, icon: const Icon(Icons.person_search), label: Text(tx(context, 'دَوَّر في كُلّ الأَجهِزة', 'Search all devices'))),
+          if (_busy) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+        ]),
+      ),
+      if (_msg.isNotEmpty) Padding(padding: const EdgeInsets.all(16), child: Text(_msg, style: const TextStyle(color: VC.bad))),
+      if (items == null && _msg.isEmpty)
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(tx(context, 'اكتِب رَقَم عَميل وَشوف كُلّ الرَسايل وَالمُكالَمات مَعاه مِن كُلّ أَجهِزة الشَرِكة عَلى خَطّ زَمَنيّ واحِد. 050 123 4567 هو نَفسه +971501234567.',
+              'Type a customer number to see every SMS and call with it from all company devices on one timeline. 050 123 4567 is the same as +971501234567.'),
+              style: const TextStyle(color: VC.muted)),
+        ),
+      if (items != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: VPanel(
+            title: tx(context, '${items.length} نَتيجة · $sms رِسالة · ${items.length - sms} مُكالَمة · $devs جِهاز',
+                '${items.length} results · $sms SMS · ${items.length - sms} calls · $devs device(s)'),
+            child: VTable(
+              empty: tx(context, 'مَفيش حاجة لِلرَقَم ده', 'Nothing for this number'),
+              columns: [
+                DataColumn(label: Text(tx(context, 'الوَقت', 'Time'))),
+                DataColumn(label: Text(tx(context, 'الجِهاز', 'Device'))),
+                DataColumn(label: Text(tx(context, 'النَوع', 'Type'))),
+                DataColumn(label: Text(tx(context, 'الرَقَم', 'Number'))),
+                DataColumn(label: Text(tx(context, 'التَفاصيل', 'Details'))),
+              ],
+              rows: [
+                for (final x in items)
+                  DataRow(cells: [
+                    DataCell(Text(VF.dt(vTime(x['at'])))),
+                    DataCell(Text(vStr(x['device']))),
+                    DataCell(x['kind'] == 'sms'
+                        ? VPill(x['dir'] == 'out' ? tx(context, 'SMS صادِر', 'SMS out') : tx(context, 'SMS وارِد', 'SMS in'), color: VC.info,
+                            icon: x['dir'] == 'out' ? Icons.north_east : Icons.south_west)
+                        : VPill(vStr(x['dir']), color: switch (vStr(x['dir'])) { 'missed' || 'rejected' => VC.bad, 'outgoing' => VC.info, _ => VC.ok },
+                            icon: Icons.call_outlined)),
+                    DataCell(Text('${x['number']}${vStr(x['name']).isEmpty ? '' : ' · ${x['name']}'}', textDirection: TextDirection.ltr)),
+                    DataCell(ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 380),
+                      child: x['kind'] == 'sms'
+                          ? Tooltip(message: vStr(x['body']), child: Text(vStr(x['body']).replaceAll('\n', ' · '), maxLines: 2, overflow: TextOverflow.ellipsis))
+                          : Text(tx(context, 'المُدّة ${vNum(x['sec']) ~/ 60}:${(vNum(x['sec']) % 60).toInt().toString().padLeft(2, '0')}',
+                              'Duration ${vNum(x['sec']) ~/ 60}:${(vNum(x['sec']) % 60).toInt().toString().padLeft(2, '0')}')),
+                    )),
+                  ]),
+              ],
+            ),
+          ),
+        ),
+    ]);
   }
 }
