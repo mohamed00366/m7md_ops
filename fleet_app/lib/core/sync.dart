@@ -12,7 +12,7 @@ import 'demo.dart';
 import 'report.dart';
 import 'store.dart';
 
-const kAppVersion = '1.0.2';
+const kAppVersion = '1.0.3';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {

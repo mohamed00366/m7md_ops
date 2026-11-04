@@ -183,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
         const SizedBox(height: 12),
-        const Text('VIP اعدادات $kAppVersion · M7 NEXUS', textAlign: TextAlign.center, style: TextStyle(color: FleetColors.muted)),
+        const Text('VIP Settings $kAppVersion · M7 NEXUS', textAlign: TextAlign.center, style: TextStyle(color: FleetColors.muted)),
       ]),
     );
   }

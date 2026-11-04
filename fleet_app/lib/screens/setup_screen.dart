@@ -56,7 +56,7 @@ class _SetupScreenState extends State<SetupScreen> {
           child: TextField(controller: c, obscureText: pw, decoration: InputDecoration(labelText: label, hintText: hint)),
         );
     return Scaffold(
-      appBar: AppBar(title: const Text('VIP اعدادات · set up')),
+      appBar: AppBar(title: const Text('VIP Settings · set up')),
       body: ListView(padding: const EdgeInsets.all(20), children: [
         const Icon(Icons.shield_outlined, size: 56, color: FleetColors.gold),
         const SizedBox(height: 8),

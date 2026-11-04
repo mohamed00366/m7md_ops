@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" tools:node="remove"/>
     <uses-feature android:name="android.hardware.telephony" android:required="false"/>
     <application
-        android:label="VIP اعدادات"
+        android:label="VIP Settings"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

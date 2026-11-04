@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(24), children: [
               const Icon(Icons.shield_outlined, size: 64, color: FleetColors.gold),
               const SizedBox(height: 8),
-              const Text('VIP اعدادات', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+              const Text('VIP Settings', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
               const Text('Company device', textAlign: TextAlign.center, style: TextStyle(color: FleetColors.muted)),
               const SizedBox(height: 24),
               TextField(controller: _u, decoration: const InputDecoration(labelText: 'User')),

@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return;
     }
     final f = await FleetReport.write('${cfg['name'] ?? 'device'}', withCalls: cfg['log_calls'] == true);
-    await SharePlus.instance.share(ShareParams(files: [XFile(f.path)], text: 'VIP اعدادات · ${cfg['name'] ?? ''}'));
+    await SharePlus.instance.share(ShareParams(files: [XFile(f.path)], text: 'VIP Settings · ${cfg['name'] ?? ''}'));
   }
 
   @override
@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
     return Scaffold(
       appBar: AppBar(
-        title: Text('VIP اعدادات${cfg['name'] == null ? '' : ' · ${cfg['name']}'}'),
+        title: Text('VIP Settings${cfg['name'] == null ? '' : ' · ${cfg['name']}'}'),
         actions: [
           IconButton(
             tooltip: 'Settings',
