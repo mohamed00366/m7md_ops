@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../core/api.dart';
 import '../core/auth.dart';
+import '../core/demo.dart';
 import '../core/report.dart';
 import '../core/store.dart';
 import '../core/sync.dart';
@@ -46,6 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _testMail() async {
     await _saveMail();
     setState(() => _msg = 'Sending…');
+    if (FleetDemo.on) return setState(() => _msg = 'Preview: no e-mail is sent here (on the device it sends the Excel to ${_p!.mailTo}).');
     final e = await FleetReport.mail(_p!, '${_p!.config['name'] ?? 'device'}', withCalls: _p!.config['log_calls'] == true);
     if (mounted) setState(() => _msg = e ?? 'Test e-mail sent to ${_p!.mailTo}.');
   }
@@ -176,7 +178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text('Turn protection off'),
           subtitle: const Text('Needed before the app can be removed'),
           onTap: () async {
-            final ok = await _native.invokeMethod<bool>('adminRemove') ?? false;
+            final ok = FleetDemo.on || (await _native.invokeMethod<bool>('adminRemove') ?? false);
             setState(() => _msg = ok ? 'Protection is off.' : 'Could not turn it off.');
           },
         ),

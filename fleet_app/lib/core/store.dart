@@ -140,13 +140,20 @@ class CallRow {
 }
 
 /// The records kept on the device (sqflite): what was read, and whether it reached the server.
+/// [memory] (web preview / tests): the same, kept in memory.
 class LocalDb {
   LocalDb._(this.db);
-  final Database db;
+  final Database? db;
   static LocalDb? _i;
+
+  /// Keep the records in memory (web preview, tests).
+  static bool memory = false;
+  final Map<String, Map<String, Object?>> _sms = {};
+  final Map<String, Map<String, Object?>> _calls = {};
 
   static Future<LocalDb> open() async {
     if (_i != null) return _i!;
+    if (memory) return _i = LocalDb._(null);
     final path = p.join(await getDatabasesPath(), 'vip_fleet.db');
     final db = await openDatabase(path, version: 1, onCreate: (db, v) async {
       await db.execute('create table sms (hash text primary key, ts integer, direction text, address text, label text, sim text, body text, uploaded integer default 0)');
@@ -157,70 +164,94 @@ class LocalDb {
     return _i = LocalDb._(db);
   }
 
-  /// Adds new rows (same hash = kept once); returns how many were new.
-  Future<int> addSms(List<SmsRow> rows) async {
+  Future<int> _add(String table, Map<String, Map<String, Object?>> mem, List<Map<String, Object?>> rows) async {
     var n = 0;
-    final b = db.batch();
+    final b = db!.batch();
     for (final r in rows) {
-      b.insert('sms', r.toDb(), conflictAlgorithm: ConflictAlgorithm.ignore);
+      b.insert(table, r, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
     for (final x in await b.commit()) {
       if (x is int && x > 0) n++;
     }
     return n;
+  }
+
+  /// Adds new rows (same hash = kept once); returns how many were new.
+  Future<int> addSms(List<SmsRow> rows) async {
+    if (db == null) {
+      var n = 0;
+      for (final r in rows) {
+        if (!_sms.containsKey(r.hash)) {
+          _sms[r.hash] = r.toDb();
+          n++;
+        }
+      }
+      return n;
+    }
+    return _add('sms', _sms, [for (final r in rows) r.toDb()]);
   }
 
   Future<int> addCalls(List<CallRow> rows) async {
-    var n = 0;
-    final b = db.batch();
-    for (final r in rows) {
-      b.insert('calls', r.toDb(), conflictAlgorithm: ConflictAlgorithm.ignore);
+    if (db == null) {
+      var n = 0;
+      for (final r in rows) {
+        if (!_calls.containsKey(r.hash)) {
+          _calls[r.hash] = r.toDb();
+          n++;
+        }
+      }
+      return n;
     }
-    for (final x in await b.commit()) {
-      if (x is int && x > 0) n++;
-    }
-    return n;
+    return _add('calls', _calls, [for (final r in rows) r.toDb()]);
   }
 
-  Future<List<SmsRow>> sms({bool notUploaded = false, int limit = 100000, DateTime? since}) async => [
-        for (final r in await db.query('sms',
-            where: [if (notUploaded) 'uploaded = 0', if (since != null) 'ts >= ${since.millisecondsSinceEpoch}'].join(' and ').ifEmptyNull,
-            orderBy: 'ts desc', limit: limit))
-          SmsRow.fromDb(r),
-      ];
+  Future<List<Map<String, Object?>>> _query(String table, Map<String, Map<String, Object?>> mem, bool notUploaded, int limit, DateTime? since) async {
+    final d = db;
+    if (d == null) {
+      final l = mem.values
+          .where((r) => (!notUploaded || r['uploaded'] == 0) && (since == null || (r['ts'] as int) >= since.millisecondsSinceEpoch))
+          .toList()
+        ..sort((a, b) => (b['ts'] as int).compareTo(a['ts'] as int));
+      return l.take(limit).toList();
+    }
+    final where = [if (notUploaded) 'uploaded = 0', if (since != null) 'ts >= ${since.millisecondsSinceEpoch}'].join(' and ');
+    return d.query(table, where: where.isEmpty ? null : where, orderBy: 'ts desc', limit: limit);
+  }
 
-  Future<List<CallRow>> calls({bool notUploaded = false, int limit = 100000, DateTime? since}) async => [
-        for (final r in await db.query('calls',
-            where: [if (notUploaded) 'uploaded = 0', if (since != null) 'ts >= ${since.millisecondsSinceEpoch}'].join(' and ').ifEmptyNull,
-            orderBy: 'ts desc', limit: limit))
-          CallRow.fromDb(r),
-      ];
+  Future<List<SmsRow>> sms({bool notUploaded = false, int limit = 100000, DateTime? since}) async =>
+      [for (final r in await _query('sms', _sms, notUploaded, limit, since)) SmsRow.fromDb(r)];
 
-  Future<void> markSms(Iterable<String> hashes) async {
-    final b = db.batch();
+  Future<List<CallRow>> calls({bool notUploaded = false, int limit = 100000, DateTime? since}) async =>
+      [for (final r in await _query('calls', _calls, notUploaded, limit, since)) CallRow.fromDb(r)];
+
+  Future<void> _mark(String table, Map<String, Map<String, Object?>> mem, Iterable<String> hashes) async {
+    final d = db;
+    if (d == null) {
+      for (final h in hashes) {
+        mem[h]?['uploaded'] = 1;
+      }
+      return;
+    }
+    final b = d.batch();
     for (final h in hashes) {
-      b.update('sms', {'uploaded': 1}, where: 'hash = ?', whereArgs: [h]);
+      b.update(table, {'uploaded': 1}, where: 'hash = ?', whereArgs: [h]);
     }
     await b.commit(noResult: true);
   }
 
-  Future<void> markCalls(Iterable<String> hashes) async {
-    final b = db.batch();
-    for (final h in hashes) {
-      b.update('calls', {'uploaded': 1}, where: 'hash = ?', whereArgs: [h]);
-    }
-    await b.commit(noResult: true);
-  }
+  Future<void> markSms(Iterable<String> hashes) => _mark('sms', _sms, hashes);
+  Future<void> markCalls(Iterable<String> hashes) => _mark('calls', _calls, hashes);
 
   Future<(int, int, int, int)> counts() async {
-    final s = Sqflite.firstIntValue(await db.rawQuery('select count(*) from sms')) ?? 0;
-    final sw = Sqflite.firstIntValue(await db.rawQuery('select count(*) from sms where uploaded = 0')) ?? 0;
-    final k = Sqflite.firstIntValue(await db.rawQuery('select count(*) from calls')) ?? 0;
-    final kw = Sqflite.firstIntValue(await db.rawQuery('select count(*) from calls where uploaded = 0')) ?? 0;
+    final d = db;
+    if (d == null) {
+      return (_sms.length, _sms.values.where((r) => r['uploaded'] == 0).length, _calls.length, _calls.values.where((r) => r['uploaded'] == 0).length);
+    }
+    final s = Sqflite.firstIntValue(await d.rawQuery('select count(*) from sms')) ?? 0;
+    final sw = Sqflite.firstIntValue(await d.rawQuery('select count(*) from sms where uploaded = 0')) ?? 0;
+    final k = Sqflite.firstIntValue(await d.rawQuery('select count(*) from calls')) ?? 0;
+    final kw = Sqflite.firstIntValue(await d.rawQuery('select count(*) from calls where uploaded = 0')) ?? 0;
     return (s, sw, k, kw);
   }
 }
 
-extension on String {
-  String? get ifEmptyNull => isEmpty ? null : this;
-}

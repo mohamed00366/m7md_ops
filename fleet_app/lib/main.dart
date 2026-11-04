@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/auth.dart';
 import 'core/background.dart';
+import 'core/demo.dart';
 import 'core/store.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
@@ -10,9 +11,13 @@ import 'screens/setup_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final p = await Prefs.get();
-  try {
-    await FleetBackground.start();
-  } catch (_) {/* tests / no WorkManager */}
+  if (FleetDemo.on) {
+    FleetDemo.start(); // web preview with sample data
+  } else {
+    try {
+      await FleetBackground.start();
+    } catch (_) {/* tests / no WorkManager */}
+  }
   runApp(FleetApp(setUp: FleetAuth.isSetUp(p)));
 }
 

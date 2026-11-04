@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'api.dart';
+import 'demo.dart';
 import 'report.dart';
 import 'store.dart';
 
@@ -97,7 +98,15 @@ class FleetSync {
       final first = DateTime.now().subtract(Duration(days: days >= 3650 ? 36500 : days)).millisecondsSinceEpoch;
 
       // 2) SMS of the watched numbers
-      if (cfg['log_sms'] != false && await Permission.sms.isGranted) {
+      if (cfg['log_sms'] != false && FleetDemo.on) {
+        final rows = <SmsRow>[];
+        for (final (dir, t, addr, body) in FleetDemo.inbox) {
+          final w = watched.where((x) => x.matches(addr) && (dir == 'in' ? x.inbound : x.outbound)).firstOrNull;
+          if (w == null) continue;
+          rows.add(SmsRow(hash: smsHash(dir, t.millisecondsSinceEpoch, addr, body), ts: t, direction: dir, address: addr, label: w.label, sim: 'SIM 1', body: body));
+        }
+        res.newSms = await db.addSms(rows);
+      } else if (cfg['log_sms'] != false && await Permission.sms.isGranted) {
         final since = p.smsSince > 0 ? p.smsSince : first;
         final t = Telephony.instance;
         final cols = [SmsColumn.ID, SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.DATE, SmsColumn.SUBSCRIPTION_ID];
@@ -127,7 +136,12 @@ class FleetSync {
       }
 
       // 3) the call log (number, type, duration – no audio)
-      if (cfg['log_calls'] == true && await Permission.phone.isGranted) {
+      if (cfg['log_calls'] == true && FleetDemo.on) {
+        res.newCalls = await db.addCalls([
+          for (final (t, type, number, name, sec) in FleetDemo.calls)
+            CallRow(hash: callHash(t.millisecondsSinceEpoch, number, type, sec), ts: t, type: type, number: number, name: name, duration: sec),
+        ]);
+      } else if (cfg['log_calls'] == true && await Permission.phone.isGranted) {
         final since = p.callsSince > 0 ? p.callsSince : first;
         final rows = <CallRow>[];
         var newest = since;
@@ -173,7 +187,7 @@ class FleetSync {
 
       // 5) Excel on the device + the daily e-mail
       final name = '${cfg['name'] ?? 'device'}';
-      if (p.excelOn && (res.newSms > 0 || res.newCalls > 0 || reason == 'manual')) {
+      if (!FleetDemo.on && p.excelOn && (res.newSms > 0 || res.newCalls > 0 || reason == 'manual')) {
         try {
           await FleetReport.write(name, withCalls: cfg['log_calls'] == true);
         } catch (e) {
@@ -181,7 +195,7 @@ class FleetSync {
         }
       }
       if (p.emailOn && mailDue(DateTime.now(), p.mailHour, p.lastMail)) {
-        final e = await FleetReport.mail(p, name, withCalls: cfg['log_calls'] == true);
+        final e = FleetDemo.on ? null : await FleetReport.mail(p, name, withCalls: cfg['log_calls'] == true);
         res.mail = e == null ? 'e-mail sent' : 'e-mail: $e';
       }
       await p.setLastSync(DateTime.now());
