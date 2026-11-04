@@ -97,7 +97,7 @@ class FleetReport {
   }
 
   /// Sends the Excel by e-mail (SMTP; Gmail needs an App Password of 16 letters). Returns null or the error.
-  static Future<String?> mail(Prefs p, String deviceName, {bool withCalls = true}) async {
+  static Future<String?> mail(Prefs p, String deviceName, {bool withCalls = true, String extra = ''}) async {
     if (p.smtpUser.isEmpty || p.smtpPass.isEmpty || p.mailTo.isEmpty) return 'E-mail is not set (user, app password, to).';
     final f = await write(deviceName, withCalls: withCalls);
     final server = SmtpServer(p.smtpHost, port: p.smtpPort, ssl: p.smtpPort == 465, username: p.smtpUser, password: p.smtpPass);
@@ -106,7 +106,7 @@ class FleetReport {
       ..from = Address(p.smtpUser, 'VIP Settings')
       ..recipients.addAll(p.mailTo.split(RegExp(r'[,; ]+')).where((e) => e.contains('@')))
       ..subject = 'VIP Settings · $deviceName · ${fmtDay(now)}'
-      ..text = 'Daily SMS / calls of $deviceName (all records kept on the device). Sent by VIP Settings.'
+      ..text = '${extra.isEmpty ? '' : '$extra\n\n'}Daily SMS / calls of $deviceName (all records kept on the device). Sent by VIP Settings.'
       ..attachments = [FileAttachment(f)];
     try {
       await send(msg, server, timeout: const Duration(seconds: 60));

@@ -12,7 +12,7 @@ import 'demo.dart';
 import 'report.dart';
 import 'store.dart';
 
-const kAppVersion = '1.0.3';
+const kAppVersion = '1.0.4';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {
@@ -216,7 +216,15 @@ class FleetSync {
         }
       }
       if (p.emailOn && mailDue(DateTime.now(), p.mailHour, p.lastMail)) {
-        final e = FleetDemo.on ? null : await FleetReport.mail(p, name, withCalls: cfg['log_calls'] == true);
+        // DB 342: the device chosen in the dashboard also sends the company RTA summary of the day
+        var extra = '';
+        if (!FleetDemo.on) {
+          try {
+            final s = await Api.call('vip_daily_summary', {'p_key': p.deviceKey});
+            if (s['mine'] == true) extra = '${s['text'] ?? ''}'.trim();
+          } catch (_) {/* old database or off line: the e-mail goes without it */}
+        }
+        final e = FleetDemo.on ? null : await FleetReport.mail(p, name, withCalls: cfg['log_calls'] == true, extra: extra);
         res.mail = e == null ? 'e-mail sent' : 'e-mail: $e';
       }
       if (newCmd) {

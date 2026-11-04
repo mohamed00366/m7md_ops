@@ -41,7 +41,7 @@ class MainActivity : FlutterActivity() {
                 "adminRequest" -> {
                     val i = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
                         .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
-                        .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Keeps VIP Fleet on this company device.")
+                        .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Keeps VIP Settings on this company device.")
                     startActivity(i)
                     result.success(true)
                 }

@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
+import 'valet_pending_panel.dart' show fleetProblem;
 import 'valet_ui.dart';
 
 /// 📱 DB 339 – VIP Fleet: the company phones / tablets that log the SMS of watched numbers (RTA 7275) and the call log.
@@ -43,6 +44,7 @@ class _Devices extends StatefulWidget {
 
 class _DevicesState extends State<_Devices> {
   List<VJson>? _items;
+  VJson? _alerts;
   List<VJson> _points = const [];
   Object? _err;
   bool get _edit => ValetAdmin.I.can(ValetAdmin.permSettings);
@@ -63,6 +65,83 @@ class _DevicesState extends State<_Devices> {
     } catch (e) {
       if (mounted) setState(() => _err = e);
     }
+    try {
+      final a = await ValetAdmin.I.call('vva_fleet_alerts');
+      if (mounted) setState(() => _alerts = a);
+    } catch (_) {/* old server */}
+  }
+
+  /// DB 342: the options of the alerts and the daily summary.
+  Future<void> _alertSettings() async {
+    final a = _alerts;
+    if (a == null) return;
+    final v = Map<String, dynamic>.from(vMap(a['settings']));
+    final devices = vList(a['summary_devices']);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) {
+          Widget sw(String k, String ar, String en) => SwitchListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(tx(ctx, ar, en)),
+                value: v[k] != false,
+                onChanged: (x) => set(() => v[k] = x),
+              );
+          return AlertDialog(
+            title: Text(tx(ctx, 'التَنبيهات وَالمُلَخَّص اليَوميّ', 'Alerts and the daily summary')),
+            content: SizedBox(
+              width: 460,
+              child: SingleChildScrollView(
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Text(tx(ctx, 'جِهاز وِقِف', 'A device stopped'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 6),
+                  SegmentedButton<int>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(value: 0, label: Text(tx(ctx, 'مَقفول', 'Off'))),
+                      for (final h in const [1, 2, 4, 8]) ButtonSegment(value: h, label: Text(tx(ctx, '$h س', '$h h'))),
+                    ],
+                    selected: {const [0, 1, 2, 4, 8].contains(v['offline_hours']) ? v['offline_hours'] as int : 2},
+                    onSelectionChanged: (x) => set(() => v['offline_hours'] = x.first),
+                  ),
+                  Text(tx(ctx, 'مُش مُتَّصِل أَكتَر مِن المُدّة دي', 'Not seen for longer than this'), style: const TextStyle(color: VC.muted, fontSize: 12)),
+                  sw('check_sms', 'صَلاحيّة SMS اتقَفَلِت', 'SMS permission turned off'),
+                  sw('check_calls', 'صَلاحيّة المُكالَمات اتقَفَلِت', 'Call-log permission turned off'),
+                  sw('check_admin', 'الحِماية اتقَفَلِت', 'Protection turned off'),
+                  sw('check_battery', 'تَوفير البَطّاريّة بِيوَقَّفه', 'Battery saving stops it'),
+                  sw('check_waiting', 'رَسايل مُستَنّية رَفع أَكتَر مِن ساعة', 'Records waiting upload for over an hour'),
+                  const Divider(),
+                  sw('rta_errors', 'تَنبيه رَفض RTA', 'RTA refusal alert'),
+                  const Divider(),
+                  sw('summary_on', 'المُلَخَّص اليَوميّ في الإيميل', 'Daily summary in the e-mail'),
+                  DropdownButton<String>(
+                    isExpanded: true,
+                    value: devices.any((d) => vStr(d['id']) == vStr(v['summary_device'])) ? vStr(v['summary_device']) : '',
+                    items: [
+                      DropdownMenuItem(value: '', child: Text(tx(ctx, '— مَفيش جِهاز —', '— no device —'))),
+                      for (final d in devices) DropdownMenuItem(value: vStr(d['id']), child: Text(vStr(d['name']))),
+                    ],
+                    onChanged: (x) => set(() => v['summary_device'] = x ?? ''),
+                  ),
+                  Text(
+                      tx(ctx, 'الجِهاز ده بِيِبعَت مُلَخَّص اليوم لِكُلّ الشَرِكة مَع إيميله اليَوميّ (لازِم الإيميل يِكون شَغّال في التَطبيق عَليه).',
+                          'This device adds the summary of the whole company to its daily e-mail (its e-mail must be on in the app).'),
+                      style: const TextStyle(color: VC.muted, fontSize: 12)),
+                ]),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'حِفظ', 'Save'))),
+            ],
+          );
+        },
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final r = await vGuard(context, () => ValetAdmin.I.call('vva_fleet_alerts_save', {'p_data': v}), ok: tx(context, 'تَمّ الحِفظ.', 'Saved.'));
+    if (r != null && mounted) setState(() => _alerts = r);
   }
 
   Future<VJson?> _save(String? id, Map<String, dynamic> data, {bool newKey = false}) async {
@@ -242,10 +321,28 @@ class _DevicesState extends State<_Devices> {
           subtitle: tx(context, 'تَطبيق عَلى تابلِت/موبايل الشَرِكة بِيِسَجِّل رَسايل الأَرقام المُراقَبة (RTA 7275) وَسِجِلّ المُكالَمات · أَندرويد بَس',
               'An app on the company tablets / phones logs the SMS of the watched numbers (RTA 7275) and the call log · Android only'),
           actions: [
+            if (_edit && _alerts != null)
+              IconButton.filledTonal(tooltip: tx(context, 'التَنبيهات وَالمُلَخَّص', 'Alerts and summary'), onPressed: _alertSettings, icon: const Icon(Icons.notifications_active_outlined)),
             if (_edit) FilledButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: Text(tx(context, 'جِهاز جَديد', 'Add device'))),
             IconButton.filledTonal(tooltip: tx(context, 'تَحديث', 'Refresh'), onPressed: _load, icon: const Icon(Icons.refresh)),
           ],
         ),
+        // DB 342: devices with a problem
+        if (vList(_alerts?['devices']).isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: VC.bad.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(12), border: Border.all(color: VC.bad.withValues(alpha: 0.5))),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tx(context, '${vList(_alerts?['devices']).length} جِهاز مِحتاج مُراجَعة', '${vList(_alerts?['devices']).length} device(s) need a look'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, color: VC.bad)),
+                const SizedBox(height: 4),
+                for (final d in vList(_alerts?['devices']))
+                  Text('• ${d['name']}: ${[for (final x in (d['problems'] is List ? d['problems'] as List : const [])) fleetProblem(context, '$x')].join(' · ')}'),
+              ]),
+            ),
+          ),
         if (items.isEmpty)
           Padding(
             padding: const EdgeInsets.all(24),

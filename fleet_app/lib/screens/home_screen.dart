@@ -223,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 const SizedBox(height: 6),
                 Text('Watched: ${Watched.of(cfg['numbers']).map((w) => w.label.isEmpty ? w.number : '${w.number} (${w.label})').join(' · ')}',
                     style: const TextStyle(color: FleetColors.muted)),
-                const Text('The switches are set in the dashboard (VIP Fleet).', style: TextStyle(color: FleetColors.muted, fontSize: 12)),
+                const Text('The switches are set in the dashboard (Company devices).', style: TextStyle(color: FleetColors.muted, fontSize: 12)),
               ]),
             ),
           ),

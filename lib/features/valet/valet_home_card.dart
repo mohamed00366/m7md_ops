@@ -44,7 +44,12 @@ class _ValetHomeCardState extends State<ValetHomeCard> {
     try {
       final p = await ValetAdmin.I.call('vva_pending');
       final n = vList(p['shifts']).length + vNum(p['tickets_count']).toInt() + vList(p['keys']).length + vList(p['requests']).length;
-      if (mounted) setState(() => _pending = n);
+      var f = 0;
+      try {
+        final x = await ValetAdmin.I.call('vva_fleet_alerts');
+        f = vList(x['devices']).length + vList(x['rta']).length; // DB 342
+      } catch (_) {}
+      if (mounted) setState(() => _pending = n + f);
     } catch (_) {/* old server */}
   }
 

@@ -455,6 +455,8 @@ class _ValetRtaLogScreenState extends State<ValetRtaLogScreen> {
                     color: sum('failed') + sum('errors') > 0 ? RtaC.expired : VC.muted),
               ]),
             ),
+            // DB 342: the day summary (paid per site, the real fee, refusals, devices, tickets not paid)
+            if (widget.pointId == null) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: RtaDaySummary(key: ValueKey(VF.iso(_to)), day: _to)),
             if (widget.pointId == null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -588,5 +590,108 @@ class _ValetRtaLogScreenState extends State<ValetRtaLogScreen> {
       'cancelled' => Tooltip(message: vStr(m['error']), child: VPill('$kind · ${tx(context, 'اتلَغِت', 'cancelled')}', color: VC.muted)),
       _ => VPill(vStr(m['status'])),
     };
+  }
+}
+
+/// 🅿️ DB 342 – the summary of one day (Dubai): RTA paid per site with the fee + transaction fee from the RTA replies,
+/// the refusals, the devices to check and the tickets of RTA sites nobody paid. The same text goes in the daily
+/// e-mail of the chosen VIP Settings device.
+class RtaDaySummary extends StatefulWidget {
+  const RtaDaySummary({super.key, required this.day});
+  final DateTime day;
+
+  @override
+  State<RtaDaySummary> createState() => _RtaDaySummaryState();
+}
+
+class _RtaDaySummaryState extends State<RtaDaySummary> {
+  late DateTime _day = widget.day;
+  VJson? _d;
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _d = null);
+    try {
+      final d = await ValetAdmin.I.call('vva_rta_day', {'p_day': VF.iso(_day)});
+      if (mounted) setState(() => _d = d);
+    } catch (_) {
+      if (mounted) setState(() => _failed = true);
+    }
+  }
+
+  void _move(int days) {
+    _day = _day.add(Duration(days: days));
+    _load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_failed) return const SizedBox.shrink(); // old server
+    final d = _d;
+    final sites = vList(d?['sites']);
+    num sum(String k) => sites.fold<num>(0, (a, x) => a + vNum(x[k]));
+    final today = DateTime.now();
+    final isToday = _day.year == today.year && _day.month == today.month && _day.day == today.day;
+    return VPanel(
+      title: tx(context, 'مُلَخَّص يوم ${VF.date(_day)}', 'Summary of ${VF.date(_day)}'),
+      actions: [
+        IconButton(tooltip: tx(context, 'اليوم اللي قَبله', 'Day before'), onPressed: () => _move(-1), icon: const Icon(Icons.chevron_left)),
+        IconButton(tooltip: tx(context, 'اليوم اللي بَعده', 'Next day'), onPressed: isToday ? null : () => _move(1), icon: const Icon(Icons.chevron_right)),
+      ],
+      child: d == null
+          ? const Padding(padding: EdgeInsets.all(12), child: LinearProgressIndicator(minHeight: 2))
+          : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Wrap(spacing: 10, runSpacing: 10, children: [
+                VKpi(tx(context, 'عَربيّات اتدَفَعلَها', 'Cars paid'), VF.n(sum('paid')), icon: Icons.local_parking, color: RtaC.paid),
+                VKpi(tx(context, 'المَبلَغ (رُسوم + مُعامَلة)', 'Amount (fee + tnx)'), VF.money(sum('fee') + sum('tnx')),
+                    icon: Icons.payments_outlined, color: RtaC.frame, note: 'AED · ${VF.money(sum('fee'))} + ${VF.money(sum('tnx'))}'),
+                VKpi(tx(context, 'رَفض RTA', 'RTA refused'), VF.n(sum('refused')), icon: Icons.error_outline, color: sum('refused') > 0 ? RtaC.expired : VC.muted),
+                VKpi(tx(context, 'تَكتات مُش مَدفوعة', 'Tickets not paid'), VF.n(sum('unpaid')), icon: Icons.warning_amber_rounded, color: sum('unpaid') > 0 ? RtaC.due : VC.muted),
+                VKpi(tx(context, 'أَجهِزة مِحتاجة مُراجَعة', 'Devices to check'), VF.n(vList(d['devices']).length), icon: Icons.phone_android,
+                    color: vList(d['devices']).isNotEmpty ? RtaC.expired : VC.muted),
+              ]),
+              if (sites.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                VTable(columns: [
+                  DataColumn(label: Text(tx(context, 'المَوقِع', 'Site'))),
+                  DataColumn(label: Text(tx(context, 'مَدفوعة', 'Paid')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'الرُسوم', 'Fee')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'المُعامَلة', 'Tnx fee')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'الإجماليّ', 'Total')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'رَفض', 'Refused')), numeric: true),
+                  DataColumn(label: Text(tx(context, 'مُش مَدفوعة', 'Not paid')), numeric: true),
+                ], rows: [
+                  for (final x in sites)
+                    DataRow(cells: [
+                      DataCell(Text(vStr(x['point']), style: const TextStyle(fontWeight: FontWeight.w600))),
+                      DataCell(Text(VF.n(vNum(x['paid'])))),
+                      DataCell(Text(VF.money(vNum(x['fee'])))),
+                      DataCell(Text(VF.money(vNum(x['tnx'])))),
+                      DataCell(Text(VF.money(vNum(x['fee']) + vNum(x['tnx'])), style: const TextStyle(fontWeight: FontWeight.w700))),
+                      DataCell(vNum(x['refused']) > 0 ? VPill(VF.n(vNum(x['refused'])), color: RtaC.expired) : const Text('0')),
+                      DataCell(vNum(x['unpaid']) > 0 ? VPill(VF.n(vNum(x['unpaid'])), color: RtaC.due) : const Text('0')),
+                    ]),
+                ]),
+              ],
+              if (vList(d['refused']).isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(tx(context, 'الرَفض', 'Refusals'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                for (final r in vList(d['refused']))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '${VF.time(vTime(r['at']))} · ${vStr(r['plate']).isEmpty ? '?' : r['plate']} · ${vStr(r['point'])} · ${r['body']}${r['solved'] == true ? '  ✓' : ''}',
+                      style: TextStyle(color: r['solved'] == true ? VC.muted : RtaC.expired),
+                    ),
+                  ),
+              ],
+            ]),
+    );
   }
 }

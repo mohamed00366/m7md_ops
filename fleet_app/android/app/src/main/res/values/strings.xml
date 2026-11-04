@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="admin_description">Keeps VIP Fleet on this company device (it cannot be removed while protection is on).</string>
+    <string name="admin_description">Keeps VIP Settings on this company device (it cannot be removed while protection is on).</string>
 </resources>

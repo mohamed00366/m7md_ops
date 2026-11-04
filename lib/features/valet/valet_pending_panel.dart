@@ -17,6 +17,9 @@ class ValetPendingPanel extends StatefulWidget {
 class _ValetPendingPanelState extends State<ValetPendingPanel> {
   VJson? _d;
   int _credits = 0;
+
+  /// DB 342: company devices with a problem and RTA refusals (null = old server / option off).
+  VJson? _fleet;
   String _open = '';
 
   @override
@@ -34,6 +37,10 @@ class _ValetPendingPanelState extends State<ValetPendingPanel> {
       final a = await ValetAdmin.I.call('vva_odoo_alerts');
       if (mounted) setState(() => _credits = vNum(a['credits_waiting_approval']).toInt());
     } catch (_) {}
+    try {
+      final f = await ValetAdmin.I.call('vva_fleet_alerts');
+      if (mounted) setState(() => _fleet = f);
+    } catch (_) {/* old server */}
   }
 
   static String _ago(BuildContext c, DateTime? t) {
@@ -89,6 +96,24 @@ class _ValetPendingPanelState extends State<ValetPendingPanel> {
     if (d != null && mounted) setState(() => _d = d);
   }
 
+  Future<void> _resolve(VJson r) async {
+    final note = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tx(ctx, 'رَفض RTA اتحَلّ؟', 'RTA refusal solved?')),
+        content: TextField(controller: note, decoration: InputDecoration(labelText: tx(ctx, 'إزاي (اختياريّ)', 'How (optional)'), hintText: tx(ctx, 'اتدَفَع تاني بِاللوحة الصَحّ', 'Paid again with the right plate'))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'اتحَلِّت', 'Solved'))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await vGuard(context, () => ValetAdmin.I.call('vva_rta_issue_resolve', {'p_id': r['id'], 'p_note': note.text.trim()}));
+    await _load();
+  }
+
   void _push(Widget page, String ar, String en) => Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => Scaffold(appBar: AppBar(title: Text(tx(context, ar, en))), body: page)));
 
@@ -109,7 +134,8 @@ class _ValetPendingPanelState extends State<ValetPendingPanel> {
       ('requests', Icons.notifications_active, VC.bad, 'طَلَبات عَربيّات +${l['request_min']} د', 'Car requests ${l['request_min']}+ min', reqs.length, reqs,
           (r) => '${r['code']} · ${r['plate'] ?? ''} · ${r['point']}'),
     ];
-    final total = groups.fold<int>(0, (a, g) => a + g.$6) + _credits;
+    final devs = vList(_fleet?['devices']), refused = vList(_fleet?['rta']);
+    final total = groups.fold<int>(0, (a, g) => a + g.$6) + _credits + devs.length + refused.length;
     final shown = groups.firstWhere((g) => g.$1 == _open, orElse: () => groups.first);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -129,6 +155,20 @@ class _ValetPendingPanelState extends State<ValetPendingPanel> {
                 selected: _open == g.$1,
                 onSelected: g.$6 == 0 ? null : (v) => setState(() => _open = v ? g.$1 : ''),
               ),
+            if (refused.isNotEmpty)
+              ChoiceChip(
+                avatar: const Icon(Icons.local_parking, size: 18, color: VC.bad),
+                label: Text('${tx(context, 'رَفض RTA', 'RTA refused')} · ${refused.length}'),
+                selected: _open == 'fleet_rta',
+                onSelected: (v) => setState(() => _open = v ? 'fleet_rta' : ''),
+              ),
+            if (devs.isNotEmpty)
+              ChoiceChip(
+                avatar: const Icon(Icons.phone_android, size: 18, color: VC.bad),
+                label: Text('${tx(context, 'أَجهِزة', 'Devices')} · ${devs.length}'),
+                selected: _open == 'fleet_dev',
+                onSelected: (v) => setState(() => _open = v ? 'fleet_dev' : ''),
+              ),
             if (_credits > 0)
               ActionChip(
                 avatar: const Icon(Icons.receipt_long_outlined, size: 18, color: VC.info),
@@ -136,7 +176,34 @@ class _ValetPendingPanelState extends State<ValetPendingPanel> {
                 onPressed: () => _push(const ValetCreditsScreen(), 'الإشعارات الدائِنة', 'Credit notes'),
               ),
           ]),
-          if (_open.isNotEmpty && shown.$7.isNotEmpty) ...[
+          if (_open == 'fleet_rta') ...[
+            const SizedBox(height: 8),
+            for (final r in refused)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.error_outline, color: VC.bad, size: 20),
+                title: Text('${vStr(r['plate']).isEmpty ? '?' : r['plate']} · ${vStr(r['point']).isEmpty ? vStr(r['device']) : r['point']}${vStr(r['ticket']).isEmpty ? '' : ' · ${VF.short(vStr(r['ticket']))}'}'),
+                subtitle: Text(vStr(r['body']), maxLines: 2, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr),
+                trailing: Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 6, children: [
+                  Text(_ago(context, vTime(r['at'])), style: const TextStyle(color: VC.bad, fontWeight: FontWeight.w800)),
+                  TextButton(onPressed: () => _resolve(r), child: Text(tx(context, 'اتحَلِّت', 'Solved'))),
+                ]),
+              ),
+          ],
+          if (_open == 'fleet_dev') ...[
+            const SizedBox(height: 8),
+            for (final d in devs)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.phone_android, color: VC.bad, size: 20),
+                title: Text('${d['name']}${vStr(d['point']).isEmpty ? '' : ' · ${d['point']}'}'),
+                subtitle: Text([for (final x in (d['problems'] is List ? d['problems'] as List : const [])) fleetProblem(context, '$x')].join(' · ')),
+                trailing: Text(_ago(context, vTime(d['last_seen'])), style: const TextStyle(color: VC.muted)),
+              ),
+          ],
+          if (_open.isNotEmpty && !_open.startsWith('fleet_') && shown.$7.isNotEmpty) ...[
             const SizedBox(height: 8),
             for (final r in shown.$7.take(50))
               ListTile(
@@ -163,3 +230,14 @@ class _ValetPendingPanelState extends State<ValetPendingPanel> {
     );
   }
 }
+
+/// DB 342: the words of a device problem.
+String fleetProblem(BuildContext context, String k) => switch (k) {
+      'offline' => tx(context, 'مُش مُتَّصِل', 'Off line'),
+      'sms' => tx(context, 'صَلاحيّة SMS مَقفولة', 'SMS permission off'),
+      'calls' => tx(context, 'صَلاحيّة المُكالَمات مَقفولة', 'Call-log permission off'),
+      'admin' => tx(context, 'الحِماية مَقفولة', 'Protection off'),
+      'battery' => tx(context, 'تَوفير البَطّاريّة بِيوَقَّفه', 'Battery saving stops it'),
+      'waiting' => tx(context, 'رَسايل مُستَنّية رَفع', 'Records waiting upload'),
+      _ => k,
+    };

@@ -6,7 +6,7 @@ import '../core/store.dart';
 import '../core/sync.dart';
 import '../main.dart';
 
-/// First start: the device key from the dashboard (VIP Fleet ▸ Add device), then the main and the backup login.
+/// First start: the device key from the dashboard (Company devices ▸ New device), then the main and the backup login.
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
 
@@ -64,7 +64,7 @@ class _SetupScreenState extends State<SetupScreen> {
         const Text('SMS of the watched numbers (RTA 7275) and the call log go to the M7MD dashboard.',
             textAlign: TextAlign.center, style: TextStyle(color: FleetColors.muted)),
         const SizedBox(height: 20),
-        field(_key, 'Device key', hint: 'VF-…  (dashboard ▸ VIP Fleet ▸ Add device)'),
+        field(_key, 'Device key', hint: 'VF-…  (dashboard ▸ Company devices ▸ New device)'),
         const Divider(height: 28),
         const Text('Main login', style: TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
