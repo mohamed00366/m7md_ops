@@ -1,0 +1,19 @@
+name: vip_calls
+description: Reads the Android call log (number, type, duration, time) for VIP Fleet – no permission requests, works in the background.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: ae.vipvalet.vip_calls
+        pluginClass: VipCallsPlugin

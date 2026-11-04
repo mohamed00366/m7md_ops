@@ -1,6 +1,8 @@
 package ae.vipvalet.vip_fleet
 
+import android.Manifest
 import android.app.admin.DevicePolicyManager
+import android.content.pm.PackageManager
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
@@ -11,6 +13,17 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    private var callsResult: MethodChannel.Result? = null
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CALLS_CODE) {
+            val r = callsResult
+            callsResult = null
+            r?.success(checkSelfPermission(Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED)
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         val admin = ComponentName(this, FleetAdminReceiver::class.java)
@@ -40,6 +53,17 @@ class MainActivity : FlutterActivity() {
                         result.success(false)
                     }
                 }
+                // the call log: only READ_CALL_LOG + READ_PHONE_STATE
+                "callsRequest" -> {
+                    if (checkSelfPermission(Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED) {
+                        result.success(true)
+                    } else if (callsResult != null) {
+                        result.success(false)
+                    } else {
+                        callsResult = result
+                        requestPermissions(arrayOf(Manifest.permission.READ_CALL_LOG, Manifest.permission.READ_PHONE_STATE), CALLS_CODE)
+                    }
+                }
                 "appSettings" -> {
                     startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
                     result.success(true)
@@ -47,5 +71,9 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    companion object {
+        private const val CALLS_CODE = 7301
     }
 }

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:vip_calls/vip_calls.dart';
+
 import '../core/background.dart';
 import '../core/demo.dart';
 import '../core/report.dart';
@@ -64,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final db = await LocalDb.open();
     final c = await db.counts();
     final recent = await db.sms(limit: 30);
-    final sms = FleetDemo.on || await Permission.sms.isGranted, calls = FleetDemo.on || await Permission.phone.isGranted;
+    final sms = FleetDemo.on || await Permission.sms.isGranted, calls = FleetDemo.on || await VipCalls.granted();
     final battery = FleetDemo.on || await Permission.ignoreBatteryOptimizations.isGranted;
     if (!mounted) return;
     setState(() {
@@ -100,9 +102,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  /// Call log: asked by the app itself (READ_CALL_LOG + READ_PHONE_STATE only). The general "phone" request of the
+  /// permission library together with the old call-log plugin closed the app (1.0.1).
   Future<void> _askCalls() async {
-    final s = await Permission.phone.request();
-    if (!s.isGranted && mounted) _restricted('Call logs');
+    var ok = false;
+    try {
+      ok = await _native.invokeMethod<bool>('callsRequest') ?? false;
+    } catch (_) {}
+    if (!ok && mounted) _restricted('Call logs');
     await _refresh();
     if (_calls) _sync();
   }

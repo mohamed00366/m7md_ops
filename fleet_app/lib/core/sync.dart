@@ -1,18 +1,18 @@
 import 'dart:convert';
 
 import 'package:another_telephony/telephony.dart';
-import 'package:call_log/call_log.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:vip_calls/vip_calls.dart';
 
 import 'api.dart';
 import 'demo.dart';
 import 'report.dart';
 import 'store.dart';
 
-const kAppVersion = '1.0.1';
+const kAppVersion = '1.0.2';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {
@@ -81,7 +81,7 @@ class FleetSync {
     try {
       if (FleetDemo.on) return {'sms': true, 'calls': true, 'admin': false, 'battery': true};
       h['sms'] = await Permission.sms.isGranted;
-      h['calls'] = await Permission.phone.isGranted;
+      h['calls'] = await VipCalls.granted();
       h['battery'] = await Permission.ignoreBatteryOptimizations.isGranted;
       try {
         h['admin'] = await _native.invokeMethod<bool>('adminActive') ?? false;
@@ -171,23 +171,14 @@ class FleetSync {
           for (final (t, type, number, name, sec) in FleetDemo.calls)
             CallRow(hash: callHash(t.millisecondsSinceEpoch, number, type, sec), ts: t, type: type, number: number, name: name, duration: sec),
         ]);
-      } else if (cfg['log_calls'] == true && await Permission.phone.isGranted) {
+      } else if (cfg['log_calls'] == true && await VipCalls.granted()) {
         final since = p.callsSince > 0 ? p.callsSince : first;
         final rows = <CallRow>[];
         var newest = since;
-        for (final c in await CallLog.query(dateFrom: since + 1)) {
-          final ms = c.timestamp ?? 0;
-          if (ms > newest) newest = ms;
-          final type = switch (c.callType) {
-            CallType.incoming => 'incoming',
-            CallType.outgoing => 'outgoing',
-            CallType.missed => 'missed',
-            CallType.rejected => 'rejected',
-            CallType.blocked => 'blocked',
-            _ => 'other',
-          };
-          rows.add(CallRow(hash: callHash(ms, c.number ?? '', type, c.duration ?? 0), ts: DateTime.fromMillisecondsSinceEpoch(ms), type: type,
-              number: c.number ?? '', name: c.name ?? '', duration: c.duration ?? 0));
+        for (final c in await VipCalls.since(since)) {
+          if (c.ms > newest) newest = c.ms;
+          rows.add(CallRow(hash: callHash(c.ms, c.number, c.type, c.duration), ts: DateTime.fromMillisecondsSinceEpoch(c.ms), type: c.type,
+              number: c.number, name: c.name, duration: c.duration));
         }
         res.newCalls = await db.addCalls(rows);
         if (newest > since) await p.setCallsSince(newest);
