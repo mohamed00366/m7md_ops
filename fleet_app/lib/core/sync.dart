@@ -12,7 +12,7 @@ import 'demo.dart';
 import 'report.dart';
 import 'store.dart';
 
-const kAppVersion = '1.0.0';
+const kAppVersion = '1.0.1';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {
@@ -75,6 +75,25 @@ class FleetSync {
     }
   }
 
+  /// What the dashboard shows about this device: permissions, protection, battery saving, waiting records, last error.
+  static Future<Map<String, dynamic>> health() async {
+    final h = <String, dynamic>{};
+    try {
+      if (FleetDemo.on) return {'sms': true, 'calls': true, 'admin': false, 'battery': true};
+      h['sms'] = await Permission.sms.isGranted;
+      h['calls'] = await Permission.phone.isGranted;
+      h['battery'] = await Permission.ignoreBatteryOptimizations.isGranted;
+      try {
+        h['admin'] = await _native.invokeMethod<bool>('adminActive') ?? false;
+      } catch (_) {/* background: not known */}
+      final (_, sw, _, kw) = await (await LocalDb.open()).counts();
+      h['waiting'] = sw + kw;
+      final p = await Prefs.get();
+      if (p.lastError.isNotEmpty) h['error'] = p.lastError.length > 200 ? p.lastError.substring(0, 200) : p.lastError;
+    } catch (_) {}
+    return h;
+  }
+
   static Future<SyncResult> run({String reason = 'manual'}) async {
     final res = SyncResult();
     if (_busy) return res..error = 'A sync is already running.';
@@ -86,7 +105,7 @@ class FleetSync {
       // 1) the switches of the dashboard (the last ones are used when off line)
       var cfg = p.config;
       try {
-        cfg = await Api.pullConfig(p.deviceKey, kAppVersion, await deviceInfo());
+        cfg = await Api.pullConfig(p.deviceKey, kAppVersion, {...await deviceInfo(), 'health': await health()});
         await p.setConfig(cfg);
       } on ApiError catch (e) {
         if (e.message.contains('Unknown device key')) return res..error = 'This device key is not known (or was stopped) in the dashboard.';
@@ -96,6 +115,17 @@ class FleetSync {
       final db = await LocalDb.open();
       final days = (cfg['history_days'] as num?)?.toInt() ?? 30;
       final first = DateTime.now().subtract(Duration(days: days >= 3650 ? 36500 : days)).millisecondsSinceEpoch;
+      // an order from the dashboard: "Upload old data" (read the phone again from that date and send it all again)
+      final cmd = cfg['command'] is Map ? (cfg['command'] as Map).cast<String, dynamic>() : null;
+      final cmdAt = '${cmd?['at'] ?? ''}';
+      final newCmd = cmd != null && cmdAt.isNotEmpty && cmdAt != p.lastCommand;
+      if (newCmd && cmd['kind'] == 'resend') {
+        final d = (cmd['days'] as num?)?.toInt() ?? 30;
+        final from = d <= 0 ? 1 : DateTime.now().subtract(Duration(days: d)).millisecondsSinceEpoch;
+        await p.setSmsSince(from);
+        await p.setCallsSince(from);
+        await db.unmarkAll();
+      }
 
       // 2) SMS of the watched numbers
       if (cfg['log_sms'] != false && FleetDemo.on) {
@@ -197,6 +227,15 @@ class FleetSync {
       if (p.emailOn && mailDue(DateTime.now(), p.mailHour, p.lastMail)) {
         final e = FleetDemo.on ? null : await FleetReport.mail(p, name, withCalls: cfg['log_calls'] == true);
         res.mail = e == null ? 'e-mail sent' : 'e-mail: $e';
+      }
+      if (newCmd) {
+        final done = cmd['kind'] == 'resend'
+            ? 'Read again from ${(cmd['days'] as num?)?.toInt() == 0 ? 'the start' : '${cmd['days']} days'}: ${res.newSms} new SMS, ${res.upSms} sent, ${res.upCalls} calls sent${res.error.isEmpty ? '' : ' · ${res.error}'}'
+            : 'Synced: ${res.upSms} SMS, ${res.upCalls} calls sent${res.error.isEmpty ? '' : ' · ${res.error}'}';
+        try {
+          await Api.call('vip_command_done', {'p_key': p.deviceKey, 'p_at': cmdAt, 'p_result': done});
+          await p.setLastCommand(cmdAt);
+        } catch (_) {/* told at the next sync */}
       }
       await p.setLastSync(DateTime.now());
       await p.setLastError(res.error);

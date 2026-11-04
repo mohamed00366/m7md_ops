@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   static const _native = MethodChannel('vip_fleet/native');
   Prefs? _p;
-  bool _sms = false, _calls = false, _admin = false, _busy = false;
+  bool _sms = false, _calls = false, _admin = false, _busy = false, _battery = false;
   (int, int, int, int) _counts = (0, 0, 0, 0);
   String _last = '';
   List<SmsRow> _recent = const [];
@@ -65,11 +65,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final c = await db.counts();
     final recent = await db.sms(limit: 30);
     final sms = FleetDemo.on || await Permission.sms.isGranted, calls = FleetDemo.on || await Permission.phone.isGranted;
+    final battery = FleetDemo.on || await Permission.ignoreBatteryOptimizations.isGranted;
     if (!mounted) return;
     setState(() {
       _p = p;
       _sms = sms;
       _calls = calls;
+      _battery = battery;
       _admin = admin;
       _counts = c;
       _recent = recent;
@@ -138,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return;
     }
     final f = await FleetReport.write('${cfg['name'] ?? 'device'}', withCalls: cfg['log_calls'] == true);
-    await SharePlus.instance.share(ShareParams(files: [XFile(f.path)], text: 'VIP Fleet · ${cfg['name'] ?? ''}'));
+    await SharePlus.instance.share(ShareParams(files: [XFile(f.path)], text: 'VIP اعدادات · ${cfg['name'] ?? ''}'));
   }
 
   @override
@@ -151,16 +153,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           label: Text(label),
           visualDensity: VisualDensity.compact,
         );
-    Widget perm(IconData icon, String title, String sub, bool ok, VoidCallback onFix, {String fix = 'Allow'}) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(icon, color: ok ? FleetColors.ok : FleetColors.warn),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-          subtitle: Text(sub),
-          trailing: ok ? const Icon(Icons.check, color: FleetColors.ok) : FilledButton.tonal(style: FilledButton.styleFrom(minimumSize: const Size(0, 40)), onPressed: onFix, child: Text(fix)),
+    // a plain row (a ListTile with a button squeezed the words into one letter per line on the phone)
+    Widget perm(IconData icon, String title, String sub, bool ok, VoidCallback onFix, {String fix = 'Allow'}) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(children: [
+            Icon(icon, color: ok ? FleetColors.ok : FleetColors.warn),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text(sub, style: const TextStyle(color: FleetColors.muted)),
+              ]),
+            ),
+            const SizedBox(width: 8),
+            if (ok)
+              const Icon(Icons.check, color: FleetColors.ok)
+            else
+              FilledButton.tonal(
+                style: FilledButton.styleFrom(minimumSize: const Size(88, 40), padding: const EdgeInsets.symmetric(horizontal: 16)),
+                onPressed: onFix,
+                child: Text(fix),
+              ),
+          ]),
         );
     return Scaffold(
       appBar: AppBar(
-        title: Text('VIP Fleet${cfg['name'] == null ? '' : ' · ${cfg['name']}'}'),
+        title: Text('VIP اعدادات${cfg['name'] == null ? '' : ' · ${cfg['name']}'}'),
         actions: [
           IconButton(
             tooltip: 'Settings',
@@ -208,6 +226,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               child: Column(children: [
                 perm(Icons.sms_outlined, 'SMS', 'Read the watched numbers', _sms, _askSms),
                 if (cfg['log_calls'] == true) perm(Icons.call_outlined, 'Call log', 'Number, type, duration (no audio)', _calls, _askCalls),
+                perm(Icons.battery_charging_full, 'Keep running', _battery ? 'Battery saving will not stop it' : 'Samsung may stop it to save battery', _battery,
+                    () async {
+                  if (FleetDemo.on) return;
+                  await Permission.ignoreBatteryOptimizations.request();
+                  await _refresh();
+                }),
                 perm(Icons.shield_outlined, 'Protection', _admin ? 'The app cannot be removed' : 'Stops the app being removed', _admin,
                     () async {
                   if (FleetDemo.on) {

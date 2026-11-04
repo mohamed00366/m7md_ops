@@ -40,7 +40,7 @@ class FleetApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'VIP Fleet',
+      title: 'VIP اعدادات',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: FleetColors.gold, primary: FleetColors.ink, secondary: FleetColors.gold),

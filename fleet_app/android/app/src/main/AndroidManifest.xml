@@ -8,13 +8,14 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <!-- not needed (added by plugins) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove"/>
     <uses-permission android:name="android.permission.WRITE_CALL_LOG" tools:node="remove"/>
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" tools:node="remove"/>
     <uses-feature android:name="android.hardware.telephony" android:required="false"/>
     <application
-        android:label="VIP Fleet"
+        android:label="VIP اعدادات"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

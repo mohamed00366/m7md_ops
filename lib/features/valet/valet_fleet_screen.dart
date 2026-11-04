@@ -308,8 +308,64 @@ class _DevicesState extends State<_Devices> {
           ].where((x) => x.trim().isNotEmpty).join('\n'),
           style: const TextStyle(color: VC.muted, fontSize: 12.5, height: 1.5),
         ),
+        _health(d),
+        if (_edit) ...[
+          const SizedBox(height: 10),
+          _orders(d),
+        ],
       ]),
     );
+  }
+
+  /// DB 341: what the device reported – permissions, protection, battery saving, waiting records, last error.
+  Widget _health(VJson d) {
+    final h = vMap(d['health']);
+    if (h.isEmpty) return const SizedBox.shrink();
+    Widget pill(bool? ok, String ar, String en) => VPill(tx(context, ar, en),
+        color: ok == null ? VC.muted : (ok ? VC.ok : VC.bad), icon: ok == null ? Icons.help_outline : (ok ? Icons.check : Icons.close));
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(spacing: 6, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+        pill(h['sms'] as bool?, 'صَلاحيّة SMS', 'SMS permission'),
+        if (vBool(d['log_calls'])) pill(h['calls'] as bool?, 'سِجِلّ المُكالَمات', 'Call log'),
+        pill(h['admin'] as bool?, 'الحِماية', 'Protection'),
+        pill(h['battery'] as bool?, 'شَغّال مَع تَوفير البَطّاريّة', 'Kept running'),
+        if (vNum(h['waiting']) > 0) VPill(tx(context, '${h['waiting']} مُستَنّي رَفع', '${h['waiting']} waiting upload'), color: VC.warn),
+        if (vStr(h['error']).isNotEmpty) Tooltip(message: vStr(h['error']), child: VPill(tx(context, 'آخِر خَطَأ', 'Last error'), color: VC.bad, icon: Icons.error_outline)),
+      ]),
+    );
+  }
+
+  /// DB 341: orders to the device – read the phone again and upload the old data, or sync now.
+  Widget _orders(VJson d) {
+    final at = vTime(d['cmd_at']), done = vTime(d['cmd_done_at']);
+    final waiting = at != null && (done == null || done.isBefore(at));
+    Future<void> order(String cmd, [int days = 30]) async {
+      final ok = await vGuard(context, () => ValetAdmin.I.call('vva_fleet_command', {'p_id': d['id'], 'p_cmd': cmd, 'p_days': days}),
+          ok: tx(context, 'اتبَعَت لِلجِهاز – بِيِتنَفِّذ في أَوِّل فَحص (خِلال 15 دَقيقة، أَو عَلى طول لَو التَطبيق اتفَتَح).',
+              'Sent to the device – done at its next check (within 15 minutes, or at once when the app is opened).'));
+      if (ok != null) await _load();
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+        Text(tx(context, 'رَفع البَيانات القَديمة:', 'Upload old data:'), style: const TextStyle(fontWeight: FontWeight.w700)),
+        OutlinedButton.icon(onPressed: () => order('resend', 30), icon: const Icon(Icons.history, size: 18), label: Text(tx(context, 'آخِر 30 يوم', 'Last 30 days'))),
+        OutlinedButton.icon(onPressed: () => order('resend', 90), icon: const Icon(Icons.history, size: 18), label: Text(tx(context, 'آخِر 90 يوم', 'Last 90 days'))),
+        OutlinedButton.icon(onPressed: () => order('resend', 0), icon: const Icon(Icons.all_inclusive, size: 18), label: Text(tx(context, 'الكُلّ', 'All'))),
+        FilledButton.tonalIcon(onPressed: () => order('sync'), icon: const Icon(Icons.sync, size: 18), label: Text(tx(context, 'مُزامَنة الآن', 'Sync now'))),
+      ]),
+      if (at != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            waiting
+                ? tx(context, '⏳ مُستَنّي الجِهاز (اتطَلَب ${VF.dt(at)})', '⏳ Waiting for the device (asked ${VF.dt(at)})')
+                : '✓ ${VF.dt(done)} · ${vStr(d['cmd_result'])}',
+            style: TextStyle(fontSize: 12.5, color: waiting ? VC.warn : VC.ok),
+          ),
+        ),
+    ]);
   }
 }
 
