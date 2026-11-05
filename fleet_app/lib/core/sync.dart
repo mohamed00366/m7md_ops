@@ -13,7 +13,7 @@ import 'report.dart';
 import 'store.dart';
 import 'update.dart';
 
-const kAppVersion = '1.0.5';
+const kAppVersion = '1.0.6';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {
@@ -86,6 +86,8 @@ class FleetSync {
       h['battery'] = await Permission.ignoreBatteryOptimizations.isGranted;
       h['owner'] = await VipDevice.owner();
       h['build'] = kAppBuild;
+      final bat = await VipDevice.batteryPct();
+      if (bat >= 0) h['battery_pct'] = bat;
       try {
         h['admin'] = await _native.invokeMethod<bool>('adminActive') ?? false;
       } catch (_) {/* background: not known */}
@@ -112,6 +114,7 @@ class FleetSync {
       try {
         cfg = await Api.pullConfig(p.deviceKey, kAppVersion, {...await deviceInfo(), 'health': await health()});
         await p.setConfig(cfg);
+        await p.setLocked(cfg['locked'] == true);
       } on ApiError catch (e) {
         if (e.message.contains('Unknown device key')) return res..error = 'This device key is not known (or was stopped) in the dashboard.';
       } catch (_) {/* off line */}

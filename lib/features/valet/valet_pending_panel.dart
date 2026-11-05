@@ -238,6 +238,7 @@ String fleetProblem(BuildContext context, String k) => switch (k) {
       'calls' => tx(context, 'صَلاحيّة المُكالَمات مَقفولة', 'Call-log permission off'),
       'admin' => tx(context, 'الحِماية مَقفولة', 'Protection off'),
       'battery' => tx(context, 'تَوفير البَطّاريّة بِيوَقَّفه', 'Battery saving stops it'),
+      'battery_low' => tx(context, 'البَطّاريّة ضَعيفة', 'Battery low'),
       'waiting' => tx(context, 'رَسايل مُستَنّية رَفع', 'Records waiting upload'),
       _ => k,
     };

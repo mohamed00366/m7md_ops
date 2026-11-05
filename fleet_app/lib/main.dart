@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/auth.dart';
 import 'core/background.dart';
 import 'core/demo.dart';
+import 'core/foreground.dart';
 import 'core/store.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
@@ -14,9 +15,13 @@ Future<void> main() async {
   if (FleetDemo.on) {
     FleetDemo.start(); // web preview with sample data
   } else {
+    FleetForeground.initComms();
     try {
       await FleetBackground.start();
     } catch (_) {/* tests / no WorkManager */}
+    try {
+      await FleetForeground.startIfEnabled(p);
+    } catch (_) {/* tests / old device */}
   }
   runApp(FleetApp(setUp: FleetAuth.isSetUp(p)));
 }

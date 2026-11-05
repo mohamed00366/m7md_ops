@@ -60,6 +60,13 @@ class Prefs {
   // 1.0.5: the clean-up once a day; the last update tried in the background (build, time)
   DateTime? get lastCleanup => _t('last_cleanup');
   Future<void> setLastCleanup(DateTime v) => _p.setString('last_cleanup', v.toIso8601String());
+  // 1.0.6: the persistent foreground service ("keep running"); default on
+  bool get keepAlive => _p.getBool('keep_alive') ?? true;
+  Future<void> setKeepAlive(bool v) => _p.setBool('keep_alive', v);
+  // the dashboard "view only" flag, cached from the last config (so the UI locks even off line)
+  bool get locked => _p.getBool('cfg_locked') ?? false;
+  Future<void> setLocked(bool v) => _p.setBool('cfg_locked', v);
+
   int get updateTriedBuild => _p.getInt('update_tried_build') ?? 0;
   DateTime? get updateTriedAt => _t('update_tried_at');
   Future<void> setUpdateTried(int build) async {

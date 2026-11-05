@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <!-- 1.0.5: the update from the dashboard (Android asks before installing; a Device Owner installs without asking) -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <!-- 1.0.6: persistent foreground service so the OS doesn't kill recording -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <!-- not needed (added by plugins) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove"/>
     <uses-permission android:name="android.permission.WRITE_CALL_LOG" tools:node="remove"/>
@@ -60,6 +62,12 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
             </intent-filter>
         </receiver>
+        <!-- 1.0.6: the always-on service that keeps recording running -->
+        <service
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false"/>
+
         <!-- the downloaded update is handed to the Android installer from here -->
         <provider android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

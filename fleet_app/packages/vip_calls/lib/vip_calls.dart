@@ -52,6 +52,9 @@ class VipDevice {
   }
 
   static Future<List<String>> abis() async => [for (final x in (await _call<List<dynamic>>('abis')) ?? const []) '$x'];
+
+  /// Battery percentage 0–100, or -1 if unknown. Works in the background isolate too.
+  static Future<int> batteryPct() async => await _call<int>('batteryPct') ?? -1;
   static Future<bool> owner() async => await _call<bool>('owner') ?? false;
   static Future<Map<String, dynamic>> ownerSetup() async => (await _call<Map<dynamic, dynamic>>('ownerSetup'))?.cast<String, dynamic>() ?? const {};
   static Future<bool> ownerRelease() async => await _call<bool>('ownerRelease') ?? false;

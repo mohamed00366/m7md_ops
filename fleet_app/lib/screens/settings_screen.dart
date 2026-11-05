@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../core/api.dart';
 import '../core/auth.dart';
 import '../core/demo.dart';
+import '../core/foreground.dart';
 import '../core/report.dart';
 import '../core/store.dart';
 import '../core/sync.dart';
@@ -108,16 +109,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final p = _p;
     if (p == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     Widget head(String t) => Padding(padding: const EdgeInsets.fromLTRB(4, 18, 4, 6), child: Text(t, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)));
+    // 1.0.6: "dashboard only" — the whole settings page is view-only; every switch comes from the dashboard
+    final locked = !FleetDemo.on && p.locked;
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         if (_msg.isNotEmpty) Card(color: const Color(0xFFFFF8E1), child: Padding(padding: const EdgeInsets.all(12), child: Text(_msg))),
+        if (locked)
+          Card(
+            color: const Color(0xFFE8EEF6),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(children: const [
+                Icon(Icons.lock_outline, color: FleetColors.ink),
+                SizedBox(width: 10),
+                Expanded(child: Text('هذا الجهاز يُدار من الداشبورد فقط. الإعدادات للعرض فقط.\nManaged from the dashboard — view only.')),
+              ]),
+            ),
+          ),
         head('On this device'),
+        SwitchListTile(
+          title: const Text('Keep running (recommended)'),
+          subtitle: const Text('A small permanent notification so the system does not stop recording'),
+          value: p.keepAlive,
+          onChanged: locked ? null : (v) async {
+            await p.setKeepAlive(v);
+            if (v) {
+              await FleetForeground.startIfEnabled(p);
+            } else {
+              await FleetForeground.stop();
+            }
+            setState(() {});
+          },
+        ),
         SwitchListTile(
           title: const Text('Upload to the dashboard'),
           subtitle: const Text('Also needs "Upload" on in the dashboard'),
           value: p.uploadOn,
-          onChanged: (v) async {
+          onChanged: locked ? null : (v) async {
             await p.setUploadOn(v);
             setState(() {});
           },
@@ -126,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text('Excel on the device'),
           subtitle: const Text('RTA parking · All SMS · Daily summary · Calls (Share from the home page)'),
           value: p.excelOn,
-          onChanged: (v) async {
+          onChanged: locked ? null : (v) async {
             await p.setExcelOn(v);
             setState(() {});
           },
@@ -134,12 +163,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SwitchListTile(
           title: const Text('Daily e-mail with the Excel'),
           value: p.emailOn,
-          onChanged: (v) async {
+          onChanged: locked ? null : (v) async {
             await p.setEmailOn(v);
             setState(() {});
           },
         ),
-        if (p.emailOn) ...[
+        if (p.emailOn && !locked) ...[
           const Text('Gmail: turn on 2-Step Verification, then make an App Password (16 letters) and put it here – the normal password is refused (535).',
               style: TextStyle(color: FleetColors.muted, fontSize: 12.5)),
           const SizedBox(height: 10),
@@ -169,15 +198,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ]),
         ],
         head('Logins'),
-        ListTile(leading: const Icon(Icons.person_outline), title: const Text('Change the main login'), onTap: () => _changeLogin(false)),
-        ListTile(leading: const Icon(Icons.person_add_alt), title: const Text('Change the backup login'), onTap: () => _changeLogin(true)),
+        ListTile(leading: const Icon(Icons.person_outline), title: const Text('Change the main login'), enabled: !locked, onTap: locked ? null : () => _changeLogin(false)),
+        ListTile(leading: const Icon(Icons.person_add_alt), title: const Text('Change the backup login'), enabled: !locked, onTap: locked ? null : () => _changeLogin(true)),
         head('Device'),
-        ListTile(leading: const Icon(Icons.key_outlined), title: const Text('Change the device key'), subtitle: Text('Now: …${p.deviceKey.length > 4 ? p.deviceKey.substring(p.deviceKey.length - 4) : ''}'), onTap: _changeKey),
+        ListTile(leading: const Icon(Icons.key_outlined), title: const Text('Change the device key'), enabled: !locked, subtitle: Text('Now: …${p.deviceKey.length > 4 ? p.deviceKey.substring(p.deviceKey.length - 4) : ''}'), onTap: locked ? null : _changeKey),
         ListTile(
           leading: const Icon(Icons.shield_outlined),
           title: const Text('Turn protection off'),
           subtitle: const Text('Needed before the app can be removed'),
-          onTap: () async {
+          enabled: !locked,
+          onTap: locked ? null : () async {
             final ok = FleetDemo.on || (await _native.invokeMethod<bool>('adminRemove') ?? false);
             setState(() => _msg = ok ? 'Protection is off.' : 'Could not turn it off.');
           },

@@ -7,7 +7,7 @@ import 'package:vip_calls/vip_calls.dart';
 import 'store.dart';
 
 /// The build number of this app (pubspec "version: x.y.z+BUILD"). The dashboard compares with it.
-const kAppBuild = 6;
+const kAppBuild = 7;
 
 /// The newest version set in the dashboard (DB 343): {"version":"1.0.6","build":7,"arm64":url,"arm32":url,"mode":"notify|force","notes":…}.
 class AppUpdate {

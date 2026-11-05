@@ -10,6 +10,7 @@ import '../core/demo.dart';
 import '../core/report.dart';
 import '../core/rta.dart';
 import '../core/store.dart';
+import '../core/foreground.dart';
 import '../core/sync.dart';
 import '../core/update.dart';
 import '../main.dart';
@@ -97,6 +98,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _last = r.toString();
     });
     await _refresh();
+    if (!FleetDemo.on) {
+      final pp = _p;
+      if (pp != null) await FleetForeground.ensure(pp);
+    }
     _maybeForce();
   }
 

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.BatteryManager
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
@@ -92,6 +93,11 @@ class VipCallsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "abis" -> result.success(Build.SUPPORTED_ABIS.toList())
+            "batteryPct" -> {
+                val bm = ctx.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+                val lvl = try { bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1 } catch (_: Exception) { -1 }
+                result.success(if (lvl in 0..100) lvl else -1)
+            }
             "owner" -> result.success(isOwner())
             "ownerSetup" -> result.success(ownerSetup())
             "ownerRelease" -> result.success(ownerRelease())

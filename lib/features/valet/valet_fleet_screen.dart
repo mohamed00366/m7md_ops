@@ -119,6 +119,17 @@ class _DevicesState extends State<_Devices> {
                   sw('check_admin', 'الحِماية اتقَفَلِت', 'Protection turned off'),
                   sw('check_battery', 'تَوفير البَطّاريّة بِيوَقَّفه', 'Battery saving stops it'),
                   sw('check_waiting', 'رَسايل مُستَنّية رَفع أَكتَر مِن ساعة', 'Records waiting upload for over an hour'),
+                  if (v.containsKey('battery_min')) ...[
+                    const SizedBox(height: 6),
+                    Text(tx(ctx, 'تَنبيه لَو البَطّاريّة أَقَلّ مِن:', 'Alert when the battery is below:'), style: const TextStyle(fontSize: 12.5)),
+                    const SizedBox(height: 4),
+                    SegmentedButton<int>(
+                      showSelectedIcon: false,
+                      segments: [for (final b in const [0, 10, 15, 20, 30]) ButtonSegment(value: b, label: Text(b == 0 ? tx(ctx, 'مَقفول', 'Off') : '$b%'))],
+                      selected: {const [0, 10, 15, 20, 30].contains(v['battery_min']) ? v['battery_min'] as int : 15},
+                      onSelectionChanged: (x) => set(() => v['battery_min'] = x.first),
+                    ),
+                  ],
                   const Divider(),
                   sw('rta_errors', 'تَنبيه رَفض RTA', 'RTA refusal alert'),
                   const Divider(),
@@ -287,6 +298,29 @@ class _DevicesState extends State<_Devices> {
     await _load();
   }
 
+  /// DB 344: "dashboard-only control" — the device app becomes view-only.
+  Future<void> _lock(VJson d) async {
+    final on = !vBool(d['settings_locked']);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(on ? tx(ctx, 'التَحكُّم مِن الداشبورد فَقَط', 'Dashboard-only control') : tx(ctx, 'فَكّ القَفل', 'Unlock')),
+        content: Text(on
+            ? tx(ctx, 'شاشة «${d['name']}» هَتبقى لِلعَرض فَقَط، وَكُلّ المَفاتيح مِن الداشبورد. حَتّى اللي ماسِك التابلت مُش هَيقدَر يغَيَّر إعداد. التَسجيل بِيكَمِّل عادي.',
+                'The "${d['name']}" screen becomes view-only — every switch comes from the dashboard. Whoever holds the tablet cannot change a setting. Recording continues.')
+            : tx(ctx, '«${d['name']}» هَيرجَع يقدَر يغَيَّر إعداداته مِن التابلت.', '"${d['name']}" can change its own settings again.')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'تَمام', 'OK'))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await vGuard(context, () => ValetAdmin.I.call('vva_fleet_device_opts', {'p_id': d['id'], 'p_data': {'settings_locked': on}}),
+        ok: tx(context, 'تَمّ · هَيطبَّق في أَوِّل فَحص لِلجِهاز.', 'Saved · applies at the next device check.'));
+    await _load();
+  }
+
   /// DB 343: the device stops being Device Owner (then it can be removed like any app).
   Future<void> _release(VJson d) async {
     final ok = await showDialog<bool>(
@@ -321,8 +355,8 @@ class _DevicesState extends State<_Devices> {
           content: SizedBox(
             width: 360,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(tx(ctx, 'اكتِبه في تَطبيق VIP Fleet عَلى الجِهاز. بِيِظهَر مَرّة واحدة بَس – لَو ضاع اعمِل مِفتاح جَديد.',
-                  'Type it in the VIP Fleet app on the device. It is shown ONCE – if it is lost, make a new key.'),
+              Text(tx(ctx, 'اكتِبه في تَطبيق VIP Settings عَلى الجِهاز. بِيِظهَر مَرّة واحدة بَس – لَو ضاع اعمِل مِفتاح جَديد.',
+                  'Type it in the VIP Settings app on the device. It is shown ONCE – if it is lost, make a new key.'),
                   style: const TextStyle(color: VC.muted)),
               const SizedBox(height: 12),
               Container(color: Colors.white, padding: const EdgeInsets.all(8), child: QrImageView(data: key, size: 180)),
@@ -480,7 +514,7 @@ class _DevicesState extends State<_Devices> {
       onRefresh: _load,
       child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
         VHead(
-          tx(context, 'VIP Fleet · أَجهِزة الشَرِكة', 'VIP Fleet · company devices'),
+          tx(context, 'VIP Settings · أَجهِزة الشَرِكة', 'VIP Settings · company devices'),
           subtitle: tx(context, 'تَطبيق عَلى تابلِت/موبايل الشَرِكة بِيِسَجِّل رَسايل الأَرقام المُراقَبة (RTA 7275) وَسِجِلّ المُكالَمات · أَندرويد بَس',
               'An app on the company tablets / phones logs the SMS of the watched numbers (RTA 7275) and the call log · Android only'),
           actions: [
@@ -545,12 +579,15 @@ class _DevicesState extends State<_Devices> {
               'edit' => _editDevice(d),
               'key' => _newKey(d),
               'clean' => _cleanup(d),
+              'lock' => _lock(d),
               'release' => _release(d),
               _ => _stop(d),
             },
             itemBuilder: (_) => [
               PopupMenuItem(value: 'edit', child: Text(tx(context, 'تَعديل · الأَرقام المُراقَبة', 'Edit · watched numbers'))),
               PopupMenuItem(value: 'key', child: Text(tx(context, 'مِفتاح جَديد', 'New key'))),
+              if (d.containsKey('settings_locked'))
+                PopupMenuItem(value: 'lock', child: Text(vBool(d['settings_locked']) ? tx(context, 'فَكّ القَفل (تَحكُّم مِن الجِهاز)', 'Unlock (allow device control)') : tx(context, 'التَحكُّم مِن الداشبورد فَقَط', 'Dashboard-only control'))),
               if (d.containsKey('cleanup_on')) PopupMenuItem(value: 'clean', child: Text(tx(context, 'تَنظيف الجِهاز', 'Device clean-up'))),
               if (vMap(d['health'])['owner'] == true) PopupMenuItem(value: 'release', child: Text(tx(context, 'فَكّ الـ Device Owner', 'Release Device Owner'))),
               PopupMenuItem(value: 'stop', child: Text(tx(context, 'إيقاف الجِهاز', 'Stop the device'), style: const TextStyle(color: VC.bad))),
@@ -600,6 +637,11 @@ class _DevicesState extends State<_Devices> {
         if (vBool(d['log_calls'])) pill(h['calls'] as bool?, 'سِجِلّ المُكالَمات', 'Call log'),
         pill(h['admin'] as bool?, 'الحِماية', 'Protection'),
         pill(h['battery'] as bool?, 'شَغّال مَع تَوفير البَطّاريّة', 'Kept running'),
+        if (vStr(d['battery_pct']).isNotEmpty)
+          VPill('${d['battery_pct']}%',
+              color: vNum(d['battery_pct']) < 15 ? VC.bad : (vNum(d['battery_pct']) < 30 ? VC.warn : VC.ok),
+              icon: vNum(d['battery_pct']) < 15 ? Icons.battery_alert : Icons.battery_full),
+        if (vBool(d['settings_locked'])) VPill(tx(context, 'تَحكُّم مِن الداشبورد', 'Dashboard-controlled'), color: VC.info, icon: Icons.lock_outline),
         if (h['owner'] == true) const VPill('Device Owner', color: VC.ok, icon: Icons.verified_user_outlined),
         if (_latest['build'] != null && vNum(h['build']) < vNum(_latest['build']))
           VPill(tx(context, 'إصدار قَديم v${d['app_version']} ← ${_latest['version']}', 'Old v${d['app_version']} → ${_latest['version']}'), color: VC.warn, icon: Icons.system_update_outlined),
