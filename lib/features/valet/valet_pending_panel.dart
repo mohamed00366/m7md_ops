@@ -239,6 +239,7 @@ String fleetProblem(BuildContext context, String k) => switch (k) {
       'admin' => tx(context, 'الحِماية مَقفولة', 'Protection off'),
       'battery' => tx(context, 'تَوفير البَطّاريّة بِيوَقَّفه', 'Battery saving stops it'),
       'battery_low' => tx(context, 'البَطّاريّة ضَعيفة', 'Battery low'),
+      'clock' => tx(context, 'ساعة الجِهاز غَلَط', 'Device clock is wrong'),
       'waiting' => tx(context, 'رَسايل مُستَنّية رَفع', 'Records waiting upload'),
       _ => k,
     };

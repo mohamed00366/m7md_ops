@@ -66,6 +66,9 @@ class Prefs {
   // the dashboard "view only" flag, cached from the last config (so the UI locks even off line)
   bool get locked => _p.getBool('cfg_locked') ?? false;
   Future<void> setLocked(bool v) => _p.setBool('cfg_locked', v);
+  // 1.0.7: difference between the device clock and the server (seconds); big value = the tablet clock is wrong
+  int get clockSkewSec => _p.getInt('clock_skew') ?? 0;
+  Future<void> setClockSkew(int v) => _p.setInt('clock_skew', v);
 
   int get updateTriedBuild => _p.getInt('update_tried_build') ?? 0;
   DateTime? get updateTriedAt => _t('update_tried_at');

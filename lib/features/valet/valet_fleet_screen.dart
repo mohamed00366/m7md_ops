@@ -321,6 +321,92 @@ class _DevicesState extends State<_Devices> {
     await _load();
   }
 
+  /// DB 345: the work lockdown (Device Owner only) — no hotspot, no new apps, hide chosen apps, no escape.
+  Future<void> _policy(VJson d) async {
+    final owner = vMap(d['health'])['owner'] == true;
+    var on = vBool(d['policy_on']);
+    final f = {
+      'block_tethering': vBool(d['block_tethering']),
+      'block_install': vBool(d['block_install']),
+      'block_factory_reset': vBool(d['block_factory_reset']),
+      'block_app_control': vBool(d['block_app_control']),
+      'block_add_user': vBool(d['block_add_user']),
+      'block_usb': vBool(d['block_usb']),
+    };
+    final hidden = TextEditingController(text: [for (final x in (d['hidden_apps'] is List ? d['hidden_apps'] as List : const [])) '$x'].join('\n'));
+    final labels = {
+      'block_tethering': tx(context, 'مَنع الهوت سبوت (مُشارَكة الداتا)', 'No hotspot (data sharing)'),
+      'block_install': tx(context, 'مَنع تَثبيت تَطبيقات جَديدة', 'No installing new apps'),
+      'block_factory_reset': tx(context, 'مَنع ضَبط المَصنَع', 'No factory reset'),
+      'block_app_control': tx(context, 'مَنع إيقاف/مَسح بَيانات التَطبيقات', 'No force-stop / clear-data'),
+      'block_add_user': tx(context, 'مَنع إضافة مُستخدِمين', 'No new users'),
+      'block_usb': tx(context, 'مَنع نَقل المَلَفّات بِالـ USB', 'No USB file transfer'),
+    };
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text(tx(ctx, 'قَفل الجِهاز لِلشُغل · ${d['name']}', 'Lock for work · ${d['name']}')),
+          content: SizedBox(
+            width: 480,
+            child: SingleChildScrollView(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                if (!owner)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: VC.warn.withValues(alpha: .12), borderRadius: BorderRadius.circular(10)),
+                    child: Text(tx(ctx, '⚠️ ده بِيِشتَغَل بَس عَلى جِهاز Device Owner. الجِهاز ده لِسّه مِش Device Owner، فالقَفل مِش هَيِتطَبَّق لَحَدّ ما يِتعمِل.',
+                        '⚠️ This works only on a Device Owner device. This one is not Device Owner yet, so nothing applies until it is.'),
+                        style: const TextStyle(fontSize: 12.5)),
+                  ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(tx(ctx, 'تَفعيل القَفل', 'Lockdown on'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                  value: on,
+                  onChanged: (x) => set(() => on = x),
+                ),
+                for (final k in f.keys)
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(labels[k]!),
+                    value: f[k]!,
+                    onChanged: on ? (x) => set(() => f[k] = x) : null,
+                  ),
+                const Divider(),
+                Text(tx(ctx, 'إخفاء تَطبيقات (اسم الحُزمة في كُلّ سَطر):', 'Hide apps (one package name per line):'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: hidden,
+                  enabled: on,
+                  maxLines: 5,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                  decoration: const InputDecoration(hintText: 'com.google.android.youtube\ncom.android.chrome\ncom.instagram.android'),
+                ),
+                const SizedBox(height: 4),
+                Text(tx(ctx, 'أشهَر اللي بِيِستَهلِك داتا: YouTube=com.google.android.youtube · Chrome=com.android.chrome · Instagram=com.instagram.android · TikTok=com.zhiliaoapp.musically',
+                    'Common data users: YouTube=com.google.android.youtube · Chrome=com.android.chrome · Instagram=com.instagram.android · TikTok=com.zhiliaoapp.musically'),
+                    style: const TextStyle(color: VC.muted, fontSize: 11.5)),
+              ]),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tx(ctx, 'إلغاء', 'Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tx(ctx, 'حِفظ', 'Save'))),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final apps = [for (final l in hidden.text.split(RegExp(r'[\s,]+'))) if (l.trim().isNotEmpty) l.trim()];
+    await vGuard(
+        context,
+        () => ValetAdmin.I.call('vva_fleet_device_opts', {'p_id': d['id'], 'p_data': {'policy_on': on, ...f, 'hidden_apps': apps}}),
+        ok: tx(context, 'تَمّ · هَيطبَّق في أَوِّل فَحص لِلجِهاز.', 'Saved · applies at the next device check.'));
+    await _load();
+  }
+
   /// DB 343: the device stops being Device Owner (then it can be removed like any app).
   Future<void> _release(VJson d) async {
     final ok = await showDialog<bool>(
@@ -580,6 +666,7 @@ class _DevicesState extends State<_Devices> {
               'key' => _newKey(d),
               'clean' => _cleanup(d),
               'lock' => _lock(d),
+              'policy' => _policy(d),
               'release' => _release(d),
               _ => _stop(d),
             },
@@ -588,6 +675,7 @@ class _DevicesState extends State<_Devices> {
               PopupMenuItem(value: 'key', child: Text(tx(context, 'مِفتاح جَديد', 'New key'))),
               if (d.containsKey('settings_locked'))
                 PopupMenuItem(value: 'lock', child: Text(vBool(d['settings_locked']) ? tx(context, 'فَكّ القَفل (تَحكُّم مِن الجِهاز)', 'Unlock (allow device control)') : tx(context, 'التَحكُّم مِن الداشبورد فَقَط', 'Dashboard-only control'))),
+              if (d.containsKey('policy_on')) PopupMenuItem(value: 'policy', child: Text(tx(context, 'قَفل الجِهاز لِلشُغل', 'Lock the device for work'))),
               if (d.containsKey('cleanup_on')) PopupMenuItem(value: 'clean', child: Text(tx(context, 'تَنظيف الجِهاز', 'Device clean-up'))),
               if (vMap(d['health'])['owner'] == true) PopupMenuItem(value: 'release', child: Text(tx(context, 'فَكّ الـ Device Owner', 'Release Device Owner'))),
               PopupMenuItem(value: 'stop', child: Text(tx(context, 'إيقاف الجِهاز', 'Stop the device'), style: const TextStyle(color: VC.bad))),
@@ -642,6 +730,7 @@ class _DevicesState extends State<_Devices> {
               color: vNum(d['battery_pct']) < 15 ? VC.bad : (vNum(d['battery_pct']) < 30 ? VC.warn : VC.ok),
               icon: vNum(d['battery_pct']) < 15 ? Icons.battery_alert : Icons.battery_full),
         if (vBool(d['settings_locked'])) VPill(tx(context, 'تَحكُّم مِن الداشبورد', 'Dashboard-controlled'), color: VC.info, icon: Icons.lock_outline),
+        if (vBool(d['policy_on'])) VPill(tx(context, 'مَقفول لِلشُغل', 'Work-locked'), color: VC.info, icon: Icons.phonelink_lock_outlined),
         if (h['owner'] == true) const VPill('Device Owner', color: VC.ok, icon: Icons.verified_user_outlined),
         if (_latest['build'] != null && vNum(h['build']) < vNum(_latest['build']))
           VPill(tx(context, 'إصدار قَديم v${d['app_version']} ← ${_latest['version']}', 'Old v${d['app_version']} → ${_latest['version']}'), color: VC.warn, icon: Icons.system_update_outlined),

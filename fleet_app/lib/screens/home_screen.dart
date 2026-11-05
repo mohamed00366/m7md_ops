@@ -225,6 +225,80 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await SharePlus.instance.share(ShareParams(files: [XFile(f.path)], text: 'VIP Settings · ${cfg['name'] ?? ''}'));
   }
 
+  /// 1.0.7 — one clear "all OK / there is a problem" card a supervisor can read at a glance, with a fix for each.
+  Widget _statusCard(Map<String, dynamic> cfg) {
+    final p = _p;
+    final (_, sWait, _, cWait) = _counts;
+    final waiting = sWait + cWait;
+    final skew = p?.clockSkewSec ?? 0;
+    // (text, fix-action-or-null)
+    final problems = <(String, VoidCallback?)>[
+      if (cfg['log_sms'] != false && !_sms) ('صَلاحيّة SMS مَقفولة · SMS permission off', _askSms),
+      if (cfg['log_calls'] == true && !_calls) ('صَلاحيّة المُكالَمات مَقفولة · Call-log permission off', _askCalls),
+      if (!_battery) ('تَوفير البَطّاريّة مُمكِن يوَقَّفه · Battery saving may stop it', _askBattery),
+      if (!_admin && !_owner) ('الحِماية مَقفولة · Protection is off', _askAdmin),
+      if (skew.abs() > 120) ('ساعة الجِهاز غَلَط (${(skew / 60).round()} د) · Device clock is wrong', _fixClock),
+      if (waiting > 0) ('$waiting سِجِلّ مُستَنّي رَفع · $waiting record(s) waiting to upload', null),
+      if (cfg['active'] == false) ('الجِهاز مَقفول مِن الداشبورد · Turned off in the dashboard', null),
+    ];
+    final ok = problems.isEmpty;
+    return Card(
+      color: ok ? const Color(0xFFE8F6EC) : const Color(0xFFFFF3E0),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(ok ? Icons.check_circle : Icons.warning_amber_rounded, color: ok ? FleetColors.ok : FleetColors.warn, size: 30),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(ok ? 'كله تمام · Everything is working' : '${problems.length} مُشكِلة · ${problems.length} item(s) need attention',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+            ),
+          ]),
+          if (_last.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4, right: 40, left: 40), child: Text('آخِر مُزامَنة · Last sync: $_last', style: const TextStyle(color: FleetColors.muted, fontSize: 12.5))),
+          for (final (text, fix) in problems)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(children: [
+                const Icon(Icons.chevron_right, size: 18, color: FleetColors.warn),
+                Expanded(child: Text(text)),
+                if (fix != null)
+                  FilledButton.tonal(
+                    style: FilledButton.styleFrom(minimumSize: const Size(72, 36), padding: const EdgeInsets.symmetric(horizontal: 12)),
+                    onPressed: fix,
+                    child: const Text('إصلاح'),
+                  ),
+              ]),
+            ),
+        ]),
+      ),
+    );
+  }
+
+  /// Opens the date & time settings so the supervisor can fix a wrong clock (or turn on automatic time).
+  Future<void> _fixClock() async {
+    try {
+      await _native.invokeMethod<void>('dateSettings');
+    } catch (_) {}
+  }
+
+  Future<void> _askBattery() async {
+    if (FleetDemo.on) return;
+    await Permission.ignoreBatteryOptimizations.request();
+    await _refresh();
+  }
+
+  Future<void> _askAdmin() async {
+    if (FleetDemo.on) {
+      setState(() => _demoAdmin = true);
+      return _refresh();
+    }
+    try {
+      await _native.invokeMethod('adminRequest');
+    } catch (_) {}
+    await _refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = _p;
@@ -278,6 +352,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: ListView(padding: const EdgeInsets.all(16), children: [
           if (FleetDemo.on) _demoPanel(),
           if (AppUpdate.of(cfg) case final u?) _updateCard(u),
+          _statusCard(cfg),
           if (cfg['active'] == false)
             const Card(
               color: Color(0xFFFFEDED),

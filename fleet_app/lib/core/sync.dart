@@ -13,7 +13,7 @@ import 'report.dart';
 import 'store.dart';
 import 'update.dart';
 
-const kAppVersion = '1.0.6';
+const kAppVersion = '1.0.7';
 
 /// A watched number from the dashboard: {"number":"7275","label":"RTA","in":true,"out":true}.
 class Watched {
@@ -88,6 +88,8 @@ class FleetSync {
       h['build'] = kAppBuild;
       final bat = await VipDevice.batteryPct();
       if (bat >= 0) h['battery_pct'] = bat;
+      final skew = (await Prefs.get()).clockSkewSec;
+      if (skew.abs() > 120) h['clock_skew'] = skew;
       try {
         h['admin'] = await _native.invokeMethod<bool>('adminActive') ?? false;
       } catch (_) {/* background: not known */}
@@ -108,13 +110,27 @@ class FleetSync {
       await p.reload();
       if (p.deviceKey.isEmpty) return res..error = 'No device key yet.';
       // Device Owner (1.0.5): the permissions are given and removing is blocked, every run (cheap)
-      if (!FleetDemo.on && await VipDevice.owner()) await VipDevice.ownerSetup();
+      final owner = !FleetDemo.on && await VipDevice.owner();
+      if (owner) await VipDevice.ownerSetup();
       // 1) the switches of the dashboard (the last ones are used when off line)
       var cfg = p.config;
       try {
         cfg = await Api.pullConfig(p.deviceKey, kAppVersion, {...await deviceInfo(), 'health': await health()});
         await p.setConfig(cfg);
         await p.setLocked(cfg['locked'] == true);
+        // clock check: how far the device clock is from the server
+        try {
+          final st = DateTime.tryParse('${cfg['server_time'] ?? ''}');
+          if (st != null) await p.setClockSkew(DateTime.now().toUtc().difference(st.toUtc()).inSeconds);
+        } catch (_) {}
+        // 1.0.7: the company lockdown (Device Owner only) – keep the tablet on the work apps, no hotspot / data waste
+        if (owner && cfg['policy'] is Map) {
+          try {
+            await VipDevice.applyPolicy((cfg['policy'] as Map).cast<String, dynamic>());
+          } catch (e) {
+            debugPrint('policy: $e');
+          }
+        }
       } on ApiError catch (e) {
         if (e.message.contains('Unknown device key')) return res..error = 'This device key is not known (or was stopped) in the dashboard.';
       } catch (_) {/* off line */}

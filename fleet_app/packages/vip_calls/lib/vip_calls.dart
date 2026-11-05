@@ -56,6 +56,14 @@ class VipDevice {
   /// Battery percentage 0–100, or -1 if unknown. Works in the background isolate too.
   static Future<int> batteryPct() async => await _call<int>('batteryPct') ?? -1;
   static Future<bool> owner() async => await _call<bool>('owner') ?? false;
+
+  /// Applies the company lockdown (Device Owner only). [policy] is the 'policy' object from the dashboard config.
+  static Future<Map<String, dynamic>> applyPolicy(Map<String, dynamic> policy) async =>
+      (await _call<Map<dynamic, dynamic>>('applyPolicy', policy))?.cast<String, dynamic>() ?? const {};
+
+  /// Common "data waster" apps that are installed on this device, as [{pkg, name}] — for the dashboard to offer.
+  static Future<List<Map<String, String>>> suggestApps() async =>
+      [for (final e in (await _call<List<dynamic>>('suggestApps')) ?? const []) {for (final x in (e as Map).entries) '${x.key}': '${x.value}'}];
   static Future<Map<String, dynamic>> ownerSetup() async => (await _call<Map<dynamic, dynamic>>('ownerSetup'))?.cast<String, dynamic>() ?? const {};
   static Future<bool> ownerRelease() async => await _call<bool>('ownerRelease') ?? false;
   static Future<bool> canInstall() async => await _call<bool>('canInstall') ?? false;

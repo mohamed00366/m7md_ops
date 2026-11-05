@@ -57,6 +57,80 @@ class VipCallsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         return out
     }
 
+    /**
+     * Applies the company lockdown as Device Owner. Each restriction is added or cleared to match the dashboard,
+     * and the chosen apps are hidden or shown again. A non-owner device does nothing. Returns what was applied.
+     */
+    private fun applyPolicy(p: Map<*, *>): Map<String, Any> {
+        if (!isOwner()) return mapOf("owner" to false)
+        val on = p["on"] == true
+        // map: a flag -> the Android user restriction it controls
+        val map = linkedMapOf(
+            "tethering" to "no_config_tethering",
+            "install" to "no_install_apps",
+            "factory_reset" to "no_factory_reset",
+            "add_user" to "no_add_user",
+            "usb" to "no_usb_file_transfer",
+        )
+        val out = HashMap<String, Any>()
+        out["owner"] = true
+        for ((flag, restriction) in map) {
+            val want = on && p[flag] == true
+            try {
+                if (want) dpm.addUserRestriction(admin, restriction) else dpm.clearUserRestriction(admin, restriction)
+            } catch (_: Exception) {}
+        }
+        // "no force-stop / clear data" for apps, and the unknown-sources install block
+        try {
+            if (on && p["app_control"] == true) dpm.addUserRestriction(admin, "no_control_apps")
+            else dpm.clearUserRestriction(admin, "no_control_apps")
+        } catch (_: Exception) {}
+        try {
+            if (on && p["install"] == true) dpm.addUserRestriction(admin, "no_install_unknown_sources")
+            else dpm.clearUserRestriction(admin, "no_install_unknown_sources")
+        } catch (_: Exception) {}
+        // hide / show the chosen apps (YouTube, browsers, games…). When off, show everything we had hidden again.
+        val wanted = if (on) (p["hidden"] as? List<*>)?.mapNotNull { it?.toString() }?.toSet() ?: emptySet() else emptySet()
+        var hid = 0
+        for (pkg in wanted) {
+            if (pkg == ctx.packageName) continue
+            try {
+                if (isInstalled(pkg)) { dpm.setApplicationHidden(admin, pkg, true); hid++ }
+            } catch (_: Exception) {}
+        }
+        // un-hide anything no longer in the list (so removing an app from the list brings it back)
+        try {
+            for (ai in ctx.packageManager.getInstalledApplications(0)) {
+                val pkg = ai.packageName
+                if (pkg == ctx.packageName || wanted.contains(pkg)) continue
+                try { if (dpm.isApplicationHidden(admin, pkg)) dpm.setApplicationHidden(admin, pkg, false) } catch (_: Exception) {}
+            }
+        } catch (_: Exception) {}
+        out["hidden"] = hid
+        return out
+    }
+
+    private fun isInstalled(pkg: String) = try {
+        ctx.packageManager.getPackageInfo(pkg, 0); true
+    } catch (_: Exception) { false }
+
+    /** Package names the dashboard can offer as common "data wasters", filtered to what is installed. */
+    private fun suggestApps(): List<Map<String, String>> {
+        val common = listOf(
+            "com.google.android.youtube" to "YouTube",
+            "com.android.chrome" to "Chrome",
+            "com.google.android.apps.youtube.music" to "YouTube Music",
+            "com.whatsapp" to "WhatsApp",
+            "com.facebook.katana" to "Facebook",
+            "com.instagram.android" to "Instagram",
+            "com.snapchat.android" to "Snapchat",
+            "org.telegram.messenger" to "Telegram",
+            "com.netflix.mediaclient" to "Netflix",
+            "com.android.vending" to "Play Store",
+        )
+        return common.filter { isInstalled(it.first) }.map { mapOf("pkg" to it.first, "name" to it.second) }
+    }
+
     private fun ownerRelease(): Boolean {
         if (!isOwner()) return true
         return try {
@@ -99,6 +173,8 @@ class VipCallsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 result.success(if (lvl in 0..100) lvl else -1)
             }
             "owner" -> result.success(isOwner())
+            "applyPolicy" -> result.success(applyPolicy((call.arguments as? Map<*, *>) ?: emptyMap<String, Any>()))
+            "suggestApps" -> result.success(suggestApps())
             "ownerSetup" -> result.success(ownerSetup())
             "ownerRelease" -> result.success(ownerRelease())
             "canInstall" -> result.success(isOwner() || Build.VERSION.SDK_INT < 26 || ctx.packageManager.canRequestPackageInstalls())

@@ -83,6 +83,12 @@ class MainActivity : FlutterActivity() {
                     startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
                     result.success(true)
                 }
+                "dateSettings" -> {
+                    try {
+                        startActivity(Intent(Settings.ACTION_DATE_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        result.success(true)
+                    } catch (_: Exception) { result.success(false) }
+                }
                 else -> result.notImplemented()
             }
         }
