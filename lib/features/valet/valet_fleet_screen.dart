@@ -15,7 +15,7 @@ import 'valet_ui.dart';
 /// Android installs the app, makes it Device Owner, and grants permissions — no computer, no Play Protect.
 const kOwnerChecksum = 'J83RndPyi6uQ01vsRDKjVWmHhkOOK_aRUWsdcV_1gKM';
 const kOwnerAdmin = 'ae.vipvalet.vip_fleet/ae.vipvalet.vip_fleet.FleetAdminReceiver';
-const kOwnerApkDefault = 'https://github.com/mohamed00366/m7md_ops/releases/download/vip-settings-1.0.8/VIP-Settings-1.0.8-universal.apk';
+const kOwnerApkDefault = 'https://github.com/mohamed00366/m7md_ops/releases/download/vip-settings-1.0.9/VIP-Settings-1.0.9-universal.apk';
 
 /// 📱 DB 339 – VIP Fleet: the company phones / tablets that log the SMS of watched numbers (RTA 7275) and the call log.
 /// Devices (on / off per device, the device key), messages, calls and the daily summary, with Excel.
@@ -331,8 +331,21 @@ class _DevicesState extends State<_Devices> {
     await _load();
   }
 
+  /// Per-device zero-touch QR: makes a fresh key for this device and bakes it into the provisioning QR, so after
+  /// scanning on a factory-reset tablet it installs, becomes Device Owner, AND links to this device — no one opens it.
+  Future<void> _setupQr(VJson d) async {
+    final ok = await vConfirm(context, tx(context, 'QR تَجهيز «${d['name']}»؟', 'Setup QR for "${d['name']}"?'),
+        tx(context, 'هَيِتعمِل مِفتاح جَديد لِلجِهاز ده وَيِتحَطّ جوّه الـ QR. المِفتاح القَديم هَيِبطَل.',
+            'A new key is made for this device and baked into the QR. The old key stops.'));
+    if (!ok || !mounted) return;
+    final r = await _save(vStr(d['id']), {}, newKey: true);
+    if (r == null || !mounted) return;
+    await _ownerQr(deviceName: vStr(d['name']), deviceKey: vStr(r['key']));
+  }
+
   /// Device Owner setup QR: scan on a fresh tablet's welcome screen (tap 6 times) → installs the app as Device Owner.
-  Future<void> _ownerQr() async {
+  /// With [deviceKey], the QR also carries the key so the device self-links with zero interaction.
+  Future<void> _ownerQr({String? deviceName, String? deviceKey}) async {
     final sp = await SharedPreferences.getInstance();
     final url = TextEditingController(text: sp.getString('owner_apk_url') ?? kOwnerApkDefault);
     final wifi = TextEditingController(text: sp.getString('owner_wifi_ssid') ?? '');
@@ -353,6 +366,9 @@ class _DevicesState extends State<_Devices> {
           m['android.app.extra.PROVISIONING_WIFI_PASSWORD'] = wpass.text;
         }
       }
+      if (deviceKey != null && deviceKey.isNotEmpty) {
+        m['android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE'] = {'device_key': deviceKey};
+      }
       return jsonEncode(m);
     }
 
@@ -360,11 +376,20 @@ class _DevicesState extends State<_Devices> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
-          title: Text(tx(ctx, 'QR إعداد Device Owner', 'Device Owner setup QR')),
+          title: Text(deviceKey != null ? tx(ctx, 'QR تَجهيز · $deviceName', 'Setup QR · $deviceName') : tx(ctx, 'QR إعداد Device Owner', 'Device Owner setup QR')),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
               child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                if (deviceKey != null)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: const Color(0xFFE6F4EC), borderRadius: BorderRadius.circular(10)),
+                    child: Text(tx(ctx, '✅ الـ QR ده فيه مِفتاح «$deviceName» — بعد المَسح الجِهاز هَيِشتَغَل وَيِتربَط لِوَحده، مَحَدش هَيِفتَح التَطبيق.',
+                        '✅ This QR carries "$deviceName" key — after scanning, the device runs and links itself; no one opens the app.'),
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                  ),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(color: const Color(0xFFE8EEF6), borderRadius: BorderRadius.circular(10)),
@@ -423,6 +448,7 @@ class _DevicesState extends State<_Devices> {
     final owner = vMap(d['health'])['owner'] == true;
     var on = vBool(d['policy_on']);
     final f = {
+      'hide_app': vBool(d['hide_app']),
       'block_tethering': vBool(d['block_tethering']),
       'block_install': vBool(d['block_install']),
       'block_factory_reset': vBool(d['block_factory_reset']),
@@ -432,6 +458,7 @@ class _DevicesState extends State<_Devices> {
     };
     final hidden = TextEditingController(text: [for (final x in (d['hidden_apps'] is List ? d['hidden_apps'] as List : const [])) '$x'].join('\n'));
     final labels = {
+      'hide_app': tx(context, 'إخفاء أيقونة التطبيق (الموظف ما يفتحهوش · *#*#1508#*#* يفتحه لك)', 'Hide the app icon (dial *#*#1508#*#* to open it)'),
       'block_tethering': tx(context, 'مَنع الهوت سبوت (مُشارَكة الداتا)', 'No hotspot (data sharing)'),
       'block_install': tx(context, 'مَنع تَثبيت تَطبيقات جَديدة', 'No installing new apps'),
       'block_factory_reset': tx(context, 'مَنع ضَبط المَصنَع', 'No factory reset'),
@@ -763,6 +790,7 @@ class _DevicesState extends State<_Devices> {
             onSelected: (v) => switch (v) {
               'edit' => _editDevice(d),
               'key' => _newKey(d),
+              'setupqr' => _setupQr(d),
               'clean' => _cleanup(d),
               'lock' => _lock(d),
               'policy' => _policy(d),
@@ -771,6 +799,7 @@ class _DevicesState extends State<_Devices> {
             },
             itemBuilder: (_) => [
               PopupMenuItem(value: 'edit', child: Text(tx(context, 'تَعديل · الأَرقام المُراقَبة', 'Edit · watched numbers'))),
+              PopupMenuItem(value: 'setupqr', child: Text(tx(context, 'QR تَجهيز الجِهاز (بالمِفتاح)', 'Setup QR (with key)'))),
               PopupMenuItem(value: 'key', child: Text(tx(context, 'مِفتاح جَديد', 'New key'))),
               if (d.containsKey('settings_locked'))
                 PopupMenuItem(value: 'lock', child: Text(vBool(d['settings_locked']) ? tx(context, 'فَكّ القَفل (تَحكُّم مِن الجِهاز)', 'Unlock (allow device control)') : tx(context, 'التَحكُّم مِن الداشبورد فَقَط', 'Dashboard-only control'))),

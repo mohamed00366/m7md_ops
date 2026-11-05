@@ -107,12 +107,24 @@ class VipCallsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             }
         } catch (_: Exception) {}
         out["hidden"] = hid
+        // hide our own launcher icon so employees can't open the app
+        setLauncherHidden(on && p["hide_app"] == true)
         return out
     }
 
     private fun isInstalled(pkg: String) = try {
         ctx.packageManager.getPackageInfo(pkg, 0); true
     } catch (_: Exception) { false }
+
+    /** Hide or show our own launcher icon (so employees can't open the app). Works without Device Owner too. */
+    private fun setLauncherHidden(hidden: Boolean) {
+        try {
+            val alias = ComponentName(ctx.packageName, "ae.vipvalet.vip_fleet.LauncherAlias")
+            val state = if (hidden) android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                        else android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            ctx.packageManager.setComponentEnabledSetting(alias, state, android.content.pm.PackageManager.DONT_KILL_APP)
+        } catch (_: Exception) {}
+    }
 
     /** Package names the dashboard can offer as common "data wasters", filtered to what is installed. */
     private fun suggestApps(): List<Map<String, String>> {
@@ -174,6 +186,7 @@ class VipCallsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             }
             "owner" -> result.success(isOwner())
             "applyPolicy" -> result.success(applyPolicy((call.arguments as? Map<*, *>) ?: emptyMap<String, Any>()))
+            "setLauncherHidden" -> { setLauncherHidden(call.arguments == true); result.success(true) }
             "suggestApps" -> result.success(suggestApps())
             "ownerSetup" -> result.success(ownerSetup())
             "ownerRelease" -> result.success(ownerRelease())

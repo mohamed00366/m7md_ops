@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -17,6 +18,12 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
 class MainActivity : FlutterActivity() {
     private var callsResult: MethodChannel.Result? = null
+
+    // launched by the admin receiver only to start the background service: don't show any UI
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (intent?.getBooleanExtra("autostart", false) == true) moveTaskToBack(true)
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
