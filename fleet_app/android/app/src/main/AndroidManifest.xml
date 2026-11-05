@@ -54,6 +54,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity-alias>
+        <!-- 1.0.10: required by Android 10+ QR / fully-managed provisioning (otherwise "Can't set up device") -->
+        <activity
+            android:name=".ProvisioningActivity"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.app.action.GET_PROVISIONING_MODE"/>
+                <action android:name="android.app.action.ADMIN_POLICY_COMPLIANCE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
         <!-- 1.0.9: open the app for the admin by dialing *#*#1508#*#* -->
         <receiver android:name=".SecretCodeReceiver" android:exported="true">
             <intent-filter>

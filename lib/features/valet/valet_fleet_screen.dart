@@ -15,7 +15,7 @@ import 'valet_ui.dart';
 /// Android installs the app, makes it Device Owner, and grants permissions — no computer, no Play Protect.
 const kOwnerChecksum = 'J83RndPyi6uQ01vsRDKjVWmHhkOOK_aRUWsdcV_1gKM';
 const kOwnerAdmin = 'ae.vipvalet.vip_fleet/ae.vipvalet.vip_fleet.FleetAdminReceiver';
-const kOwnerApkDefault = 'https://github.com/mohamed00366/m7md_ops/releases/download/vip-settings-1.0.9/VIP-Settings-1.0.9-universal.apk';
+const kOwnerApkDefault = 'https://github.com/mohamed00366/m7md_ops/releases/download/vip-settings-1.0.10/VIP-Settings-1.0.10-universal.apk';
 
 /// 📱 DB 339 – VIP Fleet: the company phones / tablets that log the SMS of watched numbers (RTA 7275) and the call log.
 /// Devices (on / off per device, the device key), messages, calls and the daily summary, with Excel.
