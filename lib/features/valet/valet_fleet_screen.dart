@@ -1,11 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/services/excel_exporter.dart';
 import 'valet_admin.dart';
 import 'valet_pending_panel.dart' show fleetProblem;
 import 'valet_ui.dart';
+
+/// Device Owner provisioning (DB 344/345): the SHA-256 of the app's signing certificate (base64-url), constant for the
+/// VIP keystore, and the default download URL. A fresh tablet scans the QR on the welcome screen (tap 6 times) and
+/// Android installs the app, makes it Device Owner, and grants permissions — no computer, no Play Protect.
+const kOwnerChecksum = 'J83RndPyi6uQ01vsRDKjVWmHhkOOK_aRUWsdcV_1gKM';
+const kOwnerAdmin = 'ae.vipvalet.vip_fleet/ae.vipvalet.vip_fleet.FleetAdminReceiver';
+const kOwnerApkDefault = 'https://github.com/mohamed00366/m7md_ops/releases/download/vip-settings-1.0.8/VIP-Settings-1.0.8-universal.apk';
 
 /// 📱 DB 339 – VIP Fleet: the company phones / tablets that log the SMS of watched numbers (RTA 7275) and the call log.
 /// Devices (on / off per device, the device key), messages, calls and the daily summary, with Excel.
@@ -321,6 +331,93 @@ class _DevicesState extends State<_Devices> {
     await _load();
   }
 
+  /// Device Owner setup QR: scan on a fresh tablet's welcome screen (tap 6 times) → installs the app as Device Owner.
+  Future<void> _ownerQr() async {
+    final sp = await SharedPreferences.getInstance();
+    final url = TextEditingController(text: sp.getString('owner_apk_url') ?? kOwnerApkDefault);
+    final wifi = TextEditingController(text: sp.getString('owner_wifi_ssid') ?? '');
+    final wpass = TextEditingController(text: sp.getString('owner_wifi_pass') ?? '');
+    if (!mounted) return;
+    String payload() {
+      final m = <String, dynamic>{
+        'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME': kOwnerAdmin,
+        'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION': url.text.trim(),
+        'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM': kOwnerChecksum,
+        'android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED': true,
+        'android.app.extra.PROVISIONING_SKIP_ENCRYPTION': true,
+      };
+      if (wifi.text.trim().isNotEmpty) {
+        m['android.app.extra.PROVISIONING_WIFI_SSID'] = wifi.text.trim();
+        if (wpass.text.isNotEmpty) {
+          m['android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE'] = 'WPA';
+          m['android.app.extra.PROVISIONING_WIFI_PASSWORD'] = wpass.text;
+        }
+      }
+      return jsonEncode(m);
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text(tx(ctx, 'QR إعداد Device Owner', 'Device Owner setup QR')),
+          content: SizedBox(
+            width: 520,
+            child: SingleChildScrollView(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color(0xFFE8EEF6), borderRadius: BorderRadius.circular(10)),
+                  child: Text(
+                      tx(ctx,
+                          'على تابلِت جَديد أَو بَعد ضَبط مَصنَع: في أَوِّل شاشة تَرحيب دوس 6 مَرّات على الشاشة، هَيِفتَح ماسِح QR، امسَح الكود ده. أَندرويد هَيِنزِّل التَطبيق، يَعمِله Device Owner، وَيِفتَح الصَلاحيّات — مِن غير كُمبيوتر وَلا Play Protect.',
+                          'On a fresh (or factory-reset) tablet: on the first welcome screen tap 6 times, a QR scanner opens, scan this. Android installs the app, makes it Device Owner, and grants permissions — no computer, no Play Protect.'),
+                      style: const TextStyle(fontSize: 12.5)),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(10),
+                    child: QrImageView(data: payload(), size: 240, version: QrVersions.auto),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: url,
+                  decoration: InputDecoration(labelText: tx(ctx, 'رابِط ملَفّ التَطبيق (APK العام)', 'App file URL (public APK)'), isDense: true),
+                  onChanged: (_) => set(() {}),
+                ),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(child: TextField(controller: wifi, decoration: InputDecoration(labelText: tx(ctx, 'واي فاي (اختِياري)', 'Wi-Fi (optional)'), isDense: true), onChanged: (_) => set(() {}))),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextField(controller: wpass, decoration: InputDecoration(labelText: tx(ctx, 'باسوورد الواي فاي', 'Wi-Fi password'), isDense: true), onChanged: (_) => set(() {}))),
+                ]),
+                const SizedBox(height: 6),
+                Text(
+                    tx(ctx, 'لو سِبت الواي فاي فاضي، التابلِت هَيِسأَل عَن الشَبَكة أَثناء الإعداد. لازِم الرابِط يِكون عام (Release على GitHub).',
+                        'Leave Wi-Fi empty to let the tablet ask during setup. The URL must be public (a GitHub Release).'),
+                    style: const TextStyle(color: VC.muted, fontSize: 11.5)),
+              ]),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await sp.setString('owner_apk_url', url.text.trim());
+                await sp.setString('owner_wifi_ssid', wifi.text.trim());
+                await sp.setString('owner_wifi_pass', wpass.text);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: Text(tx(ctx, 'حِفظ وَإغلاق', 'Save & close')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// DB 345: the work lockdown (Device Owner only) — no hotspot, no new apps, hide chosen apps, no escape.
   Future<void> _policy(VJson d) async {
     final owner = vMap(d['health'])['owner'] == true;
@@ -611,6 +708,8 @@ class _DevicesState extends State<_Devices> {
                   tooltip: tx(context, 'تَحديث التَطبيق', 'App update'),
                   onPressed: _updateSettings,
                   icon: Badge(isLabelVisible: vStr(_latest['mode']) != 'off' && _latest['build'] != null, child: const Icon(Icons.system_update_outlined))),
+            if (_edit)
+              IconButton.filledTonal(tooltip: tx(context, 'QR إعداد Device Owner', 'Device Owner setup QR'), onPressed: _ownerQr, icon: const Icon(Icons.qr_code_2)),
             if (_edit) FilledButton.icon(onPressed: _add, icon: const Icon(Icons.add), label: Text(tx(context, 'جِهاز جَديد', 'Add device'))),
             IconButton.filledTonal(tooltip: tx(context, 'تَحديث', 'Refresh'), onPressed: _load, icon: const Icon(Icons.refresh)),
           ],

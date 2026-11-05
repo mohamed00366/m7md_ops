@@ -78,7 +78,7 @@ class _SetupScreenState extends State<SetupScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('VIP Settings · set up')),
       body: ListView(padding: const EdgeInsets.all(20), children: [
-        const Icon(Icons.shield_outlined, size: 56, color: FleetColors.gold),
+        Center(child: ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.asset('assets/launcher/icon.png', width: 84, height: 84))),
         const SizedBox(height: 8),
         const Text('Company device logger', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
         const Text('SMS of the watched numbers (RTA 7275) and the call log go to the M7MD dashboard.',

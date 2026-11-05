@@ -334,6 +334,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: kBarFlex,
         title: Text('VIP Settings${cfg['name'] == null ? '' : ' · ${cfg['name']}'}'),
         actions: [
           IconButton(

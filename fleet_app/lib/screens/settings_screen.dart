@@ -112,7 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // 1.0.6: "dashboard only" — the whole settings page is view-only; every switch comes from the dashboard
     final locked = !FleetDemo.on && p.locked;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(flexibleSpace: kBarFlex, title: const Text('Settings')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         if (_msg.isNotEmpty) Card(color: const Color(0xFFFFF8E1), child: Padding(padding: const EdgeInsets.all(12), child: Text(_msg))),
         if (locked)

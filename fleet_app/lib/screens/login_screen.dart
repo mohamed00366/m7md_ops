@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(24), children: [
-              const Icon(Icons.shield_outlined, size: 64, color: FleetColors.gold),
+              Center(child: ClipRRect(borderRadius: BorderRadius.circular(22), child: Image.asset('assets/launcher/icon.png', width: 96, height: 96))),
               const SizedBox(height: 8),
               const Text('VIP Settings', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
               const Text('Company device', textAlign: TextAlign.center, style: TextStyle(color: FleetColors.muted)),
